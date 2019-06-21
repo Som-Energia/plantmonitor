@@ -1,0 +1,3 @@
+pymodbus>=1.3.2
+influxdb>=2.17.0
+python_dateutil>=2.6.1
