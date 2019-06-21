@@ -2,6 +2,7 @@
 config.py
 modmap.py
 modmap.yaml
+modmapnew.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
