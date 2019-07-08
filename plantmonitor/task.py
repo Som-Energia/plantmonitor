@@ -4,7 +4,6 @@ from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant 
 from yamlns import namespace as ns
 import sys
-import conf.config as config
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
