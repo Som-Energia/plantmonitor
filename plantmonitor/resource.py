@@ -3,7 +3,11 @@ from pymodbus.client.sync import ModbusTcpClient
 import sys
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename='datalogger.log',
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 class ProductionPlant():
@@ -14,6 +18,7 @@ class ProductionPlant():
         self.enable = None
         self.location = None
         self.devices = []
+        self.db = None
 
     def load(self, yamlFile,plant_name):
         data = ns.load(yamlFile)
@@ -21,6 +26,7 @@ class ProductionPlant():
             if plant_data.enabled and plant_data.name == plant_name:
                 self.name = plant_data.name
                 self.description = plant_data.description
+                self.db = plant_data.influx
                 for device_data in plant_data.devices:  
                     new_device = ProductionDevice()
                     if new_device.load(device_data):
@@ -112,8 +118,8 @@ class ProductionProtocolTcp(ProductionProtocol):
         return True
 
     def connect(self):
-        log.info("stablishing connection")
         if not self.client:
+            log.info("stablishing connection - %s" % self.ip)
             client = ModbusTcpClient(self.ip,
                                     timeout=self.timeout,
                                     RetryOnEmpty=True,
@@ -156,13 +162,13 @@ class ProductionDeviceModMap():
             new_modmap.load(modmap_data)
             return new_modmap
 
-        if modmap_data.type == "write_coils":
-            new_modmap = ProductionDeviceModMapWriteCoils()
+        if modmap_data.type == "discrete_input":
+            new_modmap = ProductionDeviceModMapDiscreteInput()
             new_modmap.load(modmap_data)
             return new_modmap
 
-        if modmap_data.type == "read_registers":
-            new_modmap = ProductionDeviceModMapReadRegisters()
+        if modmap_data.type == "input_registers":
+            new_modmap = ProductionDeviceModMapInputRegisters()
             new_modmap.load(modmap_data)
             return new_modmap
 
@@ -185,28 +191,25 @@ class ProductionDeviceModMap():
 class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
     def get_registers(self, connection):
         connection.connect()
+        log.info("getting registers from inverter")
         rr = connection.client.read_holding_registers(self.scan.start, 
                                             count=self.scan.range, 
                                             unit=connection.slave)
         connection.disconnect()
         return self.extract_rr(rr)
 
-class ProductionDeviceModMapReadRegisters(ProductionDeviceModMap):
+class ProductionDeviceModMapInputRegisters(ProductionDeviceModMap):
     def get_registers(self, connection):
-        connection.connect()
-        rr = connection.client.read_input_registers(self.scan.start, 
-                                        count=self.scan.range, 
-                                        unit=connection.slave)
-        connection.disconnect()
-        return self.extract_rr(rr)
+        log.info("Input Register is not implemented")
+        return {}
 
 class ProductionDeviceModMapCoils(ProductionDeviceModMap):
     def get_registers(self, connection):
-        print("not implemented")
+        log.info("Coils is not implemented")
         return {}
 
-class ProductionDeviceModMapWriteCoils(ProductionDeviceModMap):
+class ProductionDeviceModMapDiscreteInput(ProductionDeviceModMap):
     def get_registers(self, connection):
-        print("not implemented")
+        log.info("Discrete Input is not implemented")
         return {}
 
