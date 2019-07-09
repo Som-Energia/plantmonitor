@@ -182,21 +182,33 @@ class ProductionDeviceModMap():
         self.scan = modmap_data.scan
         return self.type
 
-    def extract_rr(self, rr_obj):
-        inv = {}
-        for count,reg_value in enumerate(rr_obj.registers):
-            inv[self.registers[count]] = reg_value
-        return inv
+    def extract_rr(self, rr_obj, offset):
+        log.info("registers values from inverter %s" % rr_obj.registers)
+        register_values = rr_obj.registers
 
-class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
+        return ns(
+            (name, register_values[index-offset])
+            for index, name in self.registers.items()
+            )
+
     def get_registers(self, connection):
         connection.connect()
         log.info("getting registers from inverter")
-        rr = connection.client.read_holding_registers(self.scan.start, 
-                                            count=self.scan.range, 
-                                            unit=connection.slave)
+        rr = self.get_register_values(connection)
         connection.disconnect()
-        return self.extract_rr(rr)
+        return self.extract_rr(rr, self.scan.start)
+
+    def get_register_values(self, connection):
+        raise NotImplementedError()
+
+
+class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
+    def get_register_values(self, connection):
+        return connection.client.read_holding_registers(
+            self.scan.start, 
+            count=self.scan.range, 
+            unit=connection.slave,
+            )
 
 class ProductionDeviceModMapInputRegisters(ProductionDeviceModMap):
     def get_registers(self, connection):
