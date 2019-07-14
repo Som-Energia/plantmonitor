@@ -39,28 +39,31 @@ def task():
             logging.error('Error loadinf yaml definition file...')
             sys.exit(-1)
         
-        result = plant.get_registers()
-        inverter_name = plant.devices[0].name
-        plant_name = plant.name
-        inverter_registers = result['Alcolea'][0]['fields']
-
-        logging.info("**** Saving data in database ****")
-        logging.info("**** Metrics - measurement - %s ****" %  inverter_name)
-        logging.info("**** Metrics - tag - location %s ****" % plant_name)
-        logging.info("**** Metrics - fields -  %s ****" % inverter_registers)
-
         flux_client = client_db(plant.db)
 
-        if flux_client is not None:
-            metrics = {}
-            tags = {}
-            fields = {}
-            metrics['measurement'] = inverter_name
-            tags['location'] = plant_name
-            metrics['tags'] = tags
-            metrics['fields'] = inverter_registers
+        result = plant.get_registers()
 
-            publish_influx(metrics,flux_client)
+        plant_name = plant.name
+
+        for i, device in enumerate(plant.devices):
+            inverter_name = plant.devices[i].name
+            inverter_registers = result[i]['Alcolea'][0]['fields']
+
+            logging.info("**** Saving data in database ****")
+            logging.info("**** Metrics - measurement - %s ****" %  inverter_name)
+            logging.info("**** Metrics - tag - location %s ****" % plant_name)
+            logging.info("**** Metrics - fields -  %s ****" % inverter_registers)
+
+            if flux_client is not None:
+                metrics = {}
+                tags = {}
+                fields = {}
+                metrics['measurement'] = inverter_name
+                tags['location'] = plant_name
+                metrics['tags'] = tags
+                metrics['fields'] = inverter_registers
+
+                publish_influx(metrics,flux_client)
 
     except Exception as err:
         logging.error("[ERROR] %s" % err)

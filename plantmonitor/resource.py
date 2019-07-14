@@ -40,8 +40,9 @@ class ProductionPlant():
             data = {}
             metrics = device.get_registers()
             data[self.name] = metrics
+            all_metrics.append(data)
 
-        return data
+        return all_metrics
 
 
 class ProductionDevice():
