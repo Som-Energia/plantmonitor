@@ -3,7 +3,7 @@ from pymodbus.client.sync import ModbusTcpClient
 import sys
 import logging
 
-logging.basicConfig(filename='datalogger.log',
+logging.basicConfig(filename='/var/log/plantmonitor/datalogger.log',
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
