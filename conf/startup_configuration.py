@@ -21,4 +21,4 @@ def build_app():
 
 def add_jobs(app):
     logging.debug("Adding task")
-    app.add_job(task, 'interval', seconds=120)
+    app.add_job(task, 'interval', seconds=60)

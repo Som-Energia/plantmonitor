@@ -50,7 +50,7 @@ def task():
             inverter_registers = result[i]['Alcolea'][0]['fields']
 
             logging.info("**** Saving data in database ****")
-            logging.info("**** Metrics - measurement - %s ****" %  inverter_name)
+            logging.info("**** Metrics - tag - %s ****" %  inverter_name)
             logging.info("**** Metrics - tag - location %s ****" % plant_name)
             logging.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
@@ -58,8 +58,9 @@ def task():
                 metrics = {}
                 tags = {}
                 fields = {}
-                metrics['measurement'] = inverter_name
+                metrics['measurement'] = 'sistema_inversor'
                 tags['location'] = plant_name
+                tags['inverter_name'] = inverter_name
                 metrics['tags'] = tags
                 metrics['fields'] = inverter_registers
 
