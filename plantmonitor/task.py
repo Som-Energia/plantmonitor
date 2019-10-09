@@ -3,8 +3,12 @@ from pymodbus.client.sync import ModbusTcpClient
 from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant 
 from yamlns import namespace as ns
+from erppeek import Client
 import sys
 import logging
+import time 
+import datetime
+import conf.config as config
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -66,5 +70,49 @@ def task():
 
                 publish_influx(metrics,flux_client)
 
+    except Exception as err:
+        logging.error("[ERROR] %s" % err)
+
+def task_counter_erp():
+    c = Client(**config.erppeek)
+    plant = ProductionPlant()
+    if not plant.load('conf/modmap.yaml','Alcolea'):
+        logging.error('Error loadinf yaml definition file...')
+        sys.exit(-1)    
+    flux_client = client_db(plant.db)
+    mobj = c.model('giscedata.lectures.comptador')
+    meter_ids = mobj.search([('technology_type', '=', 'telemeasure')])
+    meter_names = mobj.read(meter_ids, ['name'])
+    tm_ids = []
+    try:
+        for name in meter_names:
+            tm_id = c.TmProfile.search(
+                [('name','=', name['name'])],
+                order="create_date DESC",
+                limit=1
+            )
+            tm_ids.append(tm_id[0])
+        if flux_client is not None:
+            for tm in tm_ids:
+                tm_profile = (c.TmProfile.read(
+                    tm,
+                    ['ae','ai','timestamp','name']
+                    ))
+                metrics = {}
+                tags = {}
+                fields = {}
+                metrics['measurement'] = 'sistema_contador'
+                fields['export_energy'] = tm_profile['ae']
+                fields['import_energy'] = tm_profile['ai']
+                fields['id'] = tm_profile['id']
+                tags['name'] = tm_profile['name'] 
+                metrics['tags'] = tags
+                metrics['fields'] = fields
+                timestamp = datetime.datetime.strptime(
+                    tm_profile['timestamp'],
+                    "%Y-%m-%d %H:%M:%S").timestamp()
+                metrics['timestamp'] = timestamp
+                publish_influx(metrics,flux_client)
+                       
     except Exception as err:
         logging.error("[ERROR] %s" % err)
