@@ -3,3 +3,4 @@ influxdb>=2.17.0
 python_dateutil>=2.6.1
 yamlns>=0.6
 APScheduler>=3.6.0
+erppeek
