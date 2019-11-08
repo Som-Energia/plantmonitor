@@ -12,7 +12,6 @@ def telemeasure_meter_names(c):
     return [meter['name'] for meter in meters]
 
 def measures_from_date(c, meter, beyond, upto):
-    print(meter)
     measure_ids = c.TmProfile.search([
         ('name','=', meter),
         ('utc_timestamp','<', upto),
