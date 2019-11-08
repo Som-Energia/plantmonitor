@@ -1,7 +1,7 @@
-from plantmeter.isodates import utcisodatetime
 from influxdb import InfluxDBClient as client_db
 import datetime
 import logging
+
 
 def telemeasure_meter_names(c):
     Meter = c.model('giscedata.lectures.comptador')
@@ -19,9 +19,6 @@ def measures_from_date(c, meter, beyond, upto):
         ]+([
             ('utc_timestamp','>', beyond)
         ] if beyond else []),
-        #limit=10,
-        #order="create_date DESC",
-        #order="utc_timestamp DESC",
         ) # TODO: Manage duplicated datetimes
     if not measure_ids: return []
     measure_ids = [int(m) for m in measure_ids]
@@ -55,7 +52,6 @@ def upload_measures(flux_client, meter, measures):
             ),
             fields = dict(
                 export_energy = measure,
-               # id = tm_profile['id'],
             ),
             time = isodatetime,
         )
@@ -95,7 +91,6 @@ def last_uploaded_plantmonitor_measures(flux_client, meter):
 
 def transfer_meter_to_plantmonitor(c, flux_client, meter, upto):
     last_date = last_uploaded_plantmonitor_measures(flux_client, meter)
-    print(meter, last_date)
     measures = measures_from_date(c, meter, beyond=last_date, upto=upto)
     upload_measures(flux_client, meter, measures)
 
