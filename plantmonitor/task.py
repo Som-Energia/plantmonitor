@@ -4,6 +4,14 @@ from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant 
 from yamlns import namespace as ns
 from erppeek import Client
+from .meters import (
+    telemeasure_meter_names,
+    measures_from_date,
+    upload_measures,
+    uploaded_plantmonitor_measures,
+    last_uploaded_plantmonitor_measures,
+    transfer_meter_to_plantmonitor,
+)
 import sys
 import logging
 import time 
@@ -31,7 +39,7 @@ def client_db(db):
     return flux_client
 
 def publish_influx(metrics,flux_client):
-    flux_client.write_points([metrics])
+    flux_client.write_points([metrics] )
     logging.info("[INFO] Sent to InfluxDB")
 
 def task():
@@ -80,39 +88,12 @@ def task_counter_erp():
         logging.error('Error loadinf yaml definition file...')
         sys.exit(-1)    
     flux_client = client_db(plant.db)
-    mobj = c.model('giscedata.lectures.comptador')
-    meter_ids = mobj.search([('technology_type', '=', 'telemeasure')])
-    meter_names = mobj.read(meter_ids, ['name'])
-    tm_ids = []
+    utcnow = datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d %H:%M:%S")
+    meter_names = telemeasure_meter_names(c)
     try:
-        for name in meter_names:
-            tm_id = c.TmProfile.search(
-                [('name','=', name['name'])],
-                order="create_date DESC",
-                limit=1
-            )
-            tm_ids.append(tm_id[0])
-        if flux_client is not None:
-            for tm in tm_ids:
-                tm_profile = (c.TmProfile.read(
-                    tm,
-                    ['ae','ai','timestamp','name']
-                    ))
-                metrics = {}
-                tags = {}
-                fields = {}
-                metrics['measurement'] = 'sistema_contador'
-                fields['export_energy'] = tm_profile['ae']
-                fields['import_energy'] = tm_profile['ai']
-                fields['id'] = tm_profile['id']
-                tags['name'] = tm_profile['name'] 
-                metrics['tags'] = tags
-                metrics['fields'] = fields
-                timestamp = datetime.datetime.strptime(
-                    tm_profile['timestamp'],
-                    "%Y-%m-%d %H:%M:%S").timestamp()
-                metrics['timestamp'] = timestamp
-                publish_influx(metrics,flux_client)
-                       
+        for meter in meter_names:
+            transfer_meter_to_plantmonitor(c, flux_client, meter, utcnow)
+
     except Exception as err:
         logging.error("[ERROR] %s" % err)
+        raise
