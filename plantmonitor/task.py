@@ -83,11 +83,7 @@ def task():
 
 def task_counter_erp():
     c = Client(**config.erppeek)
-    plant = ProductionPlant()
-    if not plant.load('conf/modmap.yaml','Alcolea'):
-        logging.error('Error loadinf yaml definition file...')
-        sys.exit(-1)    
-    flux_client = client_db(plant.db)
+    flux_client = client_db(**config.influx)
     utcnow = datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d %H:%M:%S")
     meter_names = telemeasure_meter_names(c)
     try:
