@@ -83,7 +83,7 @@ def task():
 
 def task_counter_erp():
     c = Client(**config.erppeek)
-    flux_client = client_db(**config.influx)
+    flux_client = client_db(db=config.influx)
     utcnow = datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d %H:%M:%S")
     meter_names = telemeasure_meter_names(c)
     try:
