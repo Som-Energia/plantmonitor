@@ -1,13 +1,15 @@
 # PlantMonitor
 
-Through Plant Monitor, a tool to obtain data from the PV plant inverters
-
+Through Plant Monitor, a tool to obtain data from the PV plant inverters, 
 Plant Monitor will connect directly to your inverter via Modbus TCP.
+
+![Plant Schematics](/docs/plantmonitor.png?raw=true "Plant Schematics")
 
 The tool is designed to allow any inverter enabled for Modbus TCP to be consulted by
 using its own Modbus register map file.
 
-To store the data consulted in the inverters, you can use influxDB. Finally, a control panel tool is needed to visualize the stored data, such as Grafana
+To store the data consulted in the inverters, you can use TimescaleDB. 
+Finally, a control panel tool is needed to visualize the stored data, such as Grafana
 
 ## Pre-requisites
 
@@ -21,6 +23,11 @@ Install the required Python libraries for pymodbus and influxdb:
 ```
 pip install -r requirements.txt
 ```
+
+## Testing
+
+A series of mock, modbus sensors are available under `testingtools`.
+Both client and server modbus can be simulated.
 
 ## Installation
 
