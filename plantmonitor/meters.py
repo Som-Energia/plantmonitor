@@ -22,11 +22,21 @@ def measures_from_date(c, meter, beyond, upto):
     if not measure_ids: return []
     measure_ids = [int(m) for m in measure_ids]
     measures = c.TmProfile.read(measure_ids,[
+        'r1',
+        'r2',
+        'r3',
+        'r4',
         'ae',
         'utc_timestamp',
         ])
-    return [
-        (measure['utc_timestamp'], int(measure['ae']))
+    return [(
+            measure['utc_timestamp'],
+            int(measure['ae']),
+            int(measure['r1']),
+            int(measure['r2']),
+            int(measure['r3']),
+            int(measure['r4']),
+            )
         for measure in sorted(measures,
             key=lambda x: x['utc_timestamp'])
         ]
@@ -50,11 +60,15 @@ def upload_measures(flux_client, meter, measures):
                 name=meter,
             ),
             fields = dict(
-                export_energy = measure,
+                export_energy = ae,
+                r1 = r1,
+                r2 = r2,
+                r3 = r3,
+                r4 = r4,
             ),
             time = isodatetime,
         )
-        for isodatetime, measure in measures
+        for isodatetime, ae, r1, r2, r3, r4 in measures
     ])
 
 def rfc3336toiso(isodate):
@@ -64,20 +78,28 @@ def rfc3336toiso(isodate):
 
 def uploaded_plantmonitor_measures(flux_client, meter):
     result = flux_client.query("""\
-        SELECT "time","export_energy"
+        SELECT 
+            "time","export_energy",
+            "r1","r2","r3","r4"
         FROM "sistema_contador"
         WHERE "name"=$meter
         ORDER BY "time"
     """, bind_params=dict(meter=meter))
-    result = [
-        (rfc3336toiso(v['time']),v['export_energy'])
+    result = [(
+        rfc3336toiso(v['time']),
+        v['export_energy'],
+        v['r1'],
+        v['r2'],
+        v['r3'],
+        v['r4'],)
         for v in result.get_points()
         ]
     return result
 
 def last_uploaded_plantmonitor_measures(flux_client, meter):
     result = flux_client.query("""\
-        SELECT "time","export_energy"
+        SELECT "time","export_energy",
+            "r1","r2","r3","r4"
         FROM "sistema_contador"
         WHERE "name"=$meter
         ORDER BY "time" DESC LIMIT 1 
