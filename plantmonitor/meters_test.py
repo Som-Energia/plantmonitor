@@ -42,8 +42,8 @@ class Meters_Test(unittest.TestCase):
             beyond="2019-10-02 09:00:00",
             upto  ="2019-10-02 12:00:00")
         self.assertTimeSeriesEqual(measures,[
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 9, 0, 0),
+            ('2019-10-02 11:00:00', 1687, 0, 22, 0, 0),
         ])
 
     def test__measures_from_date__whenEmpty(self):
@@ -62,11 +62,11 @@ class Meters_Test(unittest.TestCase):
             upto  ="2019-06-01 03:00:00")
         self.assertTimeSeriesEqual(measures,[
             # First measure is on 2019-06-01 (Madrid) all zeros (still not producing)
-            ('2019-05-31 22:00:00', 0),
-            ('2019-05-31 23:00:00', 0),
-            ('2019-06-01 00:00:00', 0),
-            ('2019-06-01 01:00:00', 0),
-            ('2019-06-01 02:00:00', 0),
+            ('2019-05-31 22:00:00', 0, 0, 0, 0, 0),
+            ('2019-05-31 23:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 00:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 01:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 02:00:00', 0, 0, 0, 0, 0),
             ])
 
 
@@ -110,21 +110,21 @@ class MetersFlux_Test(unittest.TestCase):
 
     def test__upload_meter_measures_(self):
         upload_measures(self.flux_client, '88300864', [
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 10, 20, 30),
+            ('2019-10-02 11:00:00', 1687, 0, 30, 20, 10),
         ])
         result = uploaded_plantmonitor_measures(
              self.flux_client,'88300864')
 
         self.assertTimeSeriesEqual(result,[
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 10, 20, 30),
+            ('2019-10-02 11:00:00', 1687, 0, 30, 20, 10),
         ])
 
     def test__upload_meter_measures__isolatesMeters(self):
         upload_measures(self.flux_client, '88300864', [
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 0, 0, 0),
+            ('2019-10-02 11:00:00', 1687, 0, 0, 0, 0),
         ])
         result = uploaded_plantmonitor_measures(
              self.flux_client,'66666666')
@@ -153,8 +153,8 @@ class MetersFlux_Test(unittest.TestCase):
 
     def test__last_date_uploaded_measure(self):
         upload_measures(self.flux_client, '88300864', [
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 0, 0, 0),
+            ('2019-10-02 11:00:00', 1687, 0, 0, 0, 0),
         ])
 
         result = last_uploaded_plantmonitor_measures(
@@ -172,18 +172,18 @@ class MetersFlux_Test(unittest.TestCase):
              self.flux_client, meter)
 
         self.assertTimeSeriesEqual(result,[
-            ('2019-05-31 22:00:00', 0),
-            ('2019-05-31 23:00:00', 0),
-            ('2019-06-01 00:00:00', 0),
-            ('2019-06-01 01:00:00', 0),
-            ('2019-06-01 02:00:00', 0),
+            ('2019-05-31 22:00:00', 0, 0, 0, 0, 0),
+            ('2019-05-31 23:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 00:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 01:00:00', 0, 0, 0, 0, 0),
+            ('2019-06-01 02:00:00', 0, 0, 0, 0, 0),
         ])
 
     def test__transfer_meter_to_plantmonitor__withAlreadyTransferedMeasures(self):
         c = Client(**config.erppeek)
         meter = '88300864'
         upload_measures(self.flux_client, meter, [
-            ('2019-10-02 10:00:00', 1407),
+            ('2019-10-02 10:00:00', 1407, 0, 0, 0, 0),
         ])
 
         transfer_meter_to_plantmonitor(c, self.flux_client, meter, upto='2019-10-02 12:00:00')
@@ -192,8 +192,8 @@ class MetersFlux_Test(unittest.TestCase):
              self.flux_client, meter)
 
         self.assertTimeSeriesEqual(result,[
-            ('2019-10-02 10:00:00', 1407),
-            ('2019-10-02 11:00:00', 1687),
+            ('2019-10-02 10:00:00', 1407, 0, 0, 0, 0),
+            ('2019-10-02 11:00:00', 1687, 0, 22, 0, 0),
         ])
 
     def _test__transfer_time_measure_to_influx__disticntMeter(self):
