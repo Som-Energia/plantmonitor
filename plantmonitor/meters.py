@@ -26,12 +26,14 @@ def measures_from_date(c, meter, beyond, upto):
         'r2',
         'r3',
         'r4',
+        'ai',
         'ae',
         'utc_timestamp',
         ])
     return [(
             measure['utc_timestamp'],
             int(measure['ae']),
+            int(measure['ai']),
             int(measure['r1']),
             int(measure['r2']),
             int(measure['r3']),
@@ -61,6 +63,7 @@ def upload_measures(flux_client, meter, measures):
             ),
             fields = dict(
                 export_energy = ae,
+                import_energy = ai,
                 r1 = r1,
                 r2 = r2,
                 r3 = r3,
@@ -68,7 +71,7 @@ def upload_measures(flux_client, meter, measures):
             ),
             time = isodatetime,
         )
-        for isodatetime, ae, r1, r2, r3, r4 in measures
+        for isodatetime, ae, ai, r1, r2, r3, r4 in measures
     ])
 
 def rfc3336toiso(isodate):
@@ -79,7 +82,9 @@ def rfc3336toiso(isodate):
 def uploaded_plantmonitor_measures(flux_client, meter):
     result = flux_client.query("""\
         SELECT 
-            "time","export_energy",
+            "time",
+            "export_energy",
+            "import_energy",
             "r1","r2","r3","r4"
         FROM "sistema_contador"
         WHERE "name"=$meter
@@ -88,6 +93,7 @@ def uploaded_plantmonitor_measures(flux_client, meter):
     result = [(
         rfc3336toiso(v['time']),
         v['export_energy'],
+        v['import_energy'],
         v['r1'],
         v['r2'],
         v['r3'],
@@ -98,7 +104,10 @@ def uploaded_plantmonitor_measures(flux_client, meter):
 
 def last_uploaded_plantmonitor_measures(flux_client, meter):
     result = flux_client.query("""\
-        SELECT "time","export_energy",
+        SELECT 
+            "time",
+            "export_energy",
+            "import_energy",
             "r1","r2","r3","r4"
         FROM "sistema_contador"
         WHERE "name"=$meter
