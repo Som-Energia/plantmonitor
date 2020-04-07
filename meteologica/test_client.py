@@ -46,27 +46,29 @@ def clearDb():
             cur.execute("DELETE FROM forecastData;")
             cur.execute("DELETE FROM forecastHead;")
 
-def showUsage():
-    print('client [variable] [fromDate] [toDate]\n
-    variable: prod\n
-    fromDate: "2020-05-14T08:57:25.964384+02:00"\n
-    toDate: "2020-05-14T08:57:25.964384+02:00"\n')
+def test_prodRequest:
+    pass
 
-def parseArguments():
-    args = ns()
-    if len(sys.argv) == 3:
-        args['variable'] = sys.argv[1]
-        args['fromDate'] = sys.argv[2]
-        args['toDate'] = sys.argv[3]
-        return args
-    else
-        args['variable'] = 'prod'
-        return args
+def test_erroneusRequest:
+    pass
+
+def test_expiredToken:
+    pass
+
+def test_databaseInsert:
+    pass
+
+def test_speedTest:
+    pass
+
+def test_daylightSaving:
+    pass
+
 
 def main():
+
     configdb = ns.load('config.yaml')
 
-    timeDelta = configdb['timeDelta']
     username = configdb['psql_user']
 
     # Connexió api meteologica
@@ -98,7 +100,7 @@ def main():
     utcnow = datetime.utcnow()
     forecastDate = utcnow.astimezone(pytz.timezone("Europe/Zurich")).isoformat()
     fromDate = forecastDate
-    utcthen = utcnow + timedelta(days=1)
+    utcthen = utcnow + timedelta(days=30)
     toDate = utcthen.astimezone(pytz.timezone("Europe/Zurich")).isoformat()
 
     #forecastRequest = {'header': head, 'facilityId': 'SomEnergia_Alcolea', 'variableId': variableId, 'predictorId': predictorId, 'forecastDate': forecastDate, 'fromDate': fromDate, 'toDate': toDate}
