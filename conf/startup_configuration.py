@@ -22,4 +22,5 @@ def build_app():
 
 def add_jobs(app):
     logging.debug("Adding task")
-    app.add_job(task, 'interval', seconds=60)
+    app.add_job(task_counter_erp, 'interval', minutes=20)
+    app.add_job(task_get_meteologica_forecast, 'interval', days=14)
