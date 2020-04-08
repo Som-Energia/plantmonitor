@@ -93,3 +93,6 @@ def task_counter_erp():
     except Exception as err:
         logging.error("[ERROR] %s" % err)
         raise
+
+def task_get_meteologica_forecast():
+    pass
