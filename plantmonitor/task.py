@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pymodbus.client.sync import ModbusTcpClient
 from influxdb import InfluxDBClient
-from plantmonitor.resource import ProductionPlant 
+from plantmonitor.resource import ProductionPlant
 from yamlns import namespace as ns
 from erppeek import Client
 from .meters import (
@@ -12,9 +12,11 @@ from .meters import (
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
 )
+from meteologica import forecast
+
 import sys
 import logging
-import time 
+import time
 import datetime
 import conf.config as config
 
@@ -44,13 +46,13 @@ def publish_influx(metrics,flux_client):
 
 def task():
     try:
-        
+
         plant = ProductionPlant()
-        
+
         if not plant.load('conf/modmap.yaml','Alcolea'):
             logging.error('Error loadinf yaml definition file...')
             sys.exit(-1)
-        
+
         flux_client = client_db(plant.db)
 
         result = plant.get_registers()
@@ -95,4 +97,4 @@ def task_counter_erp():
         raise
 
 def task_get_meteologica_forecast():
-    pass
+    forecast()

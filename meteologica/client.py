@@ -59,11 +59,12 @@ def parseArguments():
         args['fromDate'] = sys.argv[2]
         args['toDate'] = sys.argv[3]
         return args
-    else
+    else:
         args['variable'] = 'prod'
         return args
 
-def main():
+def forecast():
+
     configdb = ns.load('config.yaml')
 
     timeDelta = configdb['timeDelta']
@@ -79,8 +80,6 @@ def main():
     if loginResult.errorCode != 'OK':
         print('Connection failed with error code {}'.format(loginResult.errorCode))
         sys.exit(-1)
-
-    print('Connected with sessionToken')
 
     keepAlive = loginResult
     keepAlive = client.service.keepAlive(keepAlive)
@@ -147,6 +146,11 @@ def main():
 
     elapsed = time.perf_counter() - start
     print(f'Total elapsed time {elapsed:0.4}')
+
+def main():
+    args = parseArguments()
+    forecast()
+
 
 if __name__ == "__main__":
     print("Starting job")
