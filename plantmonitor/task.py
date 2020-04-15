@@ -12,7 +12,7 @@ from .meters import (
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
 )
-from meteologica import forecast
+from meteologica.client import forecast
 
 import sys
 import logging
