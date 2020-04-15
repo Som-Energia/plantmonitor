@@ -46,12 +46,6 @@ def clearDb():
             cur.execute("DELETE FROM forecastData;")
             cur.execute("DELETE FROM forecastHead;")
 
-def showUsage():
-    print('client [variable] [fromDate] [toDate]\n
-    variable: prod\n
-    fromDate: "2020-05-14T08:57:25.964384+02:00"\n
-    toDate: "2020-05-14T08:57:25.964384+02:00"\n')
-
 def parseArguments():
     args = ns()
     if len(sys.argv) == 3:
