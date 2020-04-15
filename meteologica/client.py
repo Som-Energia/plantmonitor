@@ -13,6 +13,8 @@ from datetime import datetime, date, timedelta
 import pytz
 import time
 
+import sys
+
 def setUp():
 
     conn = psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
@@ -61,7 +63,7 @@ def forecast():
 
     configdb = ns.load('config.yaml')
 
-    timeDelta = configdb['timeDelta']
+    timeDelta = configdb['time_delta']
     username = configdb['psql_user']
 
     # Connexió api meteologica
