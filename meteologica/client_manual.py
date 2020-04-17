@@ -15,6 +15,8 @@ import time
 
 import sys
 
+import collections
+
 def setUp():
 
     conn = psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
@@ -97,10 +99,10 @@ def forecast():
     predictorId = 'aggregated'
     granularity = '60'
     utcnow = datetime.utcnow()
-    forecastDate = addtz(utcnow)
+    forecastDate = '2020-04-14T00:00:00.0000+02:00' #addtz(utcnow)
     fromDate = forecastDate
-    utcthen = utcnow + timedelta(days=1)
-    toDate = addtz(utcthen)
+    utcthen = utcnow + timedelta(days=30)
+    toDate = '2020-04-17T00:00:00.0000+02:00' #addtz(utcthen)
 
     #forecastRequest = {'header': head, 'facilityId': 'SomEnergia_Alcolea', 'variableId': variableId, 'predictorId': predictorId, 'forecastDate': forecastDate, 'fromDate': fromDate, 'toDate': toDate}
 
@@ -131,9 +133,9 @@ def forecast():
                 RETURNING id;".format(errorCode, facilityId, variableId, predictorId, forecastDate, granularity))
                 currentIdForecastHead = cur.fetchone()[0]
 
-                if errorCode = 'OK':
-                    forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
 
+                if errorCode == 'OK':
+                    forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
                     realFromDate = unixToISOtz(forecastDataDict[0][0]);
                     realToDate   = unixToISOtz(forecastDataDict[-1][0]);
 
@@ -150,7 +152,7 @@ def forecast():
                     ) for record in forecastDataDict), page_size=1000)
 
                 elapsed = time.perf_counter() - ministart
-                print(f"\t{facilityItem['facilityName']} {elapsed:0.4} s")
+                print(f"\t{facilityItem['facilityName']} ({facilityId}) {elapsed:0.4} s")
 
     elapsed = time.perf_counter() - start
     print(f'Total elapsed time {elapsed:0.4}')
