@@ -1,9 +1,0 @@
-psql_user: meteo
-psql_password: ohlala
-psql_host: 127.0.0.1
-psql_port: 5000
-psql_db: meteodb
-meteo_user: somenergia
-meteo_password: 1234
-meteo_url: 'https://someurl.wsdl'
-meteo_test_url: 'https://sometesturl.wsdl'

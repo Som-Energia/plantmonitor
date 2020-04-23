@@ -65,9 +65,12 @@ def addtz(utc_datetime):
 def unixToISOtz(unix_ts):
     return datetime.utcfromtimestamp(int(unix_ts)).replace(tzinfo=timezone.utc).astimezone(pytz.timezone("Europe/Zurich")).isoformat();
 
+def upload_meter_data():
+    pass
+
 def forecast():
 
-    configdb = ns.load('config.yaml')
+    configdb = ns.load('conf/config_meteologica.yaml')
 
     timeDelta = configdb['time_delta']
     username = configdb['psql_user']
@@ -131,7 +134,7 @@ def forecast():
                 RETURNING id;".format(errorCode, facilityId, variableId, predictorId, forecastDate, granularity))
                 currentIdForecastHead = cur.fetchone()[0]
 
-                if errorCode = 'OK':
+                if errorCode == 'OK':
                     forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
 
                     realFromDate = unixToISOtz(forecastDataDict[0][0]);
