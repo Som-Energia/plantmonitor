@@ -32,10 +32,17 @@ class PlantmonitorDBMock(object):
                         }
                     }
             return self._session
-    
+
+    def add(self, facilityMeterData):
+        facility = "SomEnergia_Fontivsolar"
+        return [facility, [("2020-01-01 00:00:00",10)]]
+
 class PlantmonitorDB:
 
     def __init__(self, **kwds):
         self._config = ns(kwds)
         self._client = None
         self._session = None
+
+    def add(self, facilityMeterData):
+        pass

@@ -18,12 +18,7 @@ import time
 from yamlns import namespace as ns
 from .client import (
     upload_meter_data,
-)    
-
-class MeteologicaClient_Test(unittest.TestCase):
-
-    def createApi(self):
-    
+)
 
 class MeteologicaClient_Test(unittest.TestCase):
 
@@ -85,31 +80,7 @@ class MeteologicaClient_Test(unittest.TestCase):
         self.assertTrue(True)
 
 
-    def test_write_meter(self):
-        db = self.createPlantmonitorDB()
-        facility = self.mainFacility()
-        result = db.add([facility, [("2020-01-01 00:00:00",10)]])
-        self.assertEqual(result, [facility, [("2020-01-01 00:00:00",10)]])
-
-    def __test_read_meter(self):
-        db = self.createPlantmonitorDB()
-        facility = self.mainFacility()
-        db.add([facility, [("2020-01-01 00:00:00",10)]])
-        meter = db.getMeterData()
-        self.assertEqual(meter, [facility, [("2020-01-01 00:00:00",10)]])
-
     def test_upload_facility_meter_data(self):
-        self.assertTrue(True)
-
-    def __test_upload_facilities_meter_data(self):
-        meteoAdapter = self.createMeteologicaAdapter()
-        facility = self.mainFacility()
-        otherfacility = self.otherFacility()
-
-        meteoAdapter.uploadMeterData(
-            [facility,[("2020-01-01 00:00:00",10)],
-            otherfacility, [("2020-01-01 00:00:00",10)]
-        ])
         self.assertTrue(True)
 
     def test_upload_daylight_saving_meter_data(self):
