@@ -20,7 +20,21 @@ from .client import (
     upload_meter_data,
 )
 
-class Meteologica_Test(unittest.TestCase):
+from .meteologica_adapter import(
+    MeteologicaAdapter
+)
+    
+
+class MeteologicaClient_Test(unittest.TestCase):
+
+    def createApi(self):
+        return MeteologicaApi_Mock()
+
+    def mainFacility(self):
+        return "SomEnergia_Fontivsolar"
+
+    def otherFacility(slf):
+        return "SomEnergia_Alcolea"
 
     def setUp(self):
 
@@ -71,14 +85,39 @@ class Meteologica_Test(unittest.TestCase):
         self.assertTrue(True)
 
 
-    def test_read_meter(self):
+    def test_write_meter(self):
+        db = self.createPlantmonitorDB()
+        facility = self.mainFacility()
+        result = db.add([facility, [("2020-01-01 00:00:00",10)]])
+        self.assertEqual(result, [facility, [("2020-01-01 00:00:00",10)]])
+
+    def __test_read_meter(self):
+        db = self.createPlantmonitorDB()
+        facility = self.mainFacility()
+        db.add([facility, [("2020-01-01 00:00:00",10)]])
+        meter = db.getMeterData()
+        self.assertEqual(meter, [facility, [("2020-01-01 00:00:00",10)]])
+
+    def test_upload_facility_meter_data(self):
         self.assertTrue(True)
 
-    def test_commit_meter_data(self):
+    def __test_upload_facilities_meter_data(self):
+        meteoAdapter = self.createMeteologicaAdapter()
+        facility = self.mainFacility()
+        otherfacility = self.otherFacility()
+
+        meteoAdapter.uploadMeterData(
+            [facility,[("2020-01-01 00:00:00",10)],
+            otherfacility, [("2020-01-01 00:00:00",10)]
+        ])
         self.assertTrue(True)
 
-    def test_commit_daylight_saving_meter_data(self):
+    def test_upload_daylight_saving_meter_data(self):
         self.assertTrue(True)
 
-    def test_read_meter_and_commit_data(self):
+    def __test_read_meter_and_upload_data(self):
+        api = self.createApi()
+        db = self.createPlantmonitorDB()
+        meter = db.getMeterData()
+        api.upload_meter_data(meter)
         self.assertTrue(True)
