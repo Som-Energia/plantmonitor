@@ -18,11 +18,11 @@ import time
 from yamlns import namespace as ns
 from .client import (
     upload_meter_data,
-)
+)    
 
-from .meteologica_adapter import(
-    MeteologicaAdapter
-)
+class MeteologicaClient_Test(unittest.TestCase):
+
+    def createApi(self):
     
 
 class MeteologicaClient_Test(unittest.TestCase):

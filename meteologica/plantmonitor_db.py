@@ -33,3 +33,9 @@ class PlantmonitorDBMock(object):
                     }
             return self._session
     
+class PlantmonitorDB:
+
+    def __init__(self, **kwds):
+        self._config = ns(kwds)
+        self._client = None
+        self._session = None
