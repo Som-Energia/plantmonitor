@@ -150,7 +150,7 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
     def mainFacility(self):
         return "SomEnergia_Fontivsolar"
 
-    def otherFacility(slf):
+    def otherFacility(self):
         return "SomEnergia_Alcolea"
 
     def test_uploadProduction_lastDateUploadedIsPersistent(self):

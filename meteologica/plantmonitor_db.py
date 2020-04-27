@@ -1,48 +1,76 @@
 from yamlns import namespace as ns
 
+import psycopg2
+
+from psycopg2 import Error
+import psycopg2.extras
+
 class PlantmonitorDBMock(object):
 
-    def __init__(self):
+    #data structure: {facility: [('time', value)]}
+
+    def __init__(self, config):
         self._data = {}
-        self._session = {}
-        self._login = {}
-        self._response = {}
-        self._validPlants = "MyPlant OtherPlant".split()
+        self._config = config
+        self._client = {'errorCode': 'DISCONNECTED'}
 
-    def login(self, username, password):
-        self._login = dict(
-            username = username,
-            password = password,
-        )
-        if self._login['username'] != 'alberto' or self._login['password'] != '1234':
-            self._session = {
+    def login(self):
+        if self._config['psql_user'] != 'alberto' or self._config['psql_password'] != '1234':
+            self._client = {
                     'errorCode': 'INVALID_USERNAME_OR_PASSWORD',
-                    'header': {
-                        'sessionToken': None,
-                        'errorCode': 'NO_SESSION'
-                        }
                     }
-            return self._session
+            return self._client
         else:
-            self._session = {
+            self._client = {
                     'errorCode': 'OK',
-                    'header': {
-                    'sessionToken': '73f19a710bbced25fb2e46e5a0d65b126716a8d19bb9f9038d2172adc14665a5f0c65a30e9fb677e5654b2f59f51abdb',
-                    'errorCode': 'OK'
-                        }
                     }
-            return self._session
+            return self._client
 
-    def add(self, facilityMeterData):
-        facility = "SomEnergia_Fontivsolar"
-        return [facility, [("2020-01-01 00:00:00",10)]]
+    def _clientOk(self):
+        return self._client['errorCode'] == 'OK'
+
+    def getMeterData(self):
+        if not self._clientOk():
+            return None
+        return self._data
+
+    def add(self, facility, MeterData):
+        self._data[facility] = MeterData
+        return {facility, self._data[facility]}
 
 class PlantmonitorDB:
 
-    def __init__(self, **kwds):
-        self._config = ns(kwds)
+    def __init__(self, config): 
+        self._config = config
         self._client = None
-        self._session = None
+
+    def login(self):
+        conn = psycopg2.connect(user = self._config['psql_user'], password = self._config['psql_password'],
+        host = self._config['psql_host'], port = self._config['psql_port'], database = self._config['psql_db'])
+        self._client = conn
+        if conn.close == 1:
+            return {'errorCode': 'CONNECTION CLOSED'}
+        else:
+            return {'errorCode': 'OK'}
+
+    def close(self):
+        self._client.close()
+
+    def __enter__(self):
+        self.login()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     def add(self, facilityMeterData):
         pass
+
+    def getMeterData(self):
+        if not self._client:
+            return None
+        cur = self._client.cursor()
+        cur.execute("select facility, time, production from sistema.contador;")
+        data = cur.fetchall()
+        return data
+        

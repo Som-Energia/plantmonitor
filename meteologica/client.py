@@ -137,8 +137,8 @@ def forecast():
                 if errorCode == 'OK':
                     forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
 
-                    realFromDate = unixToISOtz(forecastDataDict[0][0]);
-                    realToDate   = unixToISOtz(forecastDataDict[-1][0]);
+                    realFromDate = unixToISOtz(forecastDataDict[0][0])
+                    realToDate   = unixToISOtz(forecastDataDict[-1][0])
 
                     cur.execute("DELETE FROM forecastdata USING forecasthead WHERE forecastdata.idforecasthead = forecasthead.id AND forecasthead.facilityId = '{}' AND time BETWEEN '{}' AND '{}'".format(facilityId, realFromDate, realToDate))
 
