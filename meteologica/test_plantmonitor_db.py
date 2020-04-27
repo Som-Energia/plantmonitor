@@ -15,41 +15,43 @@ from .plantmonitor_db import (
 
 # tests that can't be mocked and require a real db
 class PlantmonitorDB_Test(unittest.TestCase):
-    
+
     def setUp(self):
-        configdb = ns.load('conf/configdb_test.yaml')
+        configdb = self.createConfig()
 
         with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
         host = configdb['psql_host'], port = configdb['psql_port']) as conn:
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            with conn.cursor() as cursor:     
+            with conn.cursor() as cursor:
+                cursor.execute("DROP DATABASE IF EXISTS {}".format(configdb['psql_db']))
                 cursor.execute("CREATE DATABASE {};".format(configdb['psql_db']))
 
-                # cursor.execute("CREATE TABLE if not exists sistema_contador(id SERIAL NOT NULL, errorCode VARCHAR(50), facilityId VARCHAR(50), \
-                # variableId VARCHAR(50), predictorId VARCHAR(20), forecastDate TIMESTAMPTZ, granularity INTEGER, PRIMARY KEY(id));")
-                # cursor.execute("CREATE TABLE forecastData(idForecastHead SERIAL REFERENCES forecastHead(id), time TIMESTAMPTZ, percentil10 INTEGER, percentil50 INTEGER, \
-                # percentil90 INTEGER, PRIMARY KEY(idForecastHead,time));")
-                # cursor.execute("SELECT create_hypertable('forecastData', 'time');")
-        conn.close()
+        with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
+        host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("CREATE TABLE sistema_contador(time TIMESTAMP NOT NULL, \
+                name VARCHAR(50), export_energy bigint);")
 
     def tearDown(self):
-        configdb = ns.load('conf/configdb_test.yaml')
+        configdb = self.createConfig()
 
         with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
         host = configdb['psql_host'], port = configdb['psql_port']) as conn:
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            with conn.cursor() as cur:
-                cur.execute("DROP DATABASE {}".format(configdb['psql_db']))
-        conn.close()
+            with conn.cursor() as cursor:
+                cursor.execute("DROP DATABASE {}".format(configdb['psql_db']))
 
     def createPlantmonitorDB(self):
         configdb = ns.load('conf/configdb_test.yaml')
         return PlantmonitorDB(configdb)
 
+    def createConfig(self):
+        return ns.load('conf/configdb_test.yaml')
+
     def __test_InvalidLogin(self):
-        db = self.createPlantmonitorDB()
-        db._config['psql_user'] = ''
-        self.assertEquals(db.client, {'errorCode': 'DISCONNECTED'})
+        with PlantmonitorDB(self.createConfig()) as db:
+            db._config['psql_user'] = ''
+            self.assertEquals(db.client, {'errorCode': 'DISCONNECTED'})
 
     def __test_notLoggedIn(self):
         db = self.createPlantmonitorDB()
@@ -57,25 +59,26 @@ class PlantmonitorDB_Test(unittest.TestCase):
 
     def __test_getNotLoggedIn(self):
         db = self.createPlantmonitorDB()
+        db.close()
         self.assertEquals(None, db.getMeterData())
 
     def test_LogIn(self):
         db = self.createPlantmonitorDB()
         login = db.login()
+        db.close()
         self.assertEquals(login, {'errorCode': 'OK'})
 
-    def __test_getEmpty(self):
-        db = self.createPlantmonitorDB()
-        db.login()
-        result = db.getMeterData()
-        self.assertEqual(result, {})
+    def test_getEmpty(self):
+        with self.createPlantmonitorDB() as db:
+            result = db.getMeterData()
+            self.assertEqual(result, {})
 
     def __test_getMeterData(self):
-        db = self.createPlantmonitorDB()
-        facility = self.mainFacility()
-        db.add(facility, [("2020-01-01 00:00:00",10)])
-        meter = db.getMeterData()
-        self.assertEqual(meter, [facility, [("2020-01-01 00:00:00",10)]])
+        with self.createPlantmonitorDB() as db:
+            facility = self.mainFacility()
+            db.add(facility, [("2020-01-01 00:00:00",10)])
+            meter = db.getMeterData()
+            self.assertEqual(meter, [facility, [("2020-01-01 00:00:00",10)]])
 
 
 class PlantmonitorDBMock_Test(PlantmonitorDB_Test):

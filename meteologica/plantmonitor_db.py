@@ -26,6 +26,16 @@ class PlantmonitorDBMock(object):
                     }
             return self._client
 
+    def close(self):
+        pass
+
+    def __enter__(self):
+        self.login()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
     def _clientOk(self):
         return self._client['errorCode'] == 'OK'
 
@@ -40,7 +50,7 @@ class PlantmonitorDBMock(object):
 
 class PlantmonitorDB:
 
-    def __init__(self, config): 
+    def __init__(self, config):
         self._config = config
         self._client = None
 
@@ -70,7 +80,10 @@ class PlantmonitorDB:
         if not self._client:
             return None
         cur = self._client.cursor()
-        cur.execute("select facility, time, production from sistema.contador;")
+        cur.execute("select time, name, export_energy from sistema_contador;")
         data = cur.fetchall()
         return data
-        
+
+    def dbToDIctionary(self, dbData):
+        print(dbData)
+        return dbData
