@@ -31,7 +31,11 @@ class PlantmonitorDB_Test(unittest.TestCase):
             with conn.cursor() as cursor:
                 cursor.execute("CREATE TABLE sistema_contador(time TIMESTAMP NOT NULL, \
                 name VARCHAR(50), export_energy bigint);")
-
+                cursor.execute("CREATE TABLE facility_meter (id integer NOT NULL, \
+                facilityid character varying(200),meter character varying(200));")
+                cursor.execute("CREATE SEQUENCE public.facility_meter_id_seq AS integer \
+                    START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;")
+    
     def tearDown(self):
         configdb = self.createConfig()
 
@@ -73,10 +77,30 @@ class PlantmonitorDB_Test(unittest.TestCase):
             result = db.getMeterData()
             self.assertEqual(result, {})
 
+    def test_addOneFromMissingFacility(self):
+        with self.createPlantmonitorDB() as db:
+            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]}
+            result = db.addMeterData(oneRow)
+            self.assertEqual(result, {})
+
+    def __test_addOne(self):
+        with self.createPlantmonitorDB() as db:
+            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]}
+            db.addMeterData(oneRow)
+            result = db.getMeterData()
+            self.assertEqual(result, oneRow)
+        
+    def __test_getOne(self):
+        with self.createPlantmonitorDB() as db:
+            db.addMeterData({'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]})
+            result = db.getMeterData()
+            self.assertEqual(result, {})
+
+
     def __test_getMeterData(self):
         with self.createPlantmonitorDB() as db:
             facility = self.mainFacility()
-            db.add(facility, [("2020-01-01 00:00:00",10)])
+            db.addMeterData({facility: [("2020-01-01 00:00:00",10)]})
             meter = db.getMeterData()
             self.assertEqual(meter, [facility, [("2020-01-01 00:00:00",10)]])
 
@@ -103,7 +127,7 @@ class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
         db = self.createPlantmonitorDB()
         facility = self.mainFacility()
         expected = {facility: [("2020-01-01 00:00:00",10)]}
-        result = db.add(facility, [("2020-01-01 00:00:00",10)])
+        result = db.addMeterData(facility, [("2020-01-01 00:00:00",10)])
         self.assertEqual(result, expected)
         allMeterData = db.getMeterData()
         self.assertEqual(allMeterData.get(facility, None), expected[facility])

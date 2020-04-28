@@ -5,12 +5,16 @@ import psycopg2
 from psycopg2 import Error
 import psycopg2.extras
 
+
+class PlantmonitorDBError(Exception): pass
+
 class PlantmonitorDBMock(object):
 
     #data structure: {facility: [('time', value)]}
 
     def __init__(self, config):
         self._data = {}
+        self._facilityMeter = []
         self._config = config
         self._client = {'errorCode': 'DISCONNECTED'}
 
@@ -39,14 +43,31 @@ class PlantmonitorDBMock(object):
     def _clientOk(self):
         return self._client['errorCode'] == 'OK'
 
+    def meterToFacility(self, meter):
+        facilities = [f for f, m in self._facilityMeter if m is meter]
+        return facilities[0] if facilities else None
+
+    def facilityToMeter(self, facility):
+        meters = [m for f, m in self._facilityMeter if f is facility]
+        return meters[0] if meters else None
+
     def getMeterData(self):
         if not self._clientOk():
             return None
         return self._data
 
-    def add(self, facility, MeterData):
-        self._data[facility] = MeterData
-        return {facility, self._data[facility]}
+    def addMeterData(self, facilityMeterData):
+        try:
+            for f, meterData in facilityMeterData.items():
+                meter = self.facilityToMeter(f)
+                if not meter:
+                    raise PlantmonitorDBError('Facility has no associated meter')
+                self._data.setdefault(f, []).append(meterData)
+        except:
+            return {}
+            #rollback?
+
+        return facilityMeterData
 
 class PlantmonitorDB:
 
@@ -73,17 +94,56 @@ class PlantmonitorDB:
     def __exit__(self, type, value, traceback):
         self.close()
 
-    def add(self, facilityMeterData):
-        pass
+    def getFacilityMeterDict(self):
+        if not self._client:
+            return None
 
+        cur = self._client.cursor()
+        cur.execute("select facilityid, meter from facility_meter;")
+        facility_meter_db = cur.fetchall()
+
+        facility_meter = set(facility_meter_db)
+        return facility_meter
+
+    def meterToFacility(self, meter):
+        facility_meter = self.getFacilityMeterDict()
+        facilities = [f for f, m in facility_meter if m is meter]
+        return facilities[0] if facilities else None
+
+    def facilityToMeter(self, facility):
+        facility_meter = self.getFacilityMeterDict()
+        meters = [m for f, m in facility_meter if f is facility]
+        return meters[0] if meters else None
+
+    def addMeterData(self, facilityMeterData):
+        if not self._client:
+            return None
+        cur = self._client.cursor()
+
+        try:
+            for f,v in facilityMeterData.items():
+                m = self.facilityToMeter(f)
+                if not m:
+                    raise PlantmonitorDBError('Facility has no associated meter')
+                for t, e in v:
+                    cur.execute(f"insert into sistema_contador VALUES('{m}', '{t}', {e});")
+        except:
+            return {}
+            cur.rollback()
+        
     def getMeterData(self):
         if not self._client:
             return None
         cur = self._client.cursor()
-        cur.execute("select time, name, export_energy from sistema_contador;")
-        data = cur.fetchall()
-        return data
+        cur.execute("select facilityid, time, export_energy from sistema_contador \
+        inner join facility_meter on meter = name;")
+        dbData = cur.fetchall()
 
-    def dbToDIctionary(self, dbData):
-        print(dbData)
-        return dbData
+        return self.dbToDictionary(dbData)
+    
+    def dbToDictionary(self, dbData):    
+        data = {}
+        for f,t,e in dbData:
+            data.setdefault(f, []).append((t,e))
+
+        return data
