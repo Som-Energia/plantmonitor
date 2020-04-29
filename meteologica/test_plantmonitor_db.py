@@ -11,6 +11,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from .plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBMock,
+    PlantmonitorDBError,
 )
 
 # tests that can't be mocked and require a real db
@@ -19,28 +20,43 @@ class PlantmonitorDB_Test(unittest.TestCase):
     def setUp(self):
         configdb = self.createConfig()
 
-        with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-        host = configdb['psql_host'], port = configdb['psql_port']) as conn:
+        #PlantmonitorDB.demoDb(configdb)
+
+        with psycopg2.connect(
+            user = configdb['psql_user'], 
+            password = configdb['psql_password'],
+            host = configdb['psql_host'], 
+            port = configdb['psql_port']
+        ) as conn:
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             with conn.cursor() as cursor:
                 cursor.execute("DROP DATABASE IF EXISTS {}".format(configdb['psql_db']))
                 cursor.execute("CREATE DATABASE {};".format(configdb['psql_db']))
 
-        with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-        host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
+        with psycopg2.connect(
+            user = configdb['psql_user'],
+            password = configdb['psql_password'],
+            host = configdb['psql_host'], 
+            port = configdb['psql_port'], 
+            database = configdb['psql_db']
+        ) as conn:
             with conn.cursor() as cursor:
                 cursor.execute("CREATE TABLE sistema_contador(time TIMESTAMP NOT NULL, \
                 name VARCHAR(50), export_energy bigint);")
-                cursor.execute("CREATE TABLE facility_meter (id integer NOT NULL, \
-                facilityid character varying(200),meter character varying(200));")
-                cursor.execute("CREATE SEQUENCE public.facility_meter_id_seq AS integer \
-                    START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;")
-    
+                cursor.execute("CREATE TABLE facility_meter (id serial primary key, \
+                facilityid character varying(200), meter character varying(200));")
+
     def tearDown(self):
         configdb = self.createConfig()
 
-        with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-        host = configdb['psql_host'], port = configdb['psql_port']) as conn:
+        #dropDemoDB(configdb)
+
+        with psycopg2.connect(
+            user = configdb['psql_user'], 
+            password = configdb['psql_password'],
+            host = configdb['psql_host'], 
+            port = configdb['psql_port']
+        ) as conn:
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             with conn.cursor() as cursor:
                 cursor.execute("DROP DATABASE {}".format(configdb['psql_db']))
@@ -68,20 +84,34 @@ class PlantmonitorDB_Test(unittest.TestCase):
 
     def test_LogIn(self):
         db = self.createPlantmonitorDB()
-        login = db.login()
-        db.close()
-        self.assertEquals(login, {'errorCode': 'OK'})
+        try:
+            login = db.login()
+        except:
+            self.fail("Login test failed")
+        finally:
+            db.close()
 
-    def test_getEmpty(self):
+    def __test_getEmpty(self):
         with self.createPlantmonitorDB() as db:
             result = db.getMeterData()
             self.assertEqual(result, {})
 
-    def test_addOneFromMissingFacility(self):
+    def __test_addOneFromMissingFacility(self):
         with self.createPlantmonitorDB() as db:
             oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]}
-            result = db.addMeterData(oneRow)
-            self.assertEqual(result, {})
+            self.assertRaises(PlantmonitorDBError,db.addMeterData,oneRow)
+    
+    def __test_addFirstFacilityMeterRelation(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation('Somenergia_Amapola','1234')
+            result = set(('Somenergia_Amapola','1234'))
+            self.assertEqual(db.getFacilityMeter(),result)
+
+    def __test_addAnotherFacilityMeterRelation(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation('Somenergia_Tulipan','4321')
+            db.addFacilityMeterRelation('Somenergia_Amapola','1234')
+            self.assertTrue(db.facilityMeterRelationExists('Somenergia_Amapola','1234'))
 
     def __test_addOne(self):
         with self.createPlantmonitorDB() as db:
@@ -89,13 +119,12 @@ class PlantmonitorDB_Test(unittest.TestCase):
             db.addMeterData(oneRow)
             result = db.getMeterData()
             self.assertEqual(result, oneRow)
-        
+
     def __test_getOne(self):
         with self.createPlantmonitorDB() as db:
             db.addMeterData({'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]})
             result = db.getMeterData()
             self.assertEqual(result, {})
-
 
     def __test_getMeterData(self):
         with self.createPlantmonitorDB() as db:
