@@ -91,38 +91,41 @@ class PlantmonitorDB_Test(unittest.TestCase):
         finally:
             db.close()
 
-    def __test_getEmpty(self):
+    def test_getEmpty(self):
         with self.createPlantmonitorDB() as db:
             result = db.getMeterData()
             self.assertEqual(result, {})
 
-    def __test_addOneFromMissingFacility(self):
+    def test_addOneFromMissingFacility(self):
         with self.createPlantmonitorDB() as db:
-            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]}
+            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00',10)]}
             self.assertRaises(PlantmonitorDBError,db.addMeterData,oneRow)
     
-    def __test_addFirstFacilityMeterRelation(self):
+    def test_addFirstFacilityMeterRelation(self):
         with self.createPlantmonitorDB() as db:
-            db.addFacilityMeterRelation('Somenergia_Amapola','1234')
-            result = set(('Somenergia_Amapola','1234'))
-            self.assertEqual(db.getFacilityMeter(),result)
+            db.addFacilityMeterRelation('SomEnergia_Amapola','1234')
+            result = set([('SomEnergia_Amapola','1234')])
+            facility_meter = db.getFacilityMeter()
+            self.assertEqual(facility_meter,result)
 
-    def __test_addAnotherFacilityMeterRelation(self):
+    def test_addAnotherFacilityMeterRelation(self):
         with self.createPlantmonitorDB() as db:
-            db.addFacilityMeterRelation('Somenergia_Tulipan','4321')
-            db.addFacilityMeterRelation('Somenergia_Amapola','1234')
-            self.assertTrue(db.facilityMeterRelationExists('Somenergia_Amapola','1234'))
+            db.addFacilityMeterRelation('SomEnergia_Tulipan','4321')
+            db.addFacilityMeterRelation('SomEnergia_Amapola','1234')
+            self.assertTrue(db.facilityMeterRelationExists('SomEnergia_Amapola','1234'))
 
-    def __test_addOne(self):
+    def test_addOneMeterData(self):
         with self.createPlantmonitorDB() as db:
-            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]}
+            db.addFacilityMeterRelation('SomEnergia_Amapola','1234')
+            oneRow = {'SomEnergia_Amapola': [('2020-01-01 00:00:00',10)]}
             db.addMeterData(oneRow)
             result = db.getMeterData()
+            facility_meter = db.getFacilityMeter()
             self.assertEqual(result, oneRow)
 
-    def __test_getOne(self):
+    def __test_getOneMeterData(self):
         with self.createPlantmonitorDB() as db:
-            db.addMeterData({'SomEnergia_Amapola': [('2020-01-01 00:00:00','10')]})
+            db.addMeterData({'SomEnergia_Amapola': [('2020-01-01 00:00:00',10)]})
             result = db.getMeterData()
             self.assertEqual(result, {})
 

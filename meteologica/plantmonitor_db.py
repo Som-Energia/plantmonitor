@@ -18,9 +18,10 @@ class PlantmonitorDBMock(object):
     def __init__(self, config):
         self._data = {}
         self._enterdata = {}
-        self._facilityMeter = []
+        self._facilityMeter = set()
         self._config = config
         self._client = None
+        self._withinContextManager = False
 
     def login(self):
         if self._config['psql_user'] != 'alberto' or self._config['psql_password'] != '1234':
@@ -31,6 +32,7 @@ class PlantmonitorDBMock(object):
         pass
 
     def __enter__(self):
+        self._withinContextManager = True
         self.login()
         self._enterdata = self._data
         return self
@@ -39,17 +41,6 @@ class PlantmonitorDBMock(object):
         if exc_type is not None:
             self._data = self._enterdata
         self.close()
-
-    def meterToFacility(self, meter):
-        facilities = [f for f, m in self._facilityMeter if m is meter]
-        return facilities[0] if facilities else None
-
-    def facilityToMeter(self, facility):
-        meters = [m for f, m in self._facilityMeter if f is facility]
-        return meters[0] if meters else None
-
-    def getMeterData(self):
-        return self._data
 
     @decorator.decorator
     def withinContextManager(f, self, *args, **kwds):
@@ -65,13 +56,35 @@ class PlantmonitorDBMock(object):
         finally:
             self.close()
 
+    def meterToFacility(self, meter):
+        facilities = [f for f, m in self._facilityMeter if m is meter]
+        return facilities[0] if facilities else None
+
+    def facilityToMeter(self, facility):
+        meters = [m for f, m in self._facilityMeter if f is facility]
+        return meters[0] if meters else None
+
+    def getMeterData(self):
+        return self._data
+
+    @withinContextManager
+    def addFacilityMeterRelation(self, facility, meter):
+        self._facilityMeter.add((facility, meter))
+
+    def getFacilityMeter(self):
+        return self._facilityMeter
+
+    def facilityMeterRelationExists(self, facility, meter):
+        facility_meter = self.getFacilityMeter()
+        return (facility, meter) in facility_meter
+
     def addMeterData(self, facilityMeterData):
         data_uncommited = copy.deepcopy(self._data)
         for f, meterData in facilityMeterData.items():
             meter = self.facilityToMeter(f)
             if not meter:
                 raise PlantmonitorDBError('Facility has no associated meter')
-            data_uncommited.setdefault(f, []).append(meterData)
+            data_uncommited.setdefault(f, []).extend(meterData)
         self._data = copy.deepcopy(data_uncommited)
         return facilityMeterData
 
@@ -93,6 +106,7 @@ class PlantmonitorDB:
                 port = self._config['psql_port'], 
                 database = self._config['psql_db']
             ) # raises exception on error
+            self._client = conn
         except OperationalError:
             raise PlantmonitorDBError(OperationalError.args)
         if conn.close == 1:
@@ -115,11 +129,12 @@ class PlantmonitorDB:
         if exc_type is not None:
             if self._client:
                 self._client.rollback()
+            self.close()
+            raise
         else:
             if self._client:
                 self._client.commit()
-        self.close()
-        raise
+            self.close()
 
     @decorator.decorator
     def withinContextManager(f, self, *args, **kwds):
@@ -131,28 +146,23 @@ class PlantmonitorDB:
             return result
         except Exception:
             self._client.rollback()
+            self.close()
             raise
         finally:
             self.close()
 
     @withinContextManager
     def addFacilityMeterRelation(self, facility, meter):
-        if not self._client:
-            return None
         cur = self._client.cursor()
-        cur.execute(f"insert  into facility_meter(facilityid,meter)\
-             values('{facility}','{meter}');")
-        conn.commit()
+        cur.execute(f"insert into facility_meter(facilityid,meter)\
+            values('{facility}','{meter}');")
 
     def facilityMeterRelationExists(self, facility, meter):
-        facility_meter = self.getFacilityMeter()
-        print(facility_meter)
+        facility_meter = self.getFacilityMeter() 
         return (facility, meter) in facility_meter
 
     # facilityMeterDict := set((facility1, meter1), ..., (facilityN, meterN))
     def getFacilityMeter(self):
-        if not self._client:
-            return None
         cur = self._client.cursor()
  
         cur.execute("select facilityid, meter from facility_meter;")
@@ -163,36 +173,33 @@ class PlantmonitorDB:
 
     def meterToFacility(self, meter):
         facility_meter = self.getFacilityMeter()
-        facilities = [f for f, m in facility_meter if m is meter]
+        facilities = [f for f, m in facility_meter if m == meter]
         return facilities[0] if facilities else None
 
     def facilityToMeter(self, facility):
         facility_meter = self.getFacilityMeter()
-        meters = [m for f, m in facility_meter if f is facility]
+        meters = [m for f, m in facility_meter if f == facility]
         return meters[0] if meters else None
 
     @withinContextManager
     def addMeterData(self, facilityMeterData):
-        if not self._client:
-            return None
-
         cur = self._client.cursor()
 
         for f,v in facilityMeterData.items():
             m = self.facilityToMeter(f)
             if not m:
-                raise PlantmonitorDBError('Facility has no associated meter')
+                raise PlantmonitorDBError(f'Facility {f} has no associated meter')
             for t, e in v:
-                cur.execute(f"insert into sistema_contador VALUES('{m}', '{t}', {e});")
+                cur.execute(f"insert into sistema_contador \
+                    (time, name, export_energy)\
+                    VALUES('{t}', '{m}', {e});")
 
     @withinContextManager
     def getMeterData(self):
-        if not self._client:
-            return None
-
         cur = self._client.cursor()
         cur.execute(
-            "select facilityid, time, export_energy from sistema_contador \
+            "select facilityid, to_char(time,'YYYY-MM-DD HH24:MI:SS'),\
+                 export_energy from sistema_contador \
             inner join facility_meter on meter = name;"
         )
         dbData = cur.fetchall()
@@ -203,5 +210,4 @@ class PlantmonitorDB:
         data = {}
         for f,t,e in dbData:
             data.setdefault(f, []).append((t,e))
-
         return data
