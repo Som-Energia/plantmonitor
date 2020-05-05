@@ -3,10 +3,37 @@ from .meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )
-from django.conf import settings
+#from django.conf import settings
+from yamlns import namespace as ns
 from pathlib import Path
 from unittest.mock import patch
 import unittest
+
+# import logging.config
+
+# logging.config.dictConfig({
+#     'version': 1,
+#     'formatters': {
+#         'verbose': {
+#             'format': '%(name)s: %(message)s'
+#         }
+#     },
+#     'handlers': {
+#         'console': {
+#             'level': 'INFO',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'loggers': {
+#         'zeep.transports': {
+#             'level': 'INFO',
+#             'propagate': True,
+#             'handlers': ['console'],
+#         },
+#     }
+# })
+
 
 class MeteologicaApiMock_Test(unittest.TestCase):
 
@@ -114,6 +141,7 @@ class MeteologicaApiMock_Test(unittest.TestCase):
             login['errorCode'],
             'OK'
         )
+
     def _test_uploadProduction_errorUpload(self):
         api = self.createApi()
         login = api.login('alberto','1234')
@@ -122,22 +150,40 @@ class MeteologicaApiMock_Test(unittest.TestCase):
             ("2040-01-01 00:00:00", 10),
         ])
   
-
+    def test_downloadProduction(self):
+        api = self.createApi()
+        facility = self.mainFacility()
+        api.uploadProduction(facility, [
+            ("2020-01-01 00:00:00", 10),
+        ])
+        result = api.downloadProduction(
+                    facility, 
+                    "2020-01-01 00:00:00",
+                    "2020-01-01 00:00:00"
+                )
+        
+        self.assertEqual(result,[
+            ("2020-01-01 00:00:00", 0)
+        ])
 
 class MeteologicaApi_Test(MeteologicaApiMock_Test):
 
     def createApi(self, **kwds):
+        configApi = self.createConfig()
         params=dict(
-            wsdl=settings.METEOLOGICA_CONF['wsdl'],
-            username=settings.METEOLOGICA_CONF['username'],
-            password=settings.METEOLOGICA_CONF['password'],
+            wsdl=configApi['meteo_test_url'],
+            username=configApi['meteo_user'],
+            password=configApi['meteo_password'],
             lastDateFile='lastDateFile.yaml',
             showResponses=False,
         )
         params.update(kwds)
         return MeteologicaApi(**params)
+    
+    def createConfig(self):
+        return ns.load('conf/configdb_test.yaml')
 
-    def setUp(self):
+    def setUp(self):        
         self.cleanLastDateFile()
 
     def tearDown(self):
@@ -204,6 +250,7 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
             api.login()
         self.assertEqual(type(u'')(ctx.exception),'INVALID_USERNAME_OR_PASSWORD')
         self.assertFalse(api.session())
+
 
 
 

@@ -2,14 +2,14 @@ import logging
 import os
 import re
 import stat
-import pandas as pd
+
 import pytz
 from pathlib import Path
 
 from datetime import datetime as dt
 from datetime import timedelta
 
-from django.conf import settings
+#from django.conf import settings
 
 from zeep import Client
 from zeep.transports import Transport
@@ -17,7 +17,7 @@ from requests import Session
 from yamlns import namespace as ns
 import decorator
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 class MeteologicaApiError(Exception): pass
 
@@ -57,6 +57,13 @@ class MeteologicaApi_Mock(object):
         self._checkFacility(facility)
         facility_data = self._data.setdefault(facility, [])
         facility_data += data
+    
+    def downloadProduction(self, facility, fromDate, toDate, variableId='prod', 
+        predictorId='aggregated', granularity='60', forecastDate=None):
+
+        facility_data = self._data.get(facility, [])
+        if not facility_data: return None
+        return facility_data
 
     def _checkFacility(self, facility):
         if facility not in self._validPlants:
@@ -129,7 +136,7 @@ class MeteologicaApi:
             header = self._session.header,
             facilityId = facility,
             variableId = 'prod',
-            measurementType ='CUMULATIVE',
+            measurementType ='MEAN',
             measurementTime = 60, # minutes
             unit = 'kW',
             observationData = dict(item=[
@@ -155,8 +162,40 @@ class MeteologicaApi:
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
         return lastDates.get(facility,None)
+    
+    @withinSession
+    def downloadProduction(self, facility, fromDate, toDate, variableId='prod', 
+        predictorId='aggregated', granularity='60', forecastDate=None):
+        if not forecastDate:
+            forecastDate=fromDate
+        forecastRequest = {
+            'header': self._session.header, 
+            'facilityId': facility, 
+            'variableId': variableId,
+            'predictorId': predictorId,
+            'granularity': granularity,
+            'forecastDate': forecastDate,
+            'fromDate': fromDate,
+            'toDate': toDate
+        }
+        response = self._client.service.getForecast(forecastRequest)
+        
+        if self._showResponses(): print("joete",response)
+        if response.errorCode != "OK":
+            raise MeteologicaApiError(response.errorCode)
 
+        self._session.header['sessionToken'] = response.header['sessionToken']
 
+        forecastData = response['forecastData']
+        forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
+        resultForecast = [ (self.unixToUtc(entry[0]), float(entry[2])) for entry in forecastDataDict]
+
+        return resultForecast
+    
+    def unixToUtc(self, unix_ts):
+        return str(dt.utcfromtimestamp(int(unix_ts)))
+
+'''
 class MeteologicaApiUtils(object):
 
     def __init__(self, wsdl, username, password):
@@ -165,13 +204,10 @@ class MeteologicaApiUtils(object):
         self.__password = password
         self._client = Client(wsdl)
         self.__data_login = {'username': self.__username, 'password': self.__password}
-        self._api_session = self._client.service.login(self.__data_login)
+        self._apparamsi_session = self._client.service.login(self.__data_login)
         logger.info("Sesion information %s", self._api_session.header)
 
     def upload_to_api(self, file_name):
-        '''
-        Upload `data` to Meteologica API
-        '''
         try:
             df = pd.read_csv(settings.METEOLOGICA_CONF['file'], delimiter=';')
             local = pytz.timezone ("Europe/Madrid")
@@ -222,3 +258,4 @@ class MeteologicaApiUtils(object):
         if self._client is not None:
             self._client.service.logout(self._api_session)
 
+'''
