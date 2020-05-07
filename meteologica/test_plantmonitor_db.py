@@ -125,7 +125,70 @@ class PlantmonitorDB_Test(unittest.TestCase):
             db.addMeterData(data)
             meter = db.getMeterData()
             self.assertEqual(meter, data)
+    
+    def test_getMeterDataFromToDate(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(self.secondaryFacility(), '432104321')
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234')
+            data = {
+                self.mainFacility(): [
+                    ("2020-01-01 00:00:00", 10),
+                    ("2020-01-01 01:00:00", 20),
+                    ("2020-01-01 02:00:00", 30),
+                    ("2020-01-01 03:00:00", 40),
+                ],
+                self.secondaryFacility(): [
+                    ("2020-01-01 00:00:00", 210),
+                    ("2020-01-01 01:00:00", 320),
+                    ("2020-01-01 02:00:00", 230),
+                    ("2020-01-01 03:00:00", 340),
+                ]
+            }
+            db.addMeterData(data)
+            dataFromAndTo = {
+                self.mainFacility(): [
+                    ("2020-01-01 01:00:00", 20),
+                    ("2020-01-01 02:00:00", 30),
+                    ("2020-01-01 03:00:00", 40),
+                ],
+                self.secondaryFacility(): [
+                    ("2020-01-01 01:00:00", 320),
+                    ("2020-01-01 02:00:00", 230),
+                    ("2020-01-01 03:00:00", 340),
+                ]
+            }
+            meter = db.getMeterData(
+                fromDate="2020-01-01 01:00:00",
+                toDate="2020-01-01 03:00:00"
+            )
+            self.assertCountEqual(meter, dataFromAndTo)
 
+    def test_getMeterDataFacility(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(self.secondaryFacility(), '432104321')
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234')
+            data = {
+                self.mainFacility(): [
+                    ("2020-01-01 00:00:00", 10),
+                    ("2020-01-01 01:00:00", 20),
+                ],
+                self.secondaryFacility(): [
+                    ("2020-01-01 00:00:00", 210),
+                    ("2020-01-01 03:00:00", 340),
+                ],
+            }
+            db.addMeterData(data)
+            meterData = db.getMeterData(self.mainFacility())
+            self.assertEqual(meterData, {self.mainFacility(): data[self.mainFacility()]})
+
+    def test_getFacilities(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(self.secondaryFacility(), '432104321')
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234')
+
+            facilities = db.getFacilities()
+
+            self.assertCountEqual([self.mainFacility(), self.secondaryFacility()], facilities)
 
 class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
 

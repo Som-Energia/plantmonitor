@@ -2,6 +2,7 @@ import psycopg2
 
 from psycopg2 import OperationalError
 import psycopg2.extras
+from datetime import datetime
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import decorator
@@ -90,6 +91,10 @@ class PlantmonitorDBMock(object):
     @checkLoggedIn
     def getFacilityMeter(self):
         return self._facilityMeter
+
+    def getFacilities(self):
+        facility_meter = self.getFacilityMeter()
+        return [facility for facility, meter in facility_meter]
 
     @checkLoggedIn
     def facilityMeterRelationExists(self, facility, meter):
@@ -246,6 +251,10 @@ class PlantmonitorDB:
         facility_meter = set(facility_meter_db)
         return facility_meter
 
+    def getFacilities(self):
+        facility_meter = self.getFacilityMeter()
+        return [facility for facility, meter in facility_meter]
+
     def meterToFacility(self, meter):
         facility_meter = self.getFacilityMeter()
         facilities = [f for f, m in facility_meter if m == meter]
@@ -273,15 +282,26 @@ class PlantmonitorDB:
                     VALUES('{t}', '{m}', {e});")
 
     @withinContextManager
-    def getMeterData(self):
+    def getMeterData(self, facility=None, fromDate=None, toDate=None):
         # if not self._client:
         #     raise PlantmonitorDBError("Db client is None, have you logged in?")
 
+        if not toDate:
+            toDate = datetime.now()
+        
+        condition = ''
+        if facility:
+            condition = f"where facilityid = '{facility}'"
+        if fromDate:
+            condition = f"where time between '{fromDate}' and '{toDate}'"
+        if facility and fromDate:
+            condition = f"where facilityid = '{facility}' and time between '{fromDate}' and '{toDate}'"
+
         cur = self._client.cursor()
         cur.execute(
-            "select facilityid, to_char(time,'YYYY-MM-DD HH24:MI:SS'),\
-                 export_energy from sistema_contador \
-            inner join facility_meter on meter = name;"
+            f"select facilityid, to_char(time,'YYYY-MM-DD HH24:MI:SS'),\
+                export_energy from sistema_contador \
+            inner join facility_meter on meter = name {condition};"
         )
         dbData = cur.fetchall()
 
@@ -291,4 +311,5 @@ class PlantmonitorDB:
         data = {}
         for f, t, e in dbData:
             data.setdefault(f, []).append((t, e))
+        
         return data

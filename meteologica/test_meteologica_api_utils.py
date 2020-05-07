@@ -150,7 +150,7 @@ class MeteologicaApiMock_Test(unittest.TestCase):
             ("2040-01-01 00:00:00", 10),
         ])
   
-    def test_downloadProduction(self):
+    def test_dateDownloadProduction(self):
         api = self.createApi()
         facility = self.mainFacility()
         api.uploadProduction(facility, [
@@ -161,10 +161,17 @@ class MeteologicaApiMock_Test(unittest.TestCase):
                     "2020-01-01 00:00:00",
                     "2020-01-01 00:00:00"
                 )
-        
-        self.assertEqual(result,[
-            ("2020-01-01 00:00:00", 0)
-        ])
+
+        #expected [("2020-01-01 00:00:00", _)] since we don't know meteologica's algorithm
+        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result[0]), 2)
+        self.assertEqual(result[0][0], "2020-01-01 00:00:00")
+
+    def test_getFacilities(self):
+        pass
+
+    def __test_addFacility(self):
+        pass
 
 class MeteologicaApi_Test(MeteologicaApiMock_Test):
 
@@ -250,10 +257,39 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
             api.login()
         self.assertEqual(type(u'')(ctx.exception),'INVALID_USERNAME_OR_PASSWORD')
         self.assertFalse(api.session())
+    
+    def __test_getLastApiDate(self):
+        api = self.createApi()
+        with api:
+            api.uploadProduction(facility, [
+                ("2040-02-01 00:00:00", 10),
+            ])
+            result = api.getLastApiDate()
+        self.assertEqual(result, "2040-02-01 00:00:00")
 
+    def __test_getLastApiDateForFacility(self):
+        facility = self.mainFacility()
+        api = self.createApi()
+        with api:
+            api.uploadProduction(facility, [
+                ("2040-02-01 00:00:00", 10),
+            ])
+            result = api.getLastApiDate(facility)
+        self.assertEqual(result, "2040-02-01 00:00:00")
 
-
-
+    def __test_getLastApiDateForOlderFacility(self):
+        facility = self.mainFacility()
+        otherfacility = self.otherFacility()
+        api = self.createApi()
+        with api:
+            api.uploadProduction(facility, [
+                ("2040-01-02 00:00:00", 10),
+            ])
+            api.uploadProduction(otherfacility, [
+                ("2040-01-03 00:00:00", 10),
+            ])
+            result = api.getLastApiDate(facility)
+        self.assertEqual(result, "2040-01-02 00:00:00")
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
