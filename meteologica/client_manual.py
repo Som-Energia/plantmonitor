@@ -20,12 +20,12 @@ import collections
 def setUp():
 
     conn = psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-    host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db'])
+        host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db'])
     cur = conn.cursor()
 
     # Connexió postgresql
     with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-    host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
+            host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
         with conn.cursor() as cur:
             cur.execute("CREATE TABLE if not exists forecastHead(id SERIAL NOT NULL, errorCode VARCHAR(50), facilityId VARCHAR(50), \
             variableId VARCHAR(50), predictorId VARCHAR(20), forecastDate TIMESTAMPTZ, granularity INTEGER, PRIMARY KEY(id));")
@@ -38,14 +38,14 @@ def setUp():
 def tearDown():
     # Connexió postgresql
     with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-    host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
+            host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
         with conn.cursor() as cur:
             cur.execute("DROP TABLE forecastData;")
             cur.execute("DROP TABLE forecastHead;")
 
 def clearDb():
     with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
-    host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
+            host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM forecastData;")
             cur.execute("DELETE FROM forecastHead;")

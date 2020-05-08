@@ -10,13 +10,16 @@ import decorator
 import copy
 
 
+def todt(datetimestr):
+    return datetime.strptime(datetimestr, '%Y-%m-%d %H:%M:%S')
+
 class PlantmonitorDBError(Exception):
     pass
 
 
 class PlantmonitorDBMock(object):
 
-    # data structure: {facility: [('time', value)]}
+    # data structure: {facility: [(datetime, value)]}
 
     def __init__(self, config):
         self._data = {}
@@ -80,8 +83,25 @@ class PlantmonitorDBMock(object):
         return meters[0] if meters else None
 
     @checkLoggedIn
-    def getMeterData(self):
-        return self._data
+    def getMeterData(self, facility=None, fromDate=None, toDate=None):
+
+        if not toDate:
+            toDate = datetime.now()
+
+        selectedData = {}
+        if facility and not fromDate:
+            selectedData[facility] = self._data.get(facility, [])
+        elif fromDate and not facility:
+            for facility, values in self._data.items():
+                facilityData = self._data.get(facility, [])
+                selectedData[facility] = list(filter(lambda v: fromDate <= v[0] and v[0] <= toDate, facilityData))
+        elif facility and fromDate:
+            facilityData = self._data.get(facility, [])
+            selectedData[facility] = list(filter(lambda v: fromDate <= v[0] and v[0] <= toDate, facilityData))
+        else:
+            return self._data
+
+        return selectedData
 
     @withinContextManager
     @checkLoggedIn
@@ -288,7 +308,7 @@ class PlantmonitorDB:
 
         if not toDate:
             toDate = datetime.now()
-        
+
         condition = ''
         if facility:
             condition = f"where facilityid = '{facility}'"
@@ -299,7 +319,7 @@ class PlantmonitorDB:
 
         cur = self._client.cursor()
         cur.execute(
-            f"select facilityid, to_char(time,'YYYY-MM-DD HH24:MI:SS'),\
+            f"select facilityid, time,\
                 export_energy from sistema_contador \
             inner join facility_meter on meter = name {condition};"
         )
@@ -311,5 +331,5 @@ class PlantmonitorDB:
         data = {}
         for f, t, e in dbData:
             data.setdefault(f, []).append((t, e))
-        
+
         return data

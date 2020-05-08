@@ -11,6 +11,7 @@ from .plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBMock,
     PlantmonitorDBError,
+    todt,
 )
 
 
@@ -69,7 +70,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
 
     def test_addOneFromMissingFacility(self):
         with self.createPlantmonitorDB() as db:
-            oneRow = {self.mainFacility(): [('2020-01-01 00:00:00', 10)]}
+            oneRow = {self.mainFacility(): [(todt('2020-01-01 00:00:00'), 10)]}
             self.assertRaises(PlantmonitorDBError, db.addMeterData, oneRow)
 
     def test_addFirstFacilityMeterRelation(self):
@@ -90,7 +91,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
     def test_addOneMeterData(self):
         with self.createPlantmonitorDB() as db:
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
-            oneRow = {self.mainFacility(): [('2020-01-01 00:00:00', 10)]}
+            oneRow = {self.mainFacility(): [(todt('2020-01-01 00:00:00'), 10)]}
             db.addMeterData(oneRow)
             result = db.getMeterData()
             self.assertEqual(result, oneRow)
@@ -99,7 +100,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
         with self.createPlantmonitorDB() as db:
             db.addFacilityMeterRelation(self.secondaryFacility(), '432104321')
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
-            data = {self.mainFacility(): [('2020-01-01 00:00:00', 10)]}
+            data = {self.mainFacility(): [(todt('2020-01-01 00:00:00'), 10)]}
             db.addMeterData(data)
             result = db.getMeterData()
             self.assertEqual(result, data)
@@ -110,56 +111,56 @@ class PlantmonitorDB_Test(unittest.TestCase):
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
             data = {
                 self.mainFacility(): [
-                    ("2020-01-01 00:00:00", 10),
-                    ("2020-01-01 01:00:00", 20),
-                    ("2020-01-01 02:00:00", 30),
-                    ("2020-01-01 03:00:00", 40),
+                    (todt('2020-01-01 00:00:00'), 10),
+                    (todt('2020-01-01 01:00:00'), 20),
+                    (todt('2020-01-01 02:00:00'), 30),
+                    (todt('2020-01-01 03:00:00'), 40),
                 ],
                 self.secondaryFacility(): [
-                    ("2020-01-01 00:00:00", 210),
-                    ("2020-01-01 01:00:00", 320),
-                    ("2020-01-01 02:00:00", 230),
-                    ("2020-01-01 03:00:00", 340),
+                    (todt('2020-01-01 00:00:00'), 210),
+                    (todt('2020-01-01 01:00:00'), 320),
+                    (todt('2020-01-01 02:00:00'), 230),
+                    (todt('2020-01-01 03:00:00'), 340),
                 ]
             }
             db.addMeterData(data)
             meter = db.getMeterData()
             self.assertEqual(meter, data)
-    
+
     def test_getMeterDataFromToDate(self):
         with self.createPlantmonitorDB() as db:
             db.addFacilityMeterRelation(self.secondaryFacility(), '432104321')
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
             data = {
                 self.mainFacility(): [
-                    ("2020-01-01 00:00:00", 10),
-                    ("2020-01-01 01:00:00", 20),
-                    ("2020-01-01 02:00:00", 30),
-                    ("2020-01-01 03:00:00", 40),
+                    (todt("2020-01-01 00:00:00"), 10),
+                    (todt("2020-01-01 01:00:00"), 20),
+                    (todt("2020-01-01 02:00:00"), 30),
+                    (todt("2020-01-01 03:00:00"), 40),
                 ],
                 self.secondaryFacility(): [
-                    ("2020-01-01 00:00:00", 210),
-                    ("2020-01-01 01:00:00", 320),
-                    ("2020-01-01 02:00:00", 230),
-                    ("2020-01-01 03:00:00", 340),
+                    (todt("2020-01-01 00:00:00"), 210),
+                    (todt("2020-01-01 01:00:00"), 320),
+                    (todt("2020-01-01 02:00:00"), 230),
+                    (todt("2020-01-01 03:00:00"), 340),
                 ]
             }
             db.addMeterData(data)
             dataFromAndTo = {
                 self.mainFacility(): [
-                    ("2020-01-01 01:00:00", 20),
-                    ("2020-01-01 02:00:00", 30),
-                    ("2020-01-01 03:00:00", 40),
+                    (todt("2020-01-01 02:00:00"), 30),
+                    (todt("2020-01-01 03:00:00"), 40),
+                    (todt("2020-01-01 01:00:00"), 20),
                 ],
                 self.secondaryFacility(): [
-                    ("2020-01-01 01:00:00", 320),
-                    ("2020-01-01 02:00:00", 230),
-                    ("2020-01-01 03:00:00", 340),
+                    (todt("2020-01-01 01:00:00"), 320),
+                    (todt("2020-01-01 02:00:00"), 230),
+                    (todt("2020-01-01 03:00:00"), 340),
                 ]
             }
             meter = db.getMeterData(
-                fromDate="2020-01-01 01:00:00",
-                toDate="2020-01-01 03:00:00"
+                fromDate=todt("2020-01-01 01:00:00"),
+                toDate=todt("2020-01-01 03:00:00")
             )
             self.assertCountEqual(meter, dataFromAndTo)
 
@@ -169,12 +170,12 @@ class PlantmonitorDB_Test(unittest.TestCase):
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
             data = {
                 self.mainFacility(): [
-                    ("2020-01-01 00:00:00", 10),
-                    ("2020-01-01 01:00:00", 20),
+                    (todt("2020-01-01 00:00:00"), 10),
+                    (todt("2020-01-01 01:00:00"), 20),
                 ],
                 self.secondaryFacility(): [
-                    ("2020-01-01 00:00:00", 210),
-                    ("2020-01-01 03:00:00", 340),
+                    (todt("2020-01-01 00:00:00"), 210),
+                    (todt("2020-01-01 03:00:00"), 340),
                 ],
             }
             db.addMeterData(data)
@@ -211,8 +212,8 @@ class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
     def __test_write_meter(self):
         db = self.createPlantmonitorDB()
         facility = self.mainFacility()
-        expected = {facility: [("2020-01-01 00:00:00", 10)]}
-        result = db.addMeterData(facility, [("2020-01-01 00:00:00", 10)])
+        expected = {facility: [(todt("2020-01-01 00:00:00"), 10)]}
+        result = db.addMeterData(facility, [(todt("2020-01-01 00:00:00"), 10)])
         self.assertEqual(result, expected)
         allMeterData = db.getMeterData()
         self.assertEqual(allMeterData.get(facility, None), expected[facility])
