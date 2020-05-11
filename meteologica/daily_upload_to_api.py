@@ -3,13 +3,13 @@
 from yamlns import namespace as ns
 import datetime as dt
 
-from .plantmonitor_db import (
+from plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBError,
     todt,
 )
 
-from .meteologica_api_utils import (
+from meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )
@@ -22,8 +22,8 @@ import sys
 def parseArguments():
     # TODO parse arguments into a ns
     args = ns()
-    if len(sys.argv) == 2:
-        args[sys.argv[0]] = sys.argv[1]
+    if len(sys.argv) == 3:
+        args[sys.argv[1]] = sys.argv[2]
         return args
     else:
         return args
@@ -41,10 +41,14 @@ def upload_meter_data(configdb):
 
     start = time.perf_counter()
 
-    with MeteologicaApi(params) as api:
+    with MeteologicaApi(**params) as api:
         with PlantmonitorDB(configdb) as db:
 
             facilities = db.getFacilities()
+
+            if not facilities:
+                print(f"No facilities in db {configdb['psql_db']} at {configdb['psql_host']}:{configdb['psql_port']}")
+                return
 
             for facility in facilities:
                 lastUpload = api.lastDateUploaded(facility)
@@ -64,7 +68,8 @@ def upload_meter_data(configdb):
                 # conversion from energy to power
                 # (Not necessary for hourly values)
 
-                api.uploadProduction(facility, meterData[facility])
+                print(f"data from db: {meterData}")
+                #api.uploadProduction(facility, meterData[facility])
 
     elapsed = time.perf_counter() - start
     print(f'Total elapsed time {elapsed:0.4}')
@@ -73,7 +78,7 @@ def upload_meter_data(configdb):
 def main():
     args = parseArguments()
 
-    configfile = args.get('config', 'conf/config_meteologica.yaml')
+    configfile = args.get('--config', 'conf/config_meteologica.yaml')
     configdb = ns.load(configfile)
 
     configdb.update(args)
