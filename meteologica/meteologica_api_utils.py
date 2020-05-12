@@ -6,7 +6,7 @@ import stat
 import pytz
 from pathlib import Path
 
-from datetime import datetime as dt
+from datetime import datetime
 from datetime import timedelta
 
 #from django.conf import settings
@@ -57,8 +57,8 @@ class MeteologicaApi_Mock(object):
         self._checkFacility(facility)
         facility_data = self._data.setdefault(facility, [])
         facility_data += data
-    
-    def downloadProduction(self, facility, fromDate, toDate, variableId='prod', 
+
+    def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
 
         facility_data = self._data.get(facility, [])
@@ -88,7 +88,7 @@ class MeteologicaApi:
         if not self._session:
             return None
         return  self._session.header['sessionToken']
-    
+
     def __enter__(self):
         self.login()
         return self
@@ -100,7 +100,7 @@ class MeteologicaApi:
     def login(self):
         self._client = Client(self._config.wsdl)
         self._session = None
-        
+
         response = self._client.service.login(dict(
             username = self._config.username,
             password = self._config.password,
@@ -109,7 +109,7 @@ class MeteologicaApi:
         if response.errorCode != 'OK':
             raise MeteologicaApiError(response.errorCode)
         self._session = response
-    
+
     def logout(self):
         response = self._client.service.logout(self._session)
         if self._showResponses(): print("joete2", response)
@@ -141,8 +141,8 @@ class MeteologicaApi:
             unit = 'kW',
             observationData = dict(item=[
                 dict(
-                    startTime = startTime,
-                    data = value,
+                    startTime=startTime,
+                    data=str(value),
                 )
                 for startTime, value in data
             ]),
@@ -150,7 +150,7 @@ class MeteologicaApi:
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
             raise MeteologicaApiError(response.errorCode)
-        
+
         # TODO session renewal not tested yet
         self._session.header['sessionToken'] = response.header['sessionToken']
 
@@ -161,16 +161,16 @@ class MeteologicaApi:
 
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
-        return lastDates.get(facility,None)
-    
+        return lastDates.get(facility, "2010-12-01 00:00:00")
+
     @withinSession
-    def downloadProduction(self, facility, fromDate, toDate, variableId='prod', 
+    def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
         if not forecastDate:
             forecastDate=fromDate
         forecastRequest = {
-            'header': self._session.header, 
-            'facilityId': facility, 
+            'header': self._session.header,
+            'facilityId': facility,
             'variableId': variableId,
             'predictorId': predictorId,
             'granularity': granularity,
@@ -179,7 +179,7 @@ class MeteologicaApi:
             'toDate': toDate
         }
         response = self._client.service.getForecast(forecastRequest)
-        
+
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
             raise MeteologicaApiError(response.errorCode)
@@ -191,9 +191,9 @@ class MeteologicaApi:
         resultForecast = [ (self.unixToUtc(entry[0]), float(entry[2])) for entry in forecastDataDict]
 
         return resultForecast
-    
+
     def unixToUtc(self, unix_ts):
-        return str(dt.utcfromtimestamp(int(unix_ts)))
+        return str(datetime.utcfromtimestamp(int(unix_ts)))
 
 '''
 class MeteologicaApiUtils(object):
@@ -219,7 +219,7 @@ class MeteologicaApiUtils(object):
                 local_dt = local.localize(naive, is_dst=None)
                 utc_dt = local_dt.astimezone(pytz.utc)
                 startTime_val = utc_dt.strftime ("%Y-%m-%d %H:%M:%S")
-                try: 
+                try:
                     logger.info("Uploading production curves to Meteologica API")
                     observationData = {
                                         'item': [
@@ -243,7 +243,7 @@ class MeteologicaApiUtils(object):
                     logger.info("Response from API: %s", resp_data)
                     if resp_data.header['sessionToken'] != self._api_session.header['sessionToken']:
                         self._api_session.header['sessionToken'] = resp_data.header['sessionToken']
-                
+
                 except Exception as e:
                         msg = "An uncontroled error happened during uploading "\
                             "process, reason: %s"

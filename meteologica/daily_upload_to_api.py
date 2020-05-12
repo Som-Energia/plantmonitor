@@ -58,7 +58,7 @@ def upload_meter_data(configdb):
                 if not lastUpload:
                     meterData = db.getMeterData(facility)
                 else:
-                    toDate = dt.now()
+                    toDate = dt.datetime.now()
                     fromDate = lastUploadDT
                     meterData = db.getMeterData(facility, fromDate, toDate)
 
@@ -68,8 +68,7 @@ def upload_meter_data(configdb):
                 # conversion from energy to power
                 # (Not necessary for hourly values)
 
-                print(f"data from db: {meterData}")
-                #api.uploadProduction(facility, meterData[facility])
+                api.uploadProduction(facility, meterData[facility])
 
     elapsed = time.perf_counter() - start
     print(f'Total elapsed time {elapsed:0.4}')

@@ -13,6 +13,7 @@ import copy
 def todt(datetimestr):
     return datetime.strptime(datetimestr, '%Y-%m-%d %H:%M:%S')
 
+
 class PlantmonitorDBError(Exception):
     pass
 
