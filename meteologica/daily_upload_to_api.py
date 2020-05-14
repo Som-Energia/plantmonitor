@@ -3,13 +3,13 @@
 from yamlns import namespace as ns
 import datetime as dt
 
-from plantmonitor_db import (
+from meteologica.plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBError,
     todt,
 )
 
-from meteologica_api_utils import (
+from meteologica.meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )
@@ -57,7 +57,9 @@ def upload_meter_data(configdb, test_env=True):
 
             for facility in facilities:
                 lastUpload = api.lastDateUploaded(facility)
-                lastUploadDT = todt(lastUpload)
+                lastUploadDT = None
+                if lastUpload:
+                    lastUploadDT = todt(lastUpload)
 
                 meterData = {}
                 if not lastUpload:
