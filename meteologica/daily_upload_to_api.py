@@ -6,13 +6,14 @@ import datetime as dt
 from meteologica.plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBError,
-    todt,
 )
 
 from meteologica.meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )
+
+from utils import todt
 
 import time
 
