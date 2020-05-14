@@ -57,9 +57,7 @@ def upload_meter_data(configdb, test_env=True):
 
             for facility in facilities:
                 lastUpload = api.lastDateUploaded(facility)
-                lastUploadDT = None
-                if lastUpload:
-                    lastUploadDT = todt(lastUpload)
+                lastUploadDT = todt(lastUpload)
 
                 meterData = {}
                 if not lastUpload:

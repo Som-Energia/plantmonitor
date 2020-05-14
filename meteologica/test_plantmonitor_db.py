@@ -7,12 +7,13 @@ from yamlns import namespace as ns
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from .plantmonitor_db import (
+from meteologica.plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBMock,
     PlantmonitorDBError,
-    todt,
 )
+
+from meteologica.utils import todt
 
 
 class PlantmonitorDB_Test(unittest.TestCase):

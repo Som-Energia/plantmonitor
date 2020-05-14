@@ -17,6 +17,9 @@ from requests import Session
 from yamlns import namespace as ns
 import decorator
 
+from meteologica.utils import todt
+
+
 #logger = logging.getLogger(__name__)
 
 class MeteologicaApiError(Exception): pass
@@ -156,12 +159,14 @@ class MeteologicaApi:
 
         lastDateOfCurrentBatch = max(date for date, measure in data)
         lastDates = ns.load(self._config.lastDateFile)
-        lastDates[facility] = max(lastDates.get(facility,''), lastDateOfCurrentBatch)
+        lastDates[facility] = max(lastDates.get(facility,''), str(lastDateOfCurrentBatch))
         lastDates.dump(self._config.lastDateFile)
 
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
-        return lastDates.get(facility, None)
+        lastDate = lastDates.get(facility, None)
+        return todt(lastDate)
+
 
     @withinSession
     def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
@@ -188,11 +193,14 @@ class MeteologicaApi:
 
         forecastData = response['forecastData']
         forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
-        resultForecast = [ (self.unixToUtc(entry[0]), float(entry[2])) for entry in forecastDataDict]
+        resultForecast = [ (self.unixStrtoDT(entry[0]), float(entry[2])) for entry in forecastDataDict]
 
         return resultForecast
 
-    def unixToUtc(self, unix_ts):
+    def unixStrtoDT(self, unix_ts_str):
+        return datetime.utcfromtimestamp(int(unix_ts_str))
+
+    def unixToUtcStr(self, unix_ts):
         return str(datetime.utcfromtimestamp(int(unix_ts)))
 
 '''

@@ -1,38 +1,41 @@
-from .meteologica_api_utils import (
+from meteologica.meteologica_api_utils import (
     MeteologicaApi_Mock,
     MeteologicaApi,
     MeteologicaApiError,
 )
+
+from meteologica.utils import todt
+
 #from django.conf import settings
 from yamlns import namespace as ns
 from pathlib import Path
 from unittest.mock import patch
 import unittest
 
-# import logging.config
+import logging.config
 
-# logging.config.dictConfig({
-#     'version': 1,
-#     'formatters': {
-#         'verbose': {
-#             'format': '%(name)s: %(message)s'
-#         }
-#     },
-#     'handlers': {
-#         'console': {
-#             'level': 'INFO',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'verbose',
-#         },
-#     },
-#     'loggers': {
-#         'zeep.transports': {
-#             'level': 'INFO',
-#             'propagate': True,
-#             'handlers': ['console'],
-#         },
-#     }
-# })
+logging.config.dictConfig({
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(name)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'zeep.transports': {
+            'level': 'INFO',
+            'propagate': True,
+            'handlers': ['console'],
+        },
+    }
+})
 
 
 class MeteologicaApiMock_Test(unittest.TestCase):
@@ -50,11 +53,11 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         facility = self.mainFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
         self.assertEqual(
             api.lastDateUploaded(facility),
-            "2040-01-01 00:00:00"
+            todt("2040-01-01 00:00:00")
         )
 
     def test_uploadProduction_noData(self):
@@ -69,33 +72,33 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         facility = self.mainFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
-            ("2040-01-02 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
+            (todt("2040-01-02 00:00:00"), 10),
         ])
         self.assertEqual(
             api.lastDateUploaded(facility),
-            "2040-01-02 00:00:00"
+            todt("2040-01-02 00:00:00")
         )
 
     def test_uploadProduction_calledTwice(self):
         facility = self.mainFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-02 00:00:00", 10),
+            (todt("2040-01-02 00:00:00"), 10),
         ])
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
         self.assertEqual(
             api.lastDateUploaded(facility),
-            "2040-01-02 00:00:00"
+            todt("2040-01-02 00:00:00"),
         )
 
     def test_uploadProduction_doesNotChangeOtherFacility(self):
         facility = self.mainFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
         self.assertEqual(
             api.lastDateUploaded("OtherPlant"),
@@ -107,21 +110,21 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         otherFacility = self.otherFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-02 00:00:00", 10),
+            (todt("2040-01-02 00:00:00"), 10),
         ])
         api.uploadProduction(otherFacility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
         self.assertEqual(
             api.lastDateUploaded(otherFacility),
-            "2040-01-01 00:00:00"
+            todt("2040-01-01 00:00:00")
         )
 
     def test_uploadProduction_wrongFacility(self):
         api = self.createApi()
         with self.assertRaises(MeteologicaApiError) as ctx:
             api.uploadProduction("WrongPlant", [
-                ("2040-01-01 00:00:00", 10),
+                (todt("2040-01-01 00:00:00"), 10),
             ])
         self.assertEqual(type(u'')(ctx.exception), "INVALID_FACILITY_ID")
         self.assertEqual(api.lastDateUploaded("WrongPlant"), None)
@@ -147,25 +150,25 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         login = api.login('alberto','1234')
         facility = self.mainFacility()
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
   
     def test_dateDownloadProduction(self):
         api = self.createApi()
         facility = self.mainFacility()
         api.uploadProduction(facility, [
-            ("2020-01-01 00:00:00", 10),
+            (todt("2020-01-01 00:00:00"), 10),
         ])
         result = api.downloadProduction(
-                    facility, 
-                    "2020-01-01 00:00:00",
-                    "2020-01-01 00:00:00"
+                    facility,
+                    todt("2020-01-01 00:00:00"),
+                    todt("2020-01-01 00:00:00"),
                 )
 
         #expected [("2020-01-01 00:00:00", _)] since we don't know meteologica's algorithm
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 2)
-        self.assertEqual(result[0][0], "2020-01-01 00:00:00")
+        self.assertEqual(result[0][0], todt("2020-01-01 00:00:00"))
 
     def test_getFacilities(self):
         pass
@@ -210,27 +213,24 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         facility = self.mainFacility()
         api = self.createApi()
         api.uploadProduction(facility, [
-            ("2040-01-01 00:00:00", 10),
+            (todt("2040-01-01 00:00:00"), 10),
         ])
         api2 = self.createApi()
         self.assertEqual(
             api2.lastDateUploaded(facility),
-            "2040-01-01 00:00:00"
+            todt("2040-01-01 00:00:00")
         )
 
     def test_session_unitializedOnConstruction(self):
-        facility = self.mainFacility()
         api = self.createApi()
         self.assertFalse(api.session())
     
     def test_session_withinContextIsTrue(self):
-        facility = self.mainFacility()
         api = self.createApi()
         with api:
             self.assertTrue(api.session()) 
 
     def test_session_outsideContextLogout(self):
-        facility = self.mainFacility()
         api = self.createApi()
         with api:
             pass
@@ -242,7 +242,7 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         with api:
             session = api.session()
             api.uploadProduction(facility, [
-                ("2040-01-01 00:00:00", 10),
+                (todt("2040-01-01 00:00:00"), 10),
             ])
             self.assertEqual(session, api.session())
     
@@ -262,20 +262,20 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         api = self.createApi()
         with api:
             api.uploadProduction(facility, [
-                ("2040-02-01 00:00:00", 10),
+                (todt("2040-02-01 00:00:00"), 10),
             ])
             result = api.getLastApiDate()
-        self.assertEqual(result, "2040-02-01 00:00:00")
+        self.assertEqual(result, todt("2040-02-01 00:00:00"))
 
     def __test_getLastApiDateForFacility(self):
         facility = self.mainFacility()
         api = self.createApi()
         with api:
             api.uploadProduction(facility, [
-                ("2040-02-01 00:00:00", 10),
+                (todt("2040-02-01 00:00:00"), 10),
             ])
             result = api.getLastApiDate(facility)
-        self.assertEqual(result, "2040-02-01 00:00:00")
+        self.assertEqual(result, todt("2040-02-01 00:00:00"))
 
     def __test_getLastApiDateForOlderFacility(self):
         facility = self.mainFacility()
@@ -283,13 +283,13 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         api = self.createApi()
         with api:
             api.uploadProduction(facility, [
-                ("2040-01-02 00:00:00", 10),
+                (todt("2040-01-02 00:00:00"), 10),
             ])
             api.uploadProduction(otherfacility, [
-                ("2040-01-03 00:00:00", 10),
+                (todt("2040-01-03 00:00:00"), 10),
             ])
             result = api.getLastApiDate(facility)
-        self.assertEqual(result, "2040-01-02 00:00:00")
+        self.assertEqual(result, todt("2040-01-02 00:00:00"))
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
