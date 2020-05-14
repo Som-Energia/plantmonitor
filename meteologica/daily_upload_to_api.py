@@ -13,7 +13,7 @@ from meteologica.meteologica_api_utils import (
     MeteologicaApiError,
 )
 
-from utils import todt
+from meteologica.utils import todt
 
 import time
 
