@@ -14,6 +14,8 @@ from .meters import (
 )
 from meteologica.client import forecast
 
+from meteologica.daily_upload_to_api import upload_meter_data
+
 import sys
 import logging
 import time
@@ -98,3 +100,7 @@ def task_counter_erp():
 
 def task_get_meteologica_forecast():
     forecast()
+
+def task_daily_upload_to_api_meteologica(test_env=True):
+    configdb = ns.load('conf/config_meteologica.yaml')
+    upload_meter_data(configdb, test_env=test_env)

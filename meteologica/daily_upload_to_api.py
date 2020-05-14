@@ -29,10 +29,15 @@ def parseArguments():
         return args
 
 
-def upload_meter_data(configdb):
+def upload_meter_data(configdb, test_env=True):
+
+    if test_env:
+        target_wsdl = configdb['meteo_test_url']
+    else:
+        target_wsdl = configdb['meteo_url']
 
     params = dict(
-        wsdl=configdb['meteo_test_url'],
+        wsdl=target_wsdl,
         username=configdb['meteo_user'],
         password=configdb['meteo_password'],
         lastDateFile='lastDateFile.yaml',

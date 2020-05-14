@@ -81,6 +81,7 @@ class MeteologicaApi:
         self._client = None
         self._session = None
         lastDates = Path(self._config.lastDateFile)
+        self._somenergiaFoundation = "2010-12-01 00:00:00"
         if not lastDates.exists():
             lastDates.write_text("{}")
 
@@ -161,7 +162,7 @@ class MeteologicaApi:
 
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
-        return lastDates.get(facility, "2010-12-01 00:00:00")
+        return lastDates.get(facility, self._somenergiaFoundation)
 
     @withinSession
     def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
