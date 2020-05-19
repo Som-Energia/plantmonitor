@@ -178,6 +178,27 @@ class PlantmonitorDB:
                     meter character varying(200));
                     """
                 )
+                cursor.execute(
+                    """
+                    CREATE TABLE if not exists forecastHead\
+                        (id SERIAL NOT NULL, errorCode VARCHAR(50), facilityId VARCHAR(50), \
+                        variableId VARCHAR(50), predictorId VARCHAR(20), forecastDate TIMESTAMPTZ, \
+                        granularity INTEGER, PRIMARY KEY(id));
+                    """
+                )
+                cursor.execute(
+                    """
+                    CREATE TABLE forecastData(idForecastHead SERIAL REFERENCES forecastHead(id),\
+                        time TIMESTAMPTZ, percentil10 INTEGER, percentil50 INTEGER, \
+                        percentil90 INTEGER, PRIMARY KEY(idForecastHead,time));
+                    """
+                )
+                cursor.execute(
+                    """
+                    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+                    SELECT create_hypertable('forecastData', 'time');
+                    """
+                )
 
     @staticmethod
     def dropDatabase(configdb):
