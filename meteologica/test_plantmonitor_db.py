@@ -191,6 +191,72 @@ class PlantmonitorDB_Test(unittest.TestCase):
             facilities = db.getFacilities()
 
             self.assertCountEqual([self.mainFacility(), self.secondaryFacility()], facilities)
+    
+    def test_addForecast(self):
+        with self.createPlantmonitorDB() as db:
+            data = {
+                self.mainFacility(): [
+                    (todt("2020-01-02 00:00:00"), 10),
+                    (todt("2020-01-02 01:00:00"), 20),
+                ],
+                self.secondaryFacility(): [
+                    (todt("2020-01-02 00:00:00"), 210),
+                    (todt("2020-01-02 01:00:00"), 340),
+                ],
+            }
+            forecastDate = todt("2020-01-01 00:00:00")
+            db.addForecastData(data, forecastDate)  
+            result = db.getForecastData()
+            self.assertEqual(data, result)       
+    
+    def test_addForecast_overwrite(self):
+        self.maxDiff = None
+        with self.createPlantmonitorDB() as db:
+            data = {
+                self.mainFacility(): [
+                    (todt("2020-01-02 00:00:00"), 10),
+                    (todt("2020-01-02 01:00:00"), 20),
+                ],
+            }
+            forecastDate = todt("2020-01-01 00:00:00")
+            db.addForecastData(data, forecastDate)  
+
+            data2 = {
+                self.mainFacility(): [
+                    (todt("2020-01-02 01:00:00"), 30),
+                    (todt("2020-01-02 02:00:00"), 40),
+                ],
+            }
+            forecastDate = todt("2020-01-01 00:00:00")
+            db.addForecastData(data2, forecastDate)  
+
+            dataResult =  {
+                self.mainFacility(): [
+                    (todt("2020-01-02 00:00:00"), 10),
+                    (todt("2020-01-02 01:00:00"), 30),
+                    (todt("2020-01-02 02:00:00"), 40),
+                ],
+            }
+            result = db.getForecastData()
+            self.assertEqual(dataResult, result)       
+
+    def __test_newestforecastDate_prioritized_on_overwrite(self):
+        pass
+
+    def __test_previous_facility_persisted_on_other_update(self):
+        pass
+
+    def __test_dateUnorderedForecast(self):
+        pass
+
+    def __test_forecast_without_previous_facility(self):
+        pass
+
+    def test_getLastDateDownloaded_Empty(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234') 
+            result = db.lastDateDownloaded(self.mainFacility())  
+            self.assertEqual(result, None)
 
 class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
 

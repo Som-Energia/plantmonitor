@@ -4,7 +4,7 @@ from psycopg2 import OperationalError
 import psycopg2.extras
 from datetime import datetime
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-
+from meteologica.utils import todt
 import decorator
 
 import copy
@@ -20,6 +20,7 @@ class PlantmonitorDBMock(object):
 
     def __init__(self, config):
         self._data = {}
+        self._forecastdata = {}
         self._enterdata = {}
         self._facilityMeter = set()
         self._config = config
@@ -129,6 +130,32 @@ class PlantmonitorDBMock(object):
         self._data = copy.deepcopy(data_uncommited)
         return facilityMeterData
 
+    # {facility: [(datetime, percentil50)]}
+    def addForecastData(self, data, forecastDate):
+         
+        for facility, oldforecast in self._forecastdata.items():
+            newforecast = data.get(facility, [])
+            
+            doldforecast = dict(oldforecast)
+            doldforecast.update(dict(newforecast))
+
+            self._forecastdata[facility] = list(doldforecast.items())
+
+        print(f'after update: {self._forecastdata}')
+
+        # if facility exists only in data
+        for facility, forecast in data.items(): 
+            if not facility in self._forecastdata: 
+                self._forecastdata[facility] = forecast
+
+        print(f'finally: {self._forecastdata}')
+
+
+    def getForecastData(self, facility=None):
+        return self._forecastdata
+
+    def lastDateDownloaded(self,facility):
+        return None
 
 class PlantmonitorDB:
 
@@ -340,6 +367,82 @@ class PlantmonitorDB:
             f"select facilityid, time,\
                 export_energy from sistema_contador \
             inner join facility_meter on meter = name {condition};"
+        )
+        dbData = cur.fetchall()
+
+        return self.dbToDictionary(dbData)
+
+    def lastDateDownloaded(self, facility):
+        cur = self._client.cursor()
+        cur.execute(
+            f"select time from forecastData \
+                inner join forecastHead on forecastData.idForecastHead = forecastHead.id \
+                where facilityId = '{facility}' \
+                order by time DESC limit 1;"
+        )
+        dbData = cur.fetchone()
+        print(f"fetched date downloaded: {dbData}")
+        return todt(dbData)
+
+    # records = [(datetime,percentil10,percentil50,percentil90)]
+    # records = [(datetime,percentil50)]
+    def addForecastDataFull(self, facility, forecastDate, records, headData):
+        cur = self._client.cursor()
+
+        facilityId = facility
+
+        errorCode    = headData['errorCode']
+        variableId   = headData['variableId']
+        predictorId  = headData['predictorId']
+        granularity  = headData['granularity']
+
+        fromDate = records[0][0]
+        toDate = records[-1][0]
+
+        cur.execute("INSERT INTO forecastHead(errorCode, facilityId, variableId, \
+        predictorId, forecastDate, granularity) VALUES ('{}', '{}', '{}', '{}', '{}', '{}') \
+        RETURNING id;".format(errorCode, facilityId, variableId, predictorId, forecastDate, granularity))
+        currentIdForecastHead = cur.fetchone()[0]
+
+        if errorCode == 'OK':
+            cur.execute(f"DELETE FROM forecastdata USING forecasthead WHERE forecastdata.idforecasthead = forecasthead.id AND forecasthead.facilityId = '{facilityId}' AND time BETWEEN '{fromDate}' AND '{toDate}'")
+
+            simple = False
+            if len(records[0]) == 2:
+                simple = True
+
+            #https://hakibenita.com/fast-load-data-python-postgresql
+            if simple:
+                psycopg2.extras.execute_values(cur, "INSERT INTO forecastData VALUES %s;", ((
+                    currentIdForecastHead,
+                    record[0],
+                    None,
+                    record[1],
+                    None,
+                ) for record in records), page_size=1000)
+            else:
+                psycopg2.extras.execute_values(cur, "INSERT INTO forecastData VALUES %s;", ((
+                    currentIdForecastHead,
+                    record[0],
+                    record[1],
+                    record[2],
+                    record[3],
+                ) for record in records), page_size=1000)
+
+    # {facility: [(datetime, value)]}
+    @withinContextManager
+    def addForecastData(self, data, forecastDate):
+        for facility, records in data.items():
+            headData = {'errorCode': 'OK', 'facilityId': facility, 'variableId': 'prod', 'predictorId': 'aggr', 
+            'granularity': 60}
+            self.addForecastDataFull(facility, forecastDate, records, headData)
+
+    def getForecastData(self, facility=None):
+        cur = self._client.cursor()
+        cur.execute(
+            f"select facilityid, time at time zone 'Europe/Madrid',\
+                percentil50 from forecastData \
+            inner join forecastHead on forecastData.idForecastHead = forecastHead.id;"
         )
         dbData = cur.fetchall()
 
