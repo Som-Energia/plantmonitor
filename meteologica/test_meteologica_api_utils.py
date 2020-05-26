@@ -185,6 +185,7 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
             username=configApi['meteo_user'],
             password=configApi['meteo_password'],
             lastDateFile='lastDateFile.yaml',
+            lastDateDownloadFile='lastDateDownloadFile.yaml',
             showResponses=False,
         )
         params.update(kwds)

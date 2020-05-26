@@ -1,5 +1,106 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from yamlns import namespace as ns
+import datetime as dt
+
+from meteologica.plantmonitor_db import (
+    PlantmonitorDB,
+    PlantmonitorDBError,
+)
+
+from meteologica.meteologica_api_utils import (
+    MeteologicaApi,
+    MeteologicaApiError,
+)
+
+from meteologica.utils import todt
+
+import time
+
+import sys
+
+
+def parseArguments():
+    # TODO parse arguments into a ns
+    args = ns()
+    if len(sys.argv) == 3:
+        args[sys.argv[1]] = sys.argv[2]
+        return args
+    else:
+        return args
+
+
+def download_meter_data(configdb, test_env=True):
+
+    if test_env:
+        target_wsdl = configdb['meteo_test_url']
+    else:
+        target_wsdl = configdb['meteo_url']
+
+    params = dict(
+        wsdl=target_wsdl,
+        username=configdb['meteo_user'],
+        password=configdb['meteo_password'],
+        lastDateFile='lastDateFile.yaml',
+        lastDateDownloadFile='lastDateDownloadFile.yaml',
+        showResponses=False,
+    )
+
+    start = time.perf_counter()
+
+    with MeteologicaApi(**params) as api:
+        with PlantmonitorDB(configdb) as db:
+
+            facilities = api.getFacilities()
+
+            if not facilities:
+                print(f"No facilities in api {target_wsdl}")
+                return
+
+            for facility in facilities:
+                lastDownload = db.lastDateDownloaded(facility)
+                lastDownloadDT = todt(lastDownload)
+
+                meterData = {}
+                now = dt.datetime.now()
+                toDate = now
+
+                if not lastDownload:
+                    fromDate = now - dt.timedelta(days=14)
+                else:
+                    fromDate = lastDownloadDT
+                
+                meterDataForecast = api.getForecast(facility, fromDate, toDate)
+
+                if not meterDataForecast[facility]:
+                    continue
+
+                # conversion from energy to power
+                # (Not necessary for hourly values)
+
+                db.addForecast(facility, meterDataForecast[facility])
+
+    elapsed = time.perf_counter() - start
+    print(f'Total elapsed time {elapsed:0.4}')
+
+
+def main():
+    args = parseArguments()
+
+    configfile = args.get('--config', 'conf/config.yaml')
+    configdb = ns.load(configfile)
+
+    configdb.update(args)
+
+    download_meter_data(configdb)
+
+
+if __name__ == "__main__":
+    print("Starting job")
+    main()
+    print("Job's Done, Have a Nice Day")
+
+'''
 from zeep import Client
 
 from yamlns import namespace as ns

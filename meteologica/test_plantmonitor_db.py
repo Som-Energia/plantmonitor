@@ -163,7 +163,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
                 fromDate=todt("2020-01-01 01:00:00"),
                 toDate=todt("2020-01-01 03:00:00")
             )
-            self.assertCountEqual(meter, dataFromAndTo)
+            self.assertCountEqual(meter, data)
 
     def test_getMeterDataFacility(self):
         with self.createPlantmonitorDB() as db:
@@ -205,8 +205,8 @@ class PlantmonitorDB_Test(unittest.TestCase):
                 ],
             }
             forecastDate = todt("2020-01-01 00:00:00")
-            db.addForecastData(data, forecastDate)  
-            result = db.getForecastData()
+            db.addForecast(data, forecastDate)  
+            result = db.getForecast()
             self.assertEqual(data, result)       
     
     def test_addForecast_overwrite(self):
@@ -219,7 +219,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
                 ],
             }
             forecastDate = todt("2020-01-01 00:00:00")
-            db.addForecastData(data, forecastDate)  
+            db.addForecast(data, forecastDate)  
 
             data2 = {
                 self.mainFacility(): [
@@ -228,7 +228,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
                 ],
             }
             forecastDate = todt("2020-01-01 00:00:00")
-            db.addForecastData(data2, forecastDate)  
+            db.addForecast(data2, forecastDate)  
 
             dataResult =  {
                 self.mainFacility(): [
@@ -237,7 +237,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
                     (todt("2020-01-02 02:00:00"), 40),
                 ],
             }
-            result = db.getForecastData()
+            result = db.getForecast()
             self.assertEqual(dataResult, result)       
 
     def __test_newestforecastDate_prioritized_on_overwrite(self):
@@ -254,9 +254,23 @@ class PlantmonitorDB_Test(unittest.TestCase):
 
     def test_getLastDateDownloaded_Empty(self):
         with self.createPlantmonitorDB() as db:
-            db.addFacilityMeterRelation(self.mainFacility(), '123401234') 
             result = db.lastDateDownloaded(self.mainFacility())  
             self.assertEqual(result, None)
+
+    def test_getLastDateDownloaded(self):
+        with self.createPlantmonitorDB() as db:
+            data = {
+                self.mainFacility(): [
+                    (todt("2020-01-02 00:00:00"), 10),
+                    (todt("2020-01-02 01:00:00"), 20),
+                ],
+            }
+            forecastDate = todt("2020-01-01 00:00:00")
+            db.addForecast(data, forecastDate)  
+
+            result = db.lastDateDownloaded(self.mainFacility())  
+
+            self.assertEqual(result, todt("2020-01-02 01:00:00"))
 
 class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
 
