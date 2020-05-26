@@ -295,6 +295,27 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
             ])
             result = api.getLastApiDate(facility)
         self.assertEqual(result, todt("2040-01-02 00:00:00"))
+    
+    def test_getFacilities(self):
+        self.maxDiff = None
+        api = self.createApi()
+        result = api.getAllFacilities()
+        self.assertEqual(result,[
+                'SomEnergia_Fontivsolar',
+                'SomEnergia_La_Florida',
+                'SomEnergia_Lleida_3',
+                'SomEnergia_Manlleu_Pav',
+                'SomEnergia_Manlleu_Pisc',
+                'SomEnergia_Exiom',
+                'SomEnergia_Picanya',
+                'SomEnergia_Riudarenes_BR',
+                'SomEnergia_Riudarenes_SM',
+                'SomEnergia_Riudarenes_ZE',
+                'SomEnergia_Tahal',
+                'SomEnergia_Torrefarrera',
+                'SomEnergia_Alcolea',
+                ]
+            )
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 

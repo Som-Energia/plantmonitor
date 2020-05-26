@@ -206,6 +206,22 @@ class MeteologicaApi:
     def unixToUtcStr(self, unix_ts):
         return str(datetime.utcfromtimestamp(int(unix_ts)))
 
+    @withinSession
+    def getAllFacilities(self):
+        forecastRequest = {
+            'header': self._session.header,
+        }
+        response = self._client.service.getAllFacilities(forecastRequest)
+        if self._showResponses(): print("joete",response)
+        if response.errorCode != "OK":
+            if response.errorCode == "INVALID_HEADER":
+                raise MeteologicaApiError(f"{response.errorCode}")
+            else:
+                raise MeteologicaApiError(response.errorCode)
+
+        self._session.header['sessionToken'] = response.header['sessionToken']
+        facilitiesID = [i['facilityId'] for i in response['facilityItems']['item']] 
+        return facilitiesID 
 '''
 class MeteologicaApiUtils(object):
 
