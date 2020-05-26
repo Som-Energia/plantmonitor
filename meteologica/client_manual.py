@@ -18,7 +18,7 @@ import sys
 import collections
 
 def setUp():
-
+    configdb = ns.load('../conf/config.yaml')
     conn = psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
         host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db'])
     cur = conn.cursor()
@@ -32,18 +32,28 @@ def setUp():
             cur.execute("CREATE TABLE forecastData(idForecastHead SERIAL REFERENCES forecastHead(id), time TIMESTAMPTZ, percentil10 INTEGER, percentil50 INTEGER, \
             percentil90 INTEGER, PRIMARY KEY(idForecastHead,time));")
             cur.execute("SELECT create_hypertable('forecastData', 'time');")
+            cur.execute(
+                    """
+                    CREATE TABLE facility_meter (id serial primary key,
+                    facilityid character varying(200),
+                    meter character varying(200));
+                    """
+                )
 
     return
 
 def tearDown():
     # Connexió postgresql
+    configdb = ns.load('../conf/config.yaml')
     with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
             host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
         with conn.cursor() as cur:
-            cur.execute("DROP TABLE forecastData;")
-            cur.execute("DROP TABLE forecastHead;")
+            #cur.execute("DROP TABLE forecastData;")
+            #cur.execute("DROP TABLE forecastHead;")
+            cur.execute("DROP TABLE facility_meter;")
 
 def clearDb():
+    configdb = ns.load('../conf/config.yaml')
     with psycopg2.connect(user = configdb['psql_user'], password = configdb['psql_password'],
             host = configdb['psql_host'], port = configdb['psql_port'], database = configdb['psql_db']) as conn:
         with conn.cursor() as cur:
@@ -69,7 +79,7 @@ def unixToISOtz(unix_ts):
 
 def forecast():
 
-    configdb = ns.load('config.yaml')
+    configdb = ns.load('../conf/config.yaml')
 
     timeDelta = configdb['time_delta']
     username = configdb['psql_user']
@@ -99,10 +109,10 @@ def forecast():
     predictorId = 'aggregated'
     granularity = '60'
     utcnow = datetime.utcnow()
-    forecastDate = '2020-04-14T00:00:00.0000+02:00' #addtz(utcnow)
+    forecastDate = '2020-05-05T00:00:00.0000+02:00' #addtz(utcnow)
     fromDate = forecastDate
     utcthen = utcnow + timedelta(days=30)
-    toDate = '2020-04-17T00:00:00.0000+02:00' #addtz(utcthen)
+    toDate = '2020-04-19T00:00:00.0000+02:00' #addtz(utcthen)
 
     #forecastRequest = {'header': head, 'facilityId': 'SomEnergia_Alcolea', 'variableId': variableId, 'predictorId': predictorId, 'forecastDate': forecastDate, 'fromDate': fromDate, 'toDate': toDate}
 
@@ -159,7 +169,9 @@ def forecast():
 
 def main():
     args = parseArguments()
-    forecast()
+    #tearDown()
+    #clearDb()
+    setUp()
 
 
 if __name__ == "__main__":
