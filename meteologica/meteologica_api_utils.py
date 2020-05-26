@@ -166,11 +166,11 @@ class MeteologicaApi:
         lastDates = ns.load(self._config.lastDateFile)
         lastDate = lastDates.get(facility, None)
         return todt(lastDate)
-
-
+    
     @withinSession
-    def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
+    def getForecast(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
+        print(facility)
         if not forecastDate:
             forecastDate=fromDate
         forecastRequest = {
@@ -187,7 +187,10 @@ class MeteologicaApi:
 
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
-            raise MeteologicaApiError(response.errorCode)
+            if response.errorCode == "INVALID_FACILITY_ID":
+                raise MeteologicaApiError(f"{response.errorCode} -> {facility}")
+            else:
+                raise MeteologicaApiError(response.errorCode)
 
         self._session.header['sessionToken'] = response.header['sessionToken']
 

@@ -131,7 +131,7 @@ class PlantmonitorDBMock(object):
         return facilityMeterData
 
     # {facility: [(datetime, percentil50)]}
-    def addForecastData(self, data, forecastDate):
+    def addForecast(self, data, forecastDate):
          
         for facility, oldforecast in self._forecastdata.items():
             newforecast = data.get(facility, [])
@@ -141,21 +141,19 @@ class PlantmonitorDBMock(object):
 
             self._forecastdata[facility] = list(doldforecast.items())
 
-        print(f'after update: {self._forecastdata}')
-
         # if facility exists only in data
         for facility, forecast in data.items(): 
             if not facility in self._forecastdata: 
                 self._forecastdata[facility] = forecast
 
-        print(f'finally: {self._forecastdata}')
-
-
-    def getForecastData(self, facility=None):
+    def getForecast(self, facility=None):
         return self._forecastdata
 
     def lastDateDownloaded(self,facility):
-        return None
+        records  = self._forecastdata.get(facility, None)
+        if not records:
+            return None
+        return records[-1][0]
 
 class PlantmonitorDB:
 
@@ -375,18 +373,19 @@ class PlantmonitorDB:
     def lastDateDownloaded(self, facility):
         cur = self._client.cursor()
         cur.execute(
-            f"select time from forecastData \
+            f"select time at time zone 'Europe/Madrid' from forecastData \
                 inner join forecastHead on forecastData.idForecastHead = forecastHead.id \
                 where facilityId = '{facility}' \
                 order by time DESC limit 1;"
         )
         dbData = cur.fetchone()
-        print(f"fetched date downloaded: {dbData}")
-        return todt(dbData)
+        if not dbData:
+            return None
+        return dbData[0]
 
     # records = [(datetime,percentil10,percentil50,percentil90)]
     # records = [(datetime,percentil50)]
-    def addForecastDataFull(self, facility, forecastDate, records, headData):
+    def addForecastFull(self, facility, forecastDate, records, headData):
         cur = self._client.cursor()
 
         facilityId = facility
@@ -431,13 +430,13 @@ class PlantmonitorDB:
 
     # {facility: [(datetime, value)]}
     @withinContextManager
-    def addForecastData(self, data, forecastDate):
+    def addForecast(self, data, forecastDate):
         for facility, records in data.items():
             headData = {'errorCode': 'OK', 'facilityId': facility, 'variableId': 'prod', 'predictorId': 'aggr', 
             'granularity': 60}
-            self.addForecastDataFull(facility, forecastDate, records, headData)
+            self.addForecastFull(facility, forecastDate, records, headData)
 
-    def getForecastData(self, facility=None):
+    def getForecast(self, facility=None):
         cur = self._client.cursor()
         cur.execute(
             f"select facilityid, time at time zone 'Europe/Madrid',\
