@@ -430,8 +430,8 @@ class PlantmonitorDB:
 
     # {facility: [(datetime, value)]}
     @withinContextManager
-    def addForecast(self, data, forecastDate):
-        for facility, records in data.items():
+    def addForecast(self, forecastDataDict, forecastDate):
+        for facility, records in forecastDataDict.items():
             headData = {'errorCode': 'OK', 'facilityId': facility, 'variableId': 'prod', 'predictorId': 'aggr', 
             'granularity': 60}
             self.addForecastFull(facility, forecastDate, records, headData)

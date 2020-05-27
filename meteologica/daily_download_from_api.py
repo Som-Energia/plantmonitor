@@ -51,7 +51,7 @@ def download_meter_data(configdb, test_env=True):
     with MeteologicaApi(**params) as api:
         with PlantmonitorDB(configdb) as db:
 
-            facilities = api.getFacilities()
+            facilities = api.getAllFacilities()
 
             if not facilities:
                 print(f"No facilities in api {target_wsdl}")
@@ -59,26 +59,28 @@ def download_meter_data(configdb, test_env=True):
 
             for facility in facilities:
                 lastDownload = db.lastDateDownloaded(facility)
-                lastDownloadDT = todt(lastDownload)
 
-                meterData = {}
                 now = dt.datetime.now()
                 toDate = now
 
                 if not lastDownload:
                     fromDate = now - dt.timedelta(days=14)
+                elif now - lastDownload < dt.timedelta(hours=1):
+                    print(f"{facility} already up to date")
+                    continue
                 else:
-                    fromDate = lastDownloadDT
+                    fromDate = lastDownload
                 
                 meterDataForecast = api.getForecast(facility, fromDate, toDate)
 
-                if not meterDataForecast[facility]:
+                if not meterDataForecast:
                     continue
 
                 # conversion from energy to power
                 # (Not necessary for hourly values)
-
-                db.addForecast(facility, meterDataForecast[facility])
+                forecastDict = {facility: meterDataForecast}
+                forecastDate = now
+                db.addForecast(forecastDict, forecastDate)
 
     elapsed = time.perf_counter() - start
     print(f'Total elapsed time {elapsed:0.4}')
