@@ -15,6 +15,7 @@ from .meters import (
 from meteologica.client import forecast
 
 from meteologica.daily_upload_to_api import upload_meter_data
+from meteologica.daily_download_from_api import download_meter_data
 
 import sys
 import logging
@@ -104,3 +105,7 @@ def task_get_meteologica_forecast():
 def task_daily_upload_to_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
     upload_meter_data(configdb, test_env=test_env)
+
+def task_daily_download_to_api_meteologica(test_env=True):
+    configdb = ns.load('conf/config_meteologica.yaml')
+    download_meter_data(configdb, test_env=test_env)

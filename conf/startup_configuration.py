@@ -6,7 +6,7 @@ from plantmonitor.task import task
 from plantmonitor.task import task_counter_erp
 from plantmonitor.task import task_get_meteologica_forecast
 from plantmonitor.task import task_daily_upload_to_api_meteologica
-
+from plantmonitor.task import task_daily_download_to_api_meteologica
 def build_app():
     try:
 
@@ -25,5 +25,5 @@ def build_app():
 def add_jobs(app):
     logging.debug("Adding task")
     app.add_job(task_counter_erp, 'interval', minutes=20)
-    app.add_job(task_get_meteologica_forecast, 'cron', hour=19, minute=5)
     app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':True}, hour=18, minute=5)
+    app.add_job(task_daily_download_to_api_meteologica, 'cron', kwargs={'test_env':True}, hour=19, minute=5)
