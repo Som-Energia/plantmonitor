@@ -1,2 +1,4 @@
 #!/bin/bash
-sudo su postgres -c "psql -d plantmonitor -f $1"
+viewname=${1%.sql}
+filename=$viewname.sql
+sudo su postgres -c "psql -d plantmonitor -f $filename"

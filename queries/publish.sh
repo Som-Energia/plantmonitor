@@ -1,7 +1,8 @@
 #!/bin/bash
 viewname=${1%.sql}
-echo La vista seria \"$viewname\"
-VIEWSQL=$(cat $1)
+filename=$viewname.sql
+echo Publishing \"$viewname\"
+VIEWSQL=$(cat $filename)
 
 sudo su postgres -c "psql -d plantmonitor" <<EOF
 DROP VIEW IF EXISTS public.$viewname;
