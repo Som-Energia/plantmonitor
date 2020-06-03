@@ -1,4 +1,9 @@
 #!/bin/bash
+# Publishes the sql file as view in the database
+
+# Should define environs PGHOST PGPORT PGUSER PGDATABASE PGOPTIONS
+[ -e dbconfig.sh ] && source dbconfig.sh
+
 viewname=${1%.sql}
 filename=$viewname.sql
 echo Publishing \"$viewname\"
