@@ -12,12 +12,12 @@ from .meters import (
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
 )
-from meteologica.client import forecast
 
 from meteologica.daily_upload_to_api import upload_meter_data
 from meteologica.daily_download_from_api import download_meter_data
 
 import sys
+import psycopg2
 import logging
 import time
 import datetime
@@ -47,6 +47,23 @@ def publish_influx(metrics,flux_client):
     flux_client.write_points([metrics] )
     logging.info("[INFO] Sent to InfluxDB")
 
+def publish_timescale(metrics,db):
+    with psycopg2.connect(
+            user=db['user'], password=db['password'],
+            host=db['host'], port=db['port'], database=db['database']
+        ) as conn:
+        with conn.cursor() as cur:
+            measurement    = metrics['measurement']
+            inverter_name  = metrics['tags']['inverter_name']
+            location       = metrics['tags']['location']
+            query_content  = ', '.join(metrics['fields'].keys())
+            values_content = ', '.join([f"'{v}'" for v in metrics['fields'].values()])
+            
+            cur.execute(
+                f"INSERT INTO {measurement}(time, inverter_name, location, {query_content}) \
+                VALUES (timezone('utc',NOW()), '{inverter_name}', '{location}', {values_content});"
+            )
+
 def task():
     try:
 
@@ -56,11 +73,11 @@ def task():
             logging.error('Error loadinf yaml definition file...')
             sys.exit(-1)
 
-        flux_client = client_db(plant.db)
-
         result = plant.get_registers()
 
         plant_name = plant.name
+
+        flux_client = client_db(plant.db)
 
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name
@@ -82,7 +99,9 @@ def task():
                 metrics['fields'] = inverter_registers
 
                 publish_influx(metrics,flux_client)
-
+    
+        publish_timescale(metrics, db=config.plant_postgres)
+    
     except Exception as err:
         logging.error("[ERROR] %s" % err)
 
