@@ -188,7 +188,7 @@ class MeteologicaApi:
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_FACILITY_ID":
-                raise MeteologicaApiError(f"{response.errorCode} -> {facility}")
+                raise MeteologicaApiError("{} -> {}".format(response.errorCode, facility))
             else:
                 raise MeteologicaApiError(response.errorCode)
 
@@ -215,7 +215,7 @@ class MeteologicaApi:
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_HEADER":
-                raise MeteologicaApiError(f"{response.errorCode}")
+                raise MeteologicaApiError("{}".format(response.errorCode))
             else:
                 raise MeteologicaApiError(response.errorCode)
 

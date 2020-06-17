@@ -153,10 +153,10 @@ def forecast():
                     ) for record in forecastDataDict), page_size=1000)
 
                 elapsed = time.perf_counter() - ministart
-                print(f"\t{facilityItem['facilityName']} {elapsed:0.4} s")
+                print("\t{} {:0.4} s".format(facilityItem['facilityName'], elapsed))
 
     elapsed = time.perf_counter() - start
-    print(f'Total elapsed time {elapsed:0.4}')
+    print('Total elapsed time {:0.4}'.format(elapsed))
 
 def main():
     args = parseArguments()

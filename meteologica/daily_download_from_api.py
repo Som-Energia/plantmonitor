@@ -54,7 +54,7 @@ def download_meter_data(configdb, test_env=True):
             facilities = api.getAllFacilities()
 
             if not facilities:
-                print(f"No facilities in api {target_wsdl}")
+                print("No facilities in api {}".format(target_wsdl))
                 return
 
             for facility in facilities:
@@ -66,7 +66,7 @@ def download_meter_data(configdb, test_env=True):
                 if not lastDownload:
                     fromDate = now - dt.timedelta(days=14)
                 elif now - lastDownload < dt.timedelta(hours=1):
-                    print(f"{facility} already up to date")
+                    print("{} already up to date".format(facility))
                     continue
                 else:
                     fromDate = lastDownload
@@ -83,7 +83,7 @@ def download_meter_data(configdb, test_env=True):
                 db.addForecast(forecastDict, forecastDate)
 
     elapsed = time.perf_counter() - start
-    print(f'Total elapsed time {elapsed:0.4}')
+    print('Total elapsed time {:0.4}'.format(elapsed))
 
 
 def main():
@@ -265,10 +265,10 @@ def forecast():
                     ) for record in forecastDataDict), page_size=1000)
 
                 elapsed = time.perf_counter() - ministart
-                print(f"\t{facilityItem['facilityName']} {elapsed:0.4} s")
+                print("\t{} {:0.4} s".format(facilityItem['facilityName'], elapsed))
 
     elapsed = time.perf_counter() - start
-    print(f'Total elapsed time {elapsed:0.4}')
+    print('Total elapsed time {:0.4}'.format(elapsed))
 
 def main():
     args = parseArguments()

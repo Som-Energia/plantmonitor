@@ -53,7 +53,7 @@ def upload_meter_data(configdb, test_env=True):
             facilities = db.getFacilities()
 
             if not facilities:
-                print(f"No facilities in db {configdb['psql_db']} at {configdb['psql_host']}:{configdb['psql_port']}")
+                print("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
                 return
 
             for facility in facilities:
@@ -77,7 +77,7 @@ def upload_meter_data(configdb, test_env=True):
                 api.uploadProduction(facility, meterData[facility])
 
     elapsed = time.perf_counter() - start
-    print(f'Total elapsed time {elapsed:0.4}')
+    print('Total elapsed time {:0.4}'.format(elapsed))
 
 
 def main():

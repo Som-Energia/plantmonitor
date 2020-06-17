@@ -84,7 +84,7 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print(f'Inserted {len(rows[alcolea])} entries for {alcolea}')
+        print('Inserted {} entries for {}'.format(len(rows[alcolea]),alcolea))
 
         db.addFacilityMeterRelation(fontivsolar, '567805678')
         rows = {
@@ -94,7 +94,7 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print(f'Inserted {len(rows[fontivsolar])} entries for {fontivsolar}')
+        print('Inserted {} entries for {}'.format(len(rows[fontivsolar]),fontivsolar))
 
         db.addFacilityMeterRelation(perpinya, '909009090')
         rows = {
@@ -104,7 +104,7 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print(f'Inserted {len(rows[perpinya])} entries for {perpinya}')
+        print('Inserted {} entries for {}'.format(len(rows[perpinya]),perpinya))
 
 
 if __name__ == "__main__":

@@ -297,8 +297,8 @@ class PlantmonitorDB:
     @withinContextManager
     def addFacilityMeterRelation(self, facility, meter):
         cur = self._client.cursor()
-        cur.execute(f"insert into facility_meter(facilityid,meter)\
-            values('{facility}','{meter}');")
+        cur.execute("insert into facility_meter(facilityid,meter)\
+            values('{}','{}');".format(facility,meter))
 
     def facilityMeterRelationExists(self, facility, meter):
         facility_meter = self.getFacilityMeter()
@@ -338,11 +338,11 @@ class PlantmonitorDB:
         for f, v in facilityMeterData.items():
             m = self.facilityToMeter(f)
             if not m:
-                raise PlantmonitorDBError(f'Facility {f} has no associated meter')
+                raise PlantmonitorDBError('Facility {} has no associated meter'.format(f))
             for t, e in v:
-                cur.execute(f"insert into sistema_contador \
+                cur.execute("insert into sistema_contador \
                     (time, name, export_energy)\
-                    VALUES('{t}', '{m}', {e});")
+                    VALUES('{}', '{}', {});".format(t,m,e))
 
     @withinContextManager
     def getMeterData(self, facility=None, fromDate=None, toDate=None):
@@ -354,17 +354,17 @@ class PlantmonitorDB:
 
         condition = ''
         if facility:
-            condition = f"where facilityid = '{facility}'"
+            condition = "where facilityid = '{}'".format(facility)
         if fromDate:
-            condition = f"where time between '{fromDate}' and '{toDate}'"
+            condition = "where time between '{}' and '{}'".format(fromDate, toDate)
         if facility and fromDate:
-            condition = f"where facilityid = '{facility}' and time between '{fromDate}' and '{toDate}'"
+            condition = "where facilityid = '{}' and time between '{}' and '{}'".format(facility,fromDate,toDate)
 
         cur = self._client.cursor()
         cur.execute(
-            f"select facilityid, time,\
+            "select facilityid, time,\
                 export_energy from sistema_contador \
-            inner join facility_meter on meter = name {condition};"
+            inner join facility_meter on meter = name {};".format(condition)
         )
         dbData = cur.fetchall()
 
@@ -373,10 +373,10 @@ class PlantmonitorDB:
     def lastDateDownloaded(self, facility):
         cur = self._client.cursor()
         cur.execute(
-            f"select time at time zone 'Europe/Madrid' from forecastData \
+            "select time at time zone 'Europe/Madrid' from forecastData \
                 inner join forecastHead on forecastData.idForecastHead = forecastHead.id \
-                where facilityId = '{facility}' \
-                order by time DESC limit 1;"
+                where facilityId = '{}' \
+                order by time DESC limit 1;".format(facility)
         )
         dbData = cur.fetchone()
         if not dbData:
@@ -404,7 +404,7 @@ class PlantmonitorDB:
         currentIdForecastHead = cur.fetchone()[0]
 
         if errorCode == 'OK':
-            cur.execute(f"DELETE FROM forecastdata USING forecasthead WHERE forecastdata.idforecasthead = forecasthead.id AND forecasthead.facilityId = '{facilityId}' AND time BETWEEN '{fromDate}' AND '{toDate}'")
+            cur.execute("DELETE FROM forecastdata USING forecasthead WHERE forecastdata.idforecasthead = forecasthead.id AND forecasthead.facilityId = '{}' AND time BETWEEN '{}' AND '{}'".format(facilityId,fromDate,toDate))
 
             simple = False
             if len(records[0]) == 2:
@@ -439,7 +439,7 @@ class PlantmonitorDB:
     def getForecast(self, facility=None):
         cur = self._client.cursor()
         cur.execute(
-            f"select facilityid, time at time zone 'Europe/Madrid',\
+            "select facilityid, time at time zone 'Europe/Madrid',\
                 percentil50 from forecastData \
             inner join forecastHead on forecastData.idForecastHead = forecastHead.id;"
         )
