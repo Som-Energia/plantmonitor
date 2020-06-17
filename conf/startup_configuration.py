@@ -8,7 +8,7 @@ from plantmonitor.task import task_get_meteologica_forecast
 from plantmonitor.task import task_daily_upload_to_api_meteologica
 from plantmonitor.task import task_daily_download_to_api_meteologica
 
-from config import env, env_active
+from conf.config import env, env_active
 
 def build_app():
     try:
