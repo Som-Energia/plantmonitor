@@ -57,11 +57,14 @@ def publish_timescale(metrics,db):
             inverter_name  = metrics['tags']['inverter_name']
             location       = metrics['tags']['location']
             query_content  = ', '.join(metrics['fields'].keys())
-            values_content = ', '.join([f"'{v}'" for v in metrics['fields'].values()])
+            values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
             
             cur.execute(
-                f"INSERT INTO {measurement}(time, inverter_name, location, {query_content}) \
-                VALUES (timezone('utc',NOW()), '{inverter_name}', '{location}', {values_content});"
+                "INSERT INTO {}(time, inverter_name, location, {}) \
+                VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
+                    measurement,query_content,
+                    inverter_name,location,values_content
+                )
             )
 
 def task():
