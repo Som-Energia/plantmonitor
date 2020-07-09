@@ -18,9 +18,12 @@ database = orm.Database()
 class Plant(database.Entity):
 
     name = Required(unicode)
+    codename = Required(unicode)
     description = Optional(str)
     meters = Set('Meter')
     inverters = Set('Inverter')
+    sensors = Set('Sensor')
+    forecastMetadatas = Set('ForecastMetadata')
 
 
 class Meter(database.Entity):
@@ -29,11 +32,27 @@ class Meter(database.Entity):
     name = Required(unicode, unique=True)
     meterRegistries = Set('MeterRegistry')
 
+    def insertRegistry(self,
+        export_energy,
+        import_energy,
+        r1,r2,r3,r4,
+        time=None
+    ):
+        MeterRegistry(
+            meter = self,
+            time = time or datetime.datetime.now(datetime.timezone.utc),
+            export_energy = export_energy,
+            import_energy = import_energy,
+            r1 = r1,
+            r2 = r2,
+            r3 = r3,
+            r4 = r4,
+            )
 
 class MeterRegistry(database.Entity):
 
     meter = Required(Meter)
-    time = Required(datetime.datetime)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     export_energy = Required(int, size=64)
     import_energy = Required(int, size=64)
     r1 = Required(int, size=64)
@@ -51,7 +70,7 @@ class Inverter(database.Entity):
 class InverterRegistry(database.Entity):
 
     inverter = Required(Inverter)
-    time = Required(datetime.datetime)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     HR1 = Optional(int, size=64)
     HR1_0 = Optional(int, size=64)
     HR2_2 = Optional(int, size=64)
@@ -75,44 +94,67 @@ class InverterRegistry(database.Entity):
     probe4value = Optional(int, size=64)
     temp_inv = Optional(int, size=64)
 
+class Sensor(database.Entity):
 
-# class SensorIrradiationRegistry(database.Entity):
+    name = Required(unicode, unique=True)
+    plant = Required(Plant)
+    description = Optional(str)
 
-#     name = Required(unicode, unique=True)
-#     plant = Required(Plant)
-#     time = Required(datetime.datetime)
-#     irradiation_w_m2 = Optional(int, size=64)
+class SensorIrradiation(Sensor):
 
+    sensorRegistries = Set('SensorIrradiationRegistry')
 
-# class ForecastVariable(database.Entity):
+class SensorTemperature(Sensor):
 
-#     name = Required(unicode, unique=True)
+    sensorRegistries = Set('SensorTemperatureRegistry')
 
+class SensorIntegratedIrradiation(Sensor):
 
-# class ForecastPredictor(database.Entity):
+    sensorRegistries = Set('IntegratedIrradiationRegistry')
 
-#     name = Required(unicode, unique=True)
+class SensorIrradiationRegistry(database.Entity):
 
+    sensor = Required(SensorIrradiation)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    irradiation_w_m2 = Optional(int, size=64)
 
-# class ForecastMetadata(database.Entity):
+class SensorTemperatureRegistry(database.Entity):
 
-#     errorcode = Optional(str)
-#     plant     = Required(Plant)
-#     variable  = Optional(ForecastVariable)
-#     predictor = Optional(ForecastPredictor)
-#     forecastdate = Optional(datetime.datetime)
-#     granularity = Optional(int)
+    sensor = Required(SensorTemperature)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    temperature_c = Optional(int, size=64)
 
+class IntegratedIrradiationRegistry(database.Entity):
 
-# class Forecast(database.Entity):
+    sensor = Required(SensorIntegratedIrradiation)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    integratedIrradiation_wh_m2 = Optional(int, size=64)
 
-#     forecastMetadata = Required(ForecastMetadata)
-#     time = Required(datetime.datetime)
-#     percentil10 = Optional(int)
-#     percentil50 = Optional(int)
-#     percentil90 = Optional(int)
+class ForecastVariable(database.Entity):
 
+    name = Required(unicode, unique=True)
+    forecastMetadatas = Set('ForecastMetadata')
 
-# class IntegratedIrradiation(database.Entity):
+class ForecastPredictor(database.Entity):
 
-#     integratedIrradiation_wh_m2 = Optional(int)
+    name = Required(unicode, unique=True)
+    forecastMetadatas = Set('ForecastMetadata')
+
+class ForecastMetadata(database.Entity):
+
+    errorcode = Optional(str)
+    plant     = Required(Plant)
+    variable  = Optional(ForecastVariable)
+    predictor = Optional(ForecastPredictor)
+    forecastdate = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    granularity = Optional(int)
+    forecasts = Set('Forecast')
+
+class Forecast(database.Entity):
+
+    forecastMetadata = Required(ForecastMetadata)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    percentil10 = Optional(int)
+    percentil50 = Optional(int)
+    percentil90 = Optional(int)
+

@@ -4,7 +4,7 @@ from importlib import import_module
 
 ENVIRONMENT_VARIABLE = 'PLANTMONITOR_MODULE_SETTINGS'
 
-os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'plantmonitor.conf.settings.devel')
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.devel')
 
 
 class ImproperlyConfigured(Exception):
@@ -33,6 +33,8 @@ class Settings(object):
             if setting.isupper():
                 setattr(self, setting, getattr(mod, setting))
 
+
+print('Using settings module environment {}'.format(os.getenv(ENVIRONMENT_VARIABLE)))
 
 config = Settings(os.getenv(ENVIRONMENT_VARIABLE))
 
