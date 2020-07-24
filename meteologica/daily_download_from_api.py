@@ -70,8 +70,11 @@ def download_meter_data(configdb, test_env=True):
                     continue
                 else:
                     fromDate = lastDownload
-                
-                meterDataForecast = api.getForecast(facility, fromDate, toDate)
+                try:
+                    meterDataForecast = api.getForecast(facility, fromDate, toDate)
+                except MeteologicaApiError as e:
+                    print("Silenced exeption: {}".format(e))
+                    meterDataForecast = None
 
                 if not meterDataForecast:
                     continue
