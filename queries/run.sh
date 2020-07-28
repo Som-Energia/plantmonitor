@@ -6,4 +6,4 @@
 
 viewname=${1%.sql}
 filename=$viewname.sql
-sudo su postgres -c "psql -d plantmonitor -f $filename"
+psql -d plantmonitor -f "$filename"

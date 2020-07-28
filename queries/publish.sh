@@ -9,7 +9,7 @@ filename=$viewname.sql
 echo Publishing \"$viewname\"
 VIEWSQL=$(cat $filename)
 
-sudo su postgres -c "psql -d plantmonitor" <<EOF
+psql -d plantmonitor <<EOF
 DROP VIEW IF EXISTS public.$viewname;
 CREATE VIEW public.$viewname AS
 $VIEWSQL
