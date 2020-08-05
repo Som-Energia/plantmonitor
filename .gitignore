@@ -70,3 +70,7 @@ target/
 
 # vim swap files
 .*sw?
+# plantmonitor excludes
+.env.*
+conf/configdb_test.yaml
+lastDateFile.yaml

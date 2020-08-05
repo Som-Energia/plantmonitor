@@ -16,7 +16,7 @@ from meteologica.meteologica_api_utils import (
 from meteologica.utils import todt
 
 import time
-
+import logging
 import sys
 
 
@@ -34,8 +34,11 @@ def download_meter_data(configdb, test_env=True):
 
     if test_env:
         target_wsdl = configdb['meteo_test_url']
+        lastDateFile = 'lastDateFile-test.yaml'
     else:
         target_wsdl = configdb['meteo_url']
+        lastDateFile = 'lastDateFile.yaml'
+
 
     params = dict(
         wsdl=target_wsdl,
@@ -48,6 +51,8 @@ def download_meter_data(configdb, test_env=True):
 
     start = time.perf_counter()
 
+    downloadStatus = {}
+
     with MeteologicaApi(**params) as api:
         with PlantmonitorDB(configdb) as db:
 
@@ -55,7 +60,7 @@ def download_meter_data(configdb, test_env=True):
 
             if not facilities:
                 print("No facilities in api {}".format(target_wsdl))
-                return
+                return downloadStatus
 
             for facility in facilities:
                 lastDownload = db.lastDateDownloaded(facility)
@@ -67,13 +72,17 @@ def download_meter_data(configdb, test_env=True):
                     fromDate = now - dt.timedelta(days=14)
                 elif now - lastDownload < dt.timedelta(hours=1):
                     print("{} already up to date".format(facility))
+                    downloadStatus[facility] = "UPTODATE"
                     continue
                 else:
                     fromDate = lastDownload
+
                 try:
                     meterDataForecast = api.getForecast(facility, fromDate, toDate)
+                    downloadStatus[facility] = "OK"
                 except MeteologicaApiError as e:
-                    print("Silenced exeption: {}".format(e))
+                    logging.warning("Silenced exception: {}".format(e))
+                    downloadStatus[facility] = str(e)
                     meterDataForecast = None
 
                 if not meterDataForecast:
@@ -87,6 +96,8 @@ def download_meter_data(configdb, test_env=True):
 
     elapsed = time.perf_counter() - start
     print('Total elapsed time {:0.4}'.format(elapsed))
+
+    return downloadStatus
 
 
 def main():

@@ -11,12 +11,13 @@ from meteologica.plantmonitor_db import (
 from meteologica.meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
+    MeteologicaFacilityIDError,
 )
 
 from meteologica.utils import todt
 
 import time
-
+import logging
 import sys
 
 
@@ -29,55 +30,68 @@ def parseArguments():
     else:
         return args
 
-
 def upload_meter_data(configdb, test_env=True):
 
     if test_env:
         target_wsdl = configdb['meteo_test_url']
+        lastDateFile = 'lastDateFile-test.yaml'
     else:
         target_wsdl = configdb['meteo_url']
+        lastDateFile = 'lastDateFile.yaml'
 
     params = dict(
         wsdl=target_wsdl,
         username=configdb['meteo_user'],
         password=configdb['meteo_password'],
-        lastDateFile='lastDateFile.yaml',
+        lastDateFile=lastDateFile,
         showResponses=False,
     )
 
+    responses = {}
     start = time.perf_counter()
 
     with MeteologicaApi(**params) as api:
         with PlantmonitorDB(configdb) as db:
 
             facilities = db.getFacilities()
+            apifacilities = api.getAllFacilities()
 
             if not facilities:
                 print("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
                 return
 
             for facility in facilities:
-                lastUpload = api.lastDateUploaded(facility)
-                lastUploadDT = todt(lastUpload)
+                if facility not in apifacilities:
+                    logging.warning("Facility {} in db is not known for the API, skipping.".format(facility))
+                    responses[facility] = "INVALID_FACILITY_ID: {}".format(facility)
+                    continue
 
+                lastUploadDT = api.lastDateUploaded(facility)
+                print(lastUploadDT)
                 meterData = {}
-                if not lastUpload:
+                if not lastUploadDT:
                     meterData = db.getMeterData(facility)
                 else:
                     toDate = dt.datetime.now()
                     fromDate = lastUploadDT
                     meterData = db.getMeterData(facility, fromDate, toDate)
 
-                if not meterData[facility]:
+                if not meterData:
+                    logging.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
+                # if not meterData[facility]:
+                if facility not in meterData:
+                    logging.warning("Missing {} in meterData {}".format(facility, meterData))
                     continue
 
                 # conversion from energy to power
                 # (Not necessary for hourly values)
-
-                api.uploadProduction(facility, meterData[facility])
+                response = api.uploadProduction(facility, meterData[facility])
+                responses[facility] = response
 
     elapsed = time.perf_counter() - start
     print('Total elapsed time {:0.4}'.format(elapsed))
+
+    return responses
 
 
 def main():

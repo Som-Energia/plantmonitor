@@ -132,18 +132,18 @@ class PlantmonitorDBMock(object):
 
     # {facility: [(datetime, percentil50)]}
     def addForecast(self, data, forecastDate):
-         
+
         for facility, oldforecast in self._forecastdata.items():
             newforecast = data.get(facility, [])
-            
+
             doldforecast = dict(oldforecast)
             doldforecast.update(dict(newforecast))
 
             self._forecastdata[facility] = list(doldforecast.items())
 
         # if facility exists only in data
-        for facility, forecast in data.items(): 
-            if not facility in self._forecastdata: 
+        for facility, forecast in data.items():
+            if not facility in self._forecastdata:
                 self._forecastdata[facility] = forecast
 
     def getForecast(self, facility=None):
@@ -271,7 +271,7 @@ class PlantmonitorDB:
             if self._client:
                 self._client.rollback()
                 self.close()
-            raise exc_type
+            return False
         else:
             if self._client:
                 self._client.commit()
@@ -432,11 +432,13 @@ class PlantmonitorDB:
     @withinContextManager
     def addForecast(self, forecastDataDict, forecastDate):
         for facility, records in forecastDataDict.items():
-            headData = {'errorCode': 'OK', 'facilityId': facility, 'variableId': 'prod', 'predictorId': 'aggr', 
+            headData = {'errorCode': 'OK', 'facilityId': facility, 'variableId': 'prod', 'predictorId': 'aggr',
             'granularity': 60}
             self.addForecastFull(facility, forecastDate, records, headData)
 
-    def getForecast(self, facility=None):
+    # TODO filter by facility, filter by date
+    # def getForecast(self, facility=None, fromDate=None, toDate=None):
+    def getForecast(self):
         cur = self._client.cursor()
         cur.execute(
             "select facilityid, time at time zone 'Europe/Madrid',\

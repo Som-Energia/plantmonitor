@@ -23,6 +23,7 @@ from meteologica.utils import todt
 #logger = logging.getLogger(__name__)
 
 class MeteologicaApiError(Exception): pass
+class MeteologicaFacilityIDError(MeteologicaApiError): pass
 
 class MeteologicaApi_Mock(object):
     def __init__(self):
@@ -70,12 +71,23 @@ class MeteologicaApi_Mock(object):
 
     def _checkFacility(self, facility):
         if facility not in self._validPlants:
-            raise MeteologicaApiError("INVALID_FACILITY_ID")
+            raise MeteologicaApiError("INVALID_FACILITY_ID: {}".format(facility))
 
     def lastDateUploaded(self, facility):
         facility_data = self._data.get(facility, [])
         if not facility_data: return None
         return max(date for date, measure in facility_data)
+
+    def dateRange(self, fromDate, toDate, dt):
+        while fromDate <= toDate:
+            yield fromDate
+            fromDate += dt
+
+    def getForecast(self, facility, fromDate, toDate, variableId='prod',
+        predictorId='aggregated', granularity='60', forecastDate=None):
+        return [
+            (date, 0) for date in self.dateRange(fromDate, toDate, timedelta(hours=1))
+        ]
 
 
 class MeteologicaApi:
@@ -152,7 +164,10 @@ class MeteologicaApi:
         ))
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
-            raise MeteologicaApiError(response.errorCode)
+            if response.errorCode == "INVALID_FACILITY_ID":
+                raise MeteologicaApiError("{}: {}".format(response.errorCode, facility))
+            else:
+                raise MeteologicaApiError(response.errorCode)
 
         # TODO session renewal not tested yet
         self._session.header['sessionToken'] = response.header['sessionToken']
@@ -162,11 +177,17 @@ class MeteologicaApi:
         lastDates[facility] = max(lastDates.get(facility,''), str(lastDateOfCurrentBatch))
         lastDates.dump(self._config.lastDateFile)
 
+        return response.errorCode
+
+    @withinSession
+    def downloadProduction(self, facility, data):
+        raise MeteologicaApiError("There's no method in the api to retrieve uploaded observations. Use the web interface.")
+
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
         lastDate = lastDates.get(facility, None)
         return todt(lastDate)
-    
+
     @withinSession
     def getForecast(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
@@ -188,7 +209,7 @@ class MeteologicaApi:
         if self._showResponses(): print("joete",response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_FACILITY_ID":
-                raise MeteologicaApiError("{} -> {}".format(response.errorCode, facility))
+                raise MeteologicaApiError("{}: {}".format(response.errorCode, facility))
             else:
                 raise MeteologicaApiError(response.errorCode)
 
@@ -220,8 +241,8 @@ class MeteologicaApi:
                 raise MeteologicaApiError(response.errorCode)
 
         self._session.header['sessionToken'] = response.header['sessionToken']
-        facilitiesID = [i['facilityId'] for i in response['facilityItems']['item']] 
-        return facilitiesID 
+        facilitiesID = [i['facilityId'] for i in response['facilityItems']['item']]
+        return facilitiesID
 '''
 class MeteologicaApiUtils(object):
 
