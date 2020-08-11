@@ -196,7 +196,6 @@ class MeteologicaApi:
     @withinSession
     def getForecast(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
-        print(facility)
         if not forecastDate:
             forecastDate=fromDate
         forecastRequest = {

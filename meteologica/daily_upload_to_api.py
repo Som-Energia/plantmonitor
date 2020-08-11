@@ -62,7 +62,7 @@ def upload_meter_data(configdb, test_env=True):
             apifacilities = api.getAllFacilities()
 
             if not facilities:
-                print("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
+                logger.info("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
                 return
 
             for facility in facilities:
@@ -72,7 +72,7 @@ def upload_meter_data(configdb, test_env=True):
                     continue
 
                 lastUploadDT = api.lastDateUploaded(facility)
-                print(lastUploadDT)
+                logger.debug("Facility {} last updated: {}".format(facility, lastUploadDT))
                 meterData = {}
                 if not lastUploadDT:
                     meterData = db.getMeterData(facility)
@@ -94,7 +94,7 @@ def upload_meter_data(configdb, test_env=True):
                 responses[facility] = response
 
     elapsed = time.perf_counter() - start
-    print('Total elapsed time {:0.4}'.format(elapsed))
+    logger.info('Total elapsed time {:0.4}'.format(elapsed))
 
     return responses
 
@@ -111,6 +111,6 @@ def main():
 
 
 if __name__ == "__main__":
-    print("Starting job")
+    logger.info("Starting job")
     main()
-    print("Job's Done, Have a Nice Day")
+    logger.info("Job's Done, Have a Nice Day")

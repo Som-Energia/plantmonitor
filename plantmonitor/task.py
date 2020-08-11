@@ -133,6 +133,6 @@ def task_daily_upload_to_api_meteologica(test_env=True):
     upload_meter_data(configdb, test_env=test_env)
 
 
-def task_daily_download_to_api_meteologica(test_env=True):
+def task_daily_download_from_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
     download_meter_data(configdb, test_env=test_env)

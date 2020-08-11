@@ -65,7 +65,7 @@ def download_meter_data(configdb, test_env=True):
             facilities = api.getAllFacilities()
 
             if not facilities:
-                print("No facilities in api {}".format(target_wsdl))
+                logger.info("No facilities in api {}".format(target_wsdl))
                 return downloadStatus
 
             for facility in facilities:
@@ -77,7 +77,7 @@ def download_meter_data(configdb, test_env=True):
                 if not lastDownload:
                     fromDate = now - dt.timedelta(days=14)
                 elif now - lastDownload < dt.timedelta(hours=1):
-                    print("{} already up to date".format(facility))
+                    logger.info("{} already up to date".format(facility))
                     downloadStatus[facility] = "UPTODATE"
                     continue
                 else:
@@ -101,7 +101,7 @@ def download_meter_data(configdb, test_env=True):
                 db.addForecast(forecastDict, forecastDate)
 
     elapsed = time.perf_counter() - start
-    print('Total elapsed time {:0.4}'.format(elapsed))
+    logger.info('Total elapsed time {:0.4}'.format(elapsed))
 
     return downloadStatus
 
@@ -118,9 +118,9 @@ def main():
 
 
 if __name__ == "__main__":
-    print("Starting job")
+    logger.info("Starting job")
     main()
-    print("Job's Done, Have a Nice Day")
+    logger.info("Job's Done, Have a Nice Day")
 
 '''
 from zeep import Client

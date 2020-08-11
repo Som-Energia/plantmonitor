@@ -152,8 +152,8 @@ class DailyDownload_Test(unittest.TestCase):
         with self.createPlantmonitorDB() as db:
             forecastDBData = db.getForecast(self.mainFacility())
 
-        print(forecastDBData)
-        print(forecasts)
+        logger.info(forecastDBData)
+        logger.info(forecasts)
 
         self.assertDictEqual(forecastDBData, forecasts[self.mainFacility()])
 

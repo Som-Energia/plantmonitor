@@ -19,6 +19,13 @@ import math
 import sys
 import random
 
+from conf.logging_configuration import LOGGING
+
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
+
 
 def datetime_range(start, end, delta):
     current = start
@@ -84,7 +91,7 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print('Inserted {} entries for {}'.format(len(rows[alcolea]),alcolea))
+        logger.debug('Inserted {} entries for {}'.format(len(rows[alcolea]),alcolea))
 
         db.addFacilityMeterRelation(fontivsolar, '567805678')
         rows = {
@@ -94,7 +101,7 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print('Inserted {} entries for {}'.format(len(rows[fontivsolar]),fontivsolar))
+        logger.debug('Inserted {} entries for {}'.format(len(rows[fontivsolar]),fontivsolar))
 
         db.addFacilityMeterRelation(perpinya, '909009090')
         rows = {
@@ -104,10 +111,10 @@ def main():
             )
         }
         db.addMeterData(rows)
-        print('Inserted {} entries for {}'.format(len(rows[perpinya]),perpinya))
+        logger.debug('Inserted {} entries for {}'.format(len(rows[perpinya]),perpinya))
 
 
 if __name__ == "__main__":
-    print("Starting job")
+    logger.debug("Starting job")
     main()
-    print("Job's Done, Have a Nice Day")
+    logger.debug("Job's Done, Have a Nice Day")

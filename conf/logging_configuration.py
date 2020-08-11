@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
             'format': '[%(asctime)s] [%(levelname)s]'
