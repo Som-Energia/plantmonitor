@@ -38,7 +38,7 @@ def add_jobs(app):
         app.add_job(task, 'cron', minute='*/5')
     elif env_active == env['plantmonitor_server']:
         app.add_job(task_counter_erp, 'interval', minutes=20)
-        app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':True}, hour=18, minute=5)
-        app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':True}, hour=19, minute=5)
+        app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=18, minute=5)
+        app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':False}, hour=19, minute=5)
     else:
         logger.error("Environment not configured")
