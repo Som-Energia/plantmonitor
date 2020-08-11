@@ -20,6 +20,7 @@ import time
 import logging
 import sys
 
+logger = logging.getLogger(__name__)
 
 def parseArguments():
     # TODO parse arguments into a ns
@@ -62,7 +63,7 @@ def upload_meter_data(configdb, test_env=True):
 
             for facility in facilities:
                 if facility not in apifacilities:
-                    logging.warning("Facility {} in db is not known for the API, skipping.".format(facility))
+                    logger.warning("Facility {} in db is not known for the API, skipping.".format(facility))
                     responses[facility] = "INVALID_FACILITY_ID: {}".format(facility)
                     continue
 
@@ -77,10 +78,10 @@ def upload_meter_data(configdb, test_env=True):
                     meterData = db.getMeterData(facility, fromDate, toDate)
 
                 if not meterData:
-                    logging.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
+                    logger.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
                 # if not meterData[facility]:
                 if facility not in meterData:
-                    logging.warning("Missing {} in meterData {}".format(facility, meterData))
+                    logger.warning("Missing {} in meterData {}".format(facility, meterData))
                     continue
 
                 # conversion from energy to power

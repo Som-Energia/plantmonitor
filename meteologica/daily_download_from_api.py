@@ -19,6 +19,7 @@ import time
 import logging
 import sys
 
+logger = logging.getLogger(__name__)
 
 def parseArguments():
     # TODO parse arguments into a ns
@@ -81,7 +82,7 @@ def download_meter_data(configdb, test_env=True):
                     meterDataForecast = api.getForecast(facility, fromDate, toDate)
                     downloadStatus[facility] = "OK"
                 except MeteologicaApiError as e:
-                    logging.warning("Silenced exception: {}".format(e))
+                    logger.warning("Silenced exception: {}".format(e))
                     downloadStatus[facility] = str(e)
                     meterDataForecast = None
 

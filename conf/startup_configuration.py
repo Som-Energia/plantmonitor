@@ -10,6 +10,8 @@ from plantmonitor.task import task_daily_download_to_api_meteologica
 
 from conf.config import env, env_active
 
+logger = logging.getLogger(__name__)
+
 def build_app():
     try:
 
@@ -19,14 +21,14 @@ def build_app():
 
     except Exception as e:
         msg = "An error ocurred building plant monitor: %s"
-        logging.exception(msg, e)
+        logger.exception(msg, e)
         raise e
 
-    logging.debug("Build app finished")
+    logger.debug("Build app finished")
     return scheduler
 
 def add_jobs(app):
-    logging.debug("Adding task")
+    logger.debug("Adding task")
     if env_active == env['in_plant']:
         app.add_job(task, 'cron', minute='*/5')
     elif env_active == env['plantmonitor_server']:
@@ -34,4 +36,4 @@ def add_jobs(app):
         app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':True}, hour=18, minute=5)
         app.add_job(task_daily_download_to_api_meteologica, 'cron', kwargs={'test_env':True}, hour=19, minute=5)
     else:
-        logging.error("Environment not configured")
+        logger.error("Environment not configured")
