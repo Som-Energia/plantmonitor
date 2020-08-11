@@ -14,37 +14,19 @@ from meteologica.plantmonitor_db import (
 
 from meteologica.utils import todt
 
+
 #from django.conf import settings
 from yamlns import namespace as ns
 from pathlib import Path
 from unittest.mock import patch
 import unittest
 import datetime as dt
+
+from conf.logging_configuration import LOGGING
+import logging
 import logging.config
-
-logging.config.dictConfig({
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(name)s: %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'zeep.transports': {
-            'level': 'INFO',
-            'propagate': True,
-            'handlers': ['console'],
-        },
-    }
-})
-
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("test")
 
 class DailyDownload_Test(unittest.TestCase):
 
@@ -141,9 +123,6 @@ class DailyDownload_Test(unittest.TestCase):
         forecast = []
         with self.createApi() as api:
             forecast = api.getForecast(self.mainFacility(), fromDate, toDate)
-
-        print("db: {}".format(forecastDB[self.mainFacility()]))
-        print("api: {}".format(forecast))
 
         self.assertListEqual(forecastDB[self.mainFacility()], forecast)
 

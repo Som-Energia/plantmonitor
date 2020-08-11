@@ -20,30 +20,11 @@ from pathlib import Path
 from unittest.mock import patch
 import unittest
 
+from conf.logging_configuration import LOGGING
+import logging
 import logging.config
-
-logging.config.dictConfig({
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(name)s: %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'zeep.transports': {
-            'level': 'INFO',
-            'propagate': True,
-            'handlers': ['console'],
-        },
-    }
-})
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("test")
 
 
 class DailyUpload_Test(unittest.TestCase):

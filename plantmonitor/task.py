@@ -18,14 +18,15 @@ from meteologica.daily_download_from_api import download_meter_data
 
 import sys
 import psycopg2
-import logging
 import time
 import datetime
 import conf.config as config
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
+from conf.logging_configuration import LOGGING
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
 
 def client_db(db):
     try:
@@ -37,7 +38,7 @@ def client_db(db):
                                 db['influxdb_database'],
                                 ssl=db['influxdb_ssl'],
                                 verify_ssl=db['influxdb_verify_ssl'])
-        logging.debug("Load config %s" % flux_client)
+        logger.debug("Load config %s" % flux_client)
     except:
         flux_client = None
 
@@ -45,7 +46,7 @@ def client_db(db):
 
 def publish_influx(metrics,flux_client):
     flux_client.write_points([metrics] )
-    logging.info("[INFO] Sent to InfluxDB")
+    logger.info("[INFO] Sent to InfluxDB")
 
 def publish_timescale(metrics,db):
     with psycopg2.connect(
@@ -58,7 +59,7 @@ def publish_timescale(metrics,db):
             location       = metrics['tags']['location']
             query_content  = ', '.join(metrics['fields'].keys())
             values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
-            
+
             cur.execute(
                 "INSERT INTO {}(time, inverter_name, location, {}) \
                 VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
@@ -73,7 +74,7 @@ def task():
         plant = ProductionPlant()
 
         if not plant.load('conf/modmap.yaml','Alcolea'):
-            logging.error('Error loadinf yaml definition file...')
+            logger.error('Error loadinf yaml definition file...')
             sys.exit(-1)
 
         result = plant.get_registers()
@@ -86,10 +87,10 @@ def task():
             inverter_name = plant.devices[i].name
             inverter_registers = result[i]['Alcolea'][0]['fields']
 
-            logging.info("**** Saving data in database ****")
-            logging.info("**** Metrics - tag - %s ****" %  inverter_name)
-            logging.info("**** Metrics - tag - location %s ****" % plant_name)
-            logging.info("**** Metrics - fields -  %s ****" % inverter_registers)
+            logger.info("**** Saving data in database ****")
+            logger.info("**** Metrics - tag - %s ****" %  inverter_name)
+            logger.info("**** Metrics - tag - location %s ****" % plant_name)
+            logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
             if flux_client is not None:
                 metrics = {}
@@ -102,11 +103,12 @@ def task():
                 metrics['fields'] = inverter_registers
 
                 publish_influx(metrics,flux_client)
-    
+
         publish_timescale(metrics, db=config.plant_postgres)
-    
+
     except Exception as err:
-        logging.error("[ERROR] %s" % err)
+        logger.error("[ERROR] %s" % err)
+
 
 def task_counter_erp():
     c = Client(**config.erppeek)
@@ -118,15 +120,18 @@ def task_counter_erp():
             transfer_meter_to_plantmonitor(c, flux_client, meter, utcnow)
 
     except Exception as err:
-        logging.error("[ERROR] %s" % err)
+        logger.error("[ERROR] %s" % err)
         raise
+
 
 def task_get_meteologica_forecast():
     forecast()
 
+
 def task_daily_upload_to_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
     upload_meter_data(configdb, test_env=test_env)
+
 
 def task_daily_download_to_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')

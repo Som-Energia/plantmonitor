@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 import stat
@@ -19,11 +18,17 @@ import decorator
 
 from meteologica.utils import todt
 
+from conf.logging_configuration import LOGGING
 
-#logger = logging.getLogger(__name__)
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
+
 
 class MeteologicaApiError(Exception): pass
 class MeteologicaFacilityIDError(MeteologicaApiError): pass
+
 
 class MeteologicaApi_Mock(object):
     def __init__(self):

@@ -17,10 +17,14 @@ from meteologica.meteologica_api_utils import (
 from meteologica.utils import todt
 
 import time
-import logging
 import sys
 
-logger = logging.getLogger(__name__)
+from conf.logging_configuration import LOGGING
+
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
 
 def parseArguments():
     # TODO parse arguments into a ns

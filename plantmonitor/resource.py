@@ -1,14 +1,12 @@
 from yamlns import namespace as ns
 from pymodbus.client.sync import ModbusTcpClient
 import sys
-import logging
+from conf.logging_configuration import LOGGING
 
-logging.basicConfig(filename='/var/log/plantmonitor/datalogger.log',
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.DEBUG)
-log = logging.getLogger(__name__)
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
 
 class ProductionPlant():
     def __init__(self):
@@ -27,7 +25,7 @@ class ProductionPlant():
                 self.name = plant_data.name
                 self.description = plant_data.description
                 self.db = plant_data.influx
-                for device_data in plant_data.devices:  
+                for device_data in plant_data.devices:
                     new_device = ProductionDevice()
                     if new_device.load(device_data):
                         self.devices.append(new_device)
@@ -44,7 +42,7 @@ class ProductionPlant():
                 all_metrics.append(data)
             except Exception as e:
                 msg = "An error ocurred getting registers from inverter: %s"
-                logging.exception(msg, e)
+                logger.exception(msg, e)
         return all_metrics
 
 
@@ -88,7 +86,7 @@ class ProductionProtocol():
     def __init__(self):
         self.type = None
         self.description = None
-    
+
     def factory(protocol_data):
         if protocol_data.type == "TCP":
             new_protocoltcp = ProductionProtocolTcp()
@@ -99,11 +97,11 @@ class ProductionProtocol():
             new_protocolRs = ProductionProtocolRs()
             new_protocolRs.load(protocol_data)
             return new_protocolRs
-        
+
         return None
 
     factory = staticmethod(factory)
-            
+
 class ProductionProtocolTcp(ProductionProtocol):
     def __init__(self):
         super().__init__()
@@ -112,8 +110,8 @@ class ProductionProtocolTcp(ProductionProtocol):
         self.slave = None
         self.timeout = None
         self.client = None
-    
-    def load(self, protocol_data):       
+
+    def load(self, protocol_data):
         self.ip = protocol_data.ip
         self.port = protocol_data.port
         self.timeout = protocol_data.timeout
@@ -123,30 +121,30 @@ class ProductionProtocolTcp(ProductionProtocol):
 
     def connect(self):
         if not self.client:
-            log.info("stablishing connection - %s" % self.ip)
+            logger.info("stablishing connection - %s" % self.ip)
             client = ModbusTcpClient(self.ip,
                                     timeout=self.timeout,
                                     RetryOnEmpty=True,
                                     retries=3,
                                     port=self.port)
-            log.info("Connect")
+            logger.info("Connect")
             client.connect()
             self.client = client
         else:
-            log.info("connection already stablished")
+            logger.info("connection already stablished")
 
     def disconnect(self):
-        log.info("closing connection")
+        logger.info("closing connection")
         if self.client:
            self.client.close()
-        self.client = None 
+        self.client = None
 
 class ProductionProtocolRs(ProductionProtocol):
     def __init__(self):
         super().__init__()
         self.baudrate = None
 
-    def load(self, protocol_data):       
+    def load(self, protocol_data):
         self.baud_rate = protocol_data.baud_rate
         return True
 
@@ -187,7 +185,7 @@ class ProductionDeviceModMap():
         return self.type
 
     def extract_rr(self, rr_obj, offset):
-        log.info("registers values from inverter %s" % rr_obj.registers)
+        logger.info("registers values from inverter %s" % rr_obj.registers)
         register_values = rr_obj.registers
 
         return ns(
@@ -197,7 +195,7 @@ class ProductionDeviceModMap():
 
     def get_registers(self, connection):
         connection.connect()
-        log.info("getting registers from inverter")
+        logger.info("getting registers from inverter")
         rr = self.get_register_values(connection)
         connection.disconnect()
         return self.extract_rr(rr, self.scan.start)
@@ -209,23 +207,22 @@ class ProductionDeviceModMap():
 class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
     def get_register_values(self, connection):
         return connection.client.read_holding_registers(
-            self.scan.start, 
-            count=self.scan.range, 
+            self.scan.start,
+            count=self.scan.range,
             unit=connection.slave,
             )
 
 class ProductionDeviceModMapInputRegisters(ProductionDeviceModMap):
     def get_registers(self, connection):
-        log.info("Input Register is not implemented")
+        logger.info("Input Register is not implemented")
         return {}
 
 class ProductionDeviceModMapCoils(ProductionDeviceModMap):
     def get_registers(self, connection):
-        log.info("Coils is not implemented")
+        logger.info("Coils is not implemented")
         return {}
 
 class ProductionDeviceModMapDiscreteInput(ProductionDeviceModMap):
     def get_registers(self, connection):
-        log.info("Discrete Input is not implemented")
+        logger.info("Discrete Input is not implemented")
         return {}
-

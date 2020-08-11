@@ -12,30 +12,13 @@ from pathlib import Path
 from unittest.mock import patch
 import unittest
 
-import logging.config
+from conf.logging_configuration import LOGGING
 
-logging.config.dictConfig({
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(name)s: %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'zeep.transports': {
-            'level': 'INFO',
-            'propagate': True,
-            'handlers': ['console'],
-        },
-    }
-})
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("test")
+
 
 
 class MeteologicaApiMock_Test(unittest.TestCase):

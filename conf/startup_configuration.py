@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+import conf.logging_configuration
 from influxdb import InfluxDBClient
 from apscheduler.schedulers.blocking import BlockingScheduler
 from plantmonitor.task import task
@@ -10,7 +10,12 @@ from plantmonitor.task import task_daily_download_to_api_meteologica
 
 from conf.config import env, env_active
 
-logger = logging.getLogger(__name__)
+from conf.logging_configuration import LOGGING
+
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
 
 def build_app():
     try:
