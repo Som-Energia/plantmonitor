@@ -38,7 +38,7 @@ def client_db(db):
                                 db['influxdb_database'],
                                 ssl=db['influxdb_ssl'],
                                 verify_ssl=db['influxdb_verify_ssl'])
-        logger.debug("Load config %s" % flux_client)
+        logger.info("Load config {}".format(flux_client))
     except:
         flux_client = None
 
