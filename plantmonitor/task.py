@@ -30,7 +30,7 @@ logger = logging.getLogger("plantmonitor")
 
 def client_db(db):
     try:
-        logging.info("[INFO] Connecting to Influxdb")
+        logger.info("Connecting to Influxdb")
         flux_client = InfluxDBClient(db['influxdb_ip'],
                                 db['influxdb_port'],
                                 db['influxdb_user'],
@@ -38,8 +38,8 @@ def client_db(db):
                                 db['influxdb_database'],
                                 ssl=db['influxdb_ssl'],
                                 verify_ssl=db['influxdb_verify_ssl'])
-        logger.info("Load config {}".format(flux_client))
-    except:
+    except Exception as e:
+        logger.warning("Failed to connect to influx client: {}".format(repr(e)))
         flux_client = None
 
     return flux_client

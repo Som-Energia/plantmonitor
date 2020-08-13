@@ -126,4 +126,5 @@ def last_uploaded_plantmonitor_measures(flux_client, meter):
 def transfer_meter_to_plantmonitor(c, flux_client, meter, upto):
     last_date = last_uploaded_plantmonitor_measures(flux_client, meter)
     measures = measures_from_date(c, meter, beyond=last_date, upto=upto)
+    logger.debug("Uploading {} measures for meter {} older than {} from erp to influxdb".format(len(measures), meter, last_date))
     upload_measures(flux_client, meter, measures)

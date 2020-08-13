@@ -92,6 +92,7 @@ def download_meter_data(configdb, test_env=True):
                     meterDataForecast = None
 
                 if not meterDataForecast:
+                    logger.info("No forecast data for {}".format(facility))
                     continue
 
                 # conversion from energy to power
@@ -99,6 +100,13 @@ def download_meter_data(configdb, test_env=True):
                 forecastDict = {facility: meterDataForecast}
                 forecastDate = now
                 db.addForecast(forecastDict, forecastDate)
+
+                logger.info(
+                    "Saved {} forecast records from {} to db - {} ".format
+                    (
+                        len(meterDataForecast), facility, downloadStatus[facility]
+                    )
+                )
 
     elapsed = time.perf_counter() - start
     logger.info('Total elapsed time {:0.4}'.format(elapsed))

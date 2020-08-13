@@ -61,8 +61,10 @@ def upload_meter_data(configdb, test_env=True):
             facilities = db.getFacilities()
             apifacilities = api.getAllFacilities()
 
+            logger.info('Uploading data from {} facilities in db'.format(len(facilities)))
+
             if not facilities:
-                logger.info("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
+                logger.warning("No facilities in db {} at {}:{}".format(configdb['psql_db'], configdb['psql_host'], configdb['psql_port']))
                 return
 
             for facility in facilities:
@@ -85,13 +87,15 @@ def upload_meter_data(configdb, test_env=True):
                     logger.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
                 # if not meterData[facility]:
                 if facility not in meterData:
-                    logger.warning("Missing {} in meterData {}".format(facility, meterData))
+                    logger.warning("Missing {} in db meter readings {}".format(facility, meterData))
                     continue
 
                 # conversion from energy to power
                 # (Not necessary for hourly values)
                 response = api.uploadProduction(facility, meterData[facility])
                 responses[facility] = response
+
+                logger.info("Uploaded {} observations for facility {} : {}".format(len(meterData[facility]), facility, response))
 
     elapsed = time.perf_counter() - start
     logger.info('Total elapsed time {:0.4}'.format(elapsed))
