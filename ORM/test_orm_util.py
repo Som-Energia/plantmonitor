@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 
 import os
@@ -47,9 +48,49 @@ class ORMSetup_Test(unittest.TestCase):
         self.maxDiff=None
 
         database.create_tables()
-        
+
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
+
+    def fillPlantRegistries(self, plant):
+
+        timeStart = datetime.datetime(2020, 7, 28, 9, 21, 7, 881064, tzinfo=datetime.timezone.utc)
+
+        sensorsIrr = list(SensorIrradiation.select(lambda p: p.plant==plant))
+        #TODO assert not empty
+        sensorIrr = sensorsIrr[0]
+
+        sensorTemp = list(SensorTemperature.select(lambda p: p.plant==plant))[0]
+        sensorIntegratedIrr = list(SensorIntegratedIrradiation.select(lambda p: p.plant==plant))[0]
+
+        dt = datetime.timedelta(minutes=5)
+        value = 60
+        dv = 10
+
+        n = 3
+
+        for i in range(n):
+            sensorIrr.insertRegistry(
+                time = timeStart + i*dt,
+                irradiation_w_m2 = value + i*dv,
+            )
+            sensorTemp.insertRegistry(
+                time = timeStart + i*dt,
+                temperature_c = 300 + value + i*(dv+10),
+            )
+            sensorIntegratedIrr.insertRegistry(
+                time = timeStart + i*dt,
+                integratedIrradiation_wh_m2 = 5000 + value + i*(dv+50),
+            )
+
+        plantRegistries = {
+            'irradiation': [(timeStart+i*dt, value + i*dv)  for i in range(n)],
+            'temperature': [(timeStart+i*dt, 300+value+i*(dv+10))  for i in range(n)],
+            'integratedIrr': [(timeStart+i*dt, 5000+value+i*(dv+50)) for i in range(n)],
+        }
+
+        return plantRegistries
+
 
     def tearDown(self):
         orm.rollback()
@@ -190,7 +231,7 @@ class ORMSetup_Test(unittest.TestCase):
             alcolea_read = Plant[1]
             self.assertEqual(alcolea_read, alcolea)
             self.assertEqual(alcolea_read.name, alcolea.name)
-    
+
     def test_InsertOnePlantOneSensor(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
@@ -198,7 +239,7 @@ class ORMSetup_Test(unittest.TestCase):
 
             sensor_read = Sensor[1]
             self.assertEqual(sensor_read,sensor)
-    
+
     def test_InsertOnePlantOneSensorOneRegistry(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
@@ -211,7 +252,7 @@ class ORMSetup_Test(unittest.TestCase):
 
             sensor_registry_read = SensorIrradiationRegistry[1]
             self.assertEqual(sensor_registry_read,sensorRegistry)
-    
+
     def test_InsertOneForecast(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
@@ -232,7 +273,7 @@ class ORMSetup_Test(unittest.TestCase):
                 percentil50 = 50,
                 percentil90 = 90,
             )
-            
+
             forecast_read = Forecast[1]
             self.assertEqual(forecast_read,forecast)
 
@@ -259,47 +300,77 @@ class ORMSetup_Test(unittest.TestCase):
 
             self.assertListEqual(list(query), expected)
 
+    def test_fixtureCreation(self):
+        with orm.db_session:
+
+            alcoleaPlantYAML = ns.loads("""\
+                plants:
+                - plant:
+                    name: alcolea
+                    codename: SCSOM04
+                    description: la bonica planta
+                    meters:
+                    - meter:
+                        name: '1234578'
+                    inverters:
+                    - inverter:
+                        name: '5555'
+                    - inverter:
+                        name: '6666'
+                    irradiationSensors:
+                    - irradiationSensor:
+                        name: alberto
+                    temperatureSensors:
+                    - temperatureSensor:
+                        name: joana
+                    integratedSensors:
+                    - integratedSensor:
+                        name: voki""")
+
+            alcoleaPlant = alcoleaPlantYAML.plants[0].plant
+            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = alcolea.importPlant(alcoleaPlantYAML)
+
+        #TODO test the whole fixture, not just the plant data
+        plantns = alcolea.exportPlant()
+        self.assertNsEqual(plantns, alcoleaPlantYAML)
+
+    def test_fillPlantRegistries(self):
+        with orm.db_session:
+            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            alcolea.createPlantFixture()
+            plantRegistries = self.fillPlantRegistries(alcolea)
+            n = len(plantRegistries['irradiation'])
+
+            self.assertEqual(n,3)
+            self.assertListEqual(list(plantRegistries.keys()), ['irradiation', 'temperature', 'integratedIrr'])
+
     def test_GetRegistriesFromManySensorsInDateRange(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensorIrr = SensorIrradiation(name='IrradAlcolea', plant=alcolea)
-            sensorTemp = SensorTemperature(name='TempAlcolea', plant=alcolea)
-            sensorIntegratedIrr = SensorIntegratedIrradiation(name='IntegIrrAlcolea', plant=alcolea)
+            alcolea.createPlantFixture()
+            plantRegistries = self.fillPlantRegistries(alcolea)
+            n = len(plantRegistries['irradiation'])
 
-            timetz = datetime.datetime(2020, 7, 28, 9, 21, 7, 881064, tzinfo=datetime.timezone.utc)
-            dt = datetime.timedelta(minutes=5)
-            value = 60
-            dv = 10
-
-            for i in range(3):
-                SensorIrradiationRegistry(
-                    sensor = sensorIrr,
-                    time = timetz + i*dt,
-                    irradiation_w_m2 = value + i*dv,
-                )
-                SensorTemperatureRegistry(
-                    sensor = sensorTemp,
-                    time = timetz + i*dt,
-                    temperature_c = 300 + value + i*(dv+10),
-                )
-                IntegratedIrradiationRegistry(
-                    sensor = sensorIntegratedIrr,
-                    time = timetz + i*dt,
-                    integratedIrradiation_wh_m2 = 5000 + value + i*(dv+50),
-                )
-
-            expectedPlantRegistries = [((timetz+i*dt), value + i*dv, 300+value+i*(dv+10), 5000+value+i*(dv+50)) for i in range(3)]
-            
             # TODO: First select returns empty results unless we commit
             orm.commit()
+
+            expectedPlantRegistries = [
+                (
+                    plantRegistries['irradiation'][i][0],
+                    plantRegistries['irradiation'][i][1],
+                    plantRegistries['temperature'][i][1],
+                    plantRegistries['integratedIrr'][i][1],
+                ) for i in range(n)
+            ]
 
             q1 = orm.select(r for r in SensorIrradiationRegistry if r.sensor.plant == alcolea)
             q2 = orm.select(r for r in SensorTemperatureRegistry if r.sensor.plant == alcolea)
             q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
-                (r1.time, r1.irradiation_w_m2, r2.temperature_c, r3.integratedIrradiation_wh_m2, r1.sensor, r2.sensor, r3.sensor) 
-                for r1 in q1 for r2 in q2 for r3 in q3 
+                (r1.time, r1.irradiation_w_m2, r2.temperature_c, r3.integratedIrradiation_wh_m2, r1.sensor, r2.sensor, r3.sensor)
+                for r1 in q1 for r2 in q2 for r3 in q3
                 if r1.time == r2.time and r2.time == r3.time
             )
 
