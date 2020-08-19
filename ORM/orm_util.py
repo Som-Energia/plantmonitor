@@ -22,8 +22,6 @@ from .models import (
     Forecast,
 )
 
-from conf.config import env, env_active
-
 
 def setupDatabase(create_tables=True):
 
@@ -33,6 +31,10 @@ def setupDatabase(create_tables=True):
 
     database.bind(**databaseInfo)
 
+    # requires superuser privileges
+    # with orm.db_session:
+    #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
+
     #orm.set_sql_debug(True)
 
     # map the models to the database
@@ -41,10 +43,11 @@ def setupDatabase(create_tables=True):
 
     print(f"Database {databaseInfo['database']} generated")
 
-    if env_active == env['plantmonitor_server']:
-        tablesToTimescale = getTablesToTimescale()
-        print("timescaling the tables {}".format(tablesToTimescale))
-        timescaleTables()
+    # if env_active == env['plantmonitor_server']:
+    #     tablesToTimescale = getTablesToTimescale()
+    #     print("timescaling the tables {}".format(tablesToTimescale))
+    #     timescaleTables()
+
 
 def getTablesToTimescale():
     tablesToTimescale = [
@@ -56,10 +59,15 @@ def getTablesToTimescale():
     ]
     return tablesToTimescale
 
+
 def timescaleTables(tablesToTimescale):
 
-    for t in tablesToTimescale:
-        raw_sql("SELECT create_hypertable({}, 'time');".format(t))
+    # foo = database.execute("CREATE INDEX ON meterregistry (id, time DESC);")
+    boo = database.execute("SELECT create_hypertable('meterregistry', 'time');")
+
+
+    # for t in tablesToTimescale:
+    #      database.execute("SELECT create_hypertable('{}', 'time');".format(t.lower()))
 
 
 def dailyInsert():

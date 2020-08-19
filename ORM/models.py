@@ -78,10 +78,13 @@ class Meter(database.Entity):
             r4 = r4,
             )
 
+
 class MeterRegistry(database.Entity):
 
+    #id = Required(int, auto=True, unique=True)
     meter = Required(Meter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(meter, time)
     export_energy = Required(int, size=64)
     import_energy = Required(int, size=64)
     r1 = Required(int, size=64)

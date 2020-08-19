@@ -30,7 +30,7 @@ from .models import (
     Forecast,
 )
 
-from .orm_util import setupDatabase, getTablesToTimescale
+from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 
 setupDatabase()
@@ -47,12 +47,20 @@ class ORMSetup_Test(unittest.TestCase):
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
+
         self.maxDiff=None
+        # orm.set_sql_debug(True)
 
         database.create_tables()
 
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
+
+    def tearDown(self):
+        orm.rollback()
+        orm.db_session.__exit__()
+        database.drop_all_tables(with_all_data=True)
+        database.disconnect()
 
     def fillPlantRegistries(self, plant):
 
@@ -93,13 +101,6 @@ class ORMSetup_Test(unittest.TestCase):
 
         return plantRegistries
 
-
-    def tearDown(self):
-        orm.rollback()
-        orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
-
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import config
@@ -111,10 +112,23 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_timescaleTables(self):
         with orm.db_session:
+            orm.set_sql_debug(True)
+
             tablesToTimescale = getTablesToTimescale()
 
             #no raises
             timescaleTables(tablesToTimescale)
+
+            cur = database.execute("select * from _timescaledb_catalog.hypertable")
+            hypertables = cur.fetchall()
+
+            hypertablesNames = [t[2] for t in hypertables if len(t) == 11 and t[6] == '_timescaledb_internal']
+
+            tablesToTimescaleLowerCase = [name.lower() for name in tablesToTimescale]
+
+            self.assertListEqual(hypertablesNames, ['meterregistry'])
+            # self.assertListEqual(hypertablesNames, tablesToTimescaleLowerCase)
+
 
     def test_meters_whenNone(self):
         with orm.db_session:
