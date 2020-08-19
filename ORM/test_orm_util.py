@@ -15,6 +15,8 @@ from .models import (
     Plant,
     Meter,
     MeterRegistry,
+    Inverter,
+    InverterRegistry,
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
@@ -28,7 +30,7 @@ from .models import (
     Forecast,
 )
 
-from .orm_util import setupDatabase
+from .orm_util import setupDatabase, getTablesToTimescale
 from yamlns import namespace as ns
 
 setupDatabase()
@@ -106,6 +108,13 @@ class ORMSetup_Test(unittest.TestCase):
     def test_connection(self):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
+
+    def test_timescaleTables(self):
+        with orm.db_session:
+            tablesToTimescale = getTablesToTimescale()
+
+            #no raises
+            timescaleTables(tablesToTimescale)
 
     def test_meters_whenNone(self):
         with orm.db_session:
