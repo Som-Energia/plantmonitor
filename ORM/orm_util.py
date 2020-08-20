@@ -62,12 +62,11 @@ def getTablesToTimescale():
 
 def timescaleTables(tablesToTimescale):
 
-    # foo = database.execute("CREATE INDEX ON meterregistry (id, time DESC);")
-    boo = database.execute("SELECT create_hypertable('meterregistry', 'time');")
+    #foo = database.execute("CREATE INDEX ON meterregistry (meter, id, time DESC);")
+    #boo = database.execute("SELECT create_hypertable('meterregistry', 'time', 'meter', 10);")
 
-
-    # for t in tablesToTimescale:
-    #      database.execute("SELECT create_hypertable('{}', 'time');".format(t.lower()))
+    for t in tablesToTimescale:
+          database.execute("SELECT create_hypertable('{}', 'time');".format(t.lower()))
 
 
 def dailyInsert():

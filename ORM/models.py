@@ -11,6 +11,7 @@ from pony.orm import (
     Set,
     PrimaryKey,
     unicode,
+
     )
 
 database = orm.Database()
@@ -67,7 +68,7 @@ class Meter(database.Entity):
     meterRegistries = Set('MeterRegistry')
 
     def insertRegistry(self, export_energy, import_energy, r1, r2, r3, r4, time=None):
-        MeterRegistry(
+        return MeterRegistry(
             meter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             export_energy = export_energy,
@@ -81,7 +82,6 @@ class Meter(database.Entity):
 
 class MeterRegistry(database.Entity):
 
-    #id = Required(int, auto=True, unique=True)
     meter = Required(Meter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(meter, time)
@@ -124,7 +124,7 @@ class Inverter(database.Entity):
         temp_inv,
         time = None,
         ):
-        InverterRegistry(
+        return InverterRegistry(
             inverter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             HR1 = HR1,
@@ -156,6 +156,7 @@ class InverterRegistry(database.Entity):
 
     inverter = Required(Inverter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(inverter, time)
     HR1 = Optional(int, size=64)
     HR1_0 = Optional(int, size=64)
     HR2_2 = Optional(int, size=64)
@@ -190,7 +191,7 @@ class SensorIrradiation(Sensor):
     sensorRegistries = Set('SensorIrradiationRegistry')
 
     def insertRegistry(self, irradiation_w_m2, time=None):
-        SensorIrradiationRegistry(
+        return SensorIrradiationRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             irradiation_w_m2 = irradiation_w_m2
@@ -202,7 +203,7 @@ class SensorTemperature(Sensor):
     sensorRegistries = Set('SensorTemperatureRegistry')
 
     def insertRegistry(self, temperature_c, time=None):
-        SensorTemperatureRegistry(
+        return SensorTemperatureRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             temperature_c = temperature_c
@@ -213,7 +214,7 @@ class SensorIntegratedIrradiation(Sensor):
     sensorRegistries = Set('IntegratedIrradiationRegistry')
 
     def insertRegistry(self, integratedIrradiation_wh_m2, time=None):
-        IntegratedIrradiationRegistry(
+        return IntegratedIrradiationRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             integratedIrradiation_wh_m2 = integratedIrradiation_wh_m2
@@ -223,18 +224,21 @@ class SensorIrradiationRegistry(database.Entity):
 
     sensor = Required(SensorIrradiation)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(sensor, time)
     irradiation_w_m2 = Optional(int, size=64)
 
 class SensorTemperatureRegistry(database.Entity):
 
     sensor = Required(SensorTemperature)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(sensor, time)
     temperature_c = Optional(int, size=64)
 
 class IntegratedIrradiationRegistry(database.Entity):
 
     sensor = Required(SensorIntegratedIrradiation)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(sensor, time)
     integratedIrradiation_wh_m2 = Optional(int, size=64)
 
 class ForecastVariable(database.Entity):
@@ -258,7 +262,7 @@ class ForecastMetadata(database.Entity):
     forecasts = Set('Forecast')
 
     def insertForecast(self, percentil10, percentil50, percentil90, time=None):
-        IntegratedIrradiationRegistry(
+        return Forecast(
             forecastMetadata = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             percentil10 = percentil10,
@@ -271,6 +275,8 @@ class Forecast(database.Entity):
 
     forecastMetadata = Required(ForecastMetadata)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(forecastMetadata, time)
+    
     percentil10 = Optional(int)
     percentil50 = Optional(int)
     percentil90 = Optional(int)

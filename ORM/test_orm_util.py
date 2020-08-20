@@ -112,22 +112,25 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_timescaleTables(self):
         with orm.db_session:
-            orm.set_sql_debug(True)
+            # orm.set_sql_debug(True)
 
             tablesToTimescale = getTablesToTimescale()
 
             #no raises
             timescaleTables(tablesToTimescale)
+            
+            numColumnsTimescaleMetadata = 11
+            timescaleStringColumn = 3
+            hypertableName = 2
 
             cur = database.execute("select * from _timescaledb_catalog.hypertable")
             hypertables = cur.fetchall()
-
-            hypertablesNames = [t[2] for t in hypertables if len(t) == 11 and t[6] == '_timescaledb_internal']
+            
+            hypertablesNames = [t[hypertableName] for t in hypertables if len(t) == numColumnsTimescaleMetadata and t[timescaleStringColumn] == '_timescaledb_internal']
 
             tablesToTimescaleLowerCase = [name.lower() for name in tablesToTimescale]
 
-            self.assertListEqual(hypertablesNames, ['meterregistry'])
-            # self.assertListEqual(hypertablesNames, tablesToTimescaleLowerCase)
+            self.assertListEqual(hypertablesNames, tablesToTimescaleLowerCase)
 
 
     def test_meters_whenNone(self):
@@ -267,13 +270,12 @@ class ORMSetup_Test(unittest.TestCase):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
             sensor = SensorIrradiation(name='IrradAlcolea', plant=alcolea)
-            sensorRegistry = SensorIrradiationRegistry(
-                sensor = sensor,
+            sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
             )
 
-            sensor_registry_read = SensorIrradiationRegistry[1]
+            sensor_registry_read = list(SensorIrradiationRegistry.select())[0]
             self.assertEqual(sensor_registry_read,sensorRegistry)
 
     def test_InsertOneForecast(self):
@@ -289,15 +291,14 @@ class ORMSetup_Test(unittest.TestCase):
                 forecastdate = datetime.datetime.now(datetime.timezone.utc),
                 granularity = 60,
             )
-            forecast = Forecast(
-                forecastMetadata = forecastMetadata,
+            forecast = forecastMetadata.insertForecast(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 percentil10 = 10,
                 percentil50 = 50,
                 percentil90 = 90,
             )
 
-            forecast_read = Forecast[1]
+            forecast_read = list(Forecast.select())[0]
             self.assertEqual(forecast_read,forecast)
 
     def test_GetRegistriesFromOneSensorInDateRange(self):
