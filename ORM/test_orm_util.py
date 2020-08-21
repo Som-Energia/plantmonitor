@@ -177,8 +177,8 @@ class ORMSetup_Test(unittest.TestCase):
             ns(
                 # yamlns reads datetimes just as date, compare the string
                 time = str(line.time),
-                export_energy = line.export_energy,
-                import_energy = line.import_energy,
+                export_energy_wh = line.export_energy_wh,
+                import_energy_wh = line.import_energy_wh,
                 r1 = line.r1,
                 r2 = line.r2,
                 r3 = line.r3,
@@ -205,8 +205,8 @@ class ORMSetup_Test(unittest.TestCase):
             meter = Meter(name='Mary', plant=alcolea)
             meter.insertRegistry(
                 time = datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
-                export_energy = 10,
-                import_energy = 77,
+                export_energy_wh = 10,
+                import_energy_wh = 77,
                 r1 = 0,
                 r2 = 0,
                 r3 = 0,
@@ -215,8 +215,8 @@ class ORMSetup_Test(unittest.TestCase):
             self.assertMeterRegistryEqual('SOMSC01', 'Mary', """\
                 registry:
                 - time: '2020-10-20 00:00:00+00:00'
-                  export_energy: 10
-                  import_energy: 77
+                  export_energy_wh: 10
+                  import_energy_wh: 77
                   r1: 0
                   r2: 0
                   r3: 0
@@ -231,8 +231,8 @@ class ORMSetup_Test(unittest.TestCase):
             meterRegistry = MeterRegistry(
                 meter = meter,
                 time = datetime.datetime.now(datetime.timezone.utc),
-                export_energy = 10,
-                import_energy = 77,
+                export_energy_wh = 10,
+                import_energy_wh = 77,
                 r1 = 0,
                 r2 = 0,
                 r3 = 0,
@@ -246,8 +246,8 @@ class ORMSetup_Test(unittest.TestCase):
             meterRegistry = MeterRegistry(
                 meter = meter,
                 time = datetime.datetime.now(),
-                export_energy = 10,
-                import_energy = 77,
+                export_energy_wh = 10,
+                import_energy_wh = 77,
                 r1 = 0,
                 r2 = 0,
                 r3 = 0,

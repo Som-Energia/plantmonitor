@@ -67,12 +67,12 @@ class Meter(database.Entity):
     name = Required(unicode, unique=True)
     meterRegistries = Set('MeterRegistry')
 
-    def insertRegistry(self, export_energy, import_energy, r1, r2, r3, r4, time=None):
+    def insertRegistry(self, export_energy_wh, import_energy_wh, r1, r2, r3, r4, time=None):
         return MeterRegistry(
             meter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            export_energy = export_energy,
-            import_energy = import_energy,
+            export_energy_wh = export_energy_wh,
+            import_energy_wh = import_energy_wh,
             r1 = r1,
             r2 = r2,
             r3 = r3,
@@ -85,8 +85,8 @@ class MeterRegistry(database.Entity):
     meter = Required(Meter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(meter, time)
-    export_energy = Required(int, size=64)
-    import_energy = Required(int, size=64)
+    export_energy_wh = Required(int, size=64)
+    import_energy_wh = Required(int, size=64)
     r1 = Required(int, size=64)
     r2 = Required(int, size=64)
     r3 = Required(int, size=64)
@@ -100,55 +100,45 @@ class Inverter(database.Entity):
     inverterRegistries = Set('InverterRegistry')
 
     def insertRegistry(self,
-        HR1,
-        HR1_0,
-        HR2_2,
-        HR3_3,
-        HR4_4,
-        daily_energy_h,
-        daily_energy_l,
-        e_total_h,
-        e_total_l,
-        h_total_h,
-        h_total_l,
-        pac_r,
-        pac_s,
-        pac_t,
-        powerreactive_t,
-        powerreactive_r,
-        powerreactive_s,
-        probe1value,
-        probe2value,
+        daily_energy_h_wh,
+        daily_energy_l_wh,
+        e_total_h_wh,
+        e_total_l_wh,
+        h_total_h_h,
+        h_total_l_h,
+        pac_r_w,
+        pac_s_w,
+        pac_t_w,
+        powerreactive_t_v,
+        powerreactive_r_v,
+        powerreactive_s_v,
+        probe1value_c,
+        probe2value_wm2,
         probe3value,
         probe4value,
-        temp_inv,
+        temp_inv_c,
         time = None,
         ):
         return InverterRegistry(
             inverter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            HR1 = HR1,
-            HR1_0 = HR1_0,
-            HR2_2 = HR2_2,
-            HR3_3 = HR3_3,
-            HR4_4 = HR4_4,
-            daily_energy_h = daily_energy_h,
-            daily_energy_l = daily_energy_l,
-            e_total_h = e_total_h,
-            e_total_l = e_total_l,
-            h_total_h = h_total_h,
-            h_total_l = h_total_l,
-            pac_r = pac_r,
-            pac_s = pac_s,
-            pac_t = pac_t,
-            powerreactive_t = powerreactive_t,
-            powerreactive_r = powerreactive_r,
-            powerreactive_s = powerreactive_s,
-            probe1value = probe1value,
-            probe2value = probe2value,
+            daily_energy_h_wh = daily_energy_h_wh,
+            daily_energy_l_wh = daily_energy_l_wh,
+            e_total_h_wh = e_total_h_wh,
+            e_total_l_wh = e_total_l_wh,
+            h_total_h_h = h_total_h_h,
+            h_total_l_h = h_total_l_h,
+            pac_r_w = pac_r_w,
+            pac_s_w = pac_s_w,
+            pac_t_w = pac_t_w,
+            powerreactive_t_v = powerreactive_t_v,
+            powerreactive_r_v = powerreactive_r_v,
+            powerreactive_s_v = powerreactive_s_v,
+            probe1value_c = probe1value_c,
+            probe2value_wm2 = probe2value_wm2,
             probe3value = probe3value,
             probe4value = probe4value,
-            temp_inv = temp_inv
+            temp_inv_c = temp_inv_c
         )
 
 
@@ -157,28 +147,23 @@ class InverterRegistry(database.Entity):
     inverter = Required(Inverter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(inverter, time)
-    HR1 = Optional(int, size=64)
-    HR1_0 = Optional(int, size=64)
-    HR2_2 = Optional(int, size=64)
-    HR3_3 = Optional(int, size=64)
-    HR4_4 = Optional(int, size=64)
-    daily_energy_h = Optional(int, size=64)
-    daily_energy_l = Optional(int, size=64)
-    e_total_h = Optional(int, size=64)
-    e_total_l = Optional(int, size=64)
-    h_total_h = Optional(int, size=64)
-    h_total_l = Optional(int, size=64)
-    pac_r = Optional(int, size=64)
-    pac_s = Optional(int, size=64)
-    pac_t = Optional(int, size=64)
+    daily_energy_h_wh = Optional(int, size=64)
+    daily_energy_l_wh = Optional(int, size=64)
+    e_total_h_wh = Optional(int, size=64)
+    e_total_l_wh = Optional(int, size=64)
+    h_total_h_h = Optional(int, size=64)
+    h_total_l_h = Optional(int, size=64)
+    pac_r_w = Optional(int, size=64)
+    pac_s_w = Optional(int, size=64)
+    pac_t_w = Optional(int, size=64)
     powereactive_t = Optional(int, size=64)
-    powerreactive_r = Optional(int, size=64)
-    powerreactive_s = Optional(int, size=64)
-    probe1value = Optional(int, size=64)
-    probe2value = Optional(int, size=64)
+    powerreactive_r_v = Optional(int, size=64)
+    powerreactive_s_v = Optional(int, size=64)
+    probe1value_c = Optional(int, size=64)
+    probe2value_wm2 = Optional(int, size=64)
     probe3value = Optional(int, size=64)
     probe4value = Optional(int, size=64)
-    temp_inv = Optional(int, size=64)
+    temp_inv_c = Optional(int, size=64)
 
 class Sensor(database.Entity):
 
