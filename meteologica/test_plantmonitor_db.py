@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
 from yamlns import namespace as ns
 
 import psycopg2
