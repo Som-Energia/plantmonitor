@@ -112,10 +112,6 @@ class Inverter(database.Entity):
         powerreactive_t_v,
         powerreactive_r_v,
         powerreactive_s_v,
-        probe1value_c,
-        probe2value_wm2,
-        probe3value,
-        probe4value,
         temp_inv_c,
         time = None,
         ):
@@ -134,10 +130,6 @@ class Inverter(database.Entity):
             powerreactive_t_v = powerreactive_t_v,
             powerreactive_r_v = powerreactive_r_v,
             powerreactive_s_v = powerreactive_s_v,
-            probe1value_c = probe1value_c,
-            probe2value_wm2 = probe2value_wm2,
-            probe3value = probe3value,
-            probe4value = probe4value,
             temp_inv_c = temp_inv_c
         )
 
@@ -159,10 +151,6 @@ class InverterRegistry(database.Entity):
     powereactive_t = Optional(int, size=64)
     powerreactive_r_v = Optional(int, size=64)
     powerreactive_s_v = Optional(int, size=64)
-    probe1value_c = Optional(int, size=64)
-    probe2value_wm2 = Optional(int, size=64)
-    probe3value = Optional(int, size=64)
-    probe4value = Optional(int, size=64)
     temp_inv_c = Optional(int, size=64)
 
 class Sensor(database.Entity):
