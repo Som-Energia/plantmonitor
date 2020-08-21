@@ -179,10 +179,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = str(line.time),
                 export_energy_wh = line.export_energy_wh,
                 import_energy_wh = line.import_energy_wh,
-                r1 = line.r1,
-                r2 = line.r2,
-                r3 = line.r3,
-                r4 = line.r4,
+                r1_w = line.r1_w,
+                r2_w = line.r2_w,
+                r3_w = line.r3_w,
+                r4_w = line.r4_w,
             )
             for line in orm.select(
                 l for l in MeterRegistry
@@ -207,20 +207,20 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1 = 0,
-                r2 = 0,
-                r3 = 0,
-                r4 = 0,
+                r1_w = 0,
+                r2_w = 0,
+                r3_w = 0,
+                r4_w = 0,
             )
             self.assertMeterRegistryEqual('SOMSC01', 'Mary', """\
                 registry:
                 - time: '2020-10-20 00:00:00+00:00'
                   export_energy_wh: 10
                   import_energy_wh: 77
-                  r1: 0
-                  r2: 0
-                  r3: 0
-                  r4: 0
+                  r1_w: 0
+                  r2_w: 0
+                  r3_w: 0
+                  r4_w: 0
                 """)
 
 
@@ -233,10 +233,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1 = 0,
-                r2 = 0,
-                r3 = 0,
-                r4 = 0,
+                r1_w = 0,
+                r2_w = 0,
+                r3_w = 0,
+                r4_w = 0,
             )
 
     def test_ReadOnePlantOneMeterOneRegistry(self):
@@ -248,10 +248,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1 = 0,
-                r2 = 0,
-                r3 = 0,
-                r4 = 0,
+                r1_w = 0,
+                r2_w = 0,
+                r3_w = 0,
+                r4_w = 0,
             )
 
             alcolea_read = Plant[1]
@@ -393,9 +393,9 @@ class ORMSetup_Test(unittest.TestCase):
             q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
-                (r1.time, r1.irradiation_w_m2, r2.temperature_c, r3.integratedIrradiation_wh_m2, r1.sensor, r2.sensor, r3.sensor)
-                for r1 in q1 for r2 in q2 for r3 in q3
-                if r1.time == r2.time and r2.time == r3.time
+                (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_c, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)
+                for r1_w in q1 for r2_w in q2 for r3_w in q3
+                if r1_w.time == r2_w.time and r2_w.time == r3_w.time
             )
 
             plantRegistries = [(t.astimezone(datetime.timezone.utc), irr, temp, integ) for t, irr, temp, integ, s1, s2, s3 in qresult]

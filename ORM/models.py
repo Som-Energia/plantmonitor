@@ -67,16 +67,16 @@ class Meter(database.Entity):
     name = Required(unicode, unique=True)
     meterRegistries = Set('MeterRegistry')
 
-    def insertRegistry(self, export_energy_wh, import_energy_wh, r1, r2, r3, r4, time=None):
+    def insertRegistry(self, export_energy_wh, import_energy_wh, r1_w, r2_w, r3_w, r4_w, time=None):
         return MeterRegistry(
             meter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             export_energy_wh = export_energy_wh,
             import_energy_wh = import_energy_wh,
-            r1 = r1,
-            r2 = r2,
-            r3 = r3,
-            r4 = r4,
+            r1_w = r1_w,
+            r2_w = r2_w,
+            r3_w = r3_w,
+            r4_w = r4_w,
             )
 
 
@@ -87,10 +87,10 @@ class MeterRegistry(database.Entity):
     PrimaryKey(meter, time)
     export_energy_wh = Required(int, size=64)
     import_energy_wh = Required(int, size=64)
-    r1 = Required(int, size=64)
-    r2 = Required(int, size=64)
-    r3 = Required(int, size=64)
-    r4 = Required(int, size=64)
+    r1_w = Required(int, size=64)
+    r2_w = Required(int, size=64)
+    r3_w = Required(int, size=64)
+    r4_w = Required(int, size=64)
 
 
 class Inverter(database.Entity):
