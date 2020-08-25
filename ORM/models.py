@@ -4,6 +4,8 @@ import datetime
 
 from yamlns import namespace as ns
 
+from meteologica.utils import todt
+
 from pony import orm
 from pony.orm import (
     Required,
@@ -15,6 +17,7 @@ from pony.orm import (
     )
 
 database = orm.Database()
+
 
 class Plant(database.Entity):
 
@@ -64,7 +67,7 @@ class Plant(database.Entity):
 class Meter(database.Entity):
 
     plant = Required(Plant)
-    name = Required(unicode, unique=True)
+    name = Required(unicode)
     meterRegistries = Set('MeterRegistry')
 
     def insertRegistry(self, export_energy_wh, import_energy_wh, r1_w, r2_w, r3_w, r4_w, time=None):
@@ -95,7 +98,7 @@ class MeterRegistry(database.Entity):
 
 class Inverter(database.Entity):
 
-    name = Required(unicode, unique=True)
+    name = Required(unicode)
     plant = Required(Plant)
     inverterRegistries = Set('InverterRegistry')
 
@@ -148,16 +151,18 @@ class InverterRegistry(database.Entity):
     pac_r_w = Optional(int, size=64)
     pac_s_w = Optional(int, size=64)
     pac_t_w = Optional(int, size=64)
-    powereactive_t = Optional(int, size=64)
+    powerreactive_t_v = Optional(int, size=64)
     powerreactive_r_v = Optional(int, size=64)
     powerreactive_s_v = Optional(int, size=64)
     temp_inv_c = Optional(int, size=64)
 
+
 class Sensor(database.Entity):
 
-    name = Required(unicode, unique=True)
+    name = Required(unicode)
     plant = Required(Plant)
     description = Optional(str)
+
 
 class SensorIrradiation(Sensor):
 
@@ -182,6 +187,7 @@ class SensorTemperature(Sensor):
             temperature_c = temperature_c
             )
 
+
 class SensorIntegratedIrradiation(Sensor):
 
     sensorRegistries = Set('IntegratedIrradiationRegistry')
@@ -193,12 +199,14 @@ class SensorIntegratedIrradiation(Sensor):
             integratedIrradiation_wh_m2 = integratedIrradiation_wh_m2
             )
 
+
 class SensorIrradiationRegistry(database.Entity):
 
     sensor = Required(SensorIrradiation)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
     irradiation_w_m2 = Optional(int, size=64)
+
 
 class SensorTemperatureRegistry(database.Entity):
 
@@ -207,6 +215,7 @@ class SensorTemperatureRegistry(database.Entity):
     PrimaryKey(sensor, time)
     temperature_c = Optional(int, size=64)
 
+
 class IntegratedIrradiationRegistry(database.Entity):
 
     sensor = Required(SensorIntegratedIrradiation)
@@ -214,15 +223,18 @@ class IntegratedIrradiationRegistry(database.Entity):
     PrimaryKey(sensor, time)
     integratedIrradiation_wh_m2 = Optional(int, size=64)
 
+
 class ForecastVariable(database.Entity):
 
     name = Required(unicode, unique=True)
     forecastMetadatas = Set('ForecastMetadata')
 
+
 class ForecastPredictor(database.Entity):
 
     name = Required(unicode, unique=True)
     forecastMetadatas = Set('ForecastMetadata')
+
 
 class ForecastMetadata(database.Entity):
 
@@ -249,7 +261,7 @@ class Forecast(database.Entity):
     forecastMetadata = Required(ForecastMetadata)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(forecastMetadata, time)
-    
+
     percentil10 = Optional(int)
     percentil50 = Optional(int)
     percentil90 = Optional(int)

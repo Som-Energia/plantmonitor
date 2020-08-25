@@ -118,14 +118,14 @@ class ORMSetup_Test(unittest.TestCase):
 
             #no raises
             timescaleTables(tablesToTimescale)
-            
+
             numColumnsTimescaleMetadata = 11
             timescaleStringColumn = 3
             hypertableName = 2
 
             cur = database.execute("select * from _timescaledb_catalog.hypertable")
             hypertables = cur.fetchall()
-            
+
             hypertablesNames = [t[hypertableName] for t in hypertables if len(t) == numColumnsTimescaleMetadata and t[timescaleStringColumn] == '_timescaledb_internal']
 
             tablesToTimescaleLowerCase = [name.lower() for name in tablesToTimescale]
@@ -257,6 +257,13 @@ class ORMSetup_Test(unittest.TestCase):
             alcolea_read = Plant[1]
             self.assertEqual(alcolea_read, alcolea)
             self.assertEqual(alcolea_read.name, alcolea.name)
+
+    def test_InsertTwoPlantTwoMeterOneRegistry(self):
+        with orm.db_session:
+            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            alcometer = Meter(name='meter1', plant=alcolea)
+            fonti = Plant(name='SomEnergia_Fontisolar',  codename='SOMSC02', description='descripción de planta')
+            fontimeter = Meter(name='meter1', plant=fonti)
 
     def test_InsertOnePlantOneSensor(self):
         with orm.db_session:

@@ -3,7 +3,6 @@ from yamlns import namespace as ns
 
 import datetime
 import sys
-from pathlib import Path
 
 from conf.logging_configuration import LOGGING
 
@@ -39,44 +38,51 @@ from .models import (
     Forecast,
 )
 
-def psql_dt():
-    return """SELECT c.relname AS Tables_in FROM pg_catalog.pg_class c
-LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-WHERE pg_catalog.pg_table_is_visible(c.oid)
-AND c.relkind = 'r'
-AND relname NOT LIKE 'pg_%'
-ORDER BY 1"""
 
-def psql_d(tablename):
-    return """select column_name, data_type
-from INFORMATION_SCHEMA.COLUMNS where table_name ='{}';""".format(tablename)
+def migrateLegacyInverterTableToPony(db, numrecords=0):
 
-def loadDump(db, dumpdir, excluded):
-    cur = db._client.cursor()
-    # cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
-    # tables = cur.fetchall()
-    cur.execute(psql_dt())
-    dt = cur.fetchall()
-    for t in dt:
-        cur.execute(psql_d(t[0]))
-        t_info = cur.fetchall()
-        # print("\n{} defined by \n".format(t[0]))
-        # [print("\t{} {}".format(n,v)) for n,v in t_info]
+    remainingRecords = numrecords
 
-    # tableNames = [p.stem for p in Path(dumpdir).iterdir()]
-    # hypertablesNames = [n for n in tableNames if n not in excluded]
+    curr = db._client.cursor()
 
-    # [cur.execute("SELECT create_hypertable('{}', 'time');".format(t)) for t in hypertablesNames]
+    # fetch column names
+    curr.execute('select * from sistema_inversor limit 1;')
+    colNames = [c[0] for c in curr.description]
 
-    # import data
-    for tableDumpPath in Path(dumpdir).iterdir():
-        with open(tableDumpPath, 'r') as f:
-            cur.copy_from(f, tableDumpPath.stem, sep=",", null='')
+    insertSignature = [
+        'time', 'inverter_name', 'location', '1HR', '1HR0', '2HR2', '3HR3',
+        '4HR4', 'daily_energy_h', 'daily_energy_l', 'e_total_h', 'e_total_l',
+        'h_total_h', 'h_total_l', 'pac_r', 'pac_s', 'pac_t', 'powereactive_t',
+        'powerreactive_r', 'powerreactive_s', 'probe1value', 'probe2value',
+        'probe3value', 'probe4value', 'temp_inv']
+    assert(insertSignature == colNames)
+
+    curr.execute('select location from sistema_inversor group by location order by location asc limit 100;')
+
+    plantNames = [r[0] for r in curr.fetchall()]
+
+    for plantName in plantNames:
+        plant = Plant(name=plantName, codename=plantName)
+        curr.execute("select inverter_name from sistema_inversor where location = '{}' group by inverter_name order by inverter_name asc limit 100;".format(plantName))
+        inverterNames = [r[0] for r in curr.fetchall()]
+        for inverterName in inverterNames:
+            inverter = Inverter(name=inverterName, plant=plant)
+            curr.execute("select * from sistema_inversor where location = '{}' and inverter_name = '{}';".format(plantName, inverterName))
+            while remainingRecords > 0:
+                records = curr.fetchmany(min(remainingRecords, 1000))
+                if not records:
+                    break
+                remainingRecords -= len(records)
+
+                for r in records:
+                    time, inverter_name, location, HR_1, HR0_1, HR2_2, HR3_3, HR4_4, *values, probe1value, probe2value, probe3value, probe4value, temp_inv  = r
+                    inverter.insertRegistry(*values, temp_inv_c=temp_inv, time=time)
+                    # TODO create Sensor and insert values from probeNvalue
 
 
 def migrateLegacyToPony(configdb):
     with PlantmonitorDB(configdb) as db:
-        pass
+        migrateLegacyInverterTableToPony(db)
 
 
 def main():

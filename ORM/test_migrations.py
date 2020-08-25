@@ -8,7 +8,8 @@ import unittest
 from yamlns import namespace as ns
 import datetime as dt
 
-from .migrations import loadDump,migrateLegacyToPony
+# from .migrations import loadDump,migrateLegacyToPony
+from .migrations import migrateLegacyInverterTableToPony,migrateLegacyToPony
 
 from meteologica.plantmonitor_db import (
     PlantmonitorDB,
@@ -117,6 +118,54 @@ class Migrations_Test(unittest.TestCase):
             self.assertEqual(facilityMeterCountReg, 123)
             self.assertEqual(integratedSensorsCountReg, 123)
 
+    def test_insertInverterRegistrySignature(self):
+        #if the insertInvertRegistrySignature changes, the migration code has to
+        # change as well, given that it relies on column order
+        signature = Inverter.insertRegistry.__code__.co_varnames
+        expectedSignature = (
+            "self",
+            "daily_energy_h_wh",
+            "daily_energy_l_wh",
+            "e_total_h_wh",
+            "e_total_l_wh",
+            "h_total_h_h",
+            "h_total_l_h",
+            "pac_r_w",
+            "pac_s_w",
+            "pac_t_w",
+            "powerreactive_t_v",
+            "powerreactive_r_v",
+            "powerreactive_s_v",
+            "temp_inv_c",
+            "time",
+        )
+        self.assertTupleEqual(expectedSignature, signature)
+
+    def test_tableInverterColumns(self):
+        # if the insertInvertRegistrySignature changes, the migration code has to
+        # change as well, given that it relies on column order
+        with self.createPlantmonitorDB() as db:
+            cur = db._client.cursor()
+            cur.execute('select * from sistema_inversor limit 1;')
+            colNames = [c[0] for c in cur.description]
+            expectedColnames = [
+                'time', 'inverter_name', 'location', '1HR', '1HR0', '2HR2', '3HR3',
+                '4HR4', 'daily_energy_h', 'daily_energy_l', 'e_total_h', 'e_total_l',
+                'h_total_h', 'h_total_l', 'pac_r', 'pac_s', 'pac_t', 'powereactive_t',
+                'powerreactive_r', 'powerreactive_s', 'probe1value', 'probe2value',
+                'probe3value', 'probe4value', 'temp_inv'
+            ]
+            self.assertListEqual(expectedColnames, colNames)
+
+    def __test_orderbytime(self):
+        # pg_dump pg_restore fails to restore the timescale time index
+        with self.createPlantmonitorDB() as db:
+            cur = db._client.cursor()
+            cur.execute("select time from sistema_inversor order by time asc limit 1;")
+            records = cur.fetchall()
+
+            self.assertEqual(len(records), 1)
+
     def test_ormSetup(self):
         with orm.db_session:
 
@@ -169,7 +218,7 @@ class Migrations_Test(unittest.TestCase):
             records = curr.fetchmany(2)
             print(len(records))
             print(records)
-            
+
             # WARNING fetchall does not work on timescale tables / ultrabig tables
             # we might need server-side cursors
             # https://www.psycopg.org/docs/usage.html#server-side-cursors
@@ -183,15 +232,18 @@ class Migrations_Test(unittest.TestCase):
                 ]
             )
 
-
-    def test_migrateLegacyToPony_OneRecord(self):
+    def test_migrateLegacyInverterTableToPony_1000records(self):
         # Get data to migrate
-        with self.createPlantmonitorDB() as db:
-            curr = db._client.cursor()
+        # Assumed there on db
+        numrecords=1000
+        # TODO insert to ponyORM
+        with orm.db_session:
+            with self.createPlantmonitorDB() as db:
+                migrateLegacyInverterTableToPony(db, numrecords=numrecords)
 
-            # TODO insert to ponyORM
+            numplants     = orm.count(p for p in Plant)
+            numinverters  = orm.count(i for i in Inverter)
+            numregistries = orm.count(r for r in InverterRegistry)
+            print("{} plants, {} inverters, {} registries".format(numplants, numinverters, numregistries))
 
-
-            # TODO Check that data has been insert
-
-            self.assertTrue(True)
+            self.assertEqual(numrecords, numregistries)
