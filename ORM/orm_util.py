@@ -22,26 +22,38 @@ from .models import (
     Forecast,
 )
 
-
 def setupDatabase(create_tables=True):
 
     from conf import config
 
     databaseInfo = config.DB_CONF
 
-    database.bind(**databaseInfo)
+    try:
+        # unbind necessary when mixing databases
+        database.bind(**databaseInfo)
+    except orm.core.BindingError as e:
+        # TODO: capturing this exception is pontentially dangerous if databaseInfo changed
+        # let's be sure
+        with orm.db_session:
+            dsn = database.get_connection().dsn
+            dsnDict = {pair.split('=')[0]:pair.split('=')[1] for pair in dsn.split(' ')}
+            dsnDict['provider'] = database.provider_name
+            dsnDict['database'] = dsnDict.pop('dbname')
+            if not databaseInfo == dsnDict:
+                 print("Database was already bound to a different database.")
+                 raise e
+    else:
+        # requires superuser privileges
+        # with orm.db_session:
+        #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
 
-    # requires superuser privileges
-    # with orm.db_session:
-    #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
+        #orm.set_sql_debug(True)
 
-    #orm.set_sql_debug(True)
+        # map the models to the database
+        # and create the tables, if they don't exist
+        database.generate_mapping(create_tables=create_tables)
 
-    # map the models to the database
-    # and create the tables, if they don't exist
-    database.generate_mapping(create_tables=create_tables)
-
-    print(f"Database {databaseInfo['database']} generated")
+        print(f"Database {databaseInfo['database']} generated")
 
     # if env_active == env['plantmonitor_server']:
     #     tablesToTimescale = getTablesToTimescale()

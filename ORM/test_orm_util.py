@@ -223,6 +223,34 @@ class ORMSetup_Test(unittest.TestCase):
                   r4_w: 0
                 """)
 
+    def test_InverterRegistry_singleEntry(self):
+        with orm.db_session:
+            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            inverter = Inverter(name='Mary', plant=alcolea)
+            inverterDataDict = {
+                'time': datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
+                'daily_energy_h_wh': 10,
+                'daily_energy_l_wh': 10,
+                'e_total_h_wh': 10,
+                'e_total_l_wh': 10,
+                'h_total_h_h': 10,
+                'h_total_l_h': 10,
+                'pac_r_w': 10,
+                'pac_s_w': 10,
+                'pac_t_w': 10,
+                'powerreactive_t_v': 10,
+                'powerreactive_r_v': 10,
+                'powerreactive_s_v': 10,
+                'temp_inv_c': 10
+            }
+
+            inverter.insertRegistry(**inverterDataDict)
+            expectedRegistry = inverterDataDict
+            expectedRegistry['inverter'] = 1
+
+            oneRegistry = orm.select(r for r in InverterRegistry).first()
+            oneRegistryList = oneRegistry.to_dict()
+            self.assertDictEqual(expectedRegistry, oneRegistryList)
 
     def test_InsertOnePlantOneMeterOneRegistry(self):
         with orm.db_session:
