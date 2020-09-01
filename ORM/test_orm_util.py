@@ -110,7 +110,7 @@ class ORMSetup_Test(unittest.TestCase):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
 
-    def test_timescaleTables(self):
+    def __test_timescaleTables(self):
         with orm.db_session:
             # orm.set_sql_debug(True)
 

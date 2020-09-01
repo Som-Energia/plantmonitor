@@ -3,6 +3,8 @@ import os
 
 from pony import orm
 
+from conf.config import env, env_active
+
 from .models import database
 
 from .models import (
@@ -55,10 +57,11 @@ def setupDatabase(create_tables=True):
 
         print(f"Database {databaseInfo['database']} generated")
 
-    # if env_active == env['plantmonitor_server']:
-    #     tablesToTimescale = getTablesToTimescale()
-    #     print("timescaling the tables {}".format(tablesToTimescale))
-    #     timescaleTables()
+        if env_active == env['plantmonitor_server'] or env_active == env['test']:
+            tablesToTimescale = getTablesToTimescale()
+            print("timescaling the tables {}".format(tablesToTimescale))
+            with orm.db_session:
+                timescaleTables(tablesToTimescale)
 
 
 def getTablesToTimescale():
