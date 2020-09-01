@@ -24,9 +24,9 @@ from .models import (
 
 def setupDatabase(create_tables=True):
 
-    from conf import config
+    from conf import dbinfo
 
-    databaseInfo = config.DB_CONF
+    databaseInfo = dbinfo.DB_CONF
 
     try:
         # unbind necessary when mixing databases

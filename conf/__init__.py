@@ -36,7 +36,7 @@ class Settings(object):
 
 print('Using settings module environment {}'.format(os.getenv(ENVIRONMENT_VARIABLE)))
 
-config = Settings(os.getenv(ENVIRONMENT_VARIABLE))
+dbinfo = Settings(os.getenv(ENVIRONMENT_VARIABLE))
 
 
 def configure_logging(logging_config):

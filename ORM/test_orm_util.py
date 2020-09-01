@@ -42,8 +42,8 @@ class ORMSetup_Test(unittest.TestCase):
 
     def setUp(self):
 
-        from conf import config
-        self.assertEqual(config.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import dbinfo
+        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
@@ -103,8 +103,8 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
-        from conf import config
-        self.assertEqual(config.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import dbinfo
+        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
     def test_connection(self):
         with orm.db_session:

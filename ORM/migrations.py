@@ -223,6 +223,6 @@ def migrateLegacyToPony(db, excerpt=False):
 
 if __name__ == "__main__":
 
-    from conf import config
-    with PlantmonitorDB(config) as db:
+    from conf import dbinfo
+    with PlantmonitorDB(dbinfo) as db:
         migrateLegacyToPony(db)
