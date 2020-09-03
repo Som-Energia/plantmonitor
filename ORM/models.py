@@ -13,7 +13,6 @@ from pony.orm import (
     Set,
     PrimaryKey,
     unicode,
-
     )
 
 database = orm.Database()

@@ -61,7 +61,7 @@ def migrateLegacySensorTableToPony(db, plantName, tableName, deviceType, dataCol
     else:
         raise PlantmonitorDBError("Unknown device type {}".format(deviceType))
 
-    curr.execute("select time, {} from {} limit {};".format(dataColumnName, tableName, sampleSize))
+    curr.execute("select distinct on (time) time, {} from {} limit {};".format(dataColumnName, tableName, sampleSize))
     while True:
         records = curr.fetchmany(sampleSize)
         if not records:
@@ -122,11 +122,22 @@ def migrateLegacyMeterTableToPony(db, excerpt=False):
         plant = plants[0]
 
         device = Meter(name=deviceName, plant=plant)
+
+        if logging.INFO >= logger.level:
+            curr.execute("select count(*) from sistema_contador where name = '{}' group by name;".format(deviceName))
+            totalrecords = curr.fetchone()[0]
+            logger.info("Meter {} has {} records".format(deviceName, totalrecords))
+
+        i = 0
         curr.execute("select distinct on (time, name) * from sistema_contador where name = '{}';".format(deviceName))
         while True:
             records = curr.fetchmany(sampleSize)
             if not records:
                 break
+
+            if logging.DEBUG >= logger.level:
+                i += 1
+                logger.debug("Inserting {}/{} records for meter {}".format(i*sampleSize, totalrecords, deviceName))
 
             for r in records:
                 time, name, *values = r
@@ -142,7 +153,7 @@ def migrateLegacyInverterTableToPony(db, excerpt):
     if excerpt:
         sampleSize = 10
     else:
-        sampleSize = 1000
+        sampleSize = 10000
 
     curr = db._client.cursor()
 
@@ -166,16 +177,29 @@ def migrateLegacyInverterTableToPony(db, excerpt):
         plant = Plant.get(name=plantName)
         if not plant:
             plant = Plant(name=plantName, codename=plantName)
+
+        logger.info("Migrating inverters from plant {}".format(plantName))
+
         curr.execute("select inverter_name from sistema_inversor where location = '{}' group by inverter_name order by inverter_name asc;".format(plantName))
         inverterNames = [r[0] for r in curr.fetchall()]
         for inverterName in inverterNames:
             inverter = Inverter(name=inverterName, plant=plant)
             sensorIrradiation = SensorIrradiation(name=inverterName, plant=plant)
+            if logging.INFO >= logger.level:
+                curr.execute("select distinct on (location, inverter_name) count(*) from sistema_inversor where location = '{}' and inverter_name = '{}' group by location, inverter_name;".format(plantName, inverterName))
+                totalrecords = curr.fetchone()[0]
+                logger.info("Inverter {} has {} records".format(inverterName, totalrecords))
+            i = 0
             curr.execute("select distinct on (time, location, inverter_name) * from sistema_inversor where location = '{}' and inverter_name = '{}';".format(plantName, inverterName))
             while True:
                 records = curr.fetchmany(sampleSize)
                 if not records:
+                    logger.debug("No more records for inverter".format(inverterName))
                     break
+
+                if logging.DEBUG >= logger.level:
+                    i += 1
+                    logger.debug("Inserting {}/{} records for inverter {}".format(i*sampleSize, totalrecords, inverterName))
 
                 for r in records:
                     time, inverter_name, location, HR_1, HR0_1, HR2_2, HR3_3, HR4_4, *values, probe1value, probe2value, probe3value, probe4value, temp_inv  = r
@@ -186,43 +210,59 @@ def migrateLegacyInverterTableToPony(db, excerpt):
                 if excerpt:
                     break
 
+    logger.info("Inverters migrated")
 
-def migrateLegacyToPony(db, excerpt=False):
+
+def migrateLegacyToPony(db, excerpt=False, skipList=[]):
     plantName = 'Alcolea'
-    createPlants()
-    migrateLegacyInverterTableToPony(db, excerpt)
-    migrateLegacyMeterTableToPony(db, excerpt)
-    migrateLegacySensorTableToPony(
-        db,
-        plantName=plantName,
-        tableName='sensors',
-        deviceType='SensorIrradiation',
-        dataColumnName='irradiation_w_m2',
-        deviceName='irradiation_alcolea',
-        excerpt=excerpt
-    )
-    migrateLegacySensorTableToPony(
-        db,
-        plantName=plantName,
-        tableName='sensors',
-        deviceType='SensorTemperature',
-        dataColumnName='temperature_celsius',
-        deviceName='thermometer_alcolea',
-        excerpt=excerpt
-    )
-    migrateLegacySensorTableToPony(
-        db,
-        plantName=plantName,
-        tableName='integrated_sensors',
-        deviceType='SensorIntegratedIrradiation',
-        dataColumnName='integral_irradiation_wh_m2',
-        deviceName='integratedIrradiation_alcolea',
-        excerpt=excerpt
-    )
 
+    if 'plants' not in skipList:
+        logger.info("Create Plants")
+        createPlants()
+
+    if 'inverters' not in skipList:
+        logger.info("Migrate Inverters")
+        migrateLegacyInverterTableToPony(db, excerpt)
+
+    if 'meters' not in skipList:
+        logger.info("Migrate Meters")
+        migrateLegacyMeterTableToPony(db, excerpt)
+
+    if 'sensors' not in skipList:
+        logger.info("Migrate SensorIrradiation")
+        migrateLegacySensorTableToPony(
+            db,
+            plantName=plantName,
+            tableName='sensors',
+            deviceType='SensorIrradiation',
+            dataColumnName='irradiation_w_m2',
+            deviceName='irradiation_alcolea',
+            excerpt=excerpt
+        )
+        logger.info("Migrate SensorTemperature")
+        migrateLegacySensorTableToPony(
+            db,
+            plantName=plantName,
+            tableName='sensors',
+            deviceType='SensorTemperature',
+            dataColumnName='temperature_celsius',
+            deviceName='thermometer_alcolea',
+            excerpt=excerpt
+        )
+        logger.info("Migrate SensorIntegratedIrradiation")
+        migrateLegacySensorTableToPony(
+            db,
+            plantName=plantName,
+            tableName='integrated_sensors',
+            deviceType='SensorIntegratedIrradiation',
+            dataColumnName='integral_irradiation_wh_m2',
+            deviceName='integratedIrradiation_alcolea',
+            excerpt=excerpt
+        )
+    logger.info("Migration complete")
 
 if __name__ == "__main__":
 
-    from conf import dbinfo
-    with PlantmonitorDB(dbinfo) as db:
+    configdb = ns.load('conf/configlegacydb.yaml')
+    with PlantmonitorDB(configdb) as db:
         migrateLegacyToPony(db)

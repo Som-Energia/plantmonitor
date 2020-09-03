@@ -11,6 +11,8 @@ from .models import (
     Plant,
     Meter,
     MeterRegistry,
+    Inverter,
+    InverterRegistry,
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
@@ -24,11 +26,26 @@ from .models import (
     Forecast,
 )
 
-def setupDatabase(create_tables=True):
+def dropTables():
 
     from conf import dbinfo
 
     databaseInfo = dbinfo.DB_CONF
+
+    print("dropping tables in {}".format(databaseInfo))
+
+    database.bind(**databaseInfo)
+    database.generate_mapping(check_tables=False, create_tables=False)
+    database.drop_all_tables(with_all_data=True)
+    database.disconnect()
+
+def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
+
+    from conf import dbinfo
+
+    databaseInfo = dbinfo.DB_CONF
+
+    print(databaseInfo)
 
     try:
         # unbind necessary when mixing databases
@@ -45,23 +62,34 @@ def setupDatabase(create_tables=True):
                  print("Database was already bound to a different database.")
                  raise e
     else:
+        #this `else` will not run if the database was already connected
+        # (necessary for test multiple SetUps until we fix this)
+
         # requires superuser privileges
         # with orm.db_session:
         #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
 
         #orm.set_sql_debug(True)
+        database.generate_mapping(create_tables=False, check_tables=False)
+
+        if drop_tables:
+            print("Dropping all tables")
+            database.drop_all_tables()
+        # database.disconnect()
 
         # map the models to the database
         # and create the tables, if they don't exist
-        database.generate_mapping(create_tables=create_tables)
+        if create_tables:
+            database.create_tables()
 
-        print(f"Database {databaseInfo['database']} generated")
+            print(f"Database {databaseInfo['database']} generated")
 
         if env_active == env['plantmonitor_server'] or env_active == env['test']:
-            tablesToTimescale = getTablesToTimescale()
-            print("timescaling the tables {}".format(tablesToTimescale))
-            with orm.db_session:
-                timescaleTables(tablesToTimescale)
+            if timescale_tables:
+                tablesToTimescale = getTablesToTimescale()
+                print("timescaling the tables {}".format(tablesToTimescale))
+                with orm.db_session:
+                    timescaleTables(tablesToTimescale)
 
 
 def getTablesToTimescale():
