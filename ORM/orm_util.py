@@ -26,6 +26,14 @@ from .models import (
     Forecast,
 )
 
+from conf.logging_configuration import LOGGING
+
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
+
+
 def dropTables():
 
     from conf import dbinfo
@@ -39,13 +47,14 @@ def dropTables():
     database.drop_all_tables(with_all_data=True)
     database.disconnect()
 
+
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
     from conf import dbinfo
 
     databaseInfo = dbinfo.DB_CONF
 
-    print(databaseInfo)
+    # print(databaseInfo)
 
     try:
         # unbind necessary when mixing databases
@@ -82,12 +91,12 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
         if create_tables:
             database.create_tables()
 
-            print(f"Database {databaseInfo['database']} generated")
+            logger.info(f"Database {databaseInfo['database']} generated")
 
         if env_active == env['plantmonitor_server'] or env_active == env['test']:
             if timescale_tables:
                 tablesToTimescale = getTablesToTimescale()
-                print("timescaling the tables {}".format(tablesToTimescale))
+                logger.info("Timescaling the tables {}".format(tablesToTimescale))
                 with orm.db_session:
                     timescaleTables(tablesToTimescale)
 

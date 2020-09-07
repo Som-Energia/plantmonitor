@@ -155,6 +155,7 @@ class PlantmonitorDBMock(object):
             return None
         return records[-1][0]
 
+
 class PlantmonitorDB:
 
     # lingua franca: {facility: [('time', value)]}

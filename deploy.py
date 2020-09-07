@@ -34,10 +34,8 @@ from meteologica.plantmonitor_db import (
 
 
 def legacyMigrate(skipList=[]):
-    configdb = ns.load('conf/configlegacydb.yaml')
-    with PlantmonitorDB(configdb) as db:
-        with orm.db_session:
-            migrateLegacyToPony(db, skipList=skipList)
+    configdbns = ns.load('conf/configlegacydb.yaml')
+    migrateLegacyToPony(configdbns, skipList=skipList)
 
 
 @click.command()

@@ -23,10 +23,10 @@ class Plant(database.Entity):
     name = Required(unicode)
     codename = Required(unicode)
     description = Optional(str)
-    meters = Set('Meter')
-    inverters = Set('Inverter')
-    sensors = Set('Sensor')
-    forecastMetadatas = Set('ForecastMetadata')
+    meters = Set('Meter', lazy=True)
+    inverters = Set('Inverter', lazy=True)
+    sensors = Set('Sensor', lazy=True)
+    forecastMetadatas = Set('ForecastMetadata', lazy=True)
 
     def importPlant(self, nsplant):
         for plant_foo in nsplant.plants:
@@ -67,7 +67,7 @@ class Meter(database.Entity):
 
     plant = Required(Plant)
     name = Required(unicode)
-    meterRegistries = Set('MeterRegistry')
+    meterRegistries = Set('MeterRegistry', lazy=True)
 
     def insertRegistry(self, export_energy_wh, import_energy_wh, r1_w, r2_w, r3_w, r4_w, time=None):
         return MeterRegistry(
@@ -99,7 +99,7 @@ class Inverter(database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
-    inverterRegistries = Set('InverterRegistry')
+    inverterRegistries = Set('InverterRegistry', lazy=True)
 
     def insertRegistry(self,
         daily_energy_h_wh,
@@ -165,7 +165,7 @@ class Sensor(database.Entity):
 
 class SensorIrradiation(Sensor):
 
-    sensorRegistries = Set('SensorIrradiationRegistry')
+    sensorRegistries = Set('SensorIrradiationRegistry', lazy=True)
 
     def insertRegistry(self, irradiation_w_m2, time=None):
         return SensorIrradiationRegistry(
@@ -177,7 +177,7 @@ class SensorIrradiation(Sensor):
 
 class SensorTemperature(Sensor):
 
-    sensorRegistries = Set('SensorTemperatureRegistry')
+    sensorRegistries = Set('SensorTemperatureRegistry', lazy=True)
 
     def insertRegistry(self, temperature_c, time=None):
         return SensorTemperatureRegistry(
@@ -189,7 +189,7 @@ class SensorTemperature(Sensor):
 
 class SensorIntegratedIrradiation(Sensor):
 
-    sensorRegistries = Set('IntegratedIrradiationRegistry')
+    sensorRegistries = Set('IntegratedIrradiationRegistry', lazy=True)
 
     def insertRegistry(self, integratedIrradiation_wh_m2, time=None):
         return IntegratedIrradiationRegistry(
@@ -226,7 +226,7 @@ class IntegratedIrradiationRegistry(database.Entity):
 class ForecastVariable(database.Entity):
 
     name = Required(unicode, unique=True)
-    forecastMetadatas = Set('ForecastMetadata')
+    forecastMetadatas = Set('ForecastMetadata', lazy=True)
 
 
 class ForecastPredictor(database.Entity):
@@ -243,7 +243,7 @@ class ForecastMetadata(database.Entity):
     predictor = Optional(ForecastPredictor)
     forecastdate = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     granularity = Optional(int)
-    forecasts = Set('Forecast')
+    forecasts = Set('Forecast', lazy=True)
 
     def insertForecast(self, percentil10, percentil50, percentil90, time=None):
         return Forecast(

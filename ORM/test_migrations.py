@@ -53,6 +53,7 @@ from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
 setupDatabase()
 
+@unittest.skipIf(True, "requires legacy database")
 class Migrations_Test(unittest.TestCase):
 
     from yamlns.testutils import assertNsEqual
@@ -77,11 +78,11 @@ class Migrations_Test(unittest.TestCase):
         database.create_tables()
 
         # database.generate_mapping(create_tables=True)
-        orm.db_session.__enter__()
+        # orm.db_session.__enter__()
 
     def tearDownORM(self):
         orm.rollback()
-        orm.db_session.__exit__()
+        # orm.db_session.__exit__()
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
 
@@ -203,9 +204,9 @@ class Migrations_Test(unittest.TestCase):
             alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
             alcolea = alcolea.importPlant(alcoleaPlantYAML)
 
-        #TODO test the whole fixture, not just the plant data
-        plantns = alcolea.exportPlant()
-        self.assertNsEqual(plantns, alcoleaPlantYAML)
+            #TODO test the whole fixture, not just the plant data
+            plantns = alcolea.exportPlant()
+            self.assertNsEqual(plantns, alcoleaPlantYAML)
 
     def test_db_records(self):
         # Get data to migrate
@@ -218,12 +219,9 @@ class Migrations_Test(unittest.TestCase):
 
             curr.execute("select count(*) from sistema_inversor;")
             numrecords = curr.fetchone()[0]
-            print(numrecords)
             self.assertGreater(numrecords, 100)
             curr.execute('select time, inverter_name, location, "1HR", daily_energy_h, daily_energy_l from sistema_inversor;')
             records = curr.fetchmany(2)
-            print(len(records))
-            print(records)
 
             # WARNING fetchall does not work on timescale tables / ultrabig tables
             # we might need server-side cursors
@@ -238,7 +236,7 @@ class Migrations_Test(unittest.TestCase):
                 ]
             )
 
-    def test_registryInsert_PhantomObjectDebug(self):
+    def __test_registryInsert_PhantomObjectDebug(self):
         with orm.db_session:
             plant = Plant(name='alcolea', codename='alcolea')
             inverter = Inverter(name='inversor1', plant=plant)
@@ -258,15 +256,14 @@ class Migrations_Test(unittest.TestCase):
         deviceColumnName = 'contador'
         deviceType = 'Meter'
         with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyInverterTableToPony(
-                    db,
-                    tableName=tableName,
-                    plantColumnName=plantColumnName,
-                    deviceColumnName=deviceColumnName,
-                    deviceType=deviceType,
-                    excerpt=True
-                )
+            migrateLegacyInverterTableToPony(
+                self.createConfig(),
+                tableName=tableName,
+                plantColumnName=plantColumnName,
+                deviceColumnName=deviceColumnName,
+                deviceType=deviceType,
+                excerpt=True
+            )
 
     def test_migrateLegacySensorTableToPony_sensor(self):
         tableName = 'sensors'
@@ -274,17 +271,16 @@ class Migrations_Test(unittest.TestCase):
         plantName = 'Alcolea'
         deviceName = 'irradiation_alcolea'
         deviceType = 'SensorIrradiation'
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacySensorTableToPony(
-                    db,
-                    plantName=plantName,
-                    tableName=tableName,
-                    deviceType=deviceType,
-                    dataColumnName=dataColumnName,
-                    deviceName=deviceName,
-                    excerpt=True
-                )
+
+        migrateLegacySensorTableToPony(
+            self.createConfig(),
+            plantName=plantName,
+            tableName=tableName,
+            deviceType=deviceType,
+            dataColumnName=dataColumnName,
+            deviceName=deviceName,
+            excerpt=True
+        )
 
         with self.createPlantmonitorDB() as db:
             # retrieve expected
@@ -296,10 +292,11 @@ class Migrations_Test(unittest.TestCase):
         expectedValue = expectedFirstRegistry[1]
         expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedValue]
 
-        query = SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
-        migratedRegistry = query.first()
-        id, time, migratedValue = list(migratedRegistry.to_dict().values())
-        migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, migratedValue]
+        with orm.db_session:
+            query = SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
+            migratedRegistry = query.first()
+            id, time, migratedValue = list(migratedRegistry.to_dict().values())
+            migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, migratedValue]
 
         self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
 
@@ -307,10 +304,8 @@ class Migrations_Test(unittest.TestCase):
     def test_migrateLegacyMeterTableToPony_checkFacilityMeter(self):
         plantName = 'Alcolea'
 
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                createPlants()
-                migrateLegacyMeterTableToPony(db, excerpt=True)
+        createPlants()
+        migrateLegacyMeterTableToPony(self.createConfig(), excerpt=True)
 
         dbFacilityMeter = {}
         with self.createPlantmonitorDB() as db:
@@ -321,9 +316,10 @@ class Migrations_Test(unittest.TestCase):
         excludedFacilities = ['SomEnergia_Exiom', 'SomEnergia_Fontivsolar', 'SomEnergia_La_Florida', 'SomEnergia_Alcolea']
         dbFacilityMeter = set((f,m) for f,m in dbFacilityMeter if f not in excludedFacilities)
 
-        q = orm.select((m.plant.codename, m.name) for m in Meter)
-        print(q[:])
-        ormFacilityMeter = set(q[:])
+        with orm.db_session:
+            q = orm.select((m.plant.codename, m.name) for m in Meter)
+            ormFacilityMeter = set(q[:])
+
         # fetch facilitymeter data
         self.assertSetEqual(ormFacilityMeter, dbFacilityMeter)
 
@@ -331,10 +327,8 @@ class Migrations_Test(unittest.TestCase):
         plantName = 'Alcolea'
         meterName = '501600324'
 
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                createPlants()
-                migrateLegacyMeterTableToPony(db, excerpt=True)
+        createPlants()
+        migrateLegacyMeterTableToPony(self.createConfig(), excerpt=True)
 
         with self.createPlantmonitorDB() as db:
             # retrieve expected
@@ -347,10 +341,12 @@ class Migrations_Test(unittest.TestCase):
         expectedValuesList = expectedFirstRegistry[2:]
         expectedMigrateRegistryList = [expectedTime, plantName, expectedMeterName] + expectedValuesList
 
-        query = MeterRegistry.select().order_by(MeterRegistry.time)
-        migratedRegistry = query.first()
-        id, time, *migratedRegistrylist = list(migratedRegistry.to_dict().values())
-        migratedRegistryList = [time, migratedRegistry.meter.plant.name, migratedRegistry.meter.name] + migratedRegistrylist
+        with orm.db_session:
+            query = MeterRegistry.select().order_by(MeterRegistry.time)
+            migratedRegistry = query.first()
+
+            id, time, *migratedRegistrylist = list(migratedRegistry.to_dict().values())
+            migratedRegistryList = [time, migratedRegistry.meter.plant.name, migratedRegistry.meter.name] + migratedRegistrylist
 
         self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
 
@@ -359,16 +355,15 @@ class Migrations_Test(unittest.TestCase):
         plantColumnName = None
         deviceColumnName = None
         deviceType = 'SensorIrradiation'
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyInverterTableToPony(
-                    db,
-                    tableName=tableName,
-                    plantColumnName=plantColumnName,
-                    deviceColumnName=deviceColumnName,
-                    deviceType=deviceType,
-                    excerpt=True
-                )
+
+        migrateLegacyInverterTableToPony(
+            self.createConfig(),
+            tableName=tableName,
+            plantColumnName=plantColumnName,
+            deviceColumnName=deviceColumnName,
+            deviceType=deviceType,
+            excerpt=True
+        )
 
     def test_migrateLegacyInverterTableToPony_10records(self):
         # Get data to migrate
@@ -379,41 +374,38 @@ class Migrations_Test(unittest.TestCase):
         plantName = 'Alcolea'
         inversorName = 'inversor1'
 
+        migrateLegacyInverterTableToPony(self.createConfig(), excerpt=True)
+
+        with self.createPlantmonitorDB() as db:
+            # retrieve expected
+            curr = db._client.cursor()
+            #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
+            curr.execute("select distinct on (time, location, inverter_name) * from sistema_inversor where location = '{}' and inverter_name = '{}' limit 1;".format(plantName, inversorName))
+            expectedFirstRegistry = list(curr.fetchone())
+
         with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyInverterTableToPony(db, excerpt=True)
-
-            with self.createPlantmonitorDB() as db:
-                # retrieve expected
-                curr = db._client.cursor()
-                #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
-                curr.execute("select distinct on (time, location, inverter_name) * from sistema_inversor where location = '{}' and inverter_name = '{}' limit 1;".format(plantName, inversorName))
-                expectedFirstRegistry = list(curr.fetchone())
-
             numplants     = orm.count(p for p in Plant)
             numinverters  = orm.count(i for i in Inverter)
             numregistries = orm.count(r for r in InverterRegistry)
-            print("{} plants, {} inverters, {} registries".format(numplants, numinverters, numregistries))
             self.assertEqual(numinverters*numrecords, numregistries)
 
-            expectedTime = expectedFirstRegistry[0].replace(tzinfo=dt.timezone.utc)
-            expectedPlant = expectedFirstRegistry[2]
-            expectedInverter = expectedFirstRegistry[1]
-            expectedList = expectedFirstRegistry[8:-5]
-            expectedTempInv = expectedFirstRegistry[-1]
-            expectedMigrateRegistryList = [expectedTime, expectedPlant, expectedInverter] + expectedList + [expectedTempInv]
+        expectedTime = expectedFirstRegistry[0].replace(tzinfo=dt.timezone.utc)
+        expectedPlant = expectedFirstRegistry[2]
+        expectedInverter = expectedFirstRegistry[1]
+        expectedList = expectedFirstRegistry[8:-5]
+        expectedTempInv = expectedFirstRegistry[-1]
+        expectedMigrateRegistryList = [expectedTime, expectedPlant, expectedInverter] + expectedList + [expectedTempInv]
 
+        with orm.db_session:
             query = orm.select(r for r in InverterRegistry if r.inverter.name == expectedInverter and r.inverter.plant.name == expectedPlant).order_by(InverterRegistry.time)
             migratedRegistry = query.first()
             id, time, *migratedRegistryList = list(migratedRegistry.to_dict().values())
             migratedRegistryList = [time, migratedRegistry.inverter.plant.name, migratedRegistry.inverter.name] + migratedRegistryList
 
-            self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
+        self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
 
-    def test_fullMigration_plants(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyToPony(db, excerpt=True)
+    def _test_fullMigration_plants(self):
+        migrateLegacyToPony(self.createConfig(), excerpt=True)
 
         expectedPlants = [
             'Alcolea',
@@ -431,9 +423,7 @@ class Migrations_Test(unittest.TestCase):
         self.assertCountEqual(plants, expectedPlants)
 
     def test_fullMigration_FloridaCheck(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyToPony(db, excerpt=True)
+        migrateLegacyToPony(self.createConfig(), excerpt=True)
 
         with orm.db_session:
             plants = list(orm.select(p.name for p in Plant if p.name == "La Florida"))
@@ -442,67 +432,64 @@ class Migrations_Test(unittest.TestCase):
 
     def __test_migrateLegacyInverterTableToPony_DaylightSavingTime(self):
         # TODO
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyInverterTableToPony(db, excerpt=False)
+        migrateLegacyInverterTableToPony(self.createConfig(), excerpt=False)
 
 
     # skipped per slow, but numbers don't match 1769262 vs 1769465
     def __test_fullMigration_InverterCount_noexcerpt(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyInverterTableToPony(db, excerpt=False)
+        migrateLegacyInverterTableToPony(self.createConfig(), excerpt=False)
+
+        with self.createPlantmonitorDB() as db:
+            curr = db._client.cursor()
+            #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
+            curr.execute("select count(distinct (time, location, inverter_name)) from sistema_inversor")
+            expectednumregistries = curr.fetchone()[0]
 
         with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                curr = db._client.cursor()
-                #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
-                curr.execute("select count(distinct (time, location, inverter_name)) from sistema_inversor")
-                expectednumregistries = curr.fetchone()[0]
+            numregistries = orm.count(r for r in InverterRegistry)
 
-        numregistries = orm.count(r for r in InverterRegistry)
         self.assertEqual(numregistries, expectednumregistries)
 
     # TODO there are repeated records 2020-02-26 15:00:00 with different energy values
     # How does distinct choose one
     def __test_fullMigration_MeterCount_noexcerpt(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                createPlants()
-                migrateLegacyMeterTableToPony(db, excerpt=True)
 
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                curr = db._client.cursor()
-                #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
-                curr.execute("select count(distinct (time, name)) from sistema_contador")
-                expectednumregistries = curr.fetchone()[0]
+        migrateLegacyMeterTableToPony(self.createConfig(), excerpt=True)
+
+        with self.createPlantmonitorDB() as db:
+            curr = db._client.cursor()
+            #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
+            curr.execute("select count(distinct (time, name)) from sistema_contador")
+            expectednumregistries = curr.fetchone()[0]
 
         numregistries = orm.count(r for r in MeterRegistry)
         self.assertEqual(numregistries, expectednumregistries)
 
     def __test_fullMigration_noexcerpt(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyToPony(db, excerpt=True)
+
+        migrateLegacyToPony(self.createConfig(), excerpt=False)
+
+        with self.createPlantmonitorDB() as db:
+            curr = db._client.cursor()
+            #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
+            curr.execute("select count(distinct (time, location, inverter_name)) from sistema_inversor")
+            expectednumInverterRegistries = curr.fetchone()[0]
+            curr.execute("select count(*) from sistema_contador")
+            expectednumMeterRegistries = curr.fetchone()[0]
 
         with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                curr = db._client.cursor()
-                #curr.execute("select * from sistema_inversor where order by location, inverter_name, time desc limit 10;")
-                curr.execute("select count(distinct (time, location, inverter_name)) from sistema_inversor")
-                expectednumInverterRegistries = curr.fetchone()[0]
-                curr.execute("select count(*) from sistema_contador")
-                expectednumMeterRegistries = curr.fetchone()[0]
-
-        numInverterRegistries = orm.count(r for r in InverterRegistry)
-        self.assertEqual(numInverterRegistries, expectednumInverterRegistries)
-        numMeterRegistries = orm.count(r for r in MeterRegistry)
-        self.assertEqual(numMeterRegistries, expectednumMeterRegistries)
+            numInverterRegistries = orm.count(r for r in InverterRegistry)
+            self.assertEqual(numInverterRegistries, expectednumInverterRegistries)
+            numMeterRegistries = orm.count(r for r in MeterRegistry)
+            self.assertEqual(numMeterRegistries, expectednumMeterRegistries)
 
     def test_fullMigration_excerpt(self):
-        with orm.db_session:
-            with self.createPlantmonitorDB() as db:
-                migrateLegacyToPony(db, excerpt=True)
+        expectednumInverterRegistries = 60
+        expectednumMeterRegistries = 70
+        migrateLegacyToPony(self.createConfig(), excerpt=True)
 
-        # TODO more asserts
+        with orm.db_session:
+            numInverterRegistries = orm.count(r for r in InverterRegistry)
+            self.assertEqual(numInverterRegistries, expectednumInverterRegistries)
+            numMeterRegistries = orm.count(r for r in MeterRegistry)
+            self.assertEqual(numMeterRegistries, expectednumMeterRegistries)
