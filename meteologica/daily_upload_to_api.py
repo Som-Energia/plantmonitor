@@ -52,6 +52,8 @@ def upload_meter_data(configdb, test_env=True):
         showResponses=False,
     )
 
+    excludedFacilities = ['SCSOM06'] # La Florida
+
     responses = {}
     start = time.perf_counter()
 
@@ -68,6 +70,9 @@ def upload_meter_data(configdb, test_env=True):
                 return
 
             for facility in facilities:
+                if facility in excludedFacilities:
+                    logger.info("Facility {} excluded manually".format(facility))
+                    continue
                 if facility not in apifacilities:
                     logger.warning("Facility {} in db is not known for the API, skipping.".format(facility))
                     responses[facility] = "INVALID_FACILITY_ID: {}".format(facility)

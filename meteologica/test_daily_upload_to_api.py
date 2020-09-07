@@ -134,6 +134,34 @@ class DailyUpload_Test(unittest.TestCase):
         with self.createApi() as api:
             self.assertEqual(api.lastDateUploaded(self.mainFacility()), todt("2040-01-02 01:00:00"))
 
+    def test_uploadProductionFromDB_ExcludedFacilities(self):
+        config = self.createConfig()
+
+        #change this once the erp hourly-quarterly is fixed
+        excludedFacility = 'SCSOM06'
+
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(excludedFacility, '432104321')
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234')
+            data = {
+                self.mainFacility(): [
+                    (todt("2040-01-02 00:00:00"), 10),
+                    (todt("2040-01-02 01:00:00"), 20),
+                ],
+                excludedFacility: [
+                    (todt("2040-01-02 00:00:00"), 210),
+                    (todt("2040-01-02 01:00:00"), 340),
+                ],
+            }
+            db.addMeterData(data)
+
+        responses = upload_meter_data(config, test_env=True)
+
+        self.assertDictEqual(
+            {self.mainFacility(): "OK"},
+            responses
+        )
+
     def test_uploadProductionFromDB_ManyFacilities(self):
         config = self.createConfig()
 
