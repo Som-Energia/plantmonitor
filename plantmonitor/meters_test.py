@@ -47,6 +47,14 @@ class Meters_Test(unittest.TestCase):
             ('2019-10-02 11:00:00', 1687, 0, 0, 22, 0, 0),
         ])
 
+    def test__quarterly_filter_time(self):
+        c = Client(**config.erppeek)
+        meter = '44711885'
+        measures = measures_from_date(c, meter,
+            beyond="2020-09-09 08:00:00",
+            upto  ="2020-09-09 09:00:00")
+        self.assertListEqual(measures,[])
+
     def test__measures_from_date__whenEmpty(self):
         c = Client(**config.erppeek)
         meter = '88300864'

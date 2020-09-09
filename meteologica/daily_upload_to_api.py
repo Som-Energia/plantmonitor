@@ -52,7 +52,7 @@ def upload_meter_data(configdb, test_env=True):
         showResponses=False,
     )
 
-    excludedFacilities = ['SCSOM06'] # La Florida
+    excludedFacilities = []
 
     responses = {}
     start = time.perf_counter()
