@@ -75,8 +75,12 @@ def migrateLegacySensorTableToPony(configdbns, plantName, tableName, deviceType,
                     valueInt = round(value)
                     device.insertRegistry(valueInt, time=time)
 
+                orm.commit()
+
                 if excerpt:
                     break
+
+        logger.debug("Exiting transaction...")
 
 
 @orm.db_session
@@ -121,8 +125,12 @@ def migrateLegacyMeterToPony(db, deviceName, plantName, sampleSize=10000, excerp
                 time = time.replace(tzinfo=dt.timezone.utc)
                 device.insertRegistry(*values, time=time)
 
+            orm.commit()
+
             if excerpt:
                 break
+
+        logger.debug("Exiting transaction...")
 
 
 def migrateLegacyMeterTableToPony(configdbns, excerpt=False):
@@ -163,6 +171,8 @@ def migrateLegacyMeterTableToPony(configdbns, excerpt=False):
 
             migrateLegacyMeterToPony(db, deviceName, plantName, sampleSize, excerpt)
 
+    logger.info("Meters migrated")
+
 
 def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, excerpt=False):
 
@@ -198,10 +208,14 @@ def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, e
                 inverter.insertRegistry(*values, temp_inv_c=temp_inv, time=time)
                 sensorIrradiation.insertRegistry(irradiation_w_m2=probe1value, time=time)
 
+            orm.commit()
+
             if excerpt:
                 break
 
         curr.close()
+
+        logger.debug("Exiting transaction...")
 
 
 def migrateLegacyInverterTableToPony(configdbns, excerpt):
@@ -247,6 +261,7 @@ def migrateLegacyInverterTableToPony(configdbns, excerpt):
         for inverterName in inverterNames:
             with PlantmonitorDB(configdbns) as db:
                 migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize, excerpt)
+                logger.debug("Inverter {} migrate".format(inverterName))
 
     logger.info("Inverters migrated")
 

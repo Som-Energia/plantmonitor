@@ -20,7 +20,7 @@ database = orm.Database()
 
 class Plant(database.Entity):
 
-    name = Required(unicode)
+    name = Required(unicode, unique=True)
     codename = Required(unicode)
     description = Optional(str)
     meters = Set('Meter', lazy=True)
