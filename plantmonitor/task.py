@@ -104,7 +104,7 @@ def task():
 
                 publish_influx(metrics,flux_client)
 
-        publish_timescale(metrics, db=config.plant_postgres)
+            publish_timescale(metrics, db=config.plant_postgres)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
