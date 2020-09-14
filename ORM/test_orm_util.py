@@ -252,6 +252,9 @@ class ORMSetup_Test(unittest.TestCase):
             oneRegistryList = oneRegistry.to_dict()
             self.assertDictEqual(expectedRegistry, oneRegistryList)
 
+    def test_InvertersRegistries_multipleRegistries(self):
+        pass
+
     def test_InsertOnePlantOneMeterOneRegistry(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')

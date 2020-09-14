@@ -28,6 +28,23 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+import os
+
+from pony import orm
+
+import datetime
+
+from ORM.models import database
+from ORM.models import (
+    Plant,
+    Meter,
+    MeterRegistry,
+    Inverter,
+    InverterRegistry,
+)
+
+from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+
 def client_db(db):
     try:
         logger.info("Connecting to Influxdb")
@@ -43,6 +60,14 @@ def client_db(db):
         flux_client = None
 
     return flux_client
+
+def publish_orm(metrics):
+    with orm.db_session:
+        plant = metrics['tags']['location']
+        inverter_name  = metrics['tags']['inverter_name']
+        inverter = Inverter(name=inverter_name, plant=plant)
+        inverterMetrics = metrics['fields']
+        inverter.insertRegistry(**inverterMetrics)
 
 def publish_influx(metrics,flux_client):
     flux_client.write_points([metrics] )
@@ -104,7 +129,8 @@ def task():
 
                 publish_influx(metrics,flux_client)
 
-        publish_timescale(metrics, db=config.plant_postgres)
+            publish_timescale(metrics, db=config.plant_postgres)
+            publish_orm(metrics)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
