@@ -97,6 +97,7 @@ def upload_meter_data(configdb, test_env=True):
 
                 # conversion from energy to power
                 # (Not necessary for hourly values)
+                logger.debug("Uploading {} data: {} ".format(facility, meterData[facility]))
                 response = api.uploadProduction(facility, meterData[facility])
                 responses[facility] = response
 
