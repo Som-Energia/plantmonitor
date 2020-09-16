@@ -1,0 +1,41 @@
+projects:
+  description: Scripts de Plantmonitor
+  scripts:
+    computeIntegral:
+      title: Compute integral file
+      description: >
+         Genera los valores de la integral de un fichero
+      script: python3 SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {ncolumna} {fitxerMesures} {fitxerSortida} {decimal} {separador}
+      parameters:
+        ncolumna:
+          description: Número de columna a integrar (començant en 0)
+          default: 1
+        fitxerMesures:
+          description: fichero csv, xls o xlsx con los datos para integrar
+          extension:
+            - csv
+            - xlsx
+            - xls
+          type: FILE
+        fitxerSortida:
+          type: FILEDOWN
+          extension: csv
+          filename: outputFileIntegrated_{ncolumna}_col.csv
+        decimal:
+          description: Tipus de coma decimal dels numeros
+          type: enum
+          options:
+            Punt: '.'
+            Coma: ','
+            Irrellevant: '.'
+        separador:
+          description: Tipus de separador de valors del csv d'entrada i/o sortida
+          type: enum
+          options:
+            PuntComa: ';'
+            Coma: ','
+            Espai: ' '
+            Irrellevant: ';'
+
+
+# vim: et ts=2 sw=2
