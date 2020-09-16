@@ -52,7 +52,7 @@ def upload_meter_data(configdb, test_env=True):
         showResponses=False,
     )
 
-    excludedFacilities = []
+    excludedFacilities = ['test_facility']
 
     responses = {}
     start = time.perf_counter()
