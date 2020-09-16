@@ -1,11 +1,11 @@
-projects:
+plantmonitor:
   description: Scripts de Plantmonitor
   scripts:
     computeIntegral:
       title: Compute integral file
       description: >
          Genera los valores de la integral de un fichero
-      script: python3 SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {ncolumna} {fitxerMesures} {fitxerSortida} {decimal} {separador}
+      script: python SOME_SRC/plantmonitor/scripts/integral_batch_file.py {ncolumna} {fitxerMesures} {fitxerSortida} {decimal} {separador}
       parameters:
         ncolumna:
           description: Número de columna a integrar (començant en 0)
