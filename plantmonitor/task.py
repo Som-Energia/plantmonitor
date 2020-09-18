@@ -61,12 +61,16 @@ def client_db(db):
 
     return flux_client
 
-def publish_orm(inverter,metrics):
+def publish_orm(metrics):
     with orm.db_session:
         plant_name = metrics['tags']['location']
         plant = Plant.get(name=plant_name)
+        if not plant:
+            return
         inverter_name  = metrics['tags']['inverter_name']
         inverter = Inverter.get(name=inverter_name, plant=plant)
+        if not inverter:
+            return
         inverterMetrics = metrics['fields']
         register_values_dict = dict(inverterMetrics)
         inverter.insertRegistry(**register_values_dict)
