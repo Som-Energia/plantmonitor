@@ -73,6 +73,8 @@ def publish_orm(plant_name, inverter_name=None, metrics=None):
 
 
 def publish_influx(plant_name, inverter_name, metrics, flux_client):
+    if flux_client is None:
+        return
     point = dict(
         mesurements = 'sistema_inversor',
         tags = dict(
@@ -127,9 +129,7 @@ def task():
             logger.info("**** Metrics - tag - location %s ****" % plant_name)
             logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
-            if flux_client is not None:
-                publish_influx(plant_name, inverter_name, inverter_registers, flux_client)
-
+            publish_influx(plant_name, inverter_name, inverter_registers, flux_client)
             publish_timescale(plant_name, inverter_name, inverter_registers, db=config.plant_postgres)
             publish_orm(plant_name, inverter_name, inverter_registers)
 
