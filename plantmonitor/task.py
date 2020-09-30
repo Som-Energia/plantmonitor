@@ -62,11 +62,6 @@ def client_db(db):
     return flux_client
 
 def publish_orm(plant_name, inverter_name=None, metrics=None):
-    if inverter_name is None:
-        influxData = plant_name
-        plant_name = influxData['tags']['location']
-        inverter_name  = influxData['tags']['inverter_name']
-        metrics = influxData['fields']
     with orm.db_session:
         plant = Plant.get(name=plant_name)
         if not plant:
