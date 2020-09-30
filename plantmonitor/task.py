@@ -61,19 +61,21 @@ def client_db(db):
 
     return flux_client
 
-def publish_orm(metrics):
+def publish_orm(plant_name, inverter_name=None, metrics=None):
+    if inverter_name is None:
+        influxData = plant_name
+        plant_name = influxData['tags']['location']
+        inverter_name  = influxData['tags']['inverter_name']
+        metrics = influxData['fields']
     with orm.db_session:
-        plant_name = metrics['tags']['location']
         plant = Plant.get(name=plant_name)
         if not plant:
             return
-        inverter_name  = metrics['tags']['inverter_name']
         inverter = Inverter.get(name=inverter_name, plant=plant)
         if not inverter:
             return
-        inverterMetrics = metrics['fields']
-        register_values_dict = dict(inverterMetrics)
-        inverter.insertRegistry(**register_values_dict)
+        inverter.insertRegistry(**dict(metrics))
+
 
 def publish_influx(metrics,flux_client):
     flux_client.write_points([metrics] )
@@ -136,7 +138,7 @@ def task():
                 publish_influx(metrics,flux_client)
 
             publish_timescale(metrics, db=config.plant_postgres)
-            publish_orm(metrics)
+            publish_orm(plant_name, inverter_name, inverter_registers)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)

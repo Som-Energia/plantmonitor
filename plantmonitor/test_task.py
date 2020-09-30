@@ -71,16 +71,11 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_PublishOrmOneInverterRegistry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name='Mary', plant=alcolea)
-            metrics = {}
-            tags = {} 
-            fields = {}
-            metrics['measurement'] = 'sistema_inversor'
-            tags['location'] = 'SomEnergia_Alcolea'
-            tags['inverter_name'] = 'Mary'
-            metrics['tags'] = tags
-            inverter_registers = ([
+            plant_name = 'SomEnergia_Alcolea'
+            inverter_name = 'Mary'
+            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = Inverter(name=inverter_name, plant=alcolea)
+            metrics = ([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -101,9 +96,8 @@ class ORMSetup_Test(unittest.TestCase):
                 # ('probe3value', 0),
                 # ('probe4value', 0),
                 ])
-            metrics['fields'] = inverter_registers
-        publish_orm(metrics)
-        expectedRegistry = dict(inverter_registers)
+        publish_orm(plant_name, inverter_name, metrics)
+        expectedRegistry = dict(metrics)
         expectedRegistry['inverter'] = 1
         with orm.db_session:
             oneRegistry = InverterRegistry[1,expectedRegistry['time']]
@@ -112,16 +106,11 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_PublishOrmIfInverterNotExist(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name='Alice', plant=alcolea)
-            metrics = {}
-            tags = {} 
-            fields = {}
-            metrics['measurement'] = 'sistema_inversor'
-            tags['location'] = 'SomEnergia_Alcolea'
-            tags['inverter_name'] = 'Bob'
-            metrics['tags'] = tags
-            inverter_registers = ([
+            plant_name = 'SomEnergia_Alcolea'
+            inverter_name = 'Inverter1'
+            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = Inverter(name=inverter_name, plant=alcolea)
+            metrics = ([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -142,8 +131,7 @@ class ORMSetup_Test(unittest.TestCase):
                 # ('probe3value', 0),
                 # ('probe4value', 0),
                 ])
-            metrics['fields'] = inverter_registers
-        publish_orm(metrics)
+        publish_orm(plant_name, 'UnknownInverter', metrics)
         
         with orm.db_session:
             allInverterRegistries = orm.select(c for c in InverterRegistry)
@@ -152,16 +140,11 @@ class ORMSetup_Test(unittest.TestCase):
         
     def test_PublishOrmIfPlantNotExist(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name='Alice', plant=alcolea)
-            metrics = {}
-            tags = {} 
-            fields = {}
-            metrics['measurement'] = 'sistema_inversor'
-            tags['location'] = 'SomEnergia_Fontivsolar'
-            tags['inverter_name'] = 'Alice'
-            metrics['tags'] = tags
-            inverter_registers = ([
+            plant_name = 'SomEnergia_Alcolea'
+            inverter_name = 'Alice'
+            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = Inverter(name=inverter_name, plant=alcolea)
+            metrics = ([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -182,8 +165,7 @@ class ORMSetup_Test(unittest.TestCase):
                 # ('probe3value', 0),
                 # ('probe4value', 0),
                 ])
-            metrics['fields'] = inverter_registers
-        publish_orm(metrics)
+        publish_orm('UnknownPlant', inverter_name, metrics)
         
         with orm.db_session:
             allInverterRegistries = orm.select(c for c in InverterRegistry)
