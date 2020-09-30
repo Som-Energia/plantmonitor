@@ -125,16 +125,16 @@ def task():
             logger.info("**** Metrics - tag - location %s ****" % plant_name)
             logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
-            if flux_client is not None:
-                metrics = {}
-                tags = {}
-                fields = {}
-                metrics['measurement'] = 'sistema_inversor'
-                tags['location'] = plant_name
-                tags['inverter_name'] = inverter_name
-                metrics['tags'] = tags
-                metrics['fields'] = inverter_registers
+            metrics = dict(
+                mesurements = 'sistema_inversor',
+                tags = dict(
+                    location = plant_name,
+                    inverter_name = inverter_name,
+                ),
+                fields = inverter_registers,
+            )
 
+            if flux_client is not None:
                 publish_influx(metrics,flux_client)
 
             publish_timescale(metrics, db=config.plant_postgres)
