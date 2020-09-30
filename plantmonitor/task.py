@@ -71,6 +71,10 @@ def publish_orm(plant_name, inverter_name=None, metrics=None):
             return
         inverter.insertRegistry(**dict(metrics))
 
+class PonyMetricStorage:
+    def storeInverterMeasures(self, plant_name, inverter_name, metrics):
+        publish_orm(plant_name, inverter_name, metrics)
+
 
 def publish_influx(plant_name, inverter_name, metrics, flux_client):
     if flux_client is None:
