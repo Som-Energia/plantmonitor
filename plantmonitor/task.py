@@ -76,15 +76,13 @@ def publish_influx(metrics,flux_client):
     flux_client.write_points([metrics] )
     logger.info("[INFO] Sent to InfluxDB")
 
-def publish_timescale(metrics,db):
+def publish_timescale(plant_name, inverter_name, metrics, db):
     with psycopg2.connect(
             user=db['user'], password=db['password'],
             host=db['host'], port=db['port'], database=db['database']
         ) as conn:
         with conn.cursor() as cur:
-            measurement    = metrics['measurement']
-            inverter_name  = metrics['tags']['inverter_name']
-            location       = metrics['tags']['location']
+            measurement    = 'sistema_inversor'
             query_content  = ', '.join(metrics['fields'].keys())
             values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
 
@@ -92,7 +90,7 @@ def publish_timescale(metrics,db):
                 "INSERT INTO {}(time, inverter_name, location, {}) \
                 VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
                     measurement,query_content,
-                    inverter_name,location,values_content
+                    inverter_name,plant_name,values_content
                 )
             )
 
@@ -132,7 +130,7 @@ def task():
             if flux_client is not None:
                 publish_influx(metrics,flux_client)
 
-            publish_timescale(metrics, db=config.plant_postgres)
+            publish_timescale(plant_name, inverter_name, inverter_registers, db=config.plant_postgres)
             publish_orm(plant_name, inverter_name, inverter_registers)
 
     except Exception as err:
