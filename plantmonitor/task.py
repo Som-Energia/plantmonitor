@@ -61,19 +61,18 @@ def client_db(db):
 
     return flux_client
 
-def publish_orm(plant_name, inverter_name=None, metrics=None):
-    with orm.db_session:
-        plant = Plant.get(name=plant_name)
-        if not plant:
-            return
-        inverter = Inverter.get(name=inverter_name, plant=plant)
-        if not inverter:
-            return
-        inverter.insertRegistry(**dict(metrics))
 
 class PonyMetricStorage:
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
-        publish_orm(plant_name, inverter_name, metrics)
+        with orm.db_session:
+            plant = Plant.get(name=plant_name)
+            if not plant:
+                return
+            inverter = Inverter.get(name=inverter_name, plant=plant)
+            if not inverter:
+                return
+            inverter.insertRegistry(**dict(metrics))
+
 
 
 def publish_influx(plant_name, inverter_name, metrics, flux_client):
@@ -121,6 +120,7 @@ def task():
         result = plant.get_registers()
 
         plant_name = plant.name
+        ponyStorage = PonyMetricStorage()
 
         flux_client = client_db(plant.db)
 
@@ -135,7 +135,7 @@ def task():
 
             publish_influx(plant_name, inverter_name, inverter_registers, flux_client)
             publish_timescale(plant_name, inverter_name, inverter_registers, db=config.plant_postgres)
-            publish_orm(plant_name, inverter_name, inverter_registers)
+            ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
