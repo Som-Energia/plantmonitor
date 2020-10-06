@@ -93,6 +93,37 @@ class InfluxMetricStorage:
         self._flux.write_points([point] )
         logger.info("[INFO] Sent to InfluxDB")
     
+class TimeScaleMetricStorage:
+
+    def __init__(config):
+        self._config = config
+        self._dbconnetion = None
+
+    def __enter__(self):
+        return self._db()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._dbconnetion = None
+
+    def _db(self):
+        if self._dbconnetion: return self._dbconnetion
+        self._dbconnetion = psycopg2.connect(**self._config)
+        return self._dbconnetion
+
+    def storeInverterMeasures(self, plant_name, inverter_name, metrics):
+        with self._db.cursor() as cur:
+            measurement    = 'sistema_inversor'
+            query_content  = ', '.join(metrics['fields'].keys())
+            values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
+
+            cur.execute(
+                "INSERT INTO {}(time, inverter_name, location, {}) \
+                VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
+                    measurement,query_content,
+                    inverter_name,plant_name,values_content
+                )
+            )
+
 
 
 def publish_timescale(plant_name, inverter_name, metrics, db):
@@ -128,6 +159,8 @@ def task():
 
         ponyStorage = PonyMetricStorage()
         fluxStorage = InfluxMetricStorage(plant.db)
+        tsStorage = TimeScaleMetricStorage(config.plant_postgres)
+        apiStorage = ApiMetricsStorage(url='http://')
 
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name
@@ -138,9 +171,9 @@ def task():
             logger.info("**** Metrics - tag - location %s ****" % plant_name)
             logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
-            publish_timescale(plant_name, inverter_name, inverter_registers, db=config.plant_postgres)
             fluxStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
             ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+            tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
