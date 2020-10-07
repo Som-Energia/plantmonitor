@@ -155,6 +155,8 @@ class ImportPlant_Test(unittest.TestCase):
         result = runner.invoke(importPlantCLI, [fakePlantYaml])
         self.assertEqual(0, result.exit_code)
 
+        p.unlink()
+
         with orm.db_session:
             alcolea = Plant.get(name='alcolea')
             self.assertIsNotNone(alcolea)
@@ -195,6 +197,8 @@ class ImportPlant_Test(unittest.TestCase):
             f.write(content)
 
         importPlant(fakePlantYaml)
+
+        p.unlink()
 
         with orm.db_session:
             alcolea = Plant.get(name='alcolea')
