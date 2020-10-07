@@ -44,7 +44,7 @@ from ORM.models import (
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
-from importPlant import importPlantCLI, importPlant
+from addPlant import importPlantCLI, importPlant
 
 setupDatabase()
 

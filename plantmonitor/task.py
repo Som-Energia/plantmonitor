@@ -71,8 +71,15 @@ def publish_orm(metrics):
         inverter = Inverter.get(name=inverter_name, plant=plant)
         if not inverter:
             return
-        inverterMetrics = metrics['fields']
-        register_values_dict = dict(inverterMetrics)
+        inverterMetricsAndSensors = metrics['fields']
+        excludedColumns = [
+            'probe1value',
+            'probe2value',
+            'probe3value',
+            'probe4value',
+            ]
+        inverterMetricsAndSensorsDict = dict(inverterMetricsAndSensors)
+        register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
         inverter.insertRegistry(**register_values_dict)
 
 def publish_influx(metrics,flux_client):

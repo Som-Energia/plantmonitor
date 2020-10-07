@@ -173,7 +173,7 @@ class Migrations_Test(unittest.TestCase):
 
             self.assertEqual(len(records), 1)
 
-    def test_ormSetup(self):
+    def test_Plant_importExportPlant(self):
         with orm.db_session:
 
             alcoleaPlantYAML = ns.loads("""\

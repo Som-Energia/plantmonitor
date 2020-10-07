@@ -80,7 +80,7 @@ class ORMSetup_Test(unittest.TestCase):
             tags['location'] = 'SomEnergia_Alcolea'
             tags['inverter_name'] = 'Mary'
             metrics['tags'] = tags
-            inverter_registers = ([
+            inverter_registers = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -94,15 +94,22 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
-                ('time', datetime.datetime.now(datetime.timezone.utc))
+                ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters           
-                # ('probe1value', 443),
-                # ('probe2value', 220),
-                # ('probe3value', 0),
-                # ('probe4value', 0),
+                ('probe1value', 443),
+                ('probe2value', 220),
+                ('probe3value', 0),
+                ('probe4value', 0),
                 ])
             metrics['fields'] = inverter_registers
+        
         publish_orm(metrics)
+
+        inverter_registers.pop('probe1value')
+        inverter_registers.pop('probe2value')
+        inverter_registers.pop('probe3value')
+        inverter_registers.pop('probe4value')
+
         expectedRegistry = dict(inverter_registers)
         expectedRegistry['inverter'] = 1
         with orm.db_session:
@@ -121,7 +128,7 @@ class ORMSetup_Test(unittest.TestCase):
             tags['location'] = 'SomEnergia_Alcolea'
             tags['inverter_name'] = 'Bob'
             metrics['tags'] = tags
-            inverter_registers = ([
+            inverter_registers = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -135,12 +142,12 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
-                ('time', datetime.datetime.now(datetime.timezone.utc))
+                ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters           
-                # ('probe1value', 443),
-                # ('probe2value', 220),
-                # ('probe3value', 0),
-                # ('probe4value', 0),
+                ('probe1value', 443),
+                ('probe2value', 220),
+                ('probe3value', 0),
+                ('probe4value', 0),
                 ])
             metrics['fields'] = inverter_registers
         publish_orm(metrics)
@@ -161,7 +168,7 @@ class ORMSetup_Test(unittest.TestCase):
             tags['location'] = 'SomEnergia_Fontivsolar'
             tags['inverter_name'] = 'Alice'
             metrics['tags'] = tags
-            inverter_registers = ([
+            inverter_registers = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -175,12 +182,12 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
-                ('time', datetime.datetime.now(datetime.timezone.utc))
+                ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters           
-                # ('probe1value', 443),
-                # ('probe2value', 220),
-                # ('probe3value', 0),
-                # ('probe4value', 0),
+                ('probe1value', 443),
+                ('probe2value', 220),
+                ('probe3value', 0),
+                ('probe4value', 0),
                 ])
             metrics['fields'] = inverter_registers
         publish_orm(metrics)
