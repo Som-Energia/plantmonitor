@@ -90,8 +90,7 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
         # and create the tables, if they don't exist
         if create_tables:
             database.create_tables()
-
-            logger.info(f"Database {databaseInfo['database']} generated")
+            logger.info("Database {} generated".format(databaseInfo['database']))
 
         if env_active == env['plantmonitor_server'] or env_active == env['test']:
             if timescale_tables:
