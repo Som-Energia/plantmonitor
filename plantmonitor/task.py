@@ -43,7 +43,7 @@ from ORM.models import (
     InverterRegistry,
 )
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
 
 def client_db(db):
     try:
@@ -121,6 +121,8 @@ def task():
 
         flux_client = client_db(plant.db)
 
+        connectDatabase()
+
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name
             inverter_registers = result[i]['Alcolea'][0]['fields']
@@ -140,9 +142,9 @@ def task():
                 metrics['tags'] = tags
                 metrics['fields'] = inverter_registers
 
-                publish_influx(metrics,flux_client)
+                #publish_influx(metrics,flux_client)
 
-            publish_timescale(metrics, db=config.plant_postgres)
+            #publish_timescale(metrics, db=config.plant_postgres)
             publish_orm(metrics)
 
     except Exception as err:
