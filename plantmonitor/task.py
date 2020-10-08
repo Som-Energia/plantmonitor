@@ -123,7 +123,6 @@ def task():
 
         flux_client = client_db(plant.db)
 
-        connectDatabase()
 
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name

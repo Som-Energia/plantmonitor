@@ -19,7 +19,7 @@ logger = logging.getLogger("plantmonitor")
 
 def build_app():
     try:
-
+        connectDatabase()
         scheduler = BlockingScheduler(
             timezone='Europe/Madrid'
         )
