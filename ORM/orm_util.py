@@ -47,6 +47,14 @@ def dropTables():
     database.drop_all_tables(with_all_data=True)
     database.disconnect()
 
+def connectDatabase():
+    from conf import dbinfo
+
+    databaseInfo = dbinfo.DB_CONF
+
+    database.bind(**databaseInfo)
+
+    database.generate_mapping(create_tables=False, check_tables=False)
 
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
