@@ -66,10 +66,12 @@ def publish_orm(metrics):
         plant_name = metrics['tags']['location']
         plant = Plant.get(name=plant_name)
         if not plant:
+            logger.debug("No plant named {}".format(plant_name))
             return
         inverter_name  = metrics['tags']['inverter_name']
         inverter = Inverter.get(name=inverter_name, plant=plant)
         if not inverter:
+            logger.debug("No inverter named {}".format(inverter_name))
             return
         inverterMetricsAndSensors = metrics['fields']
         excludedColumns = [
