@@ -7,7 +7,7 @@ from plantmonitor.task import task_counter_erp
 from plantmonitor.task import task_get_meteologica_forecast
 from plantmonitor.task import task_daily_upload_to_api_meteologica
 from plantmonitor.task import task_daily_download_from_api_meteologica
-
+from ORM.orm_util import connectDatabase
 from conf.config import env, env_active
 
 from conf.logging_configuration import LOGGING
