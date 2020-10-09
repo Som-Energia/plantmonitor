@@ -26,7 +26,7 @@ from ORM.models import (
     ForecastPredictor,
     Forecast,
 )
-from plantmonitor.task import publish_orm, PonyMetricStorage
+from plantmonitor.task import PonyMetricStorage
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
@@ -75,31 +75,36 @@ class ORMSetup_Test(unittest.TestCase):
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
-        metrics = ([
-            ('daily_energy_h_wh', 0),
-            ('daily_energy_l_wh', 17556),
-            ('e_total_h_wh', 566),
-            ('e_total_l_wh', 49213),
-            ('h_total_h_h', 0),
-            ('h_total_l_h', 18827),
-            ('pac_r_w', 0),
-            ('pac_s_w', 0),
-            ('pac_t_w', 0),
-            ('powerreactive_t_v', 0),
-            ('powerreactive_r_v', 0),
-            ('powerreactive_s_v', 0),
-            ('temp_inv_c', 320),
-            ('time', datetime.datetime.now(datetime.timezone.utc))
-            # Sensors registers  obtained from inverters           
-            # ('probe1value', 443),
-            # ('probe2value', 220),
-            # ('probe3value', 0),
-            # ('probe4value', 0),
-            ])
+            metrics = ns([
+                    ('daily_energy_h_wh', 0),
+                    ('daily_energy_l_wh', 17556),
+                    ('e_total_h_wh', 566),
+                    ('e_total_l_wh', 49213),
+                    ('h_total_h_h', 0),
+                    ('h_total_l_h', 18827),
+                    ('pac_r_w', 0),
+                    ('pac_s_w', 0),
+                    ('pac_t_w', 0),
+                    ('powerreactive_t_v', 0),
+                    ('powerreactive_r_v', 0),
+                    ('powerreactive_s_v', 0),
+                    ('temp_inv_c', 320),
+                    ('time', datetime.datetime.now(datetime.timezone.utc)),
+                    # Sensors registers  obtained from inverters           
+                    ('probe1value', 443),
+                    ('probe2value', 220),
+                    ('probe3value', 0),
+                    ('probe4value', 0),
+                    ])
 
         storage = PonyMetricStorage()
         storage.storeInverterMeasures(
             plant_name, inverter_name, metrics)
+
+        metrics.pop('probe1value')
+        metrics.pop('probe2value')
+        metrics.pop('probe3value')
+        metrics.pop('probe4value')
 
         expectedRegistry = dict(metrics)
         expectedRegistry['inverter'] = 1
@@ -109,12 +114,12 @@ class ORMSetup_Test(unittest.TestCase):
             self.assertEqual(allInverterRegistriesList, [expectedRegistry])
 
     def test_PublishOrmIfInverterNotExist(self):
+        inverter_name = 'Alice'
+        plant_name = 'SomEnergia_Alcolea'
         with orm.db_session:
-            plant_name = 'SomEnergia_Alcolea'
-            inverter_name = 'Inverter1'
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
-            metrics = ([
+            metrics = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -128,12 +133,12 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
-                ('time', datetime.datetime.now(datetime.timezone.utc))
+                ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters           
-                # ('probe1value', 443),
-                # ('probe2value', 220),
-                # ('probe3value', 0),
-                # ('probe4value', 0),
+                ('probe1value', 443),
+                ('probe2value', 220),
+                ('probe3value', 0),
+                ('probe4value', 0),
                 ])
         storage = PonyMetricStorage()
         storage.storeInverterMeasures(
@@ -145,12 +150,12 @@ class ORMSetup_Test(unittest.TestCase):
             self.assertListEqual([], allInverterRegistriesList)
         
     def test_PublishOrmIfPlantNotExist(self):
+        inverter_name = 'Alice'
+        plant_name = 'SomEnergia_Alcolea'
         with orm.db_session:
-            plant_name = 'SomEnergia_Alcolea'
-            inverter_name = 'Alice'
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
-            metrics = ([
+            metrics = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
                 ('e_total_h_wh', 566),
@@ -164,12 +169,12 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
-                ('time', datetime.datetime.now(datetime.timezone.utc))
+                ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters           
-                # ('probe1value', 443),
-                # ('probe2value', 220),
-                # ('probe3value', 0),
-                # ('probe4value', 0),
+                ('probe1value', 443),
+                ('probe2value', 220),
+                ('probe3value', 0),
+                ('probe4value', 0),
                 ])
         storage = PonyMetricStorage()
         storage.storeInverterMeasures(

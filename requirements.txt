@@ -37,3 +37,5 @@ urllib3==1.25.9
 wcwidth==0.1.9
 yamlns==0.8.2
 zeep==3.4.0
+environs==8.0.0
+pony==0.7.13

@@ -43,7 +43,7 @@ from ORM.models import (
     InverterRegistry,
 )
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
 
 def client_db(db):
     try:
@@ -61,17 +61,27 @@ def client_db(db):
 
     return flux_client
 
-
 class PonyMetricStorage:
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         with orm.db_session:
             plant = Plant.get(name=plant_name)
             if not plant:
+                logger.debug("No plant named {}".format(plant_name))
                 return
             inverter = Inverter.get(name=inverter_name, plant=plant)
             if not inverter:
+                logger.debug("No inverter named {}".format(inverter_name))
                 return
-            inverter.insertRegistry(**dict(metrics))
+            inverterMetricsAndSensors = metrics
+            excludedColumns = [
+                'probe1value',
+                'probe2value',
+                'probe3value',
+                'probe4value',
+                ]
+            inverterMetricsAndSensorsDict = dict(inverterMetricsAndSensors)
+            register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
+            inverter.insertRegistry(**register_values_dict)
 
 
 class InfluxMetricStorage:
@@ -95,7 +105,7 @@ class InfluxMetricStorage:
     
 class TimeScaleMetricStorage:
 
-    def __init__(config):
+    def __init__(self,config):
         self._config = config
         self._dbconnetion = None
 
@@ -111,10 +121,11 @@ class TimeScaleMetricStorage:
         return self._dbconnetion
 
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
-        with self._db.cursor() as cur:
+        with self._db().cursor() as cur:
             measurement    = 'sistema_inversor'
             query_content  = ', '.join(metrics['fields'].keys())
             values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
+
 
             cur.execute(
                 "INSERT INTO {}(time, inverter_name, location, {}) \
@@ -160,7 +171,8 @@ def task():
         ponyStorage = PonyMetricStorage()
         fluxStorage = InfluxMetricStorage(plant.db)
         tsStorage = TimeScaleMetricStorage(config.plant_postgres)
-        apiStorage = ApiMetricsStorage(url='http://')
+        #apiStorage = ApiMetricsStorage(url='http://')
+
 
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name
@@ -174,6 +186,7 @@ def task():
             fluxStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
             ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
             tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)

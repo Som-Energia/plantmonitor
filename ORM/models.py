@@ -33,14 +33,20 @@ class Plant(database.Entity):
             plant = plant_foo.plant
             self.name=plant.name
             self.description=plant.description
-            [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
-            [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
-            [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
-            [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name) for sensor in plant.temperatureSensors]
-            [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
+            if 'meters' in plant:
+                [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
+            if 'inverters' in plant:
+                [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
+            if 'irradiationSensors' in plant:
+                [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
+            if 'temperatureSensors' in plant:
+                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name) for sensor in plant.temperatureSensors]
+            if 'integratedSensors' in plant:
+                [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
 
     def exportPlant(self):
+
         plantns = ns(plants=[ns(plant=ns(
                 name = plant.name,
                 codename = plant.codename,
