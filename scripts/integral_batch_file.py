@@ -99,6 +99,14 @@ def parse_xlsx(input_data_file, column2integrate):
 
     return sensor
 
+
+def dropNonMonotonicRows(df):
+    ''' strictly monotonic increasing '''
+    anomalies = [r[1] for r in zip(df.index, df.index[1:]) if r[0] >= r[1]]
+    df.drop(index=anomalies, inplace=True)
+    return anomalies
+
+
 def main():
 
     if len(sys.argv[1:]) != 5:
@@ -143,6 +151,11 @@ def main():
     from_date = sensor_df.index[0].floor('d')
     to_date   = sensor_df.index[-1].ceil('d')
 
+    if not sensor_df.index.is_monotonic_increasing:
+        print("Index is NOT monotonic! Attempting automatic fix")
+        anomalies = dropNonMonotonicRows(sensor_df)
+        print("\n[WARNING] Dropped rows with dates: {}".format(anomalies))
+
     integrals = trapezoidal_approximation(sensor_df, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
     integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', columnTitle])
@@ -150,6 +163,10 @@ def main():
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     asciigraph_print(integrals)
+
+    if anomalies:
+        print("\n[WARNING] Dropped rows with dates: {}".format(anomalies))
+
     print("\nJob's done, have a good day\n")
 
 if __name__ == "__main__":
