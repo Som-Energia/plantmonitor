@@ -154,7 +154,7 @@ def main():
     if not sensor_df.index.is_monotonic_increasing:
         print("Index is NOT monotonic! Attempting automatic fix")
         anomalies = dropNonMonotonicRows(sensor_df)
-        print("\n[WARNING] Dropped rows with dates: {}".format(anomalies))
+        print("\n\033[94m\033[1m[WARNING] Dropped rows with dates: {}\033[0m".format(anomalies))
 
     integrals = trapezoidal_approximation(sensor_df, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
@@ -165,7 +165,7 @@ def main():
     asciigraph_print(integrals)
 
     if anomalies:
-        print("\n[WARNING] Dropped rows with dates: {}".format(anomalies))
+        print("\n\033[94m\033[1m[WARNING] Dropped rows with dates: {}\033[0m".format(anomalies))
 
     print("\nJob's done, have a good day\n")
 
