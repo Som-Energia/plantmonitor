@@ -1,0 +1,221 @@
+Opcion 1:
+
+	plant: Alcolea
+	device: inversor1
+	timestamp: 2020-09-27T14:00:00Z
+	register: daily_energy_l
+	value: 200.3
+
+	plant: Alcolea
+	device: inversor1
+	timestamp: 2020-09-27T14:00:00Z
+	register: daily_energy_h
+	value: 500.3
+
+Opcion 2 (aggregar registros en un solo mensaje):
+
+	plant: Alcolea
+	device: inversor1
+	timestamp: 2020-09-27T14:00:00Z
+	- register: daily_energy_l
+	  value: 200.3
+	- register: daily_energy_h
+	  value: 500.3
+
+Opcion 2bis:
+
+	plant: Alcolea
+	device: inversor1
+	timestamp: 2020-09-27T14:00:00Z
+	metrics:
+	  daily_energy_l: 200.3
+	  daily_energy_h: 500.3
+
+Opcion 2bisbis:
+
+	plant: Alcolea
+	device: inversor1
+	timestamp: 2020-09-27T14:00:00Z
+	metrics:
+        - 200.3
+	- 500.3
+
+Opcion 3 (agregar por planta):
+
+	plant: Alcolea
+	timestamp: 2020-09-27T14:00:00Z
+	devices:
+	- device: inversor1
+	  metrics:
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+	- device: inversor2
+	  metrics:
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+
+Opcion 4 (multiples timestamps:
+
+	plant: Alcolea
+	devices:
+	- device: inversor1
+	  metrics:
+	  - timestamp: 2020-09-27T14:00:00Z
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+	  - timestamp: 2020-09-27T14:05:00Z
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+	- device: inversor2
+	  metrics:
+	  - timestamp: 2020-09-27T14:00:00Z
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+	  - timestamp: 2020-09-27T14:05:00Z
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+
+
+
+	plant: Alcolea
+	timestamp: 2020-09-27T14:00:00Z
+	devices:
+	- device: inversor1
+	  metrics:
+	  - timestamp: 2020-09-27T14:00:00Z
+	    daily_energy_l: 200.3
+	    daily_energy_h: 500.3
+
+	plant: Alcolea
+	timestamp: 2020-09-27T14:00:00Z
+	devices:
+	- device: inversor1
+		metrics_name:
+			- timestamp
+				daily_energy_l
+				daily_energy_h
+	  metrics:
+	  - 2020-09-27T14:00:00Z
+	    200.3
+	    500.3
+
+
+
+
+	plant: Alcolea
+	timestamps:
+	- 2020-09-27T14:00:00Z
+	- 2020-09-27T14:05:00Z
+	devices:
+	- device: inversor1
+	  metrics:
+	    daily_energy_l:
+	    - null
+	    - 202.3
+	    daily_energy_h:
+	    - 500.3
+	    - 502.3
+
+
+
+plant -> devices <|- Sensor <|- Sensor2
+
+# one reading
+
+	plant: Alcolea
+	version: 1.0
+	timestamp: 2020-09-27T14:00:00Z
+	devices:
+	- id: "Inverter:inversor1_mode1"
+	  reading:
+	    daily_energy_h_wh: 12
+	    daily_energy_l_wh: 10
+	    e_total_h_wh: 5
+	    e_total_l_wh: 21.3
+	    h_total_h_h: 12.5
+	    h_total_l_h: 11.5
+	    pac_r_w: 43
+	    pac_s_w: 22
+	    pac_t_w: 43
+	    powerreactive_t_v: 9
+	    powerreactive_r_v: 3
+	    powerreactive_s_v: 5
+	    temp_inv_c: 30
+	- id: "SensorTemperature:temperature"
+	  reading:
+	    temperature_c: 16.0
+	- id: "SensorIrradiation:irradiation1"
+	  reading:
+	    irradiation_w_m2: 16.0
+		
+
+# timespan readings
+	plant: Alcolea
+	timestamp: 2020-09-27T14:00:00Z
+	devices:
+	-
+		uid: HASJDAK-AHKSDJ
+		device_name: inversor1
+		device_type: Inverter
+		reading:
+			timestamp: 2020-09-27T10:00:00Z
+			daily_energy_h_wh: 12
+			daily_energy_l_wh: 10
+			e_total_h_wh: 5
+			e_total_l_wh: 21.3
+			h_total_h_h: 12.5
+			h_total_l_h: 11.5
+			pac_r_w: 43
+			pac_s_w: 22
+			pac_t_w: 43
+			powerreactive_t_v: 9
+			powerreactive_r_v: 3
+			powerreactive_s_v: 5
+			temp_inv_c: 30
+	-
+		uid: TUTUTU-HASHDH
+		device_name: temperature1
+		device_type: SensorTemperature
+		reading:
+		  timestamp: 2020-09-27T10:00:00Z
+			temperature_c: 16.0
+	- uid: BOBOBO-HASHDH
+	  device_name: irradiation1
+	  device_type: SensorIrradiation
+	  reading:
+	    timestamp: 2020-09-27T10:00:00Z
+	    irradiation_w_m2: 16.0
+	- uid: HASJDAK-AHKSDJ
+	  device_name: inversor1
+	  device_type: Inverter
+	  reading:
+			timestamp: 2020-09-27T11:00:00Z
+			daily_energy_h_wh: 12
+			daily_energy_l_wh: 10
+			e_total_h_wh: 5
+			e_total_l_wh: 21.3
+			h_total_h_h: 12.5
+			h_total_l_h: 11.5
+			pac_r_w: 43
+			pac_s_w: 22
+			pac_t_w: 43
+			powerreactive_t_v: 9
+			powerreactive_r_v: 3
+			powerreactive_s_v: 5
+			temp_inv_c: 30
+	- uid: TUTUTU-HASHDH
+	  device_name: temperature1
+	  device_type: SensorTemperature
+		reading:
+		  timestamp: 2020-09-27T11:00:00Z
+			temperature_c: 16.0
+	- uid: BOBOBO-HASHDH
+	  device_name: irradiation1
+	  device_type: SensorIrradiation
+		reading:
+			timestamp: 2020-09-27T11:00:00Z
+		  irradiation_w_m2: 16.0
+
+
+
+
