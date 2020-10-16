@@ -73,10 +73,16 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
 
-    def test_ApiPlant_Hello(self):
+    from yamlns.testutils import assertNsEqual
 
-        response = self.client.get('/')
+    def test_ApiPlant_Version(self):
+
+        response = self.client.get('/version')
+        
         self.assertEqual(response.status_code,200)
+        self.assertNsEqual(response.json, """\
+            version: '1.0'
+        """)
     
     def __test_ApiPlant_MetricsInsert_Empty(self):
 
@@ -89,17 +95,22 @@ class Api_Test(unittest.TestCase):
 
     def test_ApiPlant_MetricsInsert(self):
 
-        yaml = ns.loads("""\
+        data = ns.loads("""\
+            plant: Alcolea
+            version: "1.0"
+            timestamp: 2020-09-27T14:00:00Z
+            devices:
+            - id: "SensorTemperature:temperature"
+              reading:
+                temperature_c: 16.0
+            - id: "SensorIrradiation:irradiation1"
+              reading:
+                irradiation_w_m2: 16.0
             """)
-        plant_id = 'Alcolea'
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        data = {
-            'Data': [20.0, 30.0, 401.0, 50.0],
-            'Date': ['2017-08-11', '2017-08-12', '2017-08-13', '2017-08-14'],
-            'Day': 4
-        }
-        response = self.client.put('/plant/123', data=json.dumps(data), headers=headers)
+        response = self.client.put('/plant/{}'.format(data.plant), data=data.dump())
         self.assertEqual(response.status_code,200)
+        self.assertNsEqual(response.get_data(), data)
+
+
+
+# vim: et sw=4 ts=4
