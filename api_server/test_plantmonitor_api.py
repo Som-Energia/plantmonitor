@@ -1,11 +1,12 @@
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
-import unittest
-
-from pony import orm
-
 import datetime
+from yamlns import namespace as ns
+from fastapi.testclient import TestClient
+from pony import orm
+import unittest
+import json
 
 from ORM.models import database
 from ORM.models import (
@@ -29,11 +30,9 @@ from ORM.models import (
 from plantmonitor.task import PonyMetricStorage
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
-from yamlns import namespace as ns
-import datetime
 
-from api_server.plantmonitor_api import api,app
-import json
+from .plantmonitor_api import api
+
 setupDatabase()
 
 class Api_Test(unittest.TestCase):
@@ -56,7 +55,7 @@ class Api_Test(unittest.TestCase):
         # database.generate_mapping(create_tables=True)
         # orm.db_session.__enter__()
 
-        self.client = app.test_client()
+        self.client = TestClient(api)
 
     def tearDown(self):
         orm.rollback()
@@ -75,16 +74,16 @@ class Api_Test(unittest.TestCase):
 
     from yamlns.testutils import assertNsEqual
 
-    def test_ApiPlant_Version(self):
+    def test__api_version(self):
 
         response = self.client.get('/version')
         
         self.assertEqual(response.status_code,200)
-        self.assertNsEqual(response.json, """\
+        self.assertNsEqual(response.json(), """\
             version: '1.0'
         """)
     
-    def __test_ApiPlant_MetricsInsert_Empty(self):
+    def __test__api_plantReadings__Empty(self):
 
         yaml = ns.loads("""\
             """)
@@ -93,7 +92,7 @@ class Api_Test(unittest.TestCase):
         rv = self.client.put('/' + plant_id, yaml)
         self.assertEqual()
 
-    def test_ApiPlant_MetricsInsert(self):
+    def test__api_putPlantReadings(self):
 
         data = ns.loads("""\
             plant: Alcolea
@@ -107,9 +106,9 @@ class Api_Test(unittest.TestCase):
               reading:
                 irradiation_w_m2: 16.0
             """)
-        response = self.client.put('/plant/{}'.format(data.plant), data=data.dump())
+        response = self.client.put('/plant/{}/readings'.format(data.plant), data=data.dump())
+        self.assertNsEqual(response.content, data)
         self.assertEqual(response.status_code,200)
-        self.assertNsEqual(response.get_data(), data)
 
 
 

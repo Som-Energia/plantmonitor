@@ -28,6 +28,7 @@ setup(
             'Flask==1.1.2',
             'Flask-RESTful==0.3.8',
             'pony>=0.7.13',
+            'fastapi',
 	],
 	include_package_data = True,
 	test_suite = 'plantmonitor',

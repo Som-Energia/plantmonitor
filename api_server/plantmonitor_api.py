@@ -1,5 +1,4 @@
-from flask import Flask, request, Response
-from flask_restful import Resource, Api
+from fastapi import FastAPI, Request, Response
 
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.devel')
@@ -14,30 +13,26 @@ logger = logging.getLogger("plantmonitor")
 from plantmonitor.task import PonyMetricStorage
 from yamlns import namespace as ns
 
-app = Flask(__name__)
-api = Api(app)
+class PlantReading:
+    plant: str
 
-class Meta(Resource):
+api = FastAPI()
 
-    def get(self):
-        return dict(
-            version='1.0',
-        )
+@api.get('/version')
+def api_version():
+    return dict(
+        version='1.0',
+    )
 
+@api.put('/plant/{plant_id}/readings')
+async def api_putPlantReadings(plant_id: str, request: Request): 
+    body = await request.body()
+    data = ns.loads(body)
 
-class PlantMetrics(Resource): 
+    return Response(
+        data.dump(), 200, media_type='application/x-yaml'
+    )
 
-    def put(self, plant_id):
-        data = ns.loads(request.data)
-        return Response(
-            request.data, 200, mimetype='application/x-yaml'
-        )
-
-api.add_resource(PlantMetrics,'/plant/<string:plant_id>')
-api.add_resource(Meta,'/version')
-
-if __name__ == '__main__':
-    app.run(debug=True)
 
 
 # vim: et sw=4 ts=4
