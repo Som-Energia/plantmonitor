@@ -24,7 +24,7 @@ class PlantReading:
     plant: str
 
 api = FastAPI(
-    default_response_class = YAMLResponse
+    default_response_class = YAMLResponse,
 )
 
 @api.get('/version')
