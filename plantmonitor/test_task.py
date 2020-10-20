@@ -90,25 +90,25 @@ class ORMSetup_Test(unittest.TestCase):
                     ('powerreactive_s_v', 0),
                     ('temp_inv_c', 320),
                     ('time', datetime.datetime.now(datetime.timezone.utc)),
-                    # Sensors registers  obtained from inverters           
+                    # Sensors registers  obtained from inverters
                     ('probe1value', 443),
                     ('probe2value', 220),
                     ('probe3value', 0),
                     ('probe4value', 0),
                     ])
 
-        storage = PonyMetricStorage()
-        storage.storeInverterMeasures(
-            plant_name, inverter_name, metrics)
+            storage = PonyMetricStorage()
+            storage.storeInverterMeasures(
+                plant_name, inverter_name, metrics)
+ 
+            metrics.pop('probe1value')
+            metrics.pop('probe2value')
+            metrics.pop('probe3value')
+            metrics.pop('probe4value')
+ 
+            expectedRegistry = dict(metrics)
+            expectedRegistry['inverter'] = inverter.id
 
-        metrics.pop('probe1value')
-        metrics.pop('probe2value')
-        metrics.pop('probe3value')
-        metrics.pop('probe4value')
-
-        expectedRegistry = dict(metrics)
-        expectedRegistry['inverter'] = 1
-        with orm.db_session:
             inverterReadings = storage.inverterReadings()
             self.assertEqual(inverterReadings, [expectedRegistry])
 
@@ -133,21 +133,18 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
                 ('time', datetime.datetime.now(datetime.timezone.utc)),
-                # Sensors registers  obtained from inverters           
+                # Sensors registers  obtained from inverters
                 ('probe1value', 443),
                 ('probe2value', 220),
                 ('probe3value', 0),
                 ('probe4value', 0),
                 ])
-        storage = PonyMetricStorage()
-        storage.storeInverterMeasures(
-            plant_name, "UnknownInverter", metrics)
+            storage = PonyMetricStorage()
+            storage.storeInverterMeasures(
+                plant_name, "UnknownInverter", metrics)
 
-        with orm.db_session:
-            allInverterRegistries = orm.select(c for c in InverterRegistry)
-            allInverterRegistriesList = list(allInverterRegistries)
-            self.assertListEqual([], allInverterRegistriesList)
-        
+            self.assertListEqual(storage.inverterReadings(), [])
+ 
     def test_PublishOrmIfPlantNotExist(self):
         inverter_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
@@ -169,19 +166,16 @@ class ORMSetup_Test(unittest.TestCase):
                 ('powerreactive_s_v', 0),
                 ('temp_inv_c', 320),
                 ('time', datetime.datetime.now(datetime.timezone.utc)),
-                # Sensors registers  obtained from inverters           
+                # Sensors registers  obtained from inverters
                 ('probe1value', 443),
                 ('probe2value', 220),
                 ('probe3value', 0),
                 ('probe4value', 0),
                 ])
-        storage = PonyMetricStorage()
-        storage.storeInverterMeasures(
-            'UnknownPlant', inverter_name, metrics)
-        
-        with orm.db_session:
-            allInverterRegistries = orm.select(c for c in InverterRegistry)
-            allInverterRegistriesList = list(allInverterRegistries)
-            self.assertListEqual([], allInverterRegistriesList)
+            storage = PonyMetricStorage()
+            storage.storeInverterMeasures(
+                'UnknownPlant', inverter_name, metrics)
+ 
+            self.assertListEqual(storage.inverterReadings(), [])
 
 # vim: et ts=4 sw=4
