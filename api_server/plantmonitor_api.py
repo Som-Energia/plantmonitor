@@ -13,10 +13,19 @@ logger = logging.getLogger("plantmonitor")
 from plantmonitor.task import PonyMetricStorage
 from yamlns import namespace as ns
 
+import typing
+class YAMLResponse(Response):
+    media_type = "application/x-yaml"
+
+    def render(self, content: typing.Any) -> bytes:
+        return ns(content).dump().encode("utf-8")
+
 class PlantReading:
     plant: str
 
-api = FastAPI()
+api = FastAPI(
+    default_response_class = YAMLResponse
+)
 
 @api.get('/version')
 def api_version():

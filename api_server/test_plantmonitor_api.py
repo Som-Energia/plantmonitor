@@ -79,7 +79,7 @@ class Api_Test(unittest.TestCase):
         response = self.client.get('/version')
         
         self.assertEqual(response.status_code,200)
-        self.assertNsEqual(response.json(), """\
+        self.assertNsEqual(ns.loads(response.content), """\
             version: '1.0'
         """)
     
