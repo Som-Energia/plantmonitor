@@ -66,7 +66,7 @@ class PonyMetricStorage:
     def inverterReadings(self):
         inverterReadings = orm.select(c for c in InverterRegistry)
         return list(x.to_dict() for x in inverterReadings)
-        
+
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         with orm.db_session:
             plant = Plant.get(name=plant_name)
@@ -107,7 +107,7 @@ class InfluxMetricStorage:
 
         self._flux.write_points([point] )
         logger.info("[INFO] Sent to InfluxDB")
-    
+
 class TimeScaleMetricStorage:
 
     def __init__(self,config):

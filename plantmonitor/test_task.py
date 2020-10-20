@@ -59,7 +59,7 @@ class ORMSetup_Test(unittest.TestCase):
         orm.db_session.__exit__()
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
-    
+ 
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import dbinfo
