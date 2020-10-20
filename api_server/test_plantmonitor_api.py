@@ -62,6 +62,22 @@ class Api_Test(unittest.TestCase):
         # orm.db_session.__exit__()
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
+
+    def setUpPlant(self):
+        alcoleaPlantNS = ns.loads("""\
+            plants:
+            - plant:
+                name: Alcolea
+                codename: SCSOM04
+                description: la bonica planta
+                inverters:
+                - inverter:
+                    name: 'inversor1'
+            """)
+
+        alcoleaPlant = alcoleaPlantNS.plants[0].plant
+        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
     
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
@@ -94,21 +110,56 @@ class Api_Test(unittest.TestCase):
 
     def test__api_putPlantReadings(self):
 
+        time = datetime.datetime.now(datetime.timezone.utc)
+
         data = ns.loads("""\
             plant: Alcolea
             version: "1.0"
-            timestamp: "2020-09-27T14:00:00Z"
+            time: '{}'
             devices:
-            - id: "SensorTemperature:temperature"
+            - id: "Inverter:inversor1"
               reading:
-                temperature_c: 16.0
-            - id: "SensorIrradiation:irradiation1"
-              reading:
-                irradiation_w_m2: 16.0
-            """)
-        response = self.client.put('/plant/{}/readings'.format(data.plant), data=data.dump())
-        self.assertNsEqual(response.content, data)
-        self.assertEqual(response.status_code,200)
+                daily_energy_h_wh: 12
+                daily_energy_l_wh: 10
+                e_total_h_wh: 5
+                e_total_l_wh: 213
+                h_total_h_h: 125
+                h_total_l_h: 115
+                pac_r_w: 43
+                pac_s_w: 22
+                pac_t_w: 43
+                powerreactive_t_v: 9
+                powerreactive_r_v: 3
+                powerreactive_s_v: 5
+                temp_inv_c: 30
+            """.format(time.isoformat()))
+
+        with orm.db_session:
+            self.setUpPlant()
+            response = self.client.put('/plant/{}/readings'.format(data.plant), data=data.dump())
+            self.assertNsEqual(response.content, data)
+            self.assertEqual(response.status_code,200)
+            return
+            # TODO fix time format pipeline
+            storage = PonyMetricStorage()
+            self.assertNsEqual(ns(data=storage.inverterReadings()), """\
+                data:
+                - daily_energy_h_wh: 12
+                  daily_energy_l_wh: 10
+                  e_total_h_wh: 5
+                  e_total_l_wh: 213
+                  h_total_h_h: 125
+                  h_total_l_h: 115
+                  inverter: 1
+                  pac_r_w: 43
+                  pac_s_w: 22
+                  pac_t_w: 43
+                  powerreactive_r_v: 3
+                  powerreactive_s_v: 5
+                  powerreactive_t_v: 9
+                  temp_inv_c: 30
+                  time: {}
+                """.format(time.isoformat()))
 
 
 
