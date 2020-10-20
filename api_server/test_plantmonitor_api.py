@@ -97,7 +97,7 @@ class Api_Test(unittest.TestCase):
         data = ns.loads("""\
             plant: Alcolea
             version: "1.0"
-            timestamp: 2020-09-27T14:00:00Z
+            timestamp: "2020-09-27T14:00:00Z"
             devices:
             - id: "SensorTemperature:temperature"
               reading:
