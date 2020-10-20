@@ -38,10 +38,7 @@ async def api_putPlantReadings(plant_id: str, request: Request):
     body = await request.body()
     data = ns.loads(body)
 
-    return Response(
-        data.dump(), 200, media_type='application/x-yaml'
-    )
-
+    return data
 
 
 # vim: et sw=4 ts=4
