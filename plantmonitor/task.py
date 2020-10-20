@@ -62,6 +62,11 @@ def client_db(db):
     return flux_client
 
 class PonyMetricStorage:
+
+    def inverterReadings(self):
+        inverterReadings = orm.select(c for c in InverterRegistry)
+        return list(x.to_dict() for x in inverterReadings)
+        
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         with orm.db_session:
             plant = Plant.get(name=plant_name)

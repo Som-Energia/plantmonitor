@@ -109,9 +109,8 @@ class ORMSetup_Test(unittest.TestCase):
         expectedRegistry = dict(metrics)
         expectedRegistry['inverter'] = 1
         with orm.db_session:
-            allInverterRegistries = orm.select(c for c in InverterRegistry)
-            allInverterRegistriesList = list(x.to_dict() for x in allInverterRegistries)
-            self.assertEqual(allInverterRegistriesList, [expectedRegistry])
+            inverterReadings = storage.inverterReadings()
+            self.assertEqual(inverterReadings, [expectedRegistry])
 
     def test_PublishOrmIfInverterNotExist(self):
         inverter_name = 'Alice'
@@ -184,3 +183,5 @@ class ORMSetup_Test(unittest.TestCase):
             allInverterRegistries = orm.select(c for c in InverterRegistry)
             allInverterRegistriesList = list(allInverterRegistries)
             self.assertListEqual([], allInverterRegistriesList)
+
+# vim: et ts=4 sw=4
