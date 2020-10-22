@@ -97,17 +97,18 @@ def upload_meter_data(configdb, test_env=True):
                     logger.warning("Missing {} in db meter readings {}".format(facility, meterData))
                     continue
 
-                #Hour correction, meteologica expects start hour insted of end hour for readings
-
-                meterDataShifted = shiftOneHour(meterData)
+                #FALSE Hour correction, meteologica expects start hour insted of end hour for readings
+                #meteologica also expects end hour for readings, same as ERP
+                #and in fact uploaded are one hour forward validated and ERP, not one hour behind
+                #meterDataShifted = shiftOneHour(meterData)
 
                 # conversion from energy to power
                 # (Not necessary for hourly values)
-                logger.debug("Uploading {} data: {} ".format(facility, meterDataShifted[facility]))
-                response = api.uploadProduction(facility, meterDataShifted[facility])
+                logger.debug("Uploading {} data: {} ".format(facility, meterData[facility]))
+                response = api.uploadProduction(facility, meterData[facility])
                 responses[facility] = response
 
-                logger.info("Uploaded {} observations for facility {} : {}".format(len(meterDataShifted[facility]), facility, response))
+                logger.info("Uploaded {} observations for facility {} : {}".format(len(meterData[facility]), facility, response))
 
     elapsed = time.perf_counter() - start
     logger.info('Total elapsed time {:0.4}'.format(elapsed))

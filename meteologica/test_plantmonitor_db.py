@@ -191,7 +191,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
             facilities = db.getFacilities()
 
             self.assertCountEqual([self.mainFacility(), self.secondaryFacility()], facilities)
-    
+
     def test_addForecast(self):
         with self.createPlantmonitorDB() as db:
             data = {
