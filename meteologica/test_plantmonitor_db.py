@@ -13,7 +13,7 @@ from meteologica.plantmonitor_db import (
     PlantmonitorDBError,
 )
 
-from meteologica.utils import todt
+from meteologica.utils import todt, tztodt
 
 
 class PlantmonitorDB_Test(unittest.TestCase):
@@ -126,6 +126,21 @@ class PlantmonitorDB_Test(unittest.TestCase):
             }
             db.addMeterData(data)
             meter = db.getMeterData()
+            self.assertEqual(meter, data)
+
+    def test_getMeterData_tzaware(self):
+        with self.createPlantmonitorDB() as db:
+            db.addFacilityMeterRelation(self.mainFacility(), '123401234')
+            data = {
+                self.mainFacility(): [
+                    (tztodt('2020-01-01 00:00:00 UTC'), 10),
+                    (tztodt('2020-01-01 01:00:00 UTC'), 20),
+                ]
+            }
+            db.addMeterData(data)
+            meter = db.getMeterData()
+            print(meter)
+            print(data)
             self.assertEqual(meter, data)
 
     def test_getMeterDataFromToDate(self):
