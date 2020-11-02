@@ -95,7 +95,7 @@ def parse_xlsx(input_data_file, column2integrate):
 
     sensor = pd.read_excel(input_data_file, usecols=[datetime_col, column2integrate], index_col=datetime_col, parse_dates=True, convert_float=False)
 
-    sensor = sensor.tz_localize('Europe/Zurich')
+    sensor = sensor.tz_localize('Europe/Zurich', ambiguous='infer')
 
     return sensor
 
@@ -150,6 +150,8 @@ def main():
 
     from_date = sensor_df.index[0].floor('d')
     to_date   = sensor_df.index[-1].ceil('d')
+
+    anomalies = False
 
     if not sensor_df.index.is_monotonic_increasing:
         print("Index is NOT monotonic! Attempting automatic fix")
