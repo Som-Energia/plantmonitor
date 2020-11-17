@@ -138,20 +138,19 @@ class TimeScaleMetricStorage:
         return self._dbconnetion
 
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
-        with self._db().cursor() as cur:
-            measurement    = 'sistema_inversor'
-            query_content  = ', '.join(metrics.keys())
-            values_content = ', '.join(["'{}'".format(v) for v in metrics.values()])
+        with self._db() as conn:
+            with conn.cursor() as cur:
+                measurement    = 'sistema_inversor'
+                query_content  = ', '.join(metrics.keys())
+                values_content = ', '.join(["'{}'".format(v) for v in metrics.values()])
 
+                query = "INSERT INTO {}(time, inverter_name, location, {}) \
+                    VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
+                        measurement,query_content,
+                        inverter_name,plant_name,values_content
+                    )
 
-            cur.execute(
-                "INSERT INTO {}(time, inverter_name, location, {}) \
-                VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
-                    measurement,query_content,
-                    inverter_name,plant_name,values_content
-                )
-            )
-
+                cur.execute(query)
 
 
 def publish_timescale(plant_name, inverter_name, metrics, db):
