@@ -305,10 +305,11 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
                 'SomEnergia_Manlleu_Pisc',
                 'SCSOM02',
                 'SomEnergia_Picanya',
+                'SomEnergia_Ramadera_Cassa',
                 'SomEnergia_Riudarenes_BR',
                 'SomEnergia_Riudarenes_SM',
                 'SomEnergia_Riudarenes_ZE',
-                'SomEnergia_Tahal',
+                'SCSOM07 ',
                 'SomEnergia_Torrefarrera',
                 'SCSOM01',
             ]

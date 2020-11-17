@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
@@ -75,7 +76,11 @@ class ORMSetup_Test(unittest.TestCase):
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
-            metrics = ns([
+
+            nowtime = datetime.datetime.now(datetime.timezone.utc)
+
+            # TODO change modmap to contain units (=> will break influx export)
+            metrics_with_units = ns([
                     ('daily_energy_h_wh', 0),
                     ('daily_energy_l_wh', 17556),
                     ('e_total_h_wh', 566),
@@ -89,7 +94,28 @@ class ORMSetup_Test(unittest.TestCase):
                     ('powerreactive_r_v', 0),
                     ('powerreactive_s_v', 0),
                     ('temp_inv_c', 320),
-                    ('time', datetime.datetime.now(datetime.timezone.utc)),
+                    ('time', nowtime),
+                    # Sensors registers  obtained from inverters           
+                    ('probe1value', 443),
+                    ('probe2value', 220),
+                    ('probe3value', 0),
+                    ('probe4value', 0),
+                    ])
+            metrics = ns([
+                    ('daily_energy_h', 0),
+                    ('daily_energy_l', 17556),
+                    ('e_total_h', 566),
+                    ('e_total_l', 49213),
+                    ('h_total_h', 0),
+                    ('h_total_l', 18827),
+                    ('pac_r', 0),
+                    ('pac_s', 0),
+                    ('pac_t', 0),
+                    ('powerreactive_t', 0),
+                    ('powerreactive_r', 0),
+                    ('powerreactive_s', 0),
+                    ('temp_inv', 320),
+                    ('time', nowtime),
                     # Sensors registers  obtained from inverters           
                     ('probe1value', 443),
                     ('probe2value', 220),
@@ -101,12 +127,12 @@ class ORMSetup_Test(unittest.TestCase):
         storage.storeInverterMeasures(
             plant_name, inverter_name, metrics)
 
-        metrics.pop('probe1value')
-        metrics.pop('probe2value')
-        metrics.pop('probe3value')
-        metrics.pop('probe4value')
+        metrics_with_units.pop('probe1value')
+        metrics_with_units.pop('probe2value')
+        metrics_with_units.pop('probe3value')
+        metrics_with_units.pop('probe4value')
 
-        expectedRegistry = dict(metrics)
+        expectedRegistry = dict(metrics_with_units)
         expectedRegistry['inverter'] = 1
         with orm.db_session:
             allInverterRegistries = orm.select(c for c in InverterRegistry)

@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
 import unittest
 from erppeek import Client
 from yamlns import namespace as ns
@@ -32,7 +35,9 @@ class Meters_Test(unittest.TestCase):
             '501215457',
             '501600324',
             '501815908',
+            '70312',
             '88300864',
+            '88300909',
         ])
 
     def test__measures_from_date(self):

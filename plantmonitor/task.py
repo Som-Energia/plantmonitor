@@ -79,8 +79,24 @@ class PonyMetricStorage:
                 'probe3value',
                 'probe4value',
                 ]
+            translator = {
+                'temp_inv': 'temp_inv_c', 
+                'pac_r': 'pac_r_w',
+                'pac_s': 'pac_s_w',
+                'pac_t': 'pac_t_w',
+                'e_total_h': 'e_total_h_wh',
+                'e_total_l': 'e_total_l_wh',
+                'h_total_h': 'h_total_h_h',
+                'h_total_l': 'h_total_l_h',
+                'powerreactive_r': 'powerreactive_r_v', 
+                'powerreactive_s': 'powerreactive_s_v',
+                'powerreactive_t': 'powerreactive_t_v',
+                'daily_energy_h': 'daily_energy_h_wh',
+                'daily_energy_l': 'daily_energy_l_wh',
+                'time': 'time',
+            }
             inverterMetricsAndSensorsDict = dict(inverterMetricsAndSensors)
-            register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
+            register_values_dict = { translator[k]:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
             inverter.insertRegistry(**register_values_dict)
 
 
