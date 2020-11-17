@@ -140,8 +140,8 @@ class TimeScaleMetricStorage:
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         with self._db().cursor() as cur:
             measurement    = 'sistema_inversor'
-            query_content  = ', '.join(metrics['fields'].keys())
-            values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
+            query_content  = ', '.join(metrics.keys())
+            values_content = ', '.join(["'{}'".format(v) for v in metrics.values()])
 
 
             cur.execute(
