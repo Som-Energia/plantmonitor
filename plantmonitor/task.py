@@ -208,6 +208,8 @@ def task():
             tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
+        traceback.print_exc()
+
 
 
 def task_counter_erp():
