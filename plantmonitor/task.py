@@ -90,7 +90,7 @@ class PonyMetricStorage:
                 'h_total_l': 'h_total_l_h',
                 'powerreactive_r': 'powerreactive_r_v', 
                 'powerreactive_s': 'powerreactive_s_v',
-                'powerreactive_t': 'powerreactive_t_v',
+                'powereactive_t': 'powerreactive_t_v',
                 'daily_energy_h': 'daily_energy_h_wh',
                 'daily_energy_l': 'daily_energy_l_wh',
                 'time': 'time',

@@ -111,7 +111,7 @@ class ORMSetup_Test(unittest.TestCase):
                     ('pac_r', 0),
                     ('pac_s', 0),
                     ('pac_t', 0),
-                    ('powerreactive_t', 0),
+                    ('powereactive_t', 0),
                     ('powerreactive_r', 0),
                     ('powerreactive_s', 0),
                     ('temp_inv', 320),
