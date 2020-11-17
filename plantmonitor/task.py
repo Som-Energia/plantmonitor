@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import traceback 
 from pymodbus.client.sync import ModbusTcpClient
 from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant
@@ -205,8 +206,6 @@ def task():
             ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
             logger.info("**** Log to timescale ****")
             tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
-
-
     except Exception as err:
         logger.error("[ERROR] %s" % err)
 
@@ -222,6 +221,7 @@ def task_counter_erp():
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
+        traceback.print_exc()
         raise
 
 
