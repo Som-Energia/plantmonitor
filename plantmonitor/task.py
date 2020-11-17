@@ -199,8 +199,11 @@ def task():
             logger.info("**** Metrics - tag - location %s ****" % plant_name)
             logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
+            logger.info("**** Log to flux ****")
             fluxStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+            logger.info("**** Log to pony ****")
             ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+            logger.info("**** Log to timescale ****")
             tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
 
