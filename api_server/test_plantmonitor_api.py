@@ -37,8 +37,6 @@ setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 class Api_Test(unittest.TestCase):
 
-    from yamlns.testutils import assertNsEqual
-
     def setUp(self):
 
         from conf import dbinfo
@@ -88,25 +86,19 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
 
-    from yamlns.testutils import assertNsEqual
-
     def test__api_version(self):
 
         response = self.client.get('/version')
         
         self.assertEqual(response.status_code,200)
-        self.assertNsEqual(ns.loads(response.content), """\
-            version: '1.0'
-        """)
+        self.assertDictEqual(response.json(), {"version": "1.0"})
     
     def __test__api_plantReadings__Empty(self):
 
-        yaml = ns.loads("""\
-            """)
+        emptyplant = {}
         plant_id = 1
             
-        rv = self.client.put('/' + plant_id, yaml)
-        self.assertEqual()
+        rv = self.client.put('/' + plant_id, emptyplant)
 
     def test__api_putPlantReadings__endpoint_response(self):
 
@@ -180,16 +172,11 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
 
-            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+            self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
 
-            data["devices"][0]["reading"]["time"] = time.isoformat()
-            self.assertDictEqual(response.json(), data)
-            self.assertEqual(response.status_code, 200)
-
-            # TODO fix time format pipeline
+            # check reading content
             storage = PonyMetricStorage()
             readings = storage.inverterReadings()
-            
             self.assertListEqual(
                 readings, 
                 [{
@@ -212,6 +199,7 @@ class Api_Test(unittest.TestCase):
                 }]
             )
 
+            # check inverter content
             inverter_fk = readings[0]["inverter"]
             inverter = storage.inverter(inverter_fk)
 
