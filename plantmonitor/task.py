@@ -63,6 +63,10 @@ def client_db(db):
 
 class PonyMetricStorage:
 
+    def inverter(self, inverter_fk):
+        device = Inverter[inverter_fk]
+        return device.to_dict()
+
     def inverterReadings(self):
         inverterReadings = orm.select(c for c in InverterRegistry)
         return list(x.to_dict() for x in inverterReadings)

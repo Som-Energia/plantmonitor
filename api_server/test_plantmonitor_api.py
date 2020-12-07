@@ -33,7 +33,7 @@ from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
 from .plantmonitor_api import api
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 class Api_Test(unittest.TestCase):
 
@@ -108,58 +108,115 @@ class Api_Test(unittest.TestCase):
         rv = self.client.put('/' + plant_id, yaml)
         self.assertEqual()
 
-    def test__api_putPlantReadings(self):
+    def test__api_putPlantReadings__endpoint_response(self):
 
         time = datetime.datetime.now(datetime.timezone.utc)
 
-        data = ns.loads("""\
-            plant: Alcolea
-            version: "1.0"
-            time: '{}'
-            devices:
-            - id: "Inverter:inversor1"
-              reading:
-                daily_energy_h_wh: 12
-                daily_energy_l_wh: 10
-                e_total_h_wh: 5
-                e_total_l_wh: 213
-                h_total_h_h: 125
-                h_total_l_h: 115
-                pac_r_w: 43
-                pac_s_w: 22
-                pac_t_w: 43
-                powerreactive_t_v: 9
-                powerreactive_r_v: 3
-                powerreactive_s_v: 5
-                temp_inv_c: 30
-            """.format(time.isoformat()))
-
+        data = {
+            "plant": "Alcolea",
+            "version": "1.0",
+            "time": time.isoformat(),
+            "devices":
+            [{
+                "id": "Inverter:inversor1",
+                "reading":
+                {
+                    "daily_energy_h_wh": 12,
+                    "daily_energy_l_wh": 10,
+                    "e_total_h_wh": 5,
+                    "e_total_l_wh": 213,
+                    "h_total_h_h": 125,
+                    "h_total_l_h": 115,
+                    "pac_r_w": 43,
+                    "pac_s_w": 22,
+                    "pac_t_w": 43,
+                    "powerreactive_t_v": 9,
+                    "powerreactive_r_v": 3,
+                    "powerreactive_s_v": 5,
+                    "temp_inv_c": 30,
+                }
+            }]
+        }
+ 
         with orm.db_session:
             self.setUpPlant()
-            response = self.client.put('/plant/{}/readings'.format(data.plant), data=data.dump())
-            self.assertNsEqual(response.content, data)
-            self.assertEqual(response.status_code,200)
-            return
+
+            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+
+            data["devices"][0]["reading"]["time"] = time.isoformat()
+            self.assertDictEqual(response.json(), data)
+            self.assertEqual(response.status_code, 200)
+
+    def test__api_putPlantReadings__database_insert(self):
+
+        time = datetime.datetime.now(datetime.timezone.utc)
+
+        data = {
+            "plant": "Alcolea",
+            "version": "1.0",
+            "time": time.isoformat(),
+            "devices":
+            [{
+                "id": "Inverter:inversor1",
+                "reading":
+                {
+                    "daily_energy_h_wh": 12,
+                    "daily_energy_l_wh": 10,
+                    "e_total_h_wh": 5,
+                    "e_total_l_wh": 213,
+                    "h_total_h_h": 125,
+                    "h_total_l_h": 115,
+                    "pac_r_w": 43,
+                    "pac_s_w": 22,
+                    "pac_t_w": 43,
+                    "powerreactive_t_v": 9,
+                    "powerreactive_r_v": 3,
+                    "powerreactive_s_v": 5,
+                    "temp_inv_c": 30,
+                }
+            }]
+        }
+ 
+        with orm.db_session:
+            self.setUpPlant()
+
+            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+
+            data["devices"][0]["reading"]["time"] = time.isoformat()
+            self.assertDictEqual(response.json(), data)
+            self.assertEqual(response.status_code, 200)
+
             # TODO fix time format pipeline
             storage = PonyMetricStorage()
-            self.assertNsEqual(ns(data=storage.inverterReadings()), """\
-                data:
-                - daily_energy_h_wh: 12
-                  daily_energy_l_wh: 10
-                  e_total_h_wh: 5
-                  e_total_l_wh: 213
-                  h_total_h_h: 125
-                  h_total_l_h: 115
-                  inverter: 1
-                  pac_r_w: 43
-                  pac_s_w: 22
-                  pac_t_w: 43
-                  powerreactive_r_v: 3
-                  powerreactive_s_v: 5
-                  powerreactive_t_v: 9
-                  temp_inv_c: 30
-                  time: {}
-                """.format(time.isoformat()))
+            readings = storage.inverterReadings()
+            
+            self.assertListEqual(
+                readings, 
+                [{
+                    "inverter" : 1,
+                    "daily_energy_h_wh": 12,
+                    "daily_energy_l_wh": 10,
+                    "e_total_h_wh": 5,
+                    "e_total_l_wh": 213,
+                    "h_total_h_h": 125,
+                    "h_total_l_h": 115,
+                    "inverter": 1,
+                    "pac_r_w": 43,
+                    "pac_s_w": 22,
+                    "pac_t_w": 43,
+                    "powerreactive_r_v": 3,
+                    "powerreactive_s_v": 5,
+                    "powerreactive_t_v": 9,
+                    "temp_inv_c": 30,
+                    "time": time,
+                }]
+            )
+
+            inverter_fk = readings[0]["inverter"]
+            inverter = storage.inverter(inverter_fk)
+
+            _,device_name = data["devices"][0]["id"].split(":")
+            self.assertEqual(inverter["name"], device_name)
 
 
 
