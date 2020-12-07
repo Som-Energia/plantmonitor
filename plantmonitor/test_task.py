@@ -26,13 +26,120 @@ from ORM.models import (
     ForecastPredictor,
     Forecast,
 )
-from plantmonitor.task import PonyMetricStorage
+from plantmonitor.task import PonyMetricStorage, ApiMetricStorage
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 import datetime
 
 setupDatabase()
+
+class ApiClient_Test(unittest.TestCase):
+
+    def setUp(self):
+
+        from conf import dbinfo
+        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+
+        orm.rollback()
+        database.drop_all_tables(with_all_data=True)
+
+        self.maxDiff=None
+        # orm.set_sql_debug(True)
+
+        database.create_tables()
+
+        # database.generate_mapping(create_tables=True)
+        orm.db_session.__enter__()
+
+        # TODO create api and launch local test server
+
+    def tearDown(self):
+        orm.rollback()
+        orm.db_session.__exit__()
+        database.drop_all_tables(with_all_data=True)
+        database.disconnect()
+
+    def createApi(self):
+        #TODO configfile
+        config = {
+            "api_url":"http://localhost:8000",
+            "version":"1.0",
+        }
+        return ApiMetricStorage(config)
+
+    def createPlantDict(self):
+        plant_name = 'SomEnergia_Alcolea'
+        inverter_name = 'Mary'
+        metrics = ns([
+            ('daily_energy_h_wh', 0),
+            ('daily_energy_l_wh', 17556),
+            ('e_total_h_wh', 566),
+            ('e_total_l_wh', 49213),
+            ('h_total_h_h', 0),
+            ('h_total_l_h', 18827),
+            ('pac_r_w', 0),
+            ('pac_s_w', 0),
+            ('pac_t_w', 0),
+            ('powerreactive_t_v', 0),
+            ('powerreactive_r_v', 0),
+            ('powerreactive_s_v', 0),
+            ('temp_inv_c', 320),
+            ('time', datetime.datetime.now(datetime.timezone.utc)),
+        ])
+
+        return plant_name, inverter_name, metrics
+
+    def createPlant(self):
+        plant_name = 'SomEnergia_Alcolea'
+        inverter_name = 'Mary'
+        with orm.db_session:
+            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = Inverter(name=inverter_name, plant=alcolea)
+            metrics = ns([
+                    ('daily_energy_h_wh', 0),
+                    ('daily_energy_l_wh', 17556),
+                    ('e_total_h_wh', 566),
+                    ('e_total_l_wh', 49213),
+                    ('h_total_h_h', 0),
+                    ('h_total_l_h', 18827),
+                    ('pac_r_w', 0),
+                    ('pac_s_w', 0),
+                    ('pac_t_w', 0),
+                    ('powerreactive_t_v', 0),
+                    ('powerreactive_r_v', 0),
+                    ('powerreactive_s_v', 0),
+                    ('temp_inv_c', 320),
+                    ('time', datetime.datetime.now(datetime.timezone.utc)),
+                    ])
+
+            storage = PonyMetricStorage()
+            storage.storeInverterMeasures(plant_name, inverter_name, metrics)
+ 
+ 
+    def test_Environment(self):
+        #TODO will it be too late if the config is misconfigured?
+        from conf import dbinfo
+        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+
+    def test__ApiMetricStorage__storeInverterMeasures(self):
+        plant_name, inverter_name, inverter_registers = self.createPlantDict()
+        
+        api = self.createApi()
+        result = api.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+
+        self.assertTrue(result)
+
+    def __test__ApiMetricStorage__storeInverterMeasures(self):
+        plant_name, inverter_name, inverter_registers = self.createPlantDict()
+           
+        api = self.createApi()
+        result = api.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+
+        readings = api.getInverterMeasures(plant_name, inverter_name)
+
+        self.assertDictEqual(inverter_registers, readings)
+
 
 class ORMSetup_Test(unittest.TestCase):
 

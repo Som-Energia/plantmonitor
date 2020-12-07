@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import requests
+
 from pymodbus.client.sync import ModbusTcpClient
 from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant
@@ -92,6 +94,62 @@ class PonyMetricStorage:
             register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
             inverter.insertRegistry(**register_values_dict)
 
+class ApiMetricStorage:
+    def __init__(self, config):
+        self.api_url = config['api_url']
+        self.version = config['version']
+
+    def inverterReadings(self):
+        # connect to api and get readings
+        pass
+
+    def plant_data(self, plant_name, device_type, device_name, readings):
+
+        time = datetime.datetime.now(datetime.timezone.utc)
+        
+        plant_data = {
+            "plant": plant_name, 
+            "version": self.version,
+            "time": time.isoformat(),
+        }
+
+        id = "{}:{}".format(device_type, device_name)
+
+        plant_data["devices"] = [{"id" : id, "reading": reading} for reading in readings]
+
+        return plant_data
+
+    def storeInverterMeasures(self, plant_name, inverter_name, metrics):
+        # connect to api and put readings
+
+        with orm.db_session:
+            # TODO REST get endpoints
+            # plants = requests.get("{}/plants".format(self.api_url))
+            # if plant_name not in plants:
+            #     logger.debug("No plant named {}".format(plant_name))
+            #     return
+            # plant_id = plants.id
+            # inverter = requests.get("{}/plant/{}/inverters".format(self.api_url, plant_id))
+            # if inverter_name not in inverter:
+            #     logger.debug("No inverter named {}".format(inverter_name))
+            #     return
+            
+            inverterMetricsAndSensorsDict = dict(metrics)
+            
+            device_type = "Inverter"
+            plant_data = self.plant_data(
+                plant_name=plant_name, 
+                device_type=device_type,
+                device_name=inverter_name, 
+                readings=inverterMetricsAndSensorsDict
+                )
+
+            r = requests.put("{}/plant/{}/readings".format(self.api_url, plant_name), json=plant_data)
+
+            if r.status_code != 200:
+                logger.error("Error {} putting plant data".format(r.status_code))
+
+            return r.status_code == 200
 
 class InfluxMetricStorage:
     def __init__(self, config):
@@ -180,7 +238,7 @@ def task():
         ponyStorage = PonyMetricStorage()
         fluxStorage = InfluxMetricStorage(plant.db)
         tsStorage = TimeScaleMetricStorage(config.plant_postgres)
-        #apiStorage = ApiMetricsStorage(url='http://')
+        #apiStorage = ApiMetricStorage(url='http://')
 
 
         for i, device in enumerate(plant.devices):
