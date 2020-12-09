@@ -32,6 +32,14 @@ from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 import datetime
 
+# Test against a fully functioning api
+from api_server.plantmonitor_api import api
+from multiprocessing import Process
+import uvicorn
+import time
+import requests
+
+
 setupDatabase()
 
 class ApiClient_Test(unittest.TestCase):
@@ -52,18 +60,31 @@ class ApiClient_Test(unittest.TestCase):
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
 
-        # TODO create api and launch local test server
+        # create api and launch local test server
+        self.proc = Process(target=uvicorn.run,
+                    args=(api,),
+                    kwargs={
+                        "host": "127.0.0.1",
+                        "port": self.apiPort(),
+                        "log_level": "warning"},
+                    daemon=True)
+        self.proc.start()
+        time.sleep(0.1) 
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
+        self.proc.terminate()
 
-    def createApi(self):
+    def apiPort(self):
+        return 5000
+
+    def createApiClient(self):
         #TODO configfile
         config = {
-            "api_url":"http://localhost:8000",
+            "api_url":"http://localhost:{}".format(self.apiPort()),
             "version":"1.0",
         }
         return ApiMetricStorage(config)
@@ -116,7 +137,11 @@ class ApiClient_Test(unittest.TestCase):
             storage = PonyMetricStorage()
             storage.storeInverterMeasures(plant_name, inverter_name, metrics)
  
- 
+    def test__api_hello_version(self):
+        response = requests.get("http://localhost:{}/version".self.apiPort())
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(),{"version":"1.0"})
+
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import dbinfo
@@ -125,18 +150,18 @@ class ApiClient_Test(unittest.TestCase):
     def test__ApiMetricStorage__storeInverterMeasures(self):
         plant_name, inverter_name, inverter_registers = self.createPlantDict()
         
-        api = self.createApi()
-        result = api.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+        apiClient = self.createApiClient()
+        result = apiClient.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
         self.assertTrue(result)
 
     def __test__ApiMetricStorage__storeInverterMeasures(self):
         plant_name, inverter_name, inverter_registers = self.createPlantDict()
            
-        api = self.createApi()
-        result = api.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+        apiClient = self.createApiClient()
+        result = apiClient.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
-        readings = api.getInverterMeasures(plant_name, inverter_name)
+        readings = apiClient.getInverterMeasures(plant_name, inverter_name)
 
         self.assertDictEqual(inverter_registers, readings)
 
