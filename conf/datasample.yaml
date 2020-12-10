@@ -147,14 +147,27 @@ plant -> devices <|- Sensor <|- Sensor2
 	- id: "SensorIrradiation:irradiation1"
 	  reading:
 	    irradiation_w_m2: 16.0
-		
+
+# several readings
+	plant: Alcolea
+	time: 2020-09-27T14:00:00Z
+	devices:
+	-	id: "SensorTemperature:thermometer1"
+		readings:
+		- time: 2020-09-27T10:00:00Z
+			temperature_c: 16
+		- time: 2020-09-27T11:00:00Z
+			temperature_c: 17
+	- id: "SensorTemperature:thermometer2"
+		reading:
+		  timestamp: 2020-09-27T10:00:00Z
+			temperature_c: 16.0
 
 # timespan readings
 	plant: Alcolea
 	timestamp: 2020-09-27T14:00:00Z
 	devices:
-	-
-		uid: HASJDAK-AHKSDJ
+	- uid: HASJDAK-AHKSDJ
 		device_name: inversor1
 		device_type: Inverter
 		reading:
@@ -172,8 +185,7 @@ plant -> devices <|- Sensor <|- Sensor2
 			powerreactive_r_v: 3
 			powerreactive_s_v: 5
 			temp_inv_c: 30
-	-
-		uid: TUTUTU-HASHDH
+	- uid: TUTUTU-HASHDH
 		device_name: temperature1
 		device_type: SensorTemperature
 		reading:

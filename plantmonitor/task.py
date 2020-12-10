@@ -43,6 +43,9 @@ from ORM.models import (
     MeterRegistry,
     Inverter,
     InverterRegistry,
+    Sensor,
+    SensorTemperature,
+    SensorTemperatureRegistry,
 )
 
 from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables

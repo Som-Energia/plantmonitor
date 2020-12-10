@@ -17,6 +17,12 @@ from pony.orm import (
 
 database = orm.Database()
 
+def getRegistries(entitySet, exclude, fromdate=None, todate=None):
+        if fromdate and todate:
+            registries = orm.select(r for r in entitySet if fromdate <= r.time and r.time <= todate)[:]
+        else:
+            registries = orm.select(r for r in entitySet)[:]
+        return [r.to_dict(exclude=exclude) for r in registries]
 
 class Plant(database.Entity):
 
@@ -68,6 +74,49 @@ class Plant(database.Entity):
         SensorTemperature(plant=self, name='Temp'+self.name)
         SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
+    def plantData(self, fromdate=None, todate=None):
+        data = {"plant": self.name}
+        data["devices"] = []
+
+        classes = [Meter, Inverter, SensorIrradiation]
+        for c in classes:
+            meterList = [{
+                "id":"Meter:{}".format(m.name), "readings": m.getRegistries()
+                } for m in orm.select(mc for mc in c)]
+            data["devices"] = data["devices"] + meterList
+
+        #  select all registries fromdate todate
+        # meterList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
+        # data["devices"].append(meterList)
+
+        # sensorIrradiationList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
+
+        # meterList = [{"id":"Inverter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
+        #     "devices":
+        #     [{
+        #         "id": "Inverter:inversor1",
+        #         "reading":
+        #         {
+        #             "daily_energy_h_wh": 12,
+        #             "daily_energy_l_wh": 10,
+        #             "e_total_h_wh": 5,
+        #             "e_total_l_wh": 213,
+        #             "h_total_h_h": 125,
+        #             "h_total_l_h": 115,
+        #             "pac_r_w": 43,
+        #             "pac_s_w": 22,
+        #             "pac_t_w": 43,
+        #             "powerreactive_t_v": 9,
+        #             "powerreactive_r_v": 3,
+        #             "powerreactive_s_v": 5,
+        #             "temp_inv_c": 30,
+        #         }
+        #     }]
+        # }
+        print(data)
+        return data
+ 
+
 
 class Meter(database.Entity):
 
@@ -86,7 +135,10 @@ class Meter(database.Entity):
             r3_w = r3_w,
             r4_w = r4_w,
             )
-
+    # TODO: convert to a fixture this function
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.meterRegistries, exclude='meter', fromdate=fromdate, todate=todate)
+        return readings
 
 class MeterRegistry(database.Entity):
 
@@ -99,7 +151,7 @@ class MeterRegistry(database.Entity):
     r2_w = Required(int, size=64)
     r3_w = Required(int, size=64)
     r4_w = Required(int, size=64)
-
+    
 
 class Inverter(database.Entity):
 
@@ -140,7 +192,11 @@ class Inverter(database.Entity):
             powerreactive_s_v = powerreactive_s_v,
             temp_inv_c = temp_inv_c
         )
+    
 
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.inverterRegistries, exclude='inverter', fromdate=fromdate, todate=todate)
+        return readings
 
 class InverterRegistry(database.Entity):
 
@@ -180,6 +236,9 @@ class SensorIrradiation(Sensor):
             irradiation_w_m2 = irradiation_w_m2
             )
 
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
+        return readings
 
 class SensorTemperature(Sensor):
 
@@ -192,6 +251,9 @@ class SensorTemperature(Sensor):
             temperature_c = temperature_c
             )
 
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
+        return readings
 
 class SensorIntegratedIrradiation(Sensor):
 
@@ -204,6 +266,9 @@ class SensorIntegratedIrradiation(Sensor):
             integratedIrradiation_wh_m2 = integratedIrradiation_wh_m2
             )
 
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
+        return readings
 
 class SensorIrradiationRegistry(database.Entity):
 
@@ -259,6 +324,10 @@ class ForecastMetadata(database.Entity):
             percentil50 = percentil50,
             percentil90 = percentil90
             )
+
+    def getForecast(self, fromdate=None, todate=None):
+        readings = getRegistries(self.forecasts, exclude='forecastMetadata', fromdate=fromdate, todate=todate)
+        return readings
 
 
 class Forecast(database.Entity):
