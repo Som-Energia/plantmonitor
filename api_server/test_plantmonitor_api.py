@@ -146,7 +146,7 @@ class Api_Test(unittest.TestCase):
         data = {
             "plant": "Alcolea",
             "version": "1.0",
-            "time": time.isoformat(),
+            "time": time.isoformat(), #consider using fastapi.jsonable_encoder
             "devices":
             [{
                 "id": "Inverter:inversor1",
@@ -206,6 +206,49 @@ class Api_Test(unittest.TestCase):
             _,device_name = data["devices"][0]["id"].split(":")
             self.assertEqual(inverter["name"], device_name)
 
+    def test__api_putPlantReadings__time_reading(self):
+
+        time = datetime.datetime.now(datetime.timezone.utc)
+
+        data = {
+            "plant": "Alcolea",
+            "version": "1.0",
+            "time": time.isoformat(), #consider using fastapi.jsonable_encoder
+            "devices":
+            [{
+                "id": "Sensor:thermometer1",
+                "reading":
+                {
+                    "temperature_mc": 12,
+                    "time": time.isoformat(),
+                }
+            }]
+        }
+ 
+        with orm.db_session:
+            self.setUpPlant()
+
+            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+            print(response)
+            print(response.content)
+            # check reading content
+            storage = PonyMetricStorage()
+            readings = storage.sensorTemperatureReadings()
+            self.assertListEqual(
+                readings, 
+                [{
+                    "sensor" : 1,
+                    "temperature_mc": 12,
+                    "time": time,
+                }]
+            )
+
+            # check sensor content
+            sensor_fk = readings[0]["inverter"]
+            sensor = storage.sensor(sensor_fk)
+
+            _,device_name = data["devices"][0]["id"].split(":")
+            self.assertEqual(sensor["name"], device_name)
 
 
 # vim: et sw=4 ts=4

@@ -68,6 +68,29 @@ def client_db(db):
 
 class PonyMetricStorage:
 
+    def sensor(self, sensor_fk):
+        device = Sensor[sensor_fk]
+        return device.to_dict()
+
+    def sensorTemperatureReadings(self):
+        sensorReadings = orm.select(c for c in SensorTemperatureRegistry)
+        return list(x.to_dict() for x in sensorReadings)
+
+    #TODO return all data (or filter by date)
+    def plantData(self, plant_name):
+        plantdata = { "plant": "Alcolea" }
+        # devices = # get devices
+        # devices_readings = [{
+        #             "id": "SensorTemperature:thermometer1",
+        #             "reading":
+        #             {
+        #                 "temperature_mc": 12,
+        #                 "time": datetime.datetime.now(datetime.timezone.utc),
+        #             }
+        # } for d in devices]
+        # plantdata["devices"] = devices_readings
+        return plantdata
+
     def inverter(self, inverter_fk):
         device = Inverter[inverter_fk]
         return device.to_dict()
@@ -97,6 +120,41 @@ class PonyMetricStorage:
             register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
             inverter.insertRegistry(**register_values_dict)
 
+    def storePlantData(self, plant_data):
+        with orm.db_session:
+            plant_name = plant_data["plant"]
+            plant = Plant.get(name=plant_name)
+            if not plant:
+                logger.debug("No plant named {}".format(plant_name))
+                return
+            data_time = plant_data["time"]
+            devices = plant_data["devices"]
+            for d in devices:
+                device_type, device_name = d["id"].split(":")
+                reading = d["reading"]
+                if device_type == "Inverter":
+                    inverter = Inverter.get(name=device_name, plant=plant)
+                    if not inverter:
+                        logger.debug("No device named {}".format(device_name))
+                        continue
+                    excludedColumns = [
+                        'probe1value',
+                        'probe2value',
+                        'probe3value',
+                        'probe4value',
+                        ]
+                    reading.setdefault("time", data_time)
+                    register_values_dict = { k:v for k,v in reading.items() if k not in excludedColumns}
+                    inverter.insertRegistry(**register_values_dict)
+                elif device_type == "SensorTemperature":
+                    sensor = SensorTemperature.get(name=device_name, plant=plant)
+                    if not sensor:
+                        logger.debug("No device named {}".format(device_name))
+                        continue
+                    reading.setdefault("time", data_time)
+                    sensor.insertRegistry(**reading)
+            
+
 class ApiMetricStorage:
     def __init__(self, config):
         self.api_url = config['api_url']
@@ -109,7 +167,7 @@ class ApiMetricStorage:
     def plant_data(self, plant_name, device_type, device_name, readings):
 
         time = datetime.datetime.now(datetime.timezone.utc)
-        
+
         plant_data = {
             "plant": plant_name, 
             "version": self.version,
@@ -117,6 +175,12 @@ class ApiMetricStorage:
         }
 
         id = "{}:{}".format(device_type, device_name)
+
+        # change datetime to string
+        #TODO find a better way
+        for r in readings:
+            if "time" in r:
+                r["time"] = r["time"].isoformat()
 
         plant_data["devices"] = [{"id" : id, "reading": reading} for reading in readings]
 
@@ -137,17 +201,22 @@ class ApiMetricStorage:
             #     logger.debug("No inverter named {}".format(inverter_name))
             #     return
             
-            inverterMetricsAndSensorsDict = dict(metrics)
-            
+            reading = dict(metrics)
+            readings = [reading]
+
             device_type = "Inverter"
             plant_data = self.plant_data(
                 plant_name=plant_name, 
                 device_type=device_type,
                 device_name=inverter_name, 
-                readings=inverterMetricsAndSensorsDict
+                readings=readings
                 )
 
+            logger.info("puting metrics to endpoint {}".format(plant_data))
+
             r = requests.put("{}/plant/{}/readings".format(self.api_url, plant_name), json=plant_data)
+
+            print(r.content)
 
             if r.status_code != 200:
                 logger.error("Error {} putting plant data".format(r.status_code))

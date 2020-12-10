@@ -60,13 +60,15 @@ class ApiClient_Test(unittest.TestCase):
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
 
+        log_level = "debug"
+
         # create api and launch local test server
         self.proc = Process(target=uvicorn.run,
                     args=(api,),
                     kwargs={
                         "host": "127.0.0.1",
                         "port": self.apiPort(),
-                        "log_level": "warning"},
+                        "log_level": log_level},
                     daemon=True)
         self.proc.start()
         time.sleep(0.1) 
@@ -138,7 +140,7 @@ class ApiClient_Test(unittest.TestCase):
             storage.storeInverterMeasures(plant_name, inverter_name, metrics)
  
     def test__api_hello_version(self):
-        response = requests.get("http://localhost:{}/version".self.apiPort())
+        response = requests.get("http://localhost:{}/version".format(self.apiPort()))
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(),{"version":"1.0"})
 
@@ -309,5 +311,33 @@ class ORMSetup_Test(unittest.TestCase):
                 'UnknownPlant', inverter_name, metrics)
  
             self.assertListEqual(storage.inverterReadings(), [])
+
+    def test__PonyMetricStorage_storePlantData__storeTemperatureSensor(self):
+        sensor_name = 'Alice'
+        plant_name = 'SomEnergia_Alcolea'
+        with orm.db_session:
+            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            sensor = SensorTemperature(name=sensor_name, plant=alcolea)
+            plant_data = {
+                "plant": "Alcolea",
+                "version": "1.0",
+                "time": time.isoformat(), #consider using fastapi.jsonable_encoder
+                "devices":
+                [{
+                    "id": "SensorTemperature:thermometer1",
+                    "reading":
+                    {
+                        "temperature_mc": 12,
+                        "time": datetime.datetime.now(datetime.timezone.utc),
+                    }
+                }]
+            }
+            storage = PonyMetricStorage()
+            storage.storePlantData(plant_data)
+ 
+            self.assertListEqual(storage.plantData(), [])
+
+
+
 
 # vim: et ts=4 sw=4

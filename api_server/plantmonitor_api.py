@@ -17,12 +17,13 @@ from yamlns import namespace as ns
 import datetime
 
 from typing import (
-    Dict, List
+    Dict, List, Optional, Union
 )
 
+#TODO find a way to not use Union because of time
 class Device(BaseModel):
     id: str
-    reading: Dict[str, int]
+    reading: Dict[str, Union[int, datetime.datetime]]
 
 class PlantReading(BaseModel):
     plant: str
@@ -40,7 +41,9 @@ def api_version():
 
 
 @api.put('/plant/{plant_id}/readings')
-async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading): 
+async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
+    print("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
+    logger.info("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
     with orm.db_session:
         storage = PonyMetricStorage()
         for d in plant_reading.devices:
@@ -54,7 +57,7 @@ async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
                     metrics=device_reading,
                     )
             else:
-                print(f"Unsupported device {device_type}")
+                logger.error("Unsupported device {}".format(device_type))
     return plant_reading
 
 
