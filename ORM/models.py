@@ -76,20 +76,24 @@ class Plant(database.Entity):
 
     def plantData(self, fromdate=None, todate=None):
         data = {"plant": self.name}
-        data["devices"] = []
-        print("Esto es el valor meters {}".format(self.meters.name))
-        classes = [Meter, Inverter, SensorIrradiation]
 
-        if self.meters:
-            meterList = [{
-                "id":"Meter:{}".format(m.name), "readings": m.getRegistries()
-                } for m in orm.select(mc for mc in self.meters)]
-        if self.inverters:
-            inverterList = [{
-                "id":"Inverter:{}".format(i.name), "readings": i.getRegistries()
-                } for i in orm.select(ic for ic in self.inverters)]
+        meterList = [{
+            "id":"Meter:{}".format(m.name), "readings": m.getRegistries()
+            } for m in orm.select(mc for mc in self.meters)]
+        inverterList = [{
+            "id":"Inverter:{}".format(i.name), "readings": i.getRegistries()
+            } for i in orm.select(ic for ic in self.inverters)]
+        sensorList = [{
+            "id":"Sensor:{}".format(i.name), "readings": i.getRegistries()
+            } for i in orm.select(ic for ic in self.sensors)]
+        forecastMetadatasList = [{
+            "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries()
+            } for i in orm.select(ic for ic in self.forecastMetadatas)]
 
-        data["devices"] = inverterList + meterList
+        print("sensor list: {}".format(sensorList))
+
+        data["devices"] = inverterList + meterList + forecastMetadatasList + sensorList
+        data["devices"].sort(key=lambda x : x['id'])
 
         #  select all registries fromdate todate
         # meterList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]

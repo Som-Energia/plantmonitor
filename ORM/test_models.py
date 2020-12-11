@@ -378,9 +378,9 @@ class Models_Test(unittest.TestCase):
             irradiation_w_m2 = 15,
         )
         
-        print("Esto es el valor {}".format(alcolea.meters.name))
-
         plantdata = alcolea.plantData()
+
+        print(plantdata)
 
         expectedPlantData = {
             "plant": "alcolea",
@@ -406,7 +406,17 @@ class Models_Test(unittest.TestCase):
                     "r4_w": 1,
                     "time": time,
                 }]
+            },
+            {
+                'id': 'SensorIrradiation:alberto',
+                "readings":
+                [{
+                    "irradiation_w_m2" = 15,
+                    "time": time,
+                }]
             }]
         }
+
+        expectedPlantData["devices"].sort(key=lambda x : x['id'])
 
         self.assertDictEqual(plantdata, expectedPlantData)
