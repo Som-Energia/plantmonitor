@@ -408,13 +408,23 @@ class Models_Test(unittest.TestCase):
                 }]
             },
             {
-                'id': 'SensorIrradiation:alberto',
+                'id': 'Sensor:alberto',
                 "readings":
                 [{
-                    "irradiation_w_m2" = 15,
+                    "irradiation_w_m2": 15,
                     "time": time,
                 }]
-            }]
+            },
+            {
+                'id': 'Sensor:joana',
+                "readings":
+                []
+            },
+            {
+                'id': 'Sensor:voki',
+                "readings":
+                []
+            },]
         }
 
         expectedPlantData["devices"].sort(key=lambda x : x['id'])
