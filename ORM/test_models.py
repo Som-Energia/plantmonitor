@@ -357,7 +357,7 @@ class Models_Test(unittest.TestCase):
     def __test__forecastMetadata(self):
         pass
 
-    def __test__plantData(self):
+    def test__plantData(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcoleaPlant = alcoleaPlantNS.plants[0].plant
         alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
@@ -365,34 +365,37 @@ class Models_Test(unittest.TestCase):
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
 
         Meter[1].insertRegistry(
-            time = time,
             export_energy_wh = 10,
             import_energy_wh = 5,
             r1_w = 3,
             r2_w = 2,
             r3_w = 4,
             r4_w = 1,
+            time = time,
         )
         SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
         )
+        
+        print("Esto es el valor {}".format(alcolea.meters.name))
 
         plantdata = alcolea.plantData()
 
         expectedPlantData = {
             "plant": "alcolea",
             "devices":
-            [{
-                "id": "SensorIrradiation:joana",
-                "readings":
-                [{
-                    "irradiation_w_m2": 12,
-                    "time": time.isoformat(),
-                }]
+            [
+            {
+                'id': 'Inverter:5555',
+                'readings': []
+            }, 
+            {
+                'id': 'Inverter:6666',
+                'readings': []
             },
             {
-                "id": "Meter:pol",
+                "id": "Meter:1234578",
                 "readings":
                 [{
                     "export_energy_wh": 10,
@@ -401,7 +404,7 @@ class Models_Test(unittest.TestCase):
                     "r2_w": 2,
                     "r3_w": 4,
                     "r4_w": 1,
-                    "time": time.isoformat(),
+                    "time": time,
                 }]
             }]
         }

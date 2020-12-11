@@ -77,13 +77,19 @@ class Plant(database.Entity):
     def plantData(self, fromdate=None, todate=None):
         data = {"plant": self.name}
         data["devices"] = []
-
+        print("Esto es el valor meters {}".format(self.meters.name))
         classes = [Meter, Inverter, SensorIrradiation]
-        for c in classes:
+
+        if self.meters:
             meterList = [{
                 "id":"Meter:{}".format(m.name), "readings": m.getRegistries()
-                } for m in orm.select(mc for mc in c)]
-            data["devices"] = data["devices"] + meterList
+                } for m in orm.select(mc for mc in self.meters)]
+        if self.inverters:
+            inverterList = [{
+                "id":"Inverter:{}".format(i.name), "readings": i.getRegistries()
+                } for i in orm.select(ic for ic in self.inverters)]
+
+        data["devices"] = inverterList + meterList
 
         #  select all registries fromdate todate
         # meterList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
@@ -113,6 +119,7 @@ class Plant(database.Entity):
         #         }
         #     }]
         # }
+
         print(data)
         return data
  
