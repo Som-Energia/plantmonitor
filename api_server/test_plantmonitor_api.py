@@ -173,12 +173,10 @@ class Api_Test(unittest.TestCase):
             self.setUpPlant()
 
             response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
-            print(response.content)
             self.assertEqual(response.status_code, 200)
             # check reading content
             storage = PonyMetricStorage()
             readings = storage.inverterReadings()
-            print(readings)
             self.assertListEqual(
                 readings, 
                 [{
@@ -250,13 +248,10 @@ class Api_Test(unittest.TestCase):
             SensorTemperature(plant=Plant.get(name=plant_name), name=thermoname)
             
             response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
-            print(response)
-            print(response.content)
 
             # check reading content
             storage = PonyMetricStorage()
             plantdata = storage.plantData(plant_name)
-            print(plantdata)
 
             self.assertDictEqual(
                 plantdata, 

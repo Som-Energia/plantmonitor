@@ -298,19 +298,20 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         self.assertEqual(
             result,
             [
-                'SCSOM04',
-                'SCSOM06',
+                'SomEnergia_Fontivsolar',
+                'SomEnergia_La_Florida',
                 'SomEnergia_Lleida_3',
                 'SomEnergia_Manlleu_Pav',
                 'SomEnergia_Manlleu_Pisc',
-                'SCSOM02',
+                'SomEnergia_Exiom',
                 'SomEnergia_Picanya',
+                'SomEnergia_Ramadera_Cassa',
                 'SomEnergia_Riudarenes_BR',
                 'SomEnergia_Riudarenes_SM',
                 'SomEnergia_Riudarenes_ZE',
                 'SomEnergia_Tahal',
                 'SomEnergia_Torrefarrera',
-                'SCSOM01',
+                'SomEnergia_Alcolea',
             ]
         )
 

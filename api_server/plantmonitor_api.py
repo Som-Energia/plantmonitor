@@ -42,7 +42,6 @@ def api_version():
 
 @api.put('/plant/{plant_id}/readings')
 async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
-    print("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
     logger.info("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
     with orm.db_session:
         storage = PonyMetricStorage()
