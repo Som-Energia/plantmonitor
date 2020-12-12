@@ -77,56 +77,56 @@ class Plant(database.Entity):
     def plantData(self, fromdate=None, todate=None):
         data = {"plant": self.name}
 
+        #TODO generalize this
         meterList = [{
-            "id":"Meter:{}".format(m.name), "readings": m.getRegistries()
+            "id":"Meter:{}".format(m.name), "readings": m.getRegistries(fromdate, todate)
             } for m in orm.select(mc for mc in self.meters)]
         inverterList = [{
-            "id":"Inverter:{}".format(i.name), "readings": i.getRegistries()
+            "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.inverters)]
         sensorList = [{
-            "id":"Sensor:{}".format(i.name), "readings": i.getRegistries()
-            } for i in orm.select(ic for ic in self.sensors)]
+            "id": "{}:{}".format(i.classtype, i.name), 
+            "readings": i.getRegistries(fromdate, todate)
+            } for i in orm.select(ic for ic in self.sensors)]        
         forecastMetadatasList = [{
-            "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries()
+            "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.forecastMetadatas)]
-
-        print("sensor list: {}".format(sensorList))
 
         data["devices"] = inverterList + meterList + forecastMetadatasList + sensorList
         data["devices"].sort(key=lambda x : x['id'])
 
-        #  select all registries fromdate todate
-        # meterList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
-        # data["devices"].append(meterList)
-
-        # sensorIrradiationList = [{"id":"Meter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
-
-        # meterList = [{"id":"Inverter:{}".format(m.name), "readings": m.getReadings()} for m in orm.select(m for m in Meter)]
-        #     "devices":
-        #     [{
-        #         "id": "Inverter:inversor1",
-        #         "reading":
-        #         {
-        #             "daily_energy_h_wh": 12,
-        #             "daily_energy_l_wh": 10,
-        #             "e_total_h_wh": 5,
-        #             "e_total_l_wh": 213,
-        #             "h_total_h_h": 125,
-        #             "h_total_l_h": 115,
-        #             "pac_r_w": 43,
-        #             "pac_s_w": 22,
-        #             "pac_t_w": 43,
-        #             "powerreactive_t_v": 9,
-        #             "powerreactive_r_v": 3,
-        #             "powerreactive_s_v": 5,
-        #             "temp_inv_c": 30,
-        #         }
-        #     }]
-        # }
-
-        print(data)
         return data
- 
+
+    def str2model(self, classname, devicename):
+        #TODO generalize this
+        #TODO distinguish between failure due to missing name and unknown class
+        if classname == "Meter":
+            return Meter.get(name=devicename)
+        if classname == "Inverter":
+            return Inverter.get(name=devicename)
+        if classname == "ForecastMetadata":
+            return ForecastMetadata.get(name=devicename)
+        if classname == "SensorIrradiation":
+            return SensorIrradiation.get(name=devicename)
+        if classname == "SensorTemperature":
+            return SensorTemperature.get(name=devicename)
+        if classname == "SensorIntegratedIrradiation":
+            return SensorIntegratedIrradiation.get(name=devicename)
+        return None
+
+    def insertDeviceData(self, devicedata, packettime=None):
+        devicetype, devicename = devicedata["id"].split(":")
+        device = self.str2model(classname=devicetype, devicename=devicename)
+        if not device:
+            print("unknown device {}:{}".format(devicetype, devicename))
+            return None
+        return [device.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
+
+    def insertPlantData(self, plantdata):
+        if self.name != plantdata["plant"]:
+            return False
+        packettime = plantdata.get("time")
+        return [self.insertDeviceData(d, packettime) for d in plantdata["devices"]]
 
 
 class Meter(database.Entity):
@@ -146,6 +146,7 @@ class Meter(database.Entity):
             r3_w = r3_w,
             r4_w = r4_w,
             )
+
     # TODO: convert to a fixture this function
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.meterRegistries, exclude='meter', fromdate=fromdate, todate=todate)

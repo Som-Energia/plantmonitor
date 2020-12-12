@@ -23,7 +23,7 @@ from typing import (
 #TODO find a way to not use Union because of time
 class Device(BaseModel):
     id: str
-    reading: Dict[str, Union[int, datetime.datetime]]
+    readings: List[Dict[str, Union[int, datetime.datetime]]]
 
 class PlantReading(BaseModel):
     plant: str
@@ -46,18 +46,7 @@ async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
     logger.info("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
     with orm.db_session:
         storage = PonyMetricStorage()
-        for d in plant_reading.devices:
-            device_type, device_name = d.id.split(':')
-            device_reading = d.reading
-            device_reading.setdefault('time', plant_reading.time)
-            if device_type == "Inverter":
-                storage.storeInverterMeasures(
-                    plant_name=plant_id,
-                    inverter_name=device_name,
-                    metrics=device_reading,
-                    )
-            else:
-                logger.error("Unsupported device {}".format(device_type))
+        storage.insertPlantData(plant_reading.dict())
     return plant_reading
 
 

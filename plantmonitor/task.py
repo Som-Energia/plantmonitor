@@ -78,18 +78,10 @@ class PonyMetricStorage:
 
     #TODO return all data (or filter by date)
     def plantData(self, plant_name):
-        plantdata = { "plant": "Alcolea" }
-        # devices = # get devices
-        # devices_readings = [{
-        #             "id": "SensorTemperature:thermometer1",
-        #             "reading":
-        #             {
-        #                 "temperature_mc": 12,
-        #                 "time": datetime.datetime.now(datetime.timezone.utc),
-        #             }
-        # } for d in devices]
-        # plantdata["devices"] = devices_readings
-        return plantdata
+        plant = Plant.get(name=plant_name)
+        if plant:
+            return plant.plantData()
+        return {}
 
     def inverter(self, inverter_fk):
         device = Inverter[inverter_fk]
@@ -120,39 +112,17 @@ class PonyMetricStorage:
             register_values_dict = { k:v for k,v in inverterMetricsAndSensorsDict.items() if k not in excludedColumns}
             inverter.insertRegistry(**register_values_dict)
 
-    def storePlantData(self, plant_data):
+    def insertPlantData(self, plant_data):
         with orm.db_session:
             plant_name = plant_data["plant"]
             plant = Plant.get(name=plant_name)
             if not plant:
-                logger.debug("No plant named {}".format(plant_name))
+                logger.warning("No plant named {}".format(plant_name))
                 return
             data_time = plant_data["time"]
-            devices = plant_data["devices"]
-            for d in devices:
-                device_type, device_name = d["id"].split(":")
-                reading = d["reading"]
-                if device_type == "Inverter":
-                    inverter = Inverter.get(name=device_name, plant=plant)
-                    if not inverter:
-                        logger.debug("No device named {}".format(device_name))
-                        continue
-                    excludedColumns = [
-                        'probe1value',
-                        'probe2value',
-                        'probe3value',
-                        'probe4value',
-                        ]
-                    reading.setdefault("time", data_time)
-                    register_values_dict = { k:v for k,v in reading.items() if k not in excludedColumns}
-                    inverter.insertRegistry(**register_values_dict)
-                elif device_type == "SensorTemperature":
-                    sensor = SensorTemperature.get(name=device_name, plant=plant)
-                    if not sensor:
-                        logger.debug("No device named {}".format(device_name))
-                        continue
-                    reading.setdefault("time", data_time)
-                    sensor.insertRegistry(**reading)
+            result = plant.insertPlantData(plant_data)
+            print(result)
+            return result
             
 
 class ApiMetricStorage:
@@ -182,7 +152,7 @@ class ApiMetricStorage:
             if "time" in r:
                 r["time"] = r["time"].isoformat()
 
-        plant_data["devices"] = [{"id" : id, "reading": reading} for reading in readings]
+        plant_data["devices"] = [{"id" : id, "readings": [reading for reading in readings]}]
 
         return plant_data
 

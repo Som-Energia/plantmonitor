@@ -380,13 +380,10 @@ class Models_Test(unittest.TestCase):
         
         plantdata = alcolea.plantData()
 
-        print(plantdata)
-
         expectedPlantData = {
             "plant": "alcolea",
             "devices":
-            [
-            {
+            [{
                 'id': 'Inverter:5555',
                 'readings': []
             }, 
@@ -408,7 +405,11 @@ class Models_Test(unittest.TestCase):
                 }]
             },
             {
-                'id': 'Sensor:alberto',
+                "id": "SensorIntegratedIrradiation:voki",
+                "readings": []
+            },
+            {
+                "id": "SensorIrradiation:alberto",
                 "readings":
                 [{
                     "irradiation_w_m2": 15,
@@ -416,17 +417,66 @@ class Models_Test(unittest.TestCase):
                 }]
             },
             {
-                'id': 'Sensor:joana',
-                "readings":
-                []
-            },
-            {
-                'id': 'Sensor:voki',
-                "readings":
-                []
-            },]
+                "id": "SensorTemperature:joana",
+                "readings": []
+            }]
         }
 
         expectedPlantData["devices"].sort(key=lambda x : x['id'])
 
         self.assertDictEqual(plantdata, expectedPlantData)
+
+    def test__Plant_insertPlantData(self):
+        alcoleaPlantNS = self.samplePlantNS()
+        alcoleaPlant = alcoleaPlantNS.plants[0].plant
+        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+
+        plantData = {
+                "plant": "alcolea",
+                "devices":
+                [{
+                    'id': 'Inverter:5555',
+                    'readings': []
+                }, 
+                {
+                    'id': 'Inverter:6666',
+                    'readings': []
+                },
+                {
+                    "id": "Meter:1234578",
+                    "readings":
+                    [{
+                        "export_energy_wh": 10,
+                        "import_energy_wh": 5,
+                        "r1_w": 3,
+                        "r2_w": 2,
+                        "r3_w": 4,
+                        "r4_w": 1,
+                        "time": time,
+                    }]
+                },
+                {
+                    "id": "SensorIntegratedIrradiation:voki",
+                    "readings": []
+                },
+                {
+                    "id": "SensorIrradiation:alberto",
+                    "readings":
+                    [{
+                        "irradiation_w_m2": 15,
+                        "time": time,
+                    }]
+                },
+                {
+                    "id": "SensorTemperature:joana",
+                    "readings": []
+                }]
+            }
+
+        alcolea.insertPlantData(plantData)
+
+        plantDataResult = alcolea.plantData()
+
+        self.assertDictEqual(plantData, plantDataResult)

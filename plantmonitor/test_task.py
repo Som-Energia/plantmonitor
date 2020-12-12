@@ -40,7 +40,7 @@ import time
 import requests
 
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 class ApiClient_Test(unittest.TestCase):
 
@@ -60,7 +60,7 @@ class ApiClient_Test(unittest.TestCase):
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
 
-        log_level = "debug"
+        log_level = "warning"
 
         # create api and launch local test server
         self.proc = Process(target=uvicorn.run,
@@ -312,30 +312,37 @@ class ORMSetup_Test(unittest.TestCase):
  
             self.assertListEqual(storage.inverterReadings(), [])
 
-    def test__PonyMetricStorage_storePlantData__storeTemperatureSensor(self):
+    def test__PonyMetricStorage_insertPlantData__storeTemperatureSensor(self):
         sensor_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
+        time = datetime.datetime.now(datetime.timezone.utc)
+
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             sensor = SensorTemperature(name=sensor_name, plant=alcolea)
             plant_data = {
-                "plant": "Alcolea",
+                "plant": plant_name,
                 "version": "1.0",
                 "time": time.isoformat(), #consider using fastapi.jsonable_encoder
                 "devices":
                 [{
                     "id": "SensorTemperature:thermometer1",
-                    "reading":
-                    {
+                    "readings":
+                    [{
                         "temperature_mc": 12,
                         "time": datetime.datetime.now(datetime.timezone.utc),
-                    }
+                    }]
                 }]
             }
             storage = PonyMetricStorage()
-            storage.storePlantData(plant_data)
+            storage.insertPlantData(plant_data)
  
-            self.assertListEqual(storage.plantData(), [])
+            expected_plant_data = {
+                'plant': plant_name,
+                'devices': [{'id': 'SensorTemperature:Alice', 'readings': []}],
+            }
+
+            self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
 
 
 
