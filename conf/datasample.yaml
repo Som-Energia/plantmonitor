@@ -120,36 +120,10 @@ Opcion 4 (multiples timestamps:
 
 plant -> devices <|- Sensor <|- Sensor2
 
-# one reading
-
-	plant: Alcolea
-	version: 1.0
-	timestamp: 2020-09-27T14:00:00Z
-	devices:
-	- id: "Inverter:inversor1_mode1"
-	  reading:
-	    daily_energy_h_wh: 12
-	    daily_energy_l_wh: 10
-	    e_total_h_wh: 5
-	    e_total_l_wh: 21.3
-	    h_total_h_h: 12.5
-	    h_total_l_h: 11.5
-	    pac_r_w: 43
-	    pac_s_w: 22
-	    pac_t_w: 43
-	    powerreactive_t_v: 9
-	    powerreactive_r_v: 3
-	    powerreactive_s_v: 5
-	    temp_inv_c: 30
-	- id: "SensorTemperature:temperature"
-	  reading:
-	    temperature_c: 16.0
-	- id: "SensorIrradiation:irradiation1"
-	  reading:
-	    irradiation_w_m2: 16.0
-
+# currently in use:
 # several readings
 	plant: Alcolea
+	version: "1.0"
 	time: 2020-09-27T14:00:00Z
 	devices:
 	-	id: "SensorTemperature:thermometer1"
@@ -163,71 +137,19 @@ plant -> devices <|- Sensor <|- Sensor2
 		  timestamp: 2020-09-27T10:00:00Z
 			temperature_c: 16.0
 
-# timespan readings
-	plant: Alcolea
-	timestamp: 2020-09-27T14:00:00Z
-	devices:
-	- uid: HASJDAK-AHKSDJ
-		device_name: inversor1
-		device_type: Inverter
-		reading:
-			timestamp: 2020-09-27T10:00:00Z
-			daily_energy_h_wh: 12
-			daily_energy_l_wh: 10
-			e_total_h_wh: 5
-			e_total_l_wh: 21.3
-			h_total_h_h: 12.5
-			h_total_l_h: 11.5
-			pac_r_w: 43
-			pac_s_w: 22
-			pac_t_w: 43
-			powerreactive_t_v: 9
-			powerreactive_r_v: 3
-			powerreactive_s_v: 5
-			temp_inv_c: 30
-	- uid: TUTUTU-HASHDH
-		device_name: temperature1
-		device_type: SensorTemperature
-		reading:
-		  timestamp: 2020-09-27T10:00:00Z
-			temperature_c: 16.0
-	- uid: BOBOBO-HASHDH
-	  device_name: irradiation1
-	  device_type: SensorIrradiation
-	  reading:
-	    timestamp: 2020-09-27T10:00:00Z
-	    irradiation_w_m2: 16.0
-	- uid: HASJDAK-AHKSDJ
-	  device_name: inversor1
-	  device_type: Inverter
-	  reading:
-			timestamp: 2020-09-27T11:00:00Z
-			daily_energy_h_wh: 12
-			daily_energy_l_wh: 10
-			e_total_h_wh: 5
-			e_total_l_wh: 21.3
-			h_total_h_h: 12.5
-			h_total_l_h: 11.5
-			pac_r_w: 43
-			pac_s_w: 22
-			pac_t_w: 43
-			powerreactive_t_v: 9
-			powerreactive_r_v: 3
-			powerreactive_s_v: 5
-			temp_inv_c: 30
-	- uid: TUTUTU-HASHDH
-	  device_name: temperature1
-	  device_type: SensorTemperature
-		reading:
-		  timestamp: 2020-09-27T11:00:00Z
-			temperature_c: 16.0
-	- uid: BOBOBO-HASHDH
-	  device_name: irradiation1
-	  device_type: SensorIrradiation
-		reading:
-			timestamp: 2020-09-27T11:00:00Z
-		  irradiation_w_m2: 16.0
+# as a dictionary
 
-
-
-
+{
+		"plant": plant_name,
+		"version": "1.0",
+		"time": time.isoformat(),
+		"devices":
+		[{
+				"id": "SensorTemperature:thermometer1",
+				"readings":
+				[{
+						"temperature_mc": 12,
+						"time": datetime.datetime.now(datetime.timezone.utc),
+				}]
+		}]
+}
