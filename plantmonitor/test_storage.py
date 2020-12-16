@@ -156,16 +156,15 @@ class ApiClient_Test(unittest.TestCase):
         result = apiClient.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
         self.assertTrue(result)
-
-    def __test__ApiMetricStorage__storeInverterMeasures(self):
-        plant_name, inverter_name, inverter_registers = self.createPlantDict()
-           
+    
+    ## TODO
+    def __test__ApiMetricStorage__storePlantData(self):
+        plant_data = {}
+        
         apiClient = self.createApiClient()
-        result = apiClient.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+        result = apiClient.storePlantData(plant_data)
 
-        readings = apiClient.getInverterMeasures(plant_name, inverter_name)
-
-        self.assertDictEqual(inverter_registers, readings)
+        self.assertTrue(result)
 
 
 class Storage_Test(unittest.TestCase):
