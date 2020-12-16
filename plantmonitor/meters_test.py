@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
 import unittest
 from erppeek import Client
 from yamlns import namespace as ns
