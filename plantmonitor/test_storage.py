@@ -26,7 +26,7 @@ from ORM.models import (
     ForecastPredictor,
     Forecast,
 )
-from plantmonitor.task import PonyMetricStorage, ApiMetricStorage
+from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
@@ -168,7 +168,7 @@ class ApiClient_Test(unittest.TestCase):
         self.assertDictEqual(inverter_registers, readings)
 
 
-class ORMSetup_Test(unittest.TestCase):
+class Storage_Test(unittest.TestCase):
 
     from yamlns.testutils import assertNsEqual
 
