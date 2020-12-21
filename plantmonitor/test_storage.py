@@ -325,11 +325,11 @@ class Storage_Test(unittest.TestCase):
                 "time": time.isoformat(), #consider using fastapi.jsonable_encoder
                 "devices":
                 [{
-                    "id": "SensorTemperature:thermometer1",
+                    "id": "SensorTemperature:Alice",
                     "readings":
                     [{
-                        "temperature_mc": 12,
-                        "time": datetime.datetime.now(datetime.timezone.utc),
+                        "temperature_c": 12,
+                        "time": time,
                     }]
                 }]
             }
