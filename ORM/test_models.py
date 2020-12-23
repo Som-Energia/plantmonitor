@@ -100,6 +100,7 @@ class Models_Test(unittest.TestCase):
                 temperatureSensors:
                 - temperatureSensor:
                     name: joana
+                    ambient: False
                 integratedSensors:
                 - integratedSensor:
                     name: voki""")
@@ -414,11 +415,13 @@ class Models_Test(unittest.TestCase):
                 "readings":
                 [{
                     "irradiation_w_m2": 15,
+                    'temperature_c': 250,
                     "time": time,
                 }]
             },
             {
                 "id": "SensorTemperature:joana",
+                "ambient": False,
                 "readings": []
             }]
         }
@@ -473,6 +476,7 @@ class Models_Test(unittest.TestCase):
                 },
                 {
                     "id": "SensorTemperature:joana",
+                    "ambient": False,
                     "readings": []
                 }]
             }

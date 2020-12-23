@@ -52,7 +52,7 @@ class Plant(database.Entity):
             if 'irradiationSensors' in plant:
                 [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
             if 'temperatureSensors' in plant:
-                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name) for sensor in plant.temperatureSensors]
+                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name, ambient=sensor['temperatureSensor'].ambient) for sensor in plant.temperatureSensors]
             if 'integratedSensors' in plant:
                 [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
@@ -66,7 +66,7 @@ class Plant(database.Entity):
                 meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == plant)],
                 inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == plant)],
                 irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == plant)],
-                temperatureSensors = [ns(temperatureSensor=ns(name=sensor.name)) for sensor in SensorTemperature.select(lambda inv: inv.plant == plant)],
+                temperatureSensors = [ns(temperatureSensor=ns(name=sensor.name, ambient=sensor.ambient)) for sensor in SensorTemperature.select(lambda inv: inv.plant == plant)],
                 integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == plant)],
             )) for plant in Plant.select()]
         )
@@ -77,7 +77,7 @@ class Plant(database.Entity):
         Meter(plant=self, name='Meter'+self.name)
         Inverter(plant=self, name='Plant'+self.name)
         SensorIrradiation(plant=self, name='Irrad'+self.name)
-        SensorTemperature(plant=self, name='Temp'+self.name)
+        SensorTemperature(plant=self, ambient=True, name='Temp'+self.name)
         SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
     def plantData(self, fromdate=None, todate=None):
@@ -90,10 +90,7 @@ class Plant(database.Entity):
         inverterList = [{
             "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.inverters)]
-        sensorList = [{
-            "id": "{}:{}".format(i.classtype, i.name), 
-            "readings": i.getRegistries(fromdate, todate)
-            } for i in orm.select(ic for ic in self.sensors)]        
+        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors)]        
         forecastMetadatasList = [{
             "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.forecastMetadatas)]
@@ -247,7 +244,13 @@ class SensorIrradiation(Sensor):
 
     sensorRegistries = Set('SensorIrradiationRegistry', lazy=True)
 
-    def insertRegistry(self, irradiation_w_m2, time=None):
+    def toDict(self, fromdate=None, todate=None):
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
+
+    def insertRegistry(self, irradiation_w_m2, temperature_c, time=None):
         return SensorIrradiationRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
@@ -262,6 +265,16 @@ class SensorIrradiation(Sensor):
 class SensorTemperature(Sensor):
 
     sensorRegistries = Set('SensorTemperatureRegistry', lazy=True)
+    ambient = Optional(bool)
+
+    def toDict(self, fromdate=None, todate=None):
+        d = {
+                "id": "{}:{}".format(self.classtype, self.name), 
+                "readings": self.getRegistries(fromdate, todate)
+            }
+        if self.ambient is not None:
+            d["ambient"] = self.ambient
+        return d
 
     def insertRegistry(self, temperature_c, time=None):
         return SensorTemperatureRegistry(
@@ -277,6 +290,12 @@ class SensorTemperature(Sensor):
 class SensorIntegratedIrradiation(Sensor):
 
     sensorRegistries = Set('IntegratedIrradiationRegistry', lazy=True)
+
+    def toDict(self, fromdate=None, todate=None):
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
 
     def insertRegistry(self, integratedIrradiation_wh_m2, time=None):
         return IntegratedIrradiationRegistry(

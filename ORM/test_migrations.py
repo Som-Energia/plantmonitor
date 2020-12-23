@@ -51,7 +51,7 @@ from .models import (
 
 from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 @unittest.skipIf(True, "requires legacy database")
 class Migrations_Test(unittest.TestCase):
