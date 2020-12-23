@@ -295,9 +295,8 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         api = self.createApi()
         result = api.getAllFacilities()
         print("Api's known facilities: {}".format(result))
-        self.assertEqual(
-            result,
-            [
+        self.assertTrue(
+            set([
                 'SomEnergia_Fontivsolar',
                 'SomEnergia_La_Florida',
                 'SomEnergia_Lleida_3',
@@ -312,7 +311,7 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
                 'SomEnergia_Tahal',
                 'SomEnergia_Torrefarrera',
                 'SomEnergia_Alcolea',
-            ]
+            ]).issubset(set(result))
         )
 
 unittest.TestCase.__str__ = unittest.TestCase.id

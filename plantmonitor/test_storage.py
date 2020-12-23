@@ -338,7 +338,14 @@ class Storage_Test(unittest.TestCase):
  
             expected_plant_data = {
                 'plant': plant_name,
-                'devices': [{'id': 'SensorTemperature:Alice', 'readings': []}],
+                'devices': 
+                [{
+                    'id': 'SensorTemperature:Alice', 
+                    'readings': [{
+                        "temperature_c": 12,
+                        "time": time,
+                    }]
+                }],
             }
 
             self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
