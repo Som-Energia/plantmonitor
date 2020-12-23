@@ -51,7 +51,7 @@ from .models import (
 
 from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 class Models_Test(unittest.TestCase):
 
@@ -376,6 +376,7 @@ class Models_Test(unittest.TestCase):
         SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
+            temperature_c = 250,
         )
         
         plantdata = alcolea.plantData()
@@ -466,6 +467,7 @@ class Models_Test(unittest.TestCase):
                     "readings":
                     [{
                         "irradiation_w_m2": 15,
+                        "temperature_c": 250,
                         "time": time,
                     }]
                 },

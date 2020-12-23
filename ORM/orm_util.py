@@ -115,6 +115,12 @@ def getTablesToTimescale():
         "SensorIrradiationRegistry",
         "SensorTemperatureRegistry",
         "IntegratedIrradiationRegistry",
+        "InclinometerRegistry",
+        "AnemometerRegistry",
+        "OmieRegistry",
+        "MarketRepresentativeRegistry",
+        "SimelRegistry",
+        "NagiosRegistry",
     ]
     return tablesToTimescale
 
