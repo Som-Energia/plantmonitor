@@ -83,6 +83,7 @@ class ORMSetup_Test(unittest.TestCase):
             sensorIrr.insertRegistry(
                 time = timeStart + i*dt,
                 irradiation_w_m2 = value + i*dv,
+                temperature_c = 300 + value + i*(dv+10),
             )
             sensorTemp.insertRegistry(
                 time = timeStart + i*dt,
@@ -311,6 +312,7 @@ class ORMSetup_Test(unittest.TestCase):
             sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
+                temperature_c = 250
             )
 
             sensor_registry_read = list(SensorIrradiationRegistry.select())[0]
@@ -385,6 +387,7 @@ class ORMSetup_Test(unittest.TestCase):
                     temperatureSensors:
                     - temperatureSensor:
                         name: joana
+                        ambient: False
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")

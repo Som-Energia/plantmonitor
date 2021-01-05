@@ -33,6 +33,12 @@ class Plant(database.Entity):
     inverters = Set('Inverter', lazy=True)
     sensors = Set('Sensor', lazy=True)
     forecastMetadatas = Set('ForecastMetadata', lazy=True)
+    inclinometers = Set('Inclinometer', lazy=True)
+    anemometer = Set('Anemometer', lazy=True)
+    omie = Set('Omie', lazy=True)
+    marketRepresentative = Set('MarketRepresentative', lazy=True)
+    simel = Set('Simel', lazy=True)
+    nagios = Set('Nagios', lazy=True)
 
     def importPlant(self, nsplant):
         for plant_foo in nsplant.plants:
@@ -46,7 +52,7 @@ class Plant(database.Entity):
             if 'irradiationSensors' in plant:
                 [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
             if 'temperatureSensors' in plant:
-                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name) for sensor in plant.temperatureSensors]
+                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name, ambient=sensor['temperatureSensor'].ambient) for sensor in plant.temperatureSensors]
             if 'integratedSensors' in plant:
                 [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
@@ -60,7 +66,7 @@ class Plant(database.Entity):
                 meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == plant)],
                 inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == plant)],
                 irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == plant)],
-                temperatureSensors = [ns(temperatureSensor=ns(name=sensor.name)) for sensor in SensorTemperature.select(lambda inv: inv.plant == plant)],
+                temperatureSensors = [ns(temperatureSensor=ns(name=sensor.name, ambient=sensor.ambient)) for sensor in SensorTemperature.select(lambda inv: inv.plant == plant)],
                 integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == plant)],
             )) for plant in Plant.select()]
         )
@@ -71,7 +77,7 @@ class Plant(database.Entity):
         Meter(plant=self, name='Meter'+self.name)
         Inverter(plant=self, name='Plant'+self.name)
         SensorIrradiation(plant=self, name='Irrad'+self.name)
-        SensorTemperature(plant=self, name='Temp'+self.name)
+        SensorTemperature(plant=self, ambient=True, name='Temp'+self.name)
         SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
     def plantData(self, fromdate=None, todate=None):
@@ -84,10 +90,7 @@ class Plant(database.Entity):
         inverterList = [{
             "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.inverters)]
-        sensorList = [{
-            "id": "{}:{}".format(i.classtype, i.name), 
-            "readings": i.getRegistries(fromdate, todate)
-            } for i in orm.select(ic for ic in self.sensors)]        
+        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors)]        
         forecastMetadatasList = [{
             "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.forecastMetadatas)]
@@ -241,11 +244,18 @@ class SensorIrradiation(Sensor):
 
     sensorRegistries = Set('SensorIrradiationRegistry', lazy=True)
 
-    def insertRegistry(self, irradiation_w_m2, time=None):
+    def toDict(self, fromdate=None, todate=None):
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
+
+    def insertRegistry(self, irradiation_w_m2, temperature_c, time=None):
         return SensorIrradiationRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            irradiation_w_m2 = irradiation_w_m2
+            irradiation_w_m2 = irradiation_w_m2,
+            temperature_c = temperature_c
             )
 
     def getRegistries(self, fromdate=None, todate=None):
@@ -255,6 +265,16 @@ class SensorIrradiation(Sensor):
 class SensorTemperature(Sensor):
 
     sensorRegistries = Set('SensorTemperatureRegistry', lazy=True)
+    ambient = Optional(bool)
+
+    def toDict(self, fromdate=None, todate=None):
+        d = {
+                "id": "{}:{}".format(self.classtype, self.name), 
+                "readings": self.getRegistries(fromdate, todate)
+            }
+        if self.ambient is not None:
+            d["ambient"] = self.ambient
+        return d
 
     def insertRegistry(self, temperature_c, time=None):
         return SensorTemperatureRegistry(
@@ -270,6 +290,12 @@ class SensorTemperature(Sensor):
 class SensorIntegratedIrradiation(Sensor):
 
     sensorRegistries = Set('IntegratedIrradiationRegistry', lazy=True)
+
+    def toDict(self, fromdate=None, todate=None):
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
 
     def insertRegistry(self, integratedIrradiation_wh_m2, time=None):
         return IntegratedIrradiationRegistry(
@@ -288,7 +314,7 @@ class SensorIrradiationRegistry(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
     irradiation_w_m2 = Optional(int, size=64)
-
+    temperature_c = Optional(int, size=64)
 
 class SensorTemperatureRegistry(database.Entity):
 
@@ -297,6 +323,33 @@ class SensorTemperatureRegistry(database.Entity):
     PrimaryKey(sensor, time)
     temperature_c = Optional(int, size=64)
 
+class Inclinometer(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('InclinometerRegistry', lazy=True)
+
+
+class InclinometerRegistry(database.Entity):
+    inclinometer = Required(Inclinometer)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(inclinometer, time)
+    angle_real_co = Optional(int, size=64)
+    angle_demand_co = Optional(int, size=64)
+
+class Anemometer(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('AnemometerRegistry', lazy=True)
+
+class AnemometerRegistry(database.Entity):
+    anemometer = Required(Anemometer)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(anemometer, time)
+    wind_mms = Optional(int, size=64)
+
+# third-party / derived
 
 class IntegratedIrradiationRegistry(database.Entity):
 
@@ -351,3 +404,61 @@ class Forecast(database.Entity):
     percentil10 = Optional(int)
     percentil50 = Optional(int)
     percentil90 = Optional(int)
+
+class Omie(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('OmieRegistry', lazy=True)
+
+class OmieRegistry(database.Entity):
+    omie = Required(Omie)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(omie, time)
+    price_ce_mwh = Optional(int, size=64)
+
+class MarketRepresentative(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('MarketRepresentativeRegistry', lazy=True)
+
+class MarketRepresentativeRegistry(database.Entity):
+    marketRepresentative = Required(MarketRepresentative)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(marketRepresentative, time)
+    billed_energy_wh = Optional(int, size=64)
+    billed_market_price_ce_mwh = Optional(int, size=64)
+    cost_deviation_ce = Optional(int, size=64)
+    absolute_deviation_ce = Optional(int, size=64)
+
+# Fer servir Meter instead?
+class Simel(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('SimelRegistry', lazy=True)
+
+class SimelRegistry(database.Entity):
+    simel = Required(Simel)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(simel, time)
+    exported_energy_wh = Optional(int, size=64)
+    imported_energy_wh = Optional(int, size=64)
+    r1_wh = Optional(int, size=64)
+    r2_wh = Optional(int, size=64)
+    r3_wh = Optional(int, size=64)
+    r4_wh = Optional(int, size=64)
+
+# Rethink this one, device?
+class Nagios(database.Entity):
+    name = Required(unicode)
+    plant = Required(Plant)
+    description = Optional(str)
+    registries = Set('NagiosRegistry', lazy=True)
+
+class NagiosRegistry(database.Entity):
+    nagios = Required(Nagios)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(nagios, time)
+    billed_energy_wh = Optional(int, size=64)

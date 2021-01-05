@@ -46,7 +46,7 @@ from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
 from addPlant import importPlantCLI, importPlant
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 class ImportPlant_Test(unittest.TestCase):
 
@@ -103,6 +103,7 @@ class ImportPlant_Test(unittest.TestCase):
                     temperatureSensors:
                     - temperatureSensor:
                         name: joana
+                        ambient: False
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")
@@ -143,6 +144,7 @@ class ImportPlant_Test(unittest.TestCase):
                 temperatureSensors:
                 - temperatureSensor:
                     name: joana
+                    ambient: False
                 integratedSensors:
                 - integratedSensor:
                     name: voki"""
@@ -188,6 +190,7 @@ class ImportPlant_Test(unittest.TestCase):
                 temperatureSensors:
                 - temperatureSensor:
                     name: joana
+                    ambient: False
                 integratedSensors:
                 - integratedSensor:
                     name: voki"""
