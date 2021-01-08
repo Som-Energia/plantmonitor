@@ -51,8 +51,10 @@ class Plant(database.Entity):
                 [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
             if 'irradiationSensors' in plant:
                 [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
-            if 'temperatureSensors' in plant:
-                [SensorTemperature(plant=self, name=sensor['temperatureSensor'].name, ambient=sensor['temperatureSensor'].ambient) for sensor in plant.temperatureSensors]
+            if 'temperatureAmbientSensors' in plant:
+                [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
+            if 'temperatureModuleSensors' in plant:
+                [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
             if 'integratedSensors' in plant:
                 [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
@@ -66,7 +68,8 @@ class Plant(database.Entity):
                 meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == plant)],
                 inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == plant)],
                 irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == plant)],
-                temperatureSensors = [ns(temperatureSensor=ns(name=sensor.name, ambient=sensor.ambient)) for sensor in SensorTemperature.select(lambda inv: inv.plant == plant)],
+                temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == plant)],
+                temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == plant)],
                 integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == plant)],
             )) for plant in Plant.select()]
         )
@@ -77,7 +80,8 @@ class Plant(database.Entity):
         Meter(plant=self, name='Meter'+self.name)
         Inverter(plant=self, name='Plant'+self.name)
         SensorIrradiation(plant=self, name='Irrad'+self.name)
-        SensorTemperature(plant=self, ambient=True, name='Temp'+self.name)
+        SensorTemperatureAmbient(plant=self, name='TempAmb'+self.name)
+        SensorTemperatureModule(plant=self, name='TempMod'+self.name)
         SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
     def plantData(self, fromdate=None, todate=None):
@@ -111,8 +115,10 @@ class Plant(database.Entity):
             return ForecastMetadata.get(name=devicename)
         if classname == "SensorIrradiation":
             return SensorIrradiation.get(name=devicename)
-        if classname == "SensorTemperature":
-            return SensorTemperature.get(name=devicename)
+        if classname == "SensorTemperatureAmbient":
+            return SensorTemperatureAmbient.get(name=devicename)
+        if classname == "SensorTemperatureModule":
+            return SensorTemperatureModule.get(name=devicename)
         if classname == "SensorIntegratedIrradiation":
             return SensorIntegratedIrradiation.get(name=devicename)
         return None
@@ -262,22 +268,18 @@ class SensorIrradiation(Sensor):
         readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
         return readings
 
-class SensorTemperature(Sensor):
+class SensorTemperatureAmbient(Sensor):
 
-    sensorRegistries = Set('SensorTemperatureRegistry', lazy=True)
-    ambient = Optional(bool)
+    sensorRegistries = Set('SensorTemperatureAmbientRegistry', lazy=True)
 
     def toDict(self, fromdate=None, todate=None):
-        d = {
-                "id": "{}:{}".format(self.classtype, self.name), 
-                "readings": self.getRegistries(fromdate, todate)
-            }
-        if self.ambient is not None:
-            d["ambient"] = self.ambient
-        return d
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
 
-    def insertRegistry(self, temperature_c=None, time=None):
-        return SensorTemperatureRegistry(
+    def insertRegistry(self, temperature_c, time=None):
+        return SensorTemperatureAmbientRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             temperature_c = temperature_c
@@ -286,6 +288,29 @@ class SensorTemperature(Sensor):
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
         return readings
+
+class SensorTemperatureModule(Sensor):
+
+    sensorRegistries = Set('SensorTemperatureModuleRegistry', lazy=True)
+    ambient = Optional(bool)
+
+    def toDict(self, fromdate=None, todate=None):
+        return {
+            "id": "{}:{}".format(self.classtype, self.name), 
+            "readings": self.getRegistries(fromdate, todate)
+        }
+
+    def insertRegistry(self, temperature_c=None, time=None):
+        return SensorTemperatureModuleRegistry(
+            sensor = self,
+            time = time or datetime.datetime.now(datetime.timezone.utc),
+            temperature_c = temperature_c
+            )
+
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
+        return readings
+
 
 class SensorIntegratedIrradiation(Sensor):
 
@@ -316,9 +341,16 @@ class SensorIrradiationRegistry(database.Entity):
     irradiation_w_m2 = Optional(int, size=64)
     temperature_c = Optional(int, size=64)
 
-class SensorTemperatureRegistry(database.Entity):
+class SensorTemperatureAmbientRegistry(database.Entity):
 
-    sensor = Required(SensorTemperature)
+    sensor = Required(SensorTemperatureAmbient)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(sensor, time)
+    temperature_c = Optional(int, size=64)
+
+class SensorTemperatureModuleRegistry(database.Entity):
+
+    sensor = Required(SensorTemperatureModule)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
     temperature_c = Optional(int, size=64)

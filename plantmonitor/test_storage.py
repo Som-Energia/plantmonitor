@@ -17,9 +17,11 @@ from ORM.models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -318,14 +320,14 @@ class Storage_Test(unittest.TestCase):
 
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperature(name=sensor_name, plant=alcolea)
+            sensor = SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
             plant_data = {
                 "plant": plant_name,
                 "version": "1.0",
                 "time": time.isoformat(), #consider using fastapi.jsonable_encoder
                 "devices":
                 [{
-                    "id": "SensorTemperature:Alice",
+                    "id": "SensorTemperatureAmbient:Alice",
                     "readings":
                     [{
                         "temperature_c": 12,
@@ -340,8 +342,8 @@ class Storage_Test(unittest.TestCase):
                 'plant': plant_name,
                 'devices':
                 [{
-                    'id': 'SensorTemperature:Alice',
-                    'readings':
+                    'id': 'SensorTemperatureAmbient:Alice', 
+                    'readings': 
                     [{
                         "temperature_c": 12,
                         "time": time,

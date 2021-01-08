@@ -39,9 +39,11 @@ from .models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -97,10 +99,12 @@ class Models_Test(unittest.TestCase):
                 irradiationSensors:
                 - irradiationSensor:
                     name: alberto
-                temperatureSensors:
-                - temperatureSensor:
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: pol
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
                     name: joana
-                    ambient: False
                 integratedSensors:
                 - integratedSensor:
                     name: voki""")
@@ -179,7 +183,8 @@ class Models_Test(unittest.TestCase):
                 irradiationSensors: []
                 meters: []
                 name: alcolea
-                temperatureSensors: []
+                temperatureAmbientSensors: []
+                temperatureModuleSensors: []
                 """)
 
             emptyPlant = emptyPlantNS.plants[0].plant
@@ -420,8 +425,11 @@ class Models_Test(unittest.TestCase):
                 }]
             },
             {
-                "id": "SensorTemperature:joana",
-                "ambient": False,
+                "id": "SensorTemperatureAmbient:joana",
+                "readings": []
+            },
+            {
+                "id": "SensorTemperatureModule:pol",
                 "readings": []
             }]
         }
@@ -475,8 +483,11 @@ class Models_Test(unittest.TestCase):
                     }]
                 },
                 {
-                    "id": "SensorTemperature:joana",
-                    "ambient": False,
+                    "id": "SensorTemperatureAmbient:joana",
+                    "readings": []
+                },
+                {
+                    "id": "SensorTemperatureModule:pol",
                     "readings": []
                 }]
             }

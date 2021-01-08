@@ -18,9 +18,11 @@ from ORM.models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -216,7 +218,7 @@ class Api_Test(unittest.TestCase):
             "time": time.isoformat(), #consider using fastapi.jsonable_encoder
             "devices":
             [{
-                "id": "SensorTemperature:{}".format(thermoname),
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
                     "temperature_c": 12,
@@ -233,7 +235,7 @@ class Api_Test(unittest.TestCase):
                 "readings": []
             },
             {
-                "id": "SensorTemperature:{}".format(thermoname),
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
                     "temperature_c": 12,
@@ -245,7 +247,7 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
             plant_name = data['plant']
-            SensorTemperature(plant=Plant.get(name=plant_name), name=thermoname)
+            SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
             
             response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
 

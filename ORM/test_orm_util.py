@@ -20,9 +20,11 @@ from .models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -33,7 +35,7 @@ from .models import (
 from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 
 class ORMSetup_Test(unittest.TestCase):
@@ -70,7 +72,7 @@ class ORMSetup_Test(unittest.TestCase):
         #TODO assert not empty
         sensorIrr = sensorsIrr[0]
 
-        sensorTemp = list(SensorTemperature.select(lambda p: p.plant==plant))[0]
+        sensorTemp = list(SensorTemperatureAmbient.select(lambda p: p.plant==plant))[0]
         sensorIntegratedIrr = list(SensorIntegratedIrradiation.select(lambda p: p.plant==plant))[0]
 
         dt = datetime.timedelta(minutes=5)
@@ -300,7 +302,7 @@ class ORMSetup_Test(unittest.TestCase):
     def test_InsertOnePlantOneSensor(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperature(name='TempAlcolea', plant=alcolea)
+            sensor = SensorTemperatureAmbient(name='TempAlcolea', plant=alcolea)
 
             sensor_read = Sensor[1]
             self.assertEqual(sensor_read,sensor)
@@ -384,10 +386,12 @@ class ORMSetup_Test(unittest.TestCase):
                     irradiationSensors:
                     - irradiationSensor:
                         name: alberto
-                    temperatureSensors:
-                    - temperatureSensor:
+                    temperatureModuleSensors:
+                    - temperatureModuleSensor:
+                        name: pol
+                    temperatureAmbientSensors:
+                    - temperatureAmbientSensor:
                         name: joana
-                        ambient: False
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")
@@ -430,7 +434,7 @@ class ORMSetup_Test(unittest.TestCase):
             ]
 
             q1 = orm.select(r for r in SensorIrradiationRegistry if r.sensor.plant == alcolea)
-            q2 = orm.select(r for r in SensorTemperatureRegistry if r.sensor.plant == alcolea)
+            q2 = orm.select(r for r in SensorTemperatureAmbientRegistry if r.sensor.plant == alcolea)
             q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
