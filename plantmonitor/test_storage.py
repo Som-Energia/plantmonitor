@@ -346,7 +346,7 @@ class Storage_Test(unittest.TestCase):
                         "time": time,
                     }]
                 }],
-
+            }
             self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
 
     def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperatur(self):
@@ -378,7 +378,7 @@ class Storage_Test(unittest.TestCase):
                 'plant': plant_name,
                 'devices': [{'id': 'SensorTemperature:Alice', 'readings':
                     [{
-                        #"temperature_c": 12,
+                        "temperature_c": None,
                         "time": time,
                     }]
                 }],
