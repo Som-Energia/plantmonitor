@@ -85,11 +85,11 @@ class ORMSetup_Test(unittest.TestCase):
             sensorIrr.insertRegistry(
                 time = timeStart + i*dt,
                 irradiation_w_m2 = value + i*dv,
-                temperature_c = 300 + value + i*(dv+10),
+                temperature_dc = 300 + value + i*(dv+10),
             )
             sensorTemp.insertRegistry(
                 time = timeStart + i*dt,
-                temperature_c = 300 + value + i*(dv+10),
+                temperature_dc = 300 + value + i*(dv+10),
             )
             sensorIntegratedIrr.insertRegistry(
                 time = timeStart + i*dt,
@@ -314,7 +314,7 @@ class ORMSetup_Test(unittest.TestCase):
             sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
-                temperature_c = 250
+                temperature_dc = 2500
             )
 
             sensor_registry_read = list(SensorIrradiationRegistry.select())[0]
@@ -438,7 +438,7 @@ class ORMSetup_Test(unittest.TestCase):
             q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
-                (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_c, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)
+                (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_dc, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)
                 for r1_w in q1 for r2_w in q2 for r3_w in q3
                 if r1_w.time == r2_w.time and r2_w.time == r3_w.time
             )

@@ -330,7 +330,7 @@ class Storage_Test(unittest.TestCase):
                     "id": "SensorTemperatureAmbient:Alice",
                     "readings":
                     [{
-                        "temperature_c": 12,
+                        "temperature_dc": 1200,
                         "time": time,
                     }]
                 }]
@@ -345,7 +345,7 @@ class Storage_Test(unittest.TestCase):
                     'id': 'SensorTemperatureAmbient:Alice', 
                     'readings': 
                     [{
-                        "temperature_c": 12,
+                        "temperature_dc": 1200,
                         "time": time,
                     }]
                 }],

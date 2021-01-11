@@ -221,7 +221,7 @@ class Api_Test(unittest.TestCase):
                 "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
-                    "temperature_c": 12,
+                    "temperature_dc": 1200,
                     "time": time.isoformat(),
                 }]
             }]
@@ -238,7 +238,7 @@ class Api_Test(unittest.TestCase):
                 "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
-                    "temperature_c": 12,
+                    "temperature_dc": 1200,
                     "time": time,
                 }]
             }]

@@ -256,12 +256,12 @@ class SensorIrradiation(Sensor):
             "readings": self.getRegistries(fromdate, todate)
         }
 
-    def insertRegistry(self, irradiation_w_m2, temperature_c, time=None):
+    def insertRegistry(self, irradiation_w_m2, temperature_dc, time=None):
         return SensorIrradiationRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             irradiation_w_m2 = irradiation_w_m2,
-            temperature_c = temperature_c
+            temperature_dc = temperature_dc
             )
 
     def getRegistries(self, fromdate=None, todate=None):
@@ -278,11 +278,11 @@ class SensorTemperatureAmbient(Sensor):
             "readings": self.getRegistries(fromdate, todate)
         }
 
-    def insertRegistry(self, temperature_c, time=None):
+    def insertRegistry(self, temperature_dc, time=None):
         return SensorTemperatureAmbientRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            temperature_c = temperature_c
+            temperature_dc = temperature_dc
             )
 
     def getRegistries(self, fromdate=None, todate=None):
@@ -300,11 +300,11 @@ class SensorTemperatureModule(Sensor):
             "readings": self.getRegistries(fromdate, todate)
         }
 
-    def insertRegistry(self, temperature_c=None, time=None):
+    def insertRegistry(self, temperature_dc, time=None):
         return SensorTemperatureModuleRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            temperature_c = temperature_c
+            temperature_dc = temperature_dc
             )
 
     def getRegistries(self, fromdate=None, todate=None):
@@ -339,21 +339,21 @@ class SensorIrradiationRegistry(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
     irradiation_w_m2 = Optional(int, size=64)
-    temperature_c = Optional(int, size=64)
+    temperature_dc = Optional(int, size=64)
 
 class SensorTemperatureAmbientRegistry(database.Entity):
 
     sensor = Required(SensorTemperatureAmbient)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
-    temperature_c = Optional(int, size=64)
+    temperature_dc = Optional(int, size=64)
 
 class SensorTemperatureModuleRegistry(database.Entity):
 
     sensor = Required(SensorTemperatureModule)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
-    temperature_c = Optional(int, size=64)
+    temperature_dc = Optional(int, size=64)
 
 class Inclinometer(database.Entity):
     name = Required(unicode)
@@ -477,10 +477,10 @@ class SimelRegistry(database.Entity):
     PrimaryKey(simel, time)
     exported_energy_wh = Optional(int, size=64)
     imported_energy_wh = Optional(int, size=64)
-    r1_wh = Optional(int, size=64)
-    r2_wh = Optional(int, size=64)
-    r3_wh = Optional(int, size=64)
-    r4_wh = Optional(int, size=64)
+    r1_varh = Optional(int, size=64)
+    r2_varh = Optional(int, size=64)
+    r3_varh = Optional(int, size=64)
+    r4_varh = Optional(int, size=64)
 
 # Rethink this one, device?
 class Nagios(database.Entity):
@@ -493,4 +493,4 @@ class NagiosRegistry(database.Entity):
     nagios = Required(Nagios)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(nagios, time)
-    billed_energy_wh = Optional(int, size=64)
+    status = Optional(str)

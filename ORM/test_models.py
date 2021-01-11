@@ -382,7 +382,7 @@ class Models_Test(unittest.TestCase):
         SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
-            temperature_c = 250,
+            temperature_dc = 2500,
         )
         
         plantdata = alcolea.plantData()
@@ -420,7 +420,7 @@ class Models_Test(unittest.TestCase):
                 "readings":
                 [{
                     "irradiation_w_m2": 15,
-                    'temperature_c': 250,
+                    'temperature_dc': 2500,
                     "time": time,
                 }]
             },
@@ -478,7 +478,7 @@ class Models_Test(unittest.TestCase):
                     "readings":
                     [{
                         "irradiation_w_m2": 15,
-                        "temperature_c": 250,
+                        "temperature_dc": 2500,
                         "time": time,
                     }]
                 },
