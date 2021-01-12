@@ -323,38 +323,28 @@ class Models_Test(unittest.TestCase):
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
             Inverter[1].insertRegistry(
-                daily_energy_h_wh = 1,
-                daily_energy_l_wh =2,
-                e_total_h_wh = 3,
-                e_total_l_wh = 4,
-                h_total_h_h = 5,
-                h_total_l_h = 6,
-                pac_r_w = 7,
-                pac_s_w = 8,
-                pac_t_w = 9,
-                powerreactive_t_v = 10,
-                powerreactive_r_v = 11,
-                powerreactive_s_v = 12,
-                temp_inv_c = 13,
+                power_w = 1,
+                energy_wh =2,
+                intensity_cc_mA = 3,
+                intensity_ca_mA = 4,
+                voltage_cc_mV = 5,
+                voltage_ca_mV = 6,
+                uptime_h = 7,
+                temperature_dc = 8,
                 time = time,
             )
 
             registries = Inverter[1].getRegistries()
             
             expectedRegistries = [{
-                "daily_energy_h_wh": 1,
-                "daily_energy_l_wh": 2,
-                "e_total_h_wh": 3,
-                "e_total_l_wh": 4,
-                "h_total_h_h": 5,
-                "h_total_l_h": 6,
-                "pac_r_w": 7,
-                "pac_s_w": 8,
-                "pac_t_w": 9,
-                "powerreactive_t_v": 10,
-                "powerreactive_r_v": 11,
-                "powerreactive_s_v": 12,
-                "temp_inv_c": 13,
+                "power_w": 1,
+                "energy_wh": 2,
+                "intensity_cc_mA": 3,
+                "intensity_ca_mA": 4,
+                "voltage_cc_mV": 5,
+                "voltage_ca_mV": 6,
+                "uptime_h": 7,
+                "temperature_dc": 8,
                 "time": time,
             }]
 

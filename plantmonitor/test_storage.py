@@ -204,7 +204,9 @@ class Storage_Test(unittest.TestCase):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
 
-    def test_PublishOrmOneInverterRegistry(self):
+    #TODO deprecated as soon as we switch plant_data
+    # test instead registries_to_plant_data in task.py
+    def __test_PublishOrmOneInverterRegistry(self):
         plant_name = 'SomEnergia_Alcolea'
         inverter_name = 'Mary'
         with orm.db_session:
@@ -247,7 +249,7 @@ class Storage_Test(unittest.TestCase):
             inverterReadings = storage.inverterReadings()
             self.assertEqual(inverterReadings, [expectedRegistry])
 
-    def test_PublishOrmIfInverterNotExist(self):
+    def __test_PublishOrmIfInverterNotExist(self):
         inverter_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
         with orm.db_session:
@@ -280,7 +282,7 @@ class Storage_Test(unittest.TestCase):
 
             self.assertListEqual(storage.inverterReadings(), [])
  
-    def test_PublishOrmIfPlantNotExist(self):
+    def __test_PublishOrmIfPlantNotExist(self):
         inverter_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
         with orm.db_session:

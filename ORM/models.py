@@ -179,41 +179,30 @@ class Inverter(database.Entity):
     name = Required(unicode)
     plant = Required(Plant)
     inverterRegistries = Set('InverterRegistry', lazy=True)
-
+    
     def insertRegistry(self,
-        daily_energy_h_wh,
-        daily_energy_l_wh,
-        e_total_h_wh,
-        e_total_l_wh,
-        h_total_h_h,
-        h_total_l_h,
-        pac_r_w,
-        pac_s_w,
-        pac_t_w,
-        powerreactive_t_v,
-        powerreactive_r_v,
-        powerreactive_s_v,
-        temp_inv_c,
-        time = None,
+        power_w,
+        energy_wh,
+        intensity_cc_mA,
+        intensity_ca_mA,
+        voltage_cc_mV,
+        voltage_ca_mV,
+        uptime_h,
+        temperature_dc,
+        time=None,
         ):
         return InverterRegistry(
             inverter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
-            daily_energy_h_wh = daily_energy_h_wh,
-            daily_energy_l_wh = daily_energy_l_wh,
-            e_total_h_wh = e_total_h_wh,
-            e_total_l_wh = e_total_l_wh,
-            h_total_h_h = h_total_h_h,
-            h_total_l_h = h_total_l_h,
-            pac_r_w = pac_r_w,
-            pac_s_w = pac_s_w,
-            pac_t_w = pac_t_w,
-            powerreactive_t_v = powerreactive_t_v,
-            powerreactive_r_v = powerreactive_r_v,
-            powerreactive_s_v = powerreactive_s_v,
-            temp_inv_c = temp_inv_c
+            power_w = power_w,
+            energy_wh = energy_wh,
+            intensity_cc_mA = intensity_cc_mA,
+            intensity_ca_mA = intensity_ca_mA,
+            voltage_cc_mV = voltage_cc_mV,
+            voltage_ca_mV = voltage_ca_mV,
+            uptime_h = uptime_h,
+            temperature_dc = temperature_dc,
         )
-    
 
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.inverterRegistries, exclude='inverter', fromdate=fromdate, todate=todate)
@@ -224,19 +213,14 @@ class InverterRegistry(database.Entity):
     inverter = Required(Inverter)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(inverter, time)
-    daily_energy_h_wh = Optional(int, size=64)
-    daily_energy_l_wh = Optional(int, size=64)
-    e_total_h_wh = Optional(int, size=64)
-    e_total_l_wh = Optional(int, size=64)
-    h_total_h_h = Optional(int, size=64)
-    h_total_l_h = Optional(int, size=64)
-    pac_r_w = Optional(int, size=64)
-    pac_s_w = Optional(int, size=64)
-    pac_t_w = Optional(int, size=64)
-    powerreactive_t_v = Optional(int, size=64)
-    powerreactive_r_v = Optional(int, size=64)
-    powerreactive_s_v = Optional(int, size=64)
-    temp_inv_c = Optional(int, size=64)
+    power_w = Optional(int, size=64)
+    energy_wh = Optional(int, size=64)
+    intensity_cc_mA = Optional(int, size=64)
+    intensity_ca_mA = Optional(int, size=64)
+    voltage_cc_mV = Optional(int, size=64)
+    voltage_ca_mV = Optional(int, size=64)
+    uptime_h = Optional(int, size=64)
+    temperature_dc = Optional(int, size=64)
 
 
 class Sensor(database.Entity):

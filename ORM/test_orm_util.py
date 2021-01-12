@@ -232,19 +232,14 @@ class ORMSetup_Test(unittest.TestCase):
             inverter = Inverter(name='Mary', plant=alcolea)
             inverterDataDict = {
                 'time': datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
-                'daily_energy_h_wh': 10,
-                'daily_energy_l_wh': 10,
-                'e_total_h_wh': 10,
-                'e_total_l_wh': 10,
-                'h_total_h_h': 10,
-                'h_total_l_h': 10,
-                'pac_r_w': 10,
-                'pac_s_w': 10,
-                'pac_t_w': 10,
-                'powerreactive_t_v': 10,
-                'powerreactive_r_v': 10,
-                'powerreactive_s_v': 10,
-                'temp_inv_c': 10
+                'power_w': 10,
+                'energy_wh': 10,
+                'intensity_cc_mA': 10,
+                'intensity_ca_mA': 10,
+                'voltage_cc_mV': 10,
+                'voltage_ca_mV': 10,
+                'uptime_h': 10,
+                'temperature_dc': 10,
             }
 
             inverter.insertRegistry(**inverterDataDict)
