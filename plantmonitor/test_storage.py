@@ -366,7 +366,7 @@ class Storage_Test(unittest.TestCase):
                     "id": "SensorTemperature:Alice",
                     "readings":
                     [{
-                        #"temperature_c": 12,
+                        "temperature_c": None,
                         "time": time,
                     }]
                 }]
