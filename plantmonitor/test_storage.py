@@ -350,7 +350,7 @@ class Storage_Test(unittest.TestCase):
             }
             self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
 
-    def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperatur(self):
+    def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperature(self):
         sensor_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
         time = datetime.datetime.now(datetime.timezone.utc)
