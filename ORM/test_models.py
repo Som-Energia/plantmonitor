@@ -220,10 +220,10 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
 
             registries = Meter[1].getRegistries()
@@ -232,10 +232,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -252,19 +252,19 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
             Meter[2].insertRegistry(
                 time = time,
                 export_energy_wh = 110,
                 import_energy_wh = 15,
-                r1_w = 13,
-                r2_w = 12,
-                r3_w = 14,
-                r4_w = 11,
+                r1_VArh = 13,
+                r2_VArh = 12,
+                r3_VArh = 14,
+                r4_VArh = 11,
             )
             registries = Meter[1].getRegistries()
             
@@ -272,10 +272,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -293,10 +293,10 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
             fromdate = time - delta
             todate = time + delta
@@ -307,10 +307,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -363,10 +363,10 @@ class Models_Test(unittest.TestCase):
         Meter[1].insertRegistry(
             export_energy_wh = 10,
             import_energy_wh = 5,
-            r1_w = 3,
-            r2_w = 2,
-            r3_w = 4,
-            r4_w = 1,
+            r1_VArh = 3,
+            r2_VArh = 2,
+            r3_VArh = 4,
+            r4_VArh = 1,
             time = time,
         )
         SensorIrradiation[1].insertRegistry(
@@ -394,10 +394,10 @@ class Models_Test(unittest.TestCase):
                 [{
                     "export_energy_wh": 10,
                     "import_energy_wh": 5,
-                    "r1_w": 3,
-                    "r2_w": 2,
-                    "r3_w": 4,
-                    "r4_w": 1,
+                    "r1_VArh": 3,
+                    "r2_VArh": 2,
+                    "r3_VArh": 4,
+                    "r4_VArh": 1,
                     "time": time,
                 }]
             },
@@ -452,10 +452,10 @@ class Models_Test(unittest.TestCase):
                     [{
                         "export_energy_wh": 10,
                         "import_energy_wh": 5,
-                        "r1_w": 3,
-                        "r2_w": 2,
-                        "r3_w": 4,
-                        "r4_w": 1,
+                        "r1_VArh": 3,
+                        "r2_VArh": 2,
+                        "r3_VArh": 4,
+                        "r4_VArh": 1,
                         "time": time,
                     }]
                 },

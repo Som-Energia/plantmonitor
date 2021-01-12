@@ -144,16 +144,16 @@ class Meter(database.Entity):
     name = Required(unicode)
     meterRegistries = Set('MeterRegistry', lazy=True)
 
-    def insertRegistry(self, export_energy_wh, import_energy_wh, r1_w, r2_w, r3_w, r4_w, time=None):
+    def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None):
         return MeterRegistry(
             meter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             export_energy_wh = export_energy_wh,
             import_energy_wh = import_energy_wh,
-            r1_w = r1_w,
-            r2_w = r2_w,
-            r3_w = r3_w,
-            r4_w = r4_w,
+            r1_VArh = r1_VArh,
+            r2_VArh = r2_VArh,
+            r3_VArh = r3_VArh,
+            r4_VArh = r4_VArh,
             )
 
     # TODO: convert to a fixture this function
@@ -168,10 +168,10 @@ class MeterRegistry(database.Entity):
     PrimaryKey(meter, time)
     export_energy_wh = Required(int, size=64)
     import_energy_wh = Required(int, size=64)
-    r1_w = Required(int, size=64)
-    r2_w = Required(int, size=64)
-    r3_w = Required(int, size=64)
-    r4_w = Required(int, size=64)
+    r1_VArh = Required(int, size=64)
+    r2_VArh = Required(int, size=64)
+    r3_VArh = Required(int, size=64)
+    r4_VArh = Required(int, size=64)
     
 
 class Inverter(database.Entity):

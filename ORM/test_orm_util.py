@@ -182,10 +182,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = str(line.time),
                 export_energy_wh = line.export_energy_wh,
                 import_energy_wh = line.import_energy_wh,
-                r1_w = line.r1_w,
-                r2_w = line.r2_w,
-                r3_w = line.r3_w,
-                r4_w = line.r4_w,
+                r1_VArh = line.r1_VArh,
+                r2_VArh = line.r2_VArh,
+                r3_VArh = line.r3_VArh,
+                r4_VArh = line.r4_VArh,
             )
             for line in orm.select(
                 l for l in MeterRegistry
@@ -210,20 +210,20 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
             self.assertMeterRegistryEqual('SOMSC01', 'Mary', """\
                 registry:
                 - time: '2020-10-20 00:00:00+00:00'
                   export_energy_wh: 10
                   import_energy_wh: 77
-                  r1_w: 0
-                  r2_w: 0
-                  r3_w: 0
-                  r4_w: 0
+                  r1_VArh: 0
+                  r2_VArh: 0
+                  r3_VArh: 0
+                  r4_VArh: 0
                 """)
 
     def test_InverterRegistry_singleEntry(self):
@@ -262,10 +262,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
 
     def test_ReadOnePlantOneMeterOneRegistry(self):
@@ -277,10 +277,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
 
             alcolea_read = Plant[1]
