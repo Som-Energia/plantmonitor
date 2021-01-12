@@ -335,13 +335,14 @@ class Storage_Test(unittest.TestCase):
             }
             storage = PonyMetricStorage()
             storage.insertPlantData(plant_data)
- 
+
             expected_plant_data = {
                 'plant': plant_name,
-                'devices': 
+                'devices':
                 [{
-                    'id': 'SensorTemperature:Alice', 
-                    'readings': [{
+                    'id': 'SensorTemperature:Alice',
+                    'readings':
+                    [{
                         "temperature_c": 12,
                         "time": time,
                     }]
