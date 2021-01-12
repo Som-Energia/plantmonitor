@@ -276,7 +276,7 @@ class SensorTemperature(Sensor):
             d["ambient"] = self.ambient
         return d
 
-    def insertRegistry(self, temperature_c, time=None):
+    def insertRegistry(self, temperature_c=None, time=None):
         return SensorTemperatureRegistry(
             sensor = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),

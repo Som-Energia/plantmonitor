@@ -335,21 +335,22 @@ class Storage_Test(unittest.TestCase):
             }
             storage = PonyMetricStorage()
             storage.insertPlantData(plant_data)
- 
+
             expected_plant_data = {
                 'plant': plant_name,
-                'devices': 
+                'devices':
                 [{
-                    'id': 'SensorTemperature:Alice', 
-                    'readings': [{
+                    'id': 'SensorTemperature:Alice',
+                    'readings':
+                    [{
                         "temperature_c": 12,
                         "time": time,
                     }]
                 }],
-
+            }
             self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
 
-    def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperatur(self):
+    def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperature(self):
         sensor_name = 'Alice'
         plant_name = 'SomEnergia_Alcolea'
         time = datetime.datetime.now(datetime.timezone.utc)
@@ -366,7 +367,7 @@ class Storage_Test(unittest.TestCase):
                     "id": "SensorTemperature:Alice",
                     "readings":
                     [{
-                        #"temperature_c": 12,
+                        "temperature_c": None,
                         "time": time,
                     }]
                 }]
@@ -378,7 +379,7 @@ class Storage_Test(unittest.TestCase):
                 'plant': plant_name,
                 'devices': [{'id': 'SensorTemperature:Alice', 'readings':
                     [{
-                        #"temperature_c": 12,
+                        "temperature_c": None,
                         "time": time,
                     }]
                 }],
