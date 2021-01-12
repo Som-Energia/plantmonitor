@@ -32,9 +32,11 @@ from ORM.models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -100,10 +102,12 @@ class ImportPlant_Test(unittest.TestCase):
                     irradiationSensors:
                     - irradiationSensor:
                         name: alberto
-                    temperatureSensors:
-                    - temperatureSensor:
+                    temperatureAmbientSensors:
+                    - temperatureAmbientSensor:
                         name: joana
-                        ambient: False
+                    temperatureModuleSensors:
+                    - temperatureModuleSensor:
+                        name: pol
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")
@@ -141,10 +145,12 @@ class ImportPlant_Test(unittest.TestCase):
                 irradiationSensors:
                 - irradiationSensor:
                     name: alberto
-                temperatureSensors:
-                - temperatureSensor:
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
                     name: joana
-                    ambient: False
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: pol
                 integratedSensors:
                 - integratedSensor:
                     name: voki"""
@@ -187,10 +193,12 @@ class ImportPlant_Test(unittest.TestCase):
                 irradiationSensors:
                 - irradiationSensor:
                     name: alberto
-                temperatureSensors:
-                - temperatureSensor:
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
                     name: joana
-                    ambient: False
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: pol
                 integratedSensors:
                 - integratedSensor:
                     name: voki"""

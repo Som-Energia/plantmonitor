@@ -44,8 +44,10 @@ from ORM.models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorTemperature,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
 )
 
 from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
@@ -56,8 +58,8 @@ class PonyMetricStorage:
         device = Sensor[sensor_fk]
         return device.to_dict()
 
-    def sensorTemperatureReadings(self):
-        sensorReadings = orm.select(c for c in SensorTemperatureRegistry)
+    def sensorTemperatureAmbientReadings(self):
+        sensorReadings = orm.select(c for c in SensorTemperatureAmbientRegistry)
         return list(x.to_dict() for x in sensorReadings)
 
     #TODO return all data (or filter by date)

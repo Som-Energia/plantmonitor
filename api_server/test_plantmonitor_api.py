@@ -18,9 +18,11 @@ from ORM.models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -113,19 +115,14 @@ class Api_Test(unittest.TestCase):
                 "id": "Inverter:inversor1",
                 "readings":
                 [{
-                    "daily_energy_h_wh": 12,
-                    "daily_energy_l_wh": 10,
-                    "e_total_h_wh": 5,
-                    "e_total_l_wh": 213,
-                    "h_total_h_h": 125,
-                    "h_total_l_h": 115,
-                    "pac_r_w": 43,
-                    "pac_s_w": 22,
-                    "pac_t_w": 43,
-                    "powerreactive_t_v": 9,
-                    "powerreactive_r_v": 3,
-                    "powerreactive_s_v": 5,
-                    "temp_inv_c": 30,
+                    'power_w': 10,
+                    'energy_wh': 10,
+                    'intensity_cc_mA': 10,
+                    'intensity_ca_mA': 10,
+                    'voltage_cc_mV': 10,
+                    'voltage_ca_mV': 10,
+                    'uptime_h': 10,
+                    'temperature_dc': 10,
                 }]
             }]
         }
@@ -152,19 +149,14 @@ class Api_Test(unittest.TestCase):
                 "id": "Inverter:inversor1",
                 "readings":
                 [{
-                    "daily_energy_h_wh": 12,
-                    "daily_energy_l_wh": 10,
-                    "e_total_h_wh": 5,
-                    "e_total_l_wh": 213,
-                    "h_total_h_h": 125,
-                    "h_total_l_h": 115,
-                    "pac_r_w": 43,
-                    "pac_s_w": 22,
-                    "pac_t_w": 43,
-                    "powerreactive_t_v": 9,
-                    "powerreactive_r_v": 3,
-                    "powerreactive_s_v": 5,
-                    "temp_inv_c": 30,
+                    'power_w': 10,
+                    'energy_wh': 10,
+                    'intensity_cc_mA': 10,
+                    'intensity_ca_mA': 10,
+                    'voltage_cc_mV': 10,
+                    'voltage_ca_mV': 10,
+                    'uptime_h': 10,
+                    'temperature_dc': 10,
                 }]
             }]
         }
@@ -181,20 +173,14 @@ class Api_Test(unittest.TestCase):
                 readings, 
                 [{
                     "inverter" : 1,
-                    "daily_energy_h_wh": 12,
-                    "daily_energy_l_wh": 10,
-                    "e_total_h_wh": 5,
-                    "e_total_l_wh": 213,
-                    "h_total_h_h": 125,
-                    "h_total_l_h": 115,
-                    "inverter": 1,
-                    "pac_r_w": 43,
-                    "pac_s_w": 22,
-                    "pac_t_w": 43,
-                    "powerreactive_r_v": 3,
-                    "powerreactive_s_v": 5,
-                    "powerreactive_t_v": 9,
-                    "temp_inv_c": 30,
+                    'power_w': 10,
+                    'energy_wh': 10,
+                    'intensity_cc_mA': 10,
+                    'intensity_ca_mA': 10,
+                    'voltage_cc_mV': 10,
+                    'voltage_ca_mV': 10,
+                    'uptime_h': 10,
+                    'temperature_dc': 10,
                     "time": time,
                 }]
             )
@@ -216,10 +202,10 @@ class Api_Test(unittest.TestCase):
             "time": time.isoformat(), #consider using fastapi.jsonable_encoder
             "devices":
             [{
-                "id": "SensorTemperature:{}".format(thermoname),
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
-                    "temperature_c": 12,
+                    "temperature_dc": 1200,
                     "time": time.isoformat(),
                 }]
             }]
@@ -233,10 +219,10 @@ class Api_Test(unittest.TestCase):
                 "readings": []
             },
             {
-                "id": "SensorTemperature:{}".format(thermoname),
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
                 "readings":
                 [{
-                    "temperature_c": 12,
+                    "temperature_dc": 1200,
                     "time": time,
                 }]
             }]
@@ -245,7 +231,7 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
             plant_name = data['plant']
-            SensorTemperature(plant=Plant.get(name=plant_name), name=thermoname)
+            SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
             
             response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
 

@@ -39,9 +39,11 @@ from .models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -97,10 +99,12 @@ class Models_Test(unittest.TestCase):
                 irradiationSensors:
                 - irradiationSensor:
                     name: alberto
-                temperatureSensors:
-                - temperatureSensor:
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: pol
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
                     name: joana
-                    ambient: False
                 integratedSensors:
                 - integratedSensor:
                     name: voki""")
@@ -179,7 +183,8 @@ class Models_Test(unittest.TestCase):
                 irradiationSensors: []
                 meters: []
                 name: alcolea
-                temperatureSensors: []
+                temperatureAmbientSensors: []
+                temperatureModuleSensors: []
                 """)
 
             emptyPlant = emptyPlantNS.plants[0].plant
@@ -215,10 +220,10 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
 
             registries = Meter[1].getRegistries()
@@ -227,10 +232,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -247,19 +252,19 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
             Meter[2].insertRegistry(
                 time = time,
                 export_energy_wh = 110,
                 import_energy_wh = 15,
-                r1_w = 13,
-                r2_w = 12,
-                r3_w = 14,
-                r4_w = 11,
+                r1_VArh = 13,
+                r2_VArh = 12,
+                r3_VArh = 14,
+                r4_VArh = 11,
             )
             registries = Meter[1].getRegistries()
             
@@ -267,10 +272,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -288,10 +293,10 @@ class Models_Test(unittest.TestCase):
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
-                r1_w = 3,
-                r2_w = 2,
-                r3_w = 4,
-                r4_w = 1,
+                r1_VArh = 3,
+                r2_VArh = 2,
+                r3_VArh = 4,
+                r4_VArh = 1,
             )
             fromdate = time - delta
             todate = time + delta
@@ -302,10 +307,10 @@ class Models_Test(unittest.TestCase):
                 'time': time,
                 'export_energy_wh': 10,
                 'import_energy_wh': 5,
-                'r1_w': 3,
-                'r2_w': 2,
-                'r3_w': 4, 
-                'r4_w': 1,
+                'r1_VArh': 3,
+                'r2_VArh': 2,
+                'r3_VArh': 4,
+                'r4_VArh': 1,
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -318,38 +323,28 @@ class Models_Test(unittest.TestCase):
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
             Inverter[1].insertRegistry(
-                daily_energy_h_wh = 1,
-                daily_energy_l_wh =2,
-                e_total_h_wh = 3,
-                e_total_l_wh = 4,
-                h_total_h_h = 5,
-                h_total_l_h = 6,
-                pac_r_w = 7,
-                pac_s_w = 8,
-                pac_t_w = 9,
-                powerreactive_t_v = 10,
-                powerreactive_r_v = 11,
-                powerreactive_s_v = 12,
-                temp_inv_c = 13,
+                power_w = 1,
+                energy_wh =2,
+                intensity_cc_mA = 3,
+                intensity_ca_mA = 4,
+                voltage_cc_mV = 5,
+                voltage_ca_mV = 6,
+                uptime_h = 7,
+                temperature_dc = 8,
                 time = time,
             )
 
             registries = Inverter[1].getRegistries()
             
             expectedRegistries = [{
-                "daily_energy_h_wh": 1,
-                "daily_energy_l_wh": 2,
-                "e_total_h_wh": 3,
-                "e_total_l_wh": 4,
-                "h_total_h_h": 5,
-                "h_total_l_h": 6,
-                "pac_r_w": 7,
-                "pac_s_w": 8,
-                "pac_t_w": 9,
-                "powerreactive_t_v": 10,
-                "powerreactive_r_v": 11,
-                "powerreactive_s_v": 12,
-                "temp_inv_c": 13,
+                "power_w": 1,
+                "energy_wh": 2,
+                "intensity_cc_mA": 3,
+                "intensity_ca_mA": 4,
+                "voltage_cc_mV": 5,
+                "voltage_ca_mV": 6,
+                "uptime_h": 7,
+                "temperature_dc": 8,
                 "time": time,
             }]
 
@@ -368,16 +363,16 @@ class Models_Test(unittest.TestCase):
         Meter[1].insertRegistry(
             export_energy_wh = 10,
             import_energy_wh = 5,
-            r1_w = 3,
-            r2_w = 2,
-            r3_w = 4,
-            r4_w = 1,
+            r1_VArh = 3,
+            r2_VArh = 2,
+            r3_VArh = 4,
+            r4_VArh = 1,
             time = time,
         )
         SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
-            temperature_c = 250,
+            temperature_dc = 2500,
         )
         
         plantdata = alcolea.plantData()
@@ -399,10 +394,10 @@ class Models_Test(unittest.TestCase):
                 [{
                     "export_energy_wh": 10,
                     "import_energy_wh": 5,
-                    "r1_w": 3,
-                    "r2_w": 2,
-                    "r3_w": 4,
-                    "r4_w": 1,
+                    "r1_VArh": 3,
+                    "r2_VArh": 2,
+                    "r3_VArh": 4,
+                    "r4_VArh": 1,
                     "time": time,
                 }]
             },
@@ -415,13 +410,16 @@ class Models_Test(unittest.TestCase):
                 "readings":
                 [{
                     "irradiation_w_m2": 15,
-                    'temperature_c': 250,
+                    'temperature_dc': 2500,
                     "time": time,
                 }]
             },
             {
-                "id": "SensorTemperature:joana",
-                "ambient": False,
+                "id": "SensorTemperatureAmbient:joana",
+                "readings": []
+            },
+            {
+                "id": "SensorTemperatureModule:pol",
                 "readings": []
             }]
         }
@@ -454,10 +452,10 @@ class Models_Test(unittest.TestCase):
                     [{
                         "export_energy_wh": 10,
                         "import_energy_wh": 5,
-                        "r1_w": 3,
-                        "r2_w": 2,
-                        "r3_w": 4,
-                        "r4_w": 1,
+                        "r1_VArh": 3,
+                        "r2_VArh": 2,
+                        "r3_VArh": 4,
+                        "r4_VArh": 1,
                         "time": time,
                     }]
                 },
@@ -470,13 +468,16 @@ class Models_Test(unittest.TestCase):
                     "readings":
                     [{
                         "irradiation_w_m2": 15,
-                        "temperature_c": 250,
+                        "temperature_dc": 2500,
                         "time": time,
                     }]
                 },
                 {
-                    "id": "SensorTemperature:joana",
-                    "ambient": False,
+                    "id": "SensorTemperatureAmbient:joana",
+                    "readings": []
+                },
+                {
+                    "id": "SensorTemperatureModule:pol",
                     "readings": []
                 }]
             }

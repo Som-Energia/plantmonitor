@@ -129,13 +129,13 @@ plant -> devices <|- Sensor <|- Sensor2
 	-	id: "SensorTemperature:thermometer1"
 		readings:
 		- time: 2020-09-27T10:00:00Z
-			temperature_c: 16
+			temperature_dc: 1600
 		- time: 2020-09-27T11:00:00Z
-			temperature_c: 17
+			temperature_dc: 1700
 	- id: "SensorTemperature:thermometer2"
 		reading:
 		  timestamp: 2020-09-27T10:00:00Z
-			temperature_c: 16.0
+			temperature_dc: 1600
 
 # as a dictionary
 

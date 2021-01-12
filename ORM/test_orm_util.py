@@ -20,9 +20,11 @@ from .models import (
     Sensor,
     SensorIntegratedIrradiation,
     SensorIrradiation,
-    SensorTemperature,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
     SensorIrradiationRegistry,
-    SensorTemperatureRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
     IntegratedIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
@@ -33,7 +35,7 @@ from .models import (
 from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 
-setupDatabase()
+setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
 
 class ORMSetup_Test(unittest.TestCase):
@@ -70,7 +72,7 @@ class ORMSetup_Test(unittest.TestCase):
         #TODO assert not empty
         sensorIrr = sensorsIrr[0]
 
-        sensorTemp = list(SensorTemperature.select(lambda p: p.plant==plant))[0]
+        sensorTemp = list(SensorTemperatureAmbient.select(lambda p: p.plant==plant))[0]
         sensorIntegratedIrr = list(SensorIntegratedIrradiation.select(lambda p: p.plant==plant))[0]
 
         dt = datetime.timedelta(minutes=5)
@@ -83,11 +85,11 @@ class ORMSetup_Test(unittest.TestCase):
             sensorIrr.insertRegistry(
                 time = timeStart + i*dt,
                 irradiation_w_m2 = value + i*dv,
-                temperature_c = 300 + value + i*(dv+10),
+                temperature_dc = 300 + value + i*(dv+10),
             )
             sensorTemp.insertRegistry(
                 time = timeStart + i*dt,
-                temperature_c = 300 + value + i*(dv+10),
+                temperature_dc = 300 + value + i*(dv+10),
             )
             sensorIntegratedIrr.insertRegistry(
                 time = timeStart + i*dt,
@@ -180,10 +182,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = str(line.time),
                 export_energy_wh = line.export_energy_wh,
                 import_energy_wh = line.import_energy_wh,
-                r1_w = line.r1_w,
-                r2_w = line.r2_w,
-                r3_w = line.r3_w,
-                r4_w = line.r4_w,
+                r1_VArh = line.r1_VArh,
+                r2_VArh = line.r2_VArh,
+                r3_VArh = line.r3_VArh,
+                r4_VArh = line.r4_VArh,
             )
             for line in orm.select(
                 l for l in MeterRegistry
@@ -208,20 +210,20 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
             self.assertMeterRegistryEqual('SOMSC01', 'Mary', """\
                 registry:
                 - time: '2020-10-20 00:00:00+00:00'
                   export_energy_wh: 10
                   import_energy_wh: 77
-                  r1_w: 0
-                  r2_w: 0
-                  r3_w: 0
-                  r4_w: 0
+                  r1_VArh: 0
+                  r2_VArh: 0
+                  r3_VArh: 0
+                  r4_VArh: 0
                 """)
 
     def test_InverterRegistry_singleEntry(self):
@@ -230,19 +232,14 @@ class ORMSetup_Test(unittest.TestCase):
             inverter = Inverter(name='Mary', plant=alcolea)
             inverterDataDict = {
                 'time': datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
-                'daily_energy_h_wh': 10,
-                'daily_energy_l_wh': 10,
-                'e_total_h_wh': 10,
-                'e_total_l_wh': 10,
-                'h_total_h_h': 10,
-                'h_total_l_h': 10,
-                'pac_r_w': 10,
-                'pac_s_w': 10,
-                'pac_t_w': 10,
-                'powerreactive_t_v': 10,
-                'powerreactive_r_v': 10,
-                'powerreactive_s_v': 10,
-                'temp_inv_c': 10
+                'power_w': 10,
+                'energy_wh': 10,
+                'intensity_cc_mA': 10,
+                'intensity_ca_mA': 10,
+                'voltage_cc_mV': 10,
+                'voltage_ca_mV': 10,
+                'uptime_h': 10,
+                'temperature_dc': 10,
             }
 
             inverter.insertRegistry(**inverterDataDict)
@@ -265,10 +262,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
 
     def test_ReadOnePlantOneMeterOneRegistry(self):
@@ -280,10 +277,10 @@ class ORMSetup_Test(unittest.TestCase):
                 time = datetime.datetime.now(),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
-                r1_w = 0,
-                r2_w = 0,
-                r3_w = 0,
-                r4_w = 0,
+                r1_VArh = 0,
+                r2_VArh = 0,
+                r3_VArh = 0,
+                r4_VArh = 0,
             )
 
             alcolea_read = Plant[1]
@@ -300,7 +297,7 @@ class ORMSetup_Test(unittest.TestCase):
     def test_InsertOnePlantOneSensor(self):
         with orm.db_session:
             alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperature(name='TempAlcolea', plant=alcolea)
+            sensor = SensorTemperatureAmbient(name='TempAlcolea', plant=alcolea)
 
             sensor_read = Sensor[1]
             self.assertEqual(sensor_read,sensor)
@@ -312,7 +309,7 @@ class ORMSetup_Test(unittest.TestCase):
             sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
-                temperature_c = 250
+                temperature_dc = 2500
             )
 
             sensor_registry_read = list(SensorIrradiationRegistry.select())[0]
@@ -384,10 +381,12 @@ class ORMSetup_Test(unittest.TestCase):
                     irradiationSensors:
                     - irradiationSensor:
                         name: alberto
-                    temperatureSensors:
-                    - temperatureSensor:
+                    temperatureModuleSensors:
+                    - temperatureModuleSensor:
+                        name: pol
+                    temperatureAmbientSensors:
+                    - temperatureAmbientSensor:
                         name: joana
-                        ambient: False
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")
@@ -430,11 +429,11 @@ class ORMSetup_Test(unittest.TestCase):
             ]
 
             q1 = orm.select(r for r in SensorIrradiationRegistry if r.sensor.plant == alcolea)
-            q2 = orm.select(r for r in SensorTemperatureRegistry if r.sensor.plant == alcolea)
+            q2 = orm.select(r for r in SensorTemperatureAmbientRegistry if r.sensor.plant == alcolea)
             q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
-                (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_c, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)
+                (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_dc, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)
                 for r1_w in q1 for r2_w in q2 for r3_w in q3
                 if r1_w.time == r2_w.time and r2_w.time == r3_w.time
             )
