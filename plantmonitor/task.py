@@ -130,6 +130,47 @@ def task():
     except Exception as err:
         logger.error("[ERROR] %s" % err)
 
+#TODO move this function, create its tests and finish it
+# WIP Prototype
+def registers_to_plantdata(registers):
+
+    plant_data = {}
+
+    for i, device in enumerate(plant.devices):
+        inverter_name = plant.devices[i].name
+        inverter_registers = result[i]['Alcolea'][0]['fields']
+
+        pac_r_w = inverter_registers["pac_r_w"]
+        ...
+        power_w = pac_r_w + pac_s_w + pac_t_w
+
+        plant_data[plant_name][inverter_name]["power_w"] = power_w
+
+    return plant_data
+
+def task_plant_data_insert():
+    try:
+
+        plant = ProductionPlant()
+
+        if not plant.load('conf/modmap.yaml','Alcolea'):
+            logger.error('Error loadinf yaml definition file...')
+            sys.exit(-1)
+
+        result = plant.get_registers()
+        
+        plant_data = registers_to_plantdata(result)
+    
+        ponyStorage = PonyMetricStorage()
+        #apiStorage = ApiMetricStorage(url='http://')
+
+        logger.info("**** Saving data in database ****")
+
+        ponyStorage.insertPlantData(plant_data)
+        # apiStorage.insertPlantData(plant_data)
+
+    except Exception as err:
+        logger.error("[ERROR] %s" % err)
 
 def task_counter_erp():
     c = Client(**config.erppeek)
