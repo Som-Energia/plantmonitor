@@ -361,17 +361,17 @@ class Storage_Test(unittest.TestCase):
 
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperature(name=sensor_name, plant=alcolea)
+            sensor = SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
             plant_data = {
                 "plant": plant_name,
                 "version": "1.0",
                 "time": time.isoformat(), #consider using fastapi.jsonable_encoder
                 "devices":
                 [{
-                    "id": "SensorTemperature:Alice",
+                    "id": "SensorTemperatureAmbient:Alice",
                     "readings":
                     [{
-                        "temperature_c": None,
+                        "temperature_dc": None,
                         "time": time,
                     }]
                 }]
@@ -381,9 +381,9 @@ class Storage_Test(unittest.TestCase):
  
             expected_plant_data = {
                 'plant': plant_name,
-                'devices': [{'id': 'SensorTemperature:Alice', 'readings':
+                'devices': [{'id': 'SensorTemperatureAmbient:Alice', 'readings':
                     [{
-                        "temperature_c": None,
+                        "temperature_dc": None,
                         "time": time,
                     }]
                 }],
