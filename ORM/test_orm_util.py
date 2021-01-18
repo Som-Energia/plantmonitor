@@ -12,6 +12,8 @@ import datetime
 
 from .models import database
 from .models import (
+    importPlants,
+    exportPlants,
     Plant,
     Meter,
     MeterRegistry,
@@ -364,7 +366,7 @@ class ORMSetup_Test(unittest.TestCase):
     def test_fixtureCreation(self):
         with orm.db_session:
 
-            alcoleaPlantYAML = ns.loads("""\
+            plantsNS = ns.loads("""\
                 plants:
                 - plant:
                     name: alcolea
@@ -391,13 +393,11 @@ class ORMSetup_Test(unittest.TestCase):
                     - integratedSensor:
                         name: voki""")
 
-            alcoleaPlant = alcoleaPlantYAML.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
-            alcolea = alcolea.importPlant(alcoleaPlantYAML)
+            importPlants(plantsNS)
 
         #TODO test the whole fixture, not just the plant data
-        plantns = alcolea.exportPlant()
-        self.assertNsEqual(plantns, alcoleaPlantYAML)
+        expectedPlantns = exportPlants()
+        self.assertNsEqual(expectedPlantns, plantsNS)
 
     def test_fillPlantRegistries(self):
         with orm.db_session:

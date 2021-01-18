@@ -24,12 +24,48 @@ def getRegistries(entitySet, exclude, fromdate=None, todate=None):
             registries = orm.select(r for r in entitySet)[:]
         return [r.to_dict(exclude=exclude) for r in registries]
 
+def importPlants(nsplants):
+    with orm.db_session:
+        for kplantns in nsplants.plants:
+            plantns = kplantns['plant']
+            plant = Plant(name=plantns.name, codename=plantns.codename)
+            plant.importPlant(plantns)
+
+def exportPlants():
+    with orm.db_session:
+        plantsns = ns([
+            ("plants", [ns([
+                    ('plant', plant.exportPlant())
+                ])
+                for plant in Plant.select()]
+            )
+        ])
+    return plantsns
+
+
+class Municipality(database.Entity):
+
+    ineCode = Required(str)
+    name = Required(unicode)
+
+    countryCode = Optional(str)
+    country = Optional(unicode)
+    regionCode = Optional(str)
+    region = Optional(unicode)
+    provinceCode = Optional(str)
+    province = Optional(unicode)
+
+    plants = Set('Plant')
+
 class Plant(database.Entity):
 
     name = Required(unicode)
     codename = Required(unicode)
+    #TODO make municipality required
+    municipality = Optional(Municipality)
+    location = Optional("PlantLocation")
     description = Optional(str)
-    meters = Set('Meter', lazy=True)
+    meters = Set('Meter')
     inverters = Set('Inverter', lazy=True)
     sensors = Set('Sensor', lazy=True)
     forecastMetadatas = Set('ForecastMetadata', lazy=True)
@@ -41,38 +77,37 @@ class Plant(database.Entity):
     nagios = Set('Nagios', lazy=True)
 
     def importPlant(self, nsplant):
-        for plant_foo in nsplant.plants:
-            plant = plant_foo.plant
-            self.name=plant.name
-            self.description=plant.description
-            if 'meters' in plant:
-                [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
-            if 'inverters' in plant:
-                [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
-            if 'irradiationSensors' in plant:
-                [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
-            if 'temperatureAmbientSensors' in plant:
-                [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
-            if 'temperatureModuleSensors' in plant:
-                [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
-            if 'integratedSensors' in plant:
-                [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
+        plant = nsplant
+        self.name = plant.name
+        self.description = plant.description
+        if 'meters' in plant:
+            [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
+        if 'inverters' in plant:
+            [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
+        if 'irradiationSensors' in plant:
+            [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
+        if 'temperatureAmbientSensors' in plant:
+            [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
+        if 'temperatureModuleSensors' in plant:
+            [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
+        if 'integratedSensors' in plant:
+            [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
 
     def exportPlant(self):
+        # print([meter.to_dict() for meter in Meter.select(lambda m: m.plant == self)])
 
-        plantns = ns(plants=[ns(plant=ns(
-                name = plant.name,
-                codename = plant.codename,
-                description = plant.description,
-                meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == plant)],
-                inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == plant)],
-                irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == plant)],
-                temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == plant)],
-                temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == plant)],
-                integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == plant)],
-            )) for plant in Plant.select()]
-        )
+        plantns = ns(
+                name = self.name,
+                codename = self.codename,
+                description = self.description,
+                meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)],
+                inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)],
+                irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
+                temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
+                temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
+                integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)],
+            )
         return plantns
 
     def createPlantFixture(self):
@@ -137,6 +172,13 @@ class Plant(database.Entity):
         packettime = plantdata.get("time")
         return [self.insertDeviceData(d, packettime) for d in plantdata["devices"]]
 
+class PlantLocation(database.Entity):
+    plant = Required(Plant)
+    latitude = Required(float)
+    longitude = Required(float)
+
+    def getLatLong(self):
+        return (self.latitude, self.longitude)
 
 class Meter(database.Entity):
 

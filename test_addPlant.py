@@ -24,6 +24,8 @@ from pony import orm
 
 from ORM.models import database
 from ORM.models import (
+    importPlants,
+    exportPlants,
     Plant,
     Meter,
     MeterRegistry,
@@ -46,7 +48,7 @@ from ORM.models import (
 
 from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
-from addPlant import importPlantCLI, importPlant
+from addPlant import importPlantCLI, importPlantsFromFile
 
 setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
 
@@ -85,7 +87,7 @@ class ImportPlant_Test(unittest.TestCase):
     def test_importExportPlant(self):
         with orm.db_session:
 
-            alcoleaPlantYAML = ns.loads("""\
+            plantsns = ns.loads("""\
                 plants:
                 - plant:
                     name: alcolea
@@ -112,13 +114,11 @@ class ImportPlant_Test(unittest.TestCase):
                     - integratedSensor:
                         name: voki""")
 
-            alcoleaPlant = alcoleaPlantYAML.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
-            alcolea = alcolea.importPlant(alcoleaPlantYAML)
+            importPlants(plantsns)
 
             #TODO test the whole fixture, not just the plant data
-            plantns = alcolea.exportPlant()
-            self.assertNsEqual(plantns, alcoleaPlantYAML)
+            expectedPlantsNS = exportPlants()
+            self.assertNsEqual(expectedPlantsNS, plantsns)
 
     def test__importPlantCLI_NoFile(self):
         runner = CliRunner()
@@ -166,15 +166,13 @@ class ImportPlant_Test(unittest.TestCase):
         p.unlink()
 
         with orm.db_session:
-            alcolea = Plant.get(name='alcolea')
-            self.assertIsNotNone(alcolea)
-            plantns = alcolea.exportPlant()
+            plantns = exportPlants()
         
         self.assertNsEqual(plantns, content)
 
 
     def test__importPlant_File(self):
-        fakePlantYaml = 'fakeplant.yaml'
+        fakePlantsYaml = 'fakeplant.yaml'
 
         content = """\
             plants:
@@ -203,17 +201,15 @@ class ImportPlant_Test(unittest.TestCase):
                 - integratedSensor:
                     name: voki"""
 
-        p = Path(fakePlantYaml)
+        p = Path(fakePlantsYaml)
         with p.open("w", encoding="utf-8") as f:
             f.write(content)
 
-        importPlant(fakePlantYaml)
+        importPlantsFromFile(fakePlantsYaml)
 
         p.unlink()
 
         with orm.db_session:
-            alcolea = Plant.get(name='alcolea')
-            self.assertIsNotNone(alcolea)
-            plantns = alcolea.exportPlant()
+            plantns = exportPlants()
         
         self.assertNsEqual(plantns, content)

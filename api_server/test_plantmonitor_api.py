@@ -10,6 +10,7 @@ import json
 
 from ORM.models import database
 from ORM.models import (
+    importPlants,
     Plant,
     Meter,
     MeterRegistry,
@@ -64,7 +65,7 @@ class Api_Test(unittest.TestCase):
         database.disconnect()
 
     def setUpPlant(self):
-        alcoleaPlantNS = ns.loads("""\
+        plantsns = ns.loads("""\
             plants:
             - plant:
                 name: Alcolea
@@ -75,9 +76,7 @@ class Api_Test(unittest.TestCase):
                     name: 'inversor1'
             """)
 
-        alcoleaPlant = alcoleaPlantNS.plants[0].plant
-        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
-        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        importPlants(plantsns)
     
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?

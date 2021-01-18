@@ -32,6 +32,8 @@ from pony import orm
 from .models import database
 from .models import (
     Plant,
+    Municipality,
+    PlantLocation,
     Meter,
     MeterRegistry,
     Inverter,
@@ -81,8 +83,8 @@ class Models_Test(unittest.TestCase):
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
 
-    def samplePlantNS(self):
-        alcoleaPlantNS = ns.loads("""\
+    def samplePlantsNS(self):
+        alcoleaPlantsNS = ns.loads("""\
             plants:
             - plant:
                 name: alcolea
@@ -107,7 +109,58 @@ class Models_Test(unittest.TestCase):
                     name: joana
                 integratedSensors:
                 - integratedSensor:
-                    name: voki""")
+                    name: voki
+            - plant:
+                name: figuerea
+                codename: Som_figuerea
+                description: la bonica planta
+                meters:
+                - meter:
+                    name: '9876123'
+                inverters:
+                - inverter:
+                    name: '4444'
+                - inverter:
+                    name: '2222'
+                irradiationSensors:
+                - irradiationSensor:
+                    name: oriol
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: joan
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
+                    name: benjami
+                integratedSensors:
+                - integratedSensor:
+                    name: david""")
+        return alcoleaPlantsNS
+
+    def samplePlantNS(self):
+        alcoleaPlantNS = ns.loads("""\
+            name: alcolea
+            codename: SCSOM04
+            description: la bonica planta
+            meters:
+            - meter:
+                name: '1234578'
+            inverters:
+            - inverter:
+                name: '5555'
+            - inverter:
+                name: '6666'
+            irradiationSensors:
+            - irradiationSensor:
+                name: alberto
+            temperatureModuleSensors:
+            - temperatureModuleSensor:
+                name: pol
+            temperatureAmbientSensors:
+            - temperatureAmbientSensor:
+                name: joana
+            integratedSensors:
+            - integratedSensor:
+                name: voki""")
         return alcoleaPlantNS
 
     def test_Plant_importExportPlant(self):
@@ -115,9 +168,9 @@ class Models_Test(unittest.TestCase):
 
             alcoleaPlantNS = self.samplePlantNS()
 
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
+            orm.flush()
 
             #TODO test the whole fixture, not just the plant data
             plantns = alcolea.exportPlant()
@@ -134,11 +187,11 @@ class Models_Test(unittest.TestCase):
             extraSensor2 = ns()
             extraSensor2['extraSensor'] = ns([('name','boosensor')])
 
-            alcoleaPlantNS.plants[0].plant['extraSensors'] = [extraSensor, extraSensor2]
+            alcoleaPlantNS['extraSensors'] = [extraSensor, extraSensor2]
             
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
+            orm.flush()
 
             #TODO test the whole fixture, not just the plant data
             plantns = alcolea.exportPlant()
@@ -149,14 +202,14 @@ class Models_Test(unittest.TestCase):
 
             alcoleaPlantNS = self.samplePlantNS()
 
-            del alcoleaPlantNS.plants[0].plant['integratedSensors']
+            del alcoleaPlantNS['integratedSensors']
             
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
+            orm.flush()
 
             expectedPlantNS = alcoleaPlantNS
-            expectedPlantNS.plants[0].plant['integratedSensors'] = []
+            expectedPlantNS['integratedSensors'] = []
 
             #TODO test the whole fixture, not just the plant data
             plantns = alcolea.exportPlant()
@@ -166,16 +219,12 @@ class Models_Test(unittest.TestCase):
         with orm.db_session:
 
             emptyPlantNS = ns.loads("""\
-            plants:
-            - plant:
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
                 """)
             
             expectedPlantNS = ns.loads("""\
-            plants:
-            - plant:
                 codename: SCSOM04
                 description: la bonica planta
                 integratedSensors: []
@@ -187,8 +236,7 @@ class Models_Test(unittest.TestCase):
                 temperatureModuleSensors: []
                 """)
 
-            emptyPlant = emptyPlantNS.plants[0].plant
-            empty = Plant(name=emptyPlant.name, codename=emptyPlant.codename)
+            empty = Plant(name=emptyPlantNS.name, codename=emptyPlantNS.codename)
             empty = empty.importPlant(emptyPlantNS)
 
             #TODO test the whole fixture, not just the plant data
@@ -198,8 +246,7 @@ class Models_Test(unittest.TestCase):
     def test__Meter_getRegistries__emptyRegistries(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
 
             registries = Meter[1].getRegistries()
@@ -212,8 +259,7 @@ class Models_Test(unittest.TestCase):
     def test__Meter_getRegistries__OneRegistry(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
             Meter[1].insertRegistry(
@@ -243,8 +289,7 @@ class Models_Test(unittest.TestCase):
     def test__Meter_getRegistries__OneRegistry_two_meters(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             Meter(plant=alcolea, name="Albertinho")
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
@@ -284,8 +329,7 @@ class Models_Test(unittest.TestCase):
     def test__Meter_getRegistries__OneRegistry_filter_date(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
             delta = dt.timedelta(minutes=30)
@@ -318,8 +362,7 @@ class Models_Test(unittest.TestCase):
     def test__inverter_getRegistries__OneRegistry(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcoleaPlant = alcoleaPlantNS.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
             Inverter[1].insertRegistry(
@@ -355,8 +398,7 @@ class Models_Test(unittest.TestCase):
 
     def test__plantData(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcoleaPlant = alcoleaPlantNS.plants[0].plant
-        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
 
@@ -430,8 +472,7 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant_insertPlantData(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcoleaPlant = alcoleaPlantNS.plants[0].plant
-        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
 
@@ -487,3 +528,38 @@ class Models_Test(unittest.TestCase):
         plantDataResult = alcolea.plantData()
 
         self.assertDictEqual(plantData, plantDataResult)
+
+    def test__municipality_insert(self):
+        figueres = Municipality(
+            countryCode = "ES",
+            country = "Spain",
+            regionCode = "09",
+            region = "Cataluña",
+            provinceCode = "17",
+            province = "Girona",
+            ineCode = "17066",
+            name = "Figueres",
+        )
+
+        alcolea = Plant(name="Alcolea", codename="Som_Alcolea", municipality=figueres)
+
+        municipality = Plant.get(name="Alcolea").municipality
+
+        self.assertDictEqual(figueres.to_dict(), municipality.to_dict())
+
+    def test__location_insert(self):
+        alcolea = Plant(name="Alcolea", codename="Som_Alcolea")
+        alcoleaLatLong = (42.26610810248693, 2.958334450785599)
+        alcoleaLocation = PlantLocation(
+            plant=alcolea,
+            latitude=alcoleaLatLong[0],
+            longitude=alcoleaLatLong[1]
+        )
+        alcolea.location = alcoleaLocation
+
+        location = Plant.get(name="Alcolea").location
+
+        self.assertEqual(alcoleaLatLong, location.getLatLong())
+
+    def test__importPlants__oneplant(self):
+        pass

@@ -20,10 +20,21 @@ from ORM.orm_util import setupDatabase, dropTables
 from pony import orm
 
 from ORM.models import (
+    importPlants,
     Plant,
 )
 
 # yaml = ns.loads("""\
+#                 municipalities:
+#                 - muncipality:
+#                     name: 'Figueres'
+#                     countryCode : 'ES',
+#                     country : 'Spain',
+#                     regionCode : '09',
+#                     region : 'Cataluña',
+#                     provinceCode : '17',
+#                     province : 'Girona',
+#                     ineCode : '17066',
 #                 plants:
 #                 - plant:
 #                     name: alcolea
@@ -47,13 +58,11 @@ from ORM.models import (
 #                     - integratedSensor:
 #                         name: voki""")
 
-def importPlant(yamlFilename):
+def importPlantsFromFile(yamlFilename):
     nsplants = ns.load(yamlFilename)
 
     with orm.db_session:
-        alcoleaPlant = nsplants.plants[0].plant
-        alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
-        alcolea = alcolea.importPlant(nsplants)
+        importPlants(nsplants)
 
 @click.command()
 @click.argument('yaml', type=click.Path(exists=True))
@@ -63,7 +72,7 @@ def importPlantCLI(yaml):
 
     setupDatabase(create_tables=False, timescale_tables=False, drop_tables=False)
 
-    importPlant(yamlFilename)
+    importPlantsFromFile(yamlFilename)
 
 if __name__ == "__main__":
     importPlantCLI()
