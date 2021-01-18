@@ -26,20 +26,38 @@ def getRegistries(entitySet, exclude, fromdate=None, todate=None):
 
 def importPlants(nsplants):
     with orm.db_session:
-        for kplantns in nsplants.plants:
-            plantns = kplantns['plant']
-            plant = Plant(name=plantns.name, codename=plantns.codename)
-            plant.importPlant(plantns)
+        if 'municipalities' in nsplants:
+            for kmunicipality in nsplants.municipalities:
+                municipality = kmunicipality['municipality']
+                municipality = Municipality(
+                    name=municipality.name,
+                    ineCode=municipality.ineCode,
+                    countryCode=municipality.countryCode if "countryCode" in municipality else None,
+                    country=municipality.country if "countryCode" in municipality else None,
+                    regionCode=municipality.regionCode if "regionCode" in municipality else None,
+                    region=municipality.region if "region" in municipality else None,
+                    provinceCode=municipality.provinceCode if "provinceCode" in municipality else None,
+                    province=municipality.province if "province" in municipality else None,
+                )
+        if 'plants' in nsplants:
+            for kplantns in nsplants.plants:
+                plantns = kplantns['plant']
+                plant = Plant(name=plantns.name, codename=plantns.codename)
+                plant.importPlant(plantns)
 
 def exportPlants():
+    plantsns = ns()
     with orm.db_session:
-        plantsns = ns([
-            ("plants", [ns([
+        if Municipality.select().exists():
+            plantsns['municipalities'] = [ns([
+                    ('municipality', municipality.exportMunicipality())
+                    ])
+                    for municipality in Municipality.select()]
+
+        plantsns['plants'] = [ns([
                     ('plant', plant.exportPlant())
                 ])
                 for plant in Plant.select()]
-            )
-        ])
     return plantsns
 
 
@@ -48,14 +66,33 @@ class Municipality(database.Entity):
     ineCode = Required(str)
     name = Required(unicode)
 
-    countryCode = Optional(str)
-    country = Optional(unicode)
-    regionCode = Optional(str)
-    region = Optional(unicode)
-    provinceCode = Optional(str)
-    province = Optional(unicode)
+    countryCode = Optional(str, nullable=True)
+    country = Optional(unicode, nullable=True)
+    regionCode = Optional(str, nullable=True)
+    region = Optional(unicode, nullable=True)
+    provinceCode = Optional(str, nullable=True)
+    province = Optional(unicode, nullable=True)
 
     plants = Set('Plant')
+
+    def exportMunicipality(self):
+
+        municipalityns = ns(
+            ineCode = self.ineCode,
+            name = self.name)
+        if self.countryCode:
+            municipalityns.countryCode = self.countryCode
+        if self.country:
+            municipalityns.country = self.country
+        if self.regionCode:
+            municipalityns.regionCode = self.regionCode
+        if self.region:
+            municipalityns.region = self.region
+        if self.provinceCode:
+            municipalityns.provinceCode = self.provinceCode
+        if self.province:
+            municipalityns.province = self.province
+        return municipalityns
 
 class Plant(database.Entity):
 
@@ -80,6 +117,14 @@ class Plant(database.Entity):
         plant = nsplant
         self.name = plant.name
         self.description = plant.description
+        if 'municipality' in plant:
+            m = Municipality.get(ineCode=plant['municipality'])
+            if m:
+                self.municipality = Municipality.get(ineCode=plant['municipality'])
+            else:
+                #TODO error or exception?
+                print("Error: municipality {} not found".format(plant['municipality']))
+                raise
         if 'meters' in plant:
             [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
         if 'inverters' in plant:
@@ -108,6 +153,9 @@ class Plant(database.Entity):
                 temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
                 integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)],
             )
+        if self.municipality:
+            plantns.municipality = self.municipality.ineCode
+        print(plantns.dump())
         return plantns
 
     def createPlantFixture(self):
@@ -129,7 +177,7 @@ class Plant(database.Entity):
         inverterList = [{
             "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.inverters)]
-        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors)]        
+        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors)]
         forecastMetadatasList = [{
             "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.forecastMetadatas)]
@@ -214,14 +262,14 @@ class MeterRegistry(database.Entity):
     r2_VArh = Required(int, size=64)
     r3_VArh = Required(int, size=64)
     r4_VArh = Required(int, size=64)
-    
+
 
 class Inverter(database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
     inverterRegistries = Set('InverterRegistry', lazy=True)
-    
+
     def insertRegistry(self,
         power_w,
         energy_wh,
@@ -278,7 +326,7 @@ class SensorIrradiation(Sensor):
 
     def toDict(self, fromdate=None, todate=None):
         return {
-            "id": "{}:{}".format(self.classtype, self.name), 
+            "id": "{}:{}".format(self.classtype, self.name),
             "readings": self.getRegistries(fromdate, todate)
         }
 
@@ -300,7 +348,7 @@ class SensorTemperatureAmbient(Sensor):
 
     def toDict(self, fromdate=None, todate=None):
         return {
-            "id": "{}:{}".format(self.classtype, self.name), 
+            "id": "{}:{}".format(self.classtype, self.name),
             "readings": self.getRegistries(fromdate, todate)
         }
 
@@ -322,7 +370,7 @@ class SensorTemperatureModule(Sensor):
 
     def toDict(self, fromdate=None, todate=None):
         return {
-            "id": "{}:{}".format(self.classtype, self.name), 
+            "id": "{}:{}".format(self.classtype, self.name),
             "readings": self.getRegistries(fromdate, todate)
         }
 
@@ -344,7 +392,7 @@ class SensorIntegratedIrradiation(Sensor):
 
     def toDict(self, fromdate=None, todate=None):
         return {
-            "id": "{}:{}".format(self.classtype, self.name), 
+            "id": "{}:{}".format(self.classtype, self.name),
             "readings": self.getRegistries(fromdate, todate)
         }
 

@@ -1,0 +1,64 @@
+municipalities:
+- municipality:
+    name: Figueres
+    ineCode: '17066'
+    countryCode: ES
+    country: Spain
+    regionCode: '09'
+    region: Catalonia
+    provinceCode: '17'
+    province: Girona
+- municipality:
+    name: Girona
+    ineCode: '17079'
+plants:
+- plant:
+    name: alcolea
+    codename: SCSOM04
+    description: la bonica planta
+    municipality: '17066'
+    meters:
+    - meter:
+        name: '1234578'
+    inverters:
+    - inverter:
+        name: '5555'
+    - inverter:
+        name: '6666'
+    irradiationSensors:
+    - irradiationSensor:
+        name: alberto
+    temperatureModuleSensors:
+    - temperatureModuleSensor:
+        name: pol
+    temperatureAmbientSensors:
+    - temperatureAmbientSensor:
+        name: joana
+    integratedSensors:
+    - integratedSensor:
+        name: voki
+- plant:
+    name: figuerea
+    codename: Som_figuerea
+    description: la bonica planta
+    municipality: '17079'
+    meters:
+    - meter:
+        name: '9876123'
+    inverters:
+    - inverter:
+        name: '4444'
+    - inverter:
+        name: '2222'
+    irradiationSensors:
+    - irradiationSensor:
+        name: oriol
+    temperatureModuleSensors:
+    - temperatureModuleSensor:
+        name: joan
+    temperatureAmbientSensors:
+    - temperatureAmbientSensor:
+        name: benjami
+    integratedSensors:
+    - integratedSensor:
+        name: david

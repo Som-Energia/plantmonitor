@@ -213,3 +213,56 @@ class ImportPlant_Test(unittest.TestCase):
             plantns = exportPlants()
         
         self.assertNsEqual(plantns, content)
+
+    def test__importPlant_File__withMunicipalities(self):
+        fakePlantsYaml = 'fakeplant.yaml'
+
+        content = """\
+            municipalities:
+            - municipality:
+                name: Figueres
+                ineCode: '17066'
+                countryCode: ES
+                country: Spain
+                regionCode: '08'
+                region: Catalonia
+                provinceCode: '17'
+                province: Girona
+            plants:
+            - plant:
+                name: alcolea
+                codename: SCSOM04
+                description: la bonica planta
+                meters:
+                - meter:
+                    name: '1234578'
+                inverters:
+                - inverter:
+                    name: '5555'
+                - inverter:
+                    name: '6666'
+                irradiationSensors:
+                - irradiationSensor:
+                    name: alberto
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
+                    name: joana
+                temperatureModuleSensors:
+                - temperatureModuleSensor:
+                    name: pol
+                integratedSensors:
+                - integratedSensor:
+                    name: voki"""
+
+        p = Path(fakePlantsYaml)
+        with p.open("w", encoding="utf-8") as f:
+            f.write(content)
+
+        importPlantsFromFile(fakePlantsYaml)
+
+        p.unlink()
+
+        with orm.db_session:
+            plantns = exportPlants()
+        
+        self.assertNsEqual(plantns, content)

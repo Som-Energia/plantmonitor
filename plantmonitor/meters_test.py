@@ -38,6 +38,7 @@ class Meters_Test(unittest.TestCase):
             '88300864',
         ])
 
+    @unittest.skipIf(True, "requires data in test erp database")
     def test__measures_from_date(self):
         c = Client(**config.erppeek)
         meter = '88300864'
@@ -57,6 +58,7 @@ class Meters_Test(unittest.TestCase):
             upto  ="2016-08-02 12:00:00")
         self.assertTimeSeriesEqual(measures,[])
 
+    @unittest.skipIf(True, "requires data in test erp database")
     def test__measures_from_date__withNoBeyondDate__takesFromBegining(self):
         c = Client(**config.erppeek)
         meter = '88300864'

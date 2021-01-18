@@ -31,6 +31,8 @@ from pony import orm
 
 from .models import database
 from .models import (
+    importPlants,
+    exportPlants,
     Plant,
     Municipality,
     PlantLocation,
@@ -85,11 +87,25 @@ class Models_Test(unittest.TestCase):
 
     def samplePlantsNS(self):
         alcoleaPlantsNS = ns.loads("""\
+            municipalities:
+            - municipality:
+                name: Figueres
+                ineCode: '17066'
+                countryCode: ES
+                country: Spain
+                regionCode: '09'
+                region: Catalonia
+                provinceCode: '17'
+                province: Girona
+            - municipality:
+                name: Girona
+                ineCode: '17079'
             plants:
             - plant:
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
+                municipality: '17066'
                 meters:
                 - meter:
                     name: '1234578'
@@ -114,6 +130,7 @@ class Models_Test(unittest.TestCase):
                 name: figuerea
                 codename: Som_figuerea
                 description: la bonica planta
+                municipality: '17079'
                 meters:
                 - meter:
                     name: '9876123'
@@ -188,7 +205,7 @@ class Models_Test(unittest.TestCase):
             extraSensor2['extraSensor'] = ns([('name','boosensor')])
 
             alcoleaPlantNS['extraSensors'] = [extraSensor, extraSensor2]
-            
+
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             orm.flush()
@@ -203,7 +220,7 @@ class Models_Test(unittest.TestCase):
             alcoleaPlantNS = self.samplePlantNS()
 
             del alcoleaPlantNS['integratedSensors']
-            
+
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             orm.flush()
@@ -223,7 +240,7 @@ class Models_Test(unittest.TestCase):
                 codename: SCSOM04
                 description: la bonica planta
                 """)
-            
+
             expectedPlantNS = ns.loads("""\
                 codename: SCSOM04
                 description: la bonica planta
@@ -243,6 +260,89 @@ class Models_Test(unittest.TestCase):
             plantns = empty.exportPlant()
             self.assertNsEqual(plantns, expectedPlantNS)
 
+    def test_Plant_importPlants__manyPlants(self):
+        with orm.db_session:
+
+            plantsns = self.samplePlantsNS()
+
+            importPlants(plantsns)
+            # orm.flush()
+
+            resultPlantns = exportPlants()
+            self.assertNsEqual(plantsns, resultPlantns)
+
+    def test_Municipality__importMunicipality__OneMunicipality(self):
+        with orm.db_session:
+
+            plantsns = ns()
+
+            municipalitiesns = ns.loads("""\
+            - municipality:
+                name: Figueres
+                ineCode: '17066'
+                countryCode: ES
+                country: Spain
+                regionCode: '08'
+                region: Catalonia
+                provinceCode: '17'
+                province: Girona
+                """)
+
+            plantsns['municipalities'] = municipalitiesns
+
+            importPlants(plantsns)
+            orm.flush()
+
+            storedMunicipalitiesns = exportPlants()
+            plantsns['plants'] = []
+            self.assertNsEqual(plantsns, storedMunicipalitiesns)
+
+    def test_Plant_importPlants__ManyMunicipalities(self):
+        with orm.db_session:
+
+            plantsns = ns()
+
+            municipalitiesns = ns.loads("""\
+            - municipality:
+                name: Figueres
+                ineCode: '17066'
+            - municipality:
+                name: Girona
+                ineCode: '17003'
+                """)
+
+            plantsns['municipalities'] = municipalitiesns
+
+            importPlants(plantsns)
+            # orm.flush()
+
+            storedMunicipalitiesns = exportPlants()
+            plantsns['plants'] = []
+            self.assertNsEqual(plantsns, storedMunicipalitiesns)
+
+
+    def test_Plant_importPlants__manyPlants_ManyMunicipalities(self):
+        with orm.db_session:
+
+            plantsns = self.samplePlantsNS()
+
+            # municipalitiesns = ns.loads("""\
+            # - municipality:
+            #     name: Figueres
+            #     ineCode: '17066'
+            # - municipality:
+            #     name: Girona
+            #     ineCode: '17003'
+            #     """)
+
+            # plantsns['municipalities'] = municipalitiesns
+
+            importPlants(plantsns)
+            # orm.flush()
+
+            resultPlantns = exportPlants()
+            self.assertNsEqual(plantsns, resultPlantns)
+
     def test__Meter_getRegistries__emptyRegistries(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
@@ -250,7 +350,7 @@ class Models_Test(unittest.TestCase):
             alcolea = alcolea.importPlant(alcoleaPlantNS)
 
             registries = Meter[1].getRegistries()
-            
+
             expectedRegistries = []
 
             self.assertListEqual(registries, expectedRegistries)
@@ -261,7 +361,7 @@ class Models_Test(unittest.TestCase):
             alcoleaPlantNS = self.samplePlantNS()
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
-            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
             Meter[1].insertRegistry(
                 time = time,
                 export_energy_wh = 10,
@@ -273,7 +373,7 @@ class Models_Test(unittest.TestCase):
             )
 
             registries = Meter[1].getRegistries()
-            
+
             expectedRegistries = [{
                 'time': time,
                 'export_energy_wh': 10,
@@ -292,7 +392,7 @@ class Models_Test(unittest.TestCase):
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             Meter(plant=alcolea, name="Albertinho")
-            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
             Meter[1].insertRegistry(
                 time = time,
                 export_energy_wh = 10,
@@ -312,7 +412,7 @@ class Models_Test(unittest.TestCase):
                 r4_VArh = 11,
             )
             registries = Meter[1].getRegistries()
-            
+
             expectedRegistries = [{
                 'time': time,
                 'export_energy_wh': 10,
@@ -331,7 +431,7 @@ class Models_Test(unittest.TestCase):
             alcoleaPlantNS = self.samplePlantNS()
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
-            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
             delta = dt.timedelta(minutes=30)
             Meter[1].insertRegistry(
                 time = time,
@@ -346,7 +446,7 @@ class Models_Test(unittest.TestCase):
             todate = time + delta
 
             registries = Meter[1].getRegistries(fromdate=fromdate, todate=todate)
-            
+
             expectedRegistries = [{
                 'time': time,
                 'export_energy_wh': 10,
@@ -364,7 +464,7 @@ class Models_Test(unittest.TestCase):
             alcoleaPlantNS = self.samplePlantNS()
             alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
-            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+            time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
             Inverter[1].insertRegistry(
                 power_w = 1,
                 energy_wh =2,
@@ -378,7 +478,7 @@ class Models_Test(unittest.TestCase):
             )
 
             registries = Inverter[1].getRegistries()
-            
+
             expectedRegistries = [{
                 "power_w": 1,
                 "energy_wh": 2,
@@ -400,7 +500,7 @@ class Models_Test(unittest.TestCase):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
-        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
         Meter[1].insertRegistry(
             export_energy_wh = 10,
@@ -416,7 +516,7 @@ class Models_Test(unittest.TestCase):
             irradiation_w_m2 = 15,
             temperature_dc = 2500,
         )
-        
+
         plantdata = alcolea.plantData()
 
         expectedPlantData = {
@@ -425,7 +525,7 @@ class Models_Test(unittest.TestCase):
             [{
                 'id': 'Inverter:5555',
                 'readings': []
-            }, 
+            },
             {
                 'id': 'Inverter:6666',
                 'readings': []
@@ -474,7 +574,7 @@ class Models_Test(unittest.TestCase):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
-        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)                      
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
         plantData = {
                 "plant": "alcolea",
@@ -482,7 +582,7 @@ class Models_Test(unittest.TestCase):
                 [{
                     'id': 'Inverter:5555',
                     'readings': []
-                }, 
+                },
                 {
                     'id': 'Inverter:6666',
                     'readings': []
@@ -534,7 +634,7 @@ class Models_Test(unittest.TestCase):
             countryCode = "ES",
             country = "Spain",
             regionCode = "09",
-            region = "Cataluña",
+            region = "Catalonia",
             provinceCode = "17",
             province = "Girona",
             ineCode = "17066",
