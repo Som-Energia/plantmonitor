@@ -82,5 +82,5 @@ conf/configdb_test.yaml
 lastDateFile.yaml
 
 # sensitive data
-data/plants.yaml
-data/plants_base.yaml
+conf/plants.yaml
+conf/plants_base.yaml
