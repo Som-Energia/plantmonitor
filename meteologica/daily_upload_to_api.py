@@ -14,7 +14,7 @@ from meteologica.meteologica_api_utils import (
     MeteologicaFacilityIDError,
 )
 
-from meteologica.utils import todt
+from meteologica.utils import todt, shiftOneHour
 
 import time
 import sys
@@ -26,6 +26,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+
 def parseArguments():
     # TODO parse arguments into a ns
     args = ns()
@@ -34,6 +35,7 @@ def parseArguments():
         return args
     else:
         return args
+
 
 def upload_meter_data(configdb, test_env=True):
 
@@ -52,7 +54,7 @@ def upload_meter_data(configdb, test_env=True):
         showResponses=False,
     )
 
-    excludedFacilities = []
+    excludedFacilities = ['test_facility']
 
     responses = {}
     start = time.perf_counter()
@@ -95,8 +97,14 @@ def upload_meter_data(configdb, test_env=True):
                     logger.warning("Missing {} in db meter readings {}".format(facility, meterData))
                     continue
 
+                #FALSE Hour correction, meteologica expects start hour insted of end hour for readings
+                #meteologica also expects end hour for readings, same as ERP
+                #and in fact uploaded are one hour forward validated and ERP, not one hour behind
+                #meterDataShifted = shiftOneHour(meterData)
+
                 # conversion from energy to power
                 # (Not necessary for hourly values)
+                logger.debug("Uploading {} data: {} ".format(facility, meterData[facility]))
                 response = api.uploadProduction(facility, meterData[facility])
                 responses[facility] = response
 

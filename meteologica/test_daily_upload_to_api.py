@@ -138,7 +138,7 @@ class DailyUpload_Test(unittest.TestCase):
         config = self.createConfig()
 
         #change this once the erp hourly-quarterly is fixed
-        excludedFacility = 'SCSOM06'
+        excludedFacility = 'test_facility'
 
         with self.createPlantmonitorDB() as db:
             db.addFacilityMeterRelation(excludedFacility, '432104321')
