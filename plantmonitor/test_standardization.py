@@ -1,0 +1,150 @@
+# -*- coding: utf-8 -*-
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
+import unittest
+
+import datetime as dt
+
+from yamlns import namespace as ns
+
+from .standardization import (
+    alcolea_registers_to_plantdata,
+    alcolea_inverter_to_plantdata,
+    registers_to_plant_data
+)
+
+class Standardization_Test(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def inverter_registers(self):
+        return ns([
+                    ('daily_energy_h_wh', 0),
+                    ('daily_energy_l_wh', 17556),
+                    ('e_total_h_wh', 566),
+                    ('e_total_l_wh', 49213),
+                    ('h_total_h_h', 0),
+                    ('h_total_l_h', 18827),
+                    ('pac_r_w', 10000),
+                    ('pac_s_w', 20000),
+                    ('pac_t_w', 30000),
+                    ('powerreactive_t_v', 0),
+                    ('powerreactive_r_v', 0),
+                    ('powerreactive_s_v', 0),
+                    ('temp_inv_c', 320),
+                    ('time', dt.datetime(2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc))
+                ])
+
+    def alcolea_registers(self):
+
+        registers = [{'Alcolea': [{
+            'name': 'Alice',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers(),
+            }]
+        }]
+
+        return registers
+
+    def test__alcolea_inverter_to_plantdata(self):
+
+        inverter_name = "Alice"
+
+        inverter_registers = self.inverter_registers()
+
+        time = inverter_registers['time']
+
+        inverter_registries = alcolea_inverter_to_plantdata(inverter_name, inverter_registers)
+
+        expected_inverter_registries = {
+            'id': 'Inverter:{}'.format(inverter_name),
+            'readings':
+                [{
+                    'energy_wh': 17556,
+                    'power_w': 60000,
+                    'intensity_cc_mA': None,
+                    'intensity_ca_mA': None,
+                    'voltage_cc_mV': None,
+                    'voltage_ca_mV': None,
+                    'uptime_h': None,
+                    'temperature_dc': 32000,
+                    'time': time,
+                }]
+            }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_inverter_registries, inverter_registries)
+
+    def test__alcolea_registers_to_plantdata(self):
+
+        plant_name = 'Alcolea'
+
+        plants_registers = self.alcolea_registers()
+
+        devices_registers = plants_registers[0][plant_name]
+
+        time = devices_registers[0]['fields']['time']
+
+        plant_data = alcolea_registers_to_plantdata(devices_registers)
+
+        expected_plant_data = {
+            'plant': plant_name,
+            'devices':
+            [{
+                'id': 'Inverter:Alice',
+                'readings':
+                [{
+                    'energy_wh': 17556,
+                    'power_w': 60000,
+                    'intensity_cc_mA': None,
+                    'intensity_ca_mA': None,
+                    'voltage_cc_mV': None,
+                    'voltage_ca_mV': None,
+                    'uptime_h': None,
+                    'temperature_dc': 32000,
+                    'time': time,
+                }]
+            }],
+        }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_plant_data, plant_data)
+
+    def test__registers_to_plant_data__wrongPlant(self):
+
+        plant_name = "WrongPlant"
+
+        plant_registers = {}
+
+        plant_data = registers_to_plant_data(plant_name, plant_registers)
+
+        expected_plant_data = {}
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_plant_data, plant_data)
+
+
+    def test__registers_to_plant_data__RightPlant(self):
+
+        plant_name = "Alcolea"
+
+        plant_registers = self.alcolea_registers()
+
+        inverter_name = plant_registers[0][plant_name][0]['name']
+
+        plant_data = registers_to_plant_data(plant_name, plant_registers)
+
+        expected_plant_data = {
+            'plant': 'Alcolea',
+            'devices': []
+        }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_plant_data, plant_data)

@@ -75,7 +75,8 @@ class ProductionDevice():
         for key,dev in self.modmap.items():
             inverter = dev.get_registers(self.protocol)
             metrics = {}
-            metrics['inverter'] = self.name
+            metrics['name'] = self.name
+            metrics['type'] = 'inverter'
             metrics['model'] = self.model
             metrics['register_type'] = dev.type
             metrics['fields'] = inverter
