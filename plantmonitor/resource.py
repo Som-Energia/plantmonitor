@@ -18,7 +18,7 @@ class ProductionPlant():
         self.devices = []
         self.db = None
 
-    def load(self, yamlFile,plant_name):
+    def load(self, yamlFile, plant_name):
         data = ns.load(yamlFile)
         for plant_data in data.plantmonitor:
             if plant_data.enabled and plant_data.name == plant_name:
