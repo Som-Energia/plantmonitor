@@ -9,6 +9,7 @@ from yamlns import namespace as ns
 from .resource import (
     ProductionPlant,
     ProductionDevice,
+    ProductionDeviceModMap,
 )
 
 class Resource_Test(unittest.TestCase):
@@ -18,6 +19,55 @@ class Resource_Test(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def sensorDeviceNS(self):
+        devicesns = ns.loads("""
+  devices:
+    - name: inversor1
+      type: inversorA345Zx
+      description: inversor1
+      model: aros-solar
+      enabled: True
+      modmap:
+        - type: holding_registers
+          registers:
+            0 :  1HR0
+            1 :  1HR1
+            2 :  1HR2
+            3 :  2HR3
+            4 :  2HR4
+            5 :  2HR5
+          scan:
+            start: 0
+            range: 3
+        - type: coils
+          registers:
+            0 : xcx
+            1 : sdf
+            2 : fkl
+          scan:
+            start: 0
+            range: 3
+        - type: write_coils
+          registers:
+            0 : xcx
+            1 : sdf
+            2 : fkl
+          scan:
+            start: 0
+            range: 3
+      protocol:
+        type:
+        ip:
+        port:
+        slave:
+        timeout:
+""")
+        print(devicesns['devices'][0])
+        return devicesns['devices'][0]
+
+    def modmapNS(self):
+        return ns.load('conf/modmap.yaml')
 
     def inverter_registers(self):
         return ns([
@@ -88,8 +138,37 @@ class Resource_Test(unittest.TestCase):
                     )
                 ])]
 
-    def test__productionplant_load(self):
+    def __test__productionplant_load(self):
         self.maxDiff = None
         expected_plant_yaml = self.plant_registers()
         plant_yaml = ProductionPlant.load('conf/modmap.yaml', 'Alcolea')
         self.assertDictEqual(plant_yaml, expected_plant_yaml)
+
+    def test__ProductionDeviceModMap_factory__oneDevice_knownTypes(self):
+        device_data = self.sensorDeviceNS()
+        item_data = device_data.modmap[0]
+        dev = ProductionDeviceModMap.factory(item_data)
+        self.assertIsNotNone(dev)
+
+    def test__ProductionDeviceModMap_factory__oneSensor_oneUnkownType(self):
+        device_data = self.sensorDeviceNS()
+        item_data = device_data.modmap[2]
+        dev = ProductionDeviceModMap.factory(item_data)
+        self.assertIsNone(dev)
+
+    def test__ProductionDevice_load__oneSensor(self):
+        aSensor = ProductionDevice()
+        device_data = self.sensorDeviceNS()
+        aSensor.load(device_data)
+
+        expectedSensor = ProductionDevice()
+        expectedSensor.id = None
+        expectedSensor.name = 'inversor1'
+
+        self.assertEqual(aSensor.name, expectedSensor.name)
+
+    def __test__ProductionDevice_getRegisters__oneSensor(self):
+        aSensor = ProductionDevice()
+        device_data = ns()
+        aSensor.load(device_data)
+        aSensor.get_registers()

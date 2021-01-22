@@ -63,6 +63,9 @@ class ProductionDevice():
         self.enabled = device_data.enabled
         for item_data in device_data.modmap:
             dev = ProductionDeviceModMap.factory(item_data)
+            if not dev:
+                logger.warning("ModMap type {} is not known. Skipping.".format(item_data.type))
+                continue
             key = dev.load(item_data)
             if key:
                 self.modmap[key] = dev
