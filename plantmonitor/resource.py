@@ -8,6 +8,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+
 class ProductionPlant():
     def __init__(self):
         self.id = None
@@ -45,11 +46,22 @@ class ProductionPlant():
                 logger.exception(msg, e)
         return all_metrics
 
+    def todict(self):
+        return {
+            'name': self.name,
+            'description': self.description,
+            'enable': self.enable,
+            'location': self.location,
+            #'devices': self.devices,
+            #'db': self.db
+        }
+
 
 class ProductionDevice():
     def __init__(self):
         self.id = None
         self.name = None
+        self.type = None
         self.description = None
         self.modelo = None
         self.enable = None
@@ -58,6 +70,7 @@ class ProductionDevice():
 
     def load(self, device_data):
         self.name = device_data.name
+        self.type = device_data.type
         self.description = device_data.description
         self.model = device_data.model
         self.enabled = device_data.enabled
@@ -74,17 +87,18 @@ class ProductionDevice():
         return self.enabled
 
     def get_registers(self):
-        registers = []
-        for key,dev in self.modmap.items():
-            inverter = dev.get_registers(self.protocol)
+        devices_registers = []
+        for _, dev in self.modmap.items():
+            registers = dev.get_registers(self.protocol)
             metrics = {}
             metrics['name'] = self.name
-            metrics['type'] = 'inverter'
+            metrics['type'] = self.type
             metrics['model'] = self.model
             metrics['register_type'] = dev.type
-            metrics['fields'] = inverter
-            registers.append(metrics)
-        return registers
+            metrics['fields'] = registers
+            devices_registers.append(metrics)
+        return devices_registers
+
 
 class ProductionProtocol():
     def __init__(self):
@@ -105,6 +119,7 @@ class ProductionProtocol():
         return None
 
     factory = staticmethod(factory)
+
 
 class ProductionProtocolTcp(ProductionProtocol):
     def __init__(self):
@@ -140,8 +155,9 @@ class ProductionProtocolTcp(ProductionProtocol):
     def disconnect(self):
         logger.info("closing connection")
         if self.client:
-           self.client.close()
+            self.client.close()
         self.client = None
+
 
 class ProductionProtocolRs(ProductionProtocol):
     def __init__(self):
@@ -151,6 +167,7 @@ class ProductionProtocolRs(ProductionProtocol):
     def load(self, protocol_data):
         self.baud_rate = protocol_data.baud_rate
         return True
+
 
 class ProductionDeviceModMap():
     def __init__(self):
@@ -216,15 +233,21 @@ class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
             unit=connection.slave,
             )
 
+
 class ProductionDeviceModMapInputRegisters(ProductionDeviceModMap):
     def get_registers(self, connection):
-        logger.info("Input Register is not implemented")
-        return {}
+        return connection.client.read_input_registers(
+            self.scan.start,
+            count=self.scan.range,
+            unit=connection.slave,
+            )
+
 
 class ProductionDeviceModMapCoils(ProductionDeviceModMap):
     def get_registers(self, connection):
         logger.info("Coils is not implemented")
         return {}
+
 
 class ProductionDeviceModMapDiscreteInput(ProductionDeviceModMap):
     def get_registers(self, connection):

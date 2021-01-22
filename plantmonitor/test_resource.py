@@ -3,9 +3,11 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 import unittest
+from unittest.mock import MagicMock
 
 from yamlns import namespace as ns
 
+#from pymodbus import client
 from .resource import (
     ProductionPlant,
     ProductionDevice,
@@ -22,9 +24,31 @@ class Resource_Test(unittest.TestCase):
 
     def sensorDeviceNS(self):
         devicesns = ns.loads("""
-  devices:
-    - name: inversor1
-      type: inversorA345Zx
+name: sensor1
+type: CellTemperatureSensor
+description: sensor1wattia
+model: Wattia
+enabled: True
+modmap:
+  - type: input_registers
+    registers:
+        1 : TemperatureCell
+    scan:
+        start: 1
+        range: 1
+protocol:
+    type: modbus
+    ip: 192.168.1.100
+    port: 502
+    slave: 37
+    timeout:
+""")
+        return devicesns
+
+    def inverterDeviceNS(self):
+        devicesns = ns.loads("""
+      name: inversor1
+      type: inverter
       description: inversor1
       model: aros-solar
       enabled: True
@@ -63,8 +87,7 @@ class Resource_Test(unittest.TestCase):
         slave:
         timeout:
 """)
-        print(devicesns['devices'][0])
-        return devicesns['devices'][0]
+        return devicesns
 
     def modmapNS(self):
         return ns.load('conf/modmap.yaml')
@@ -102,13 +125,12 @@ class Resource_Test(unittest.TestCase):
 
     def plant_registers(self):
         return ns([
-                ('plantmonitor', [ns([
-                            ('name', 'Alcolea'),
-                            ('description', 'Alcolea'),
-                            ('enabled', True),
-                            ('devices', self.device_registers()),
-                        ])
-                    ])
+                    ('name', 'Alcolea'),
+                    ('description', 'Alcolea'),
+                    ('enable', None),
+                    ('location', None)
+                    #('devices', self.device_registers()),
+                    #('db', self.db_registers()),
                 ])
 
     def device_registers(self):
@@ -117,7 +139,7 @@ class Resource_Test(unittest.TestCase):
                         ('type', 'inversorA345Zx'),
                         ('description', 'inversor1'),
                         ('model', 'aros-solar'),
-                        ('enabled', True),
+                        ('enable', True),
                         ('modmap', self.modmap_registers),
                     ])
                 ]
@@ -138,20 +160,25 @@ class Resource_Test(unittest.TestCase):
                     )
                 ])]
 
-    def __test__productionplant_load(self):
+    def test__productionplant_load(self):
         self.maxDiff = None
-        expected_plant_yaml = self.plant_registers()
-        plant_yaml = ProductionPlant.load('conf/modmap.yaml', 'Alcolea')
-        self.assertDictEqual(plant_yaml, expected_plant_yaml)
+        expected_plant_ns = self.plant_registers()
+        plant = ProductionPlant()
+        result = plant.load('conf/modmap_testing.yaml', 'Alcolea')
+        self.assertTrue(result)
+        plant = plant.todict()
+        expected_plant = dict(expected_plant_ns)
+
+        self.assertDictEqual(plant, expected_plant)
 
     def test__ProductionDeviceModMap_factory__oneDevice_knownTypes(self):
-        device_data = self.sensorDeviceNS()
+        device_data = self.inverterDeviceNS()
         item_data = device_data.modmap[0]
         dev = ProductionDeviceModMap.factory(item_data)
         self.assertIsNotNone(dev)
 
     def test__ProductionDeviceModMap_factory__oneSensor_oneUnkownType(self):
-        device_data = self.sensorDeviceNS()
+        device_data = self.inverterDeviceNS()
         item_data = device_data.modmap[2]
         dev = ProductionDeviceModMap.factory(item_data)
         self.assertIsNone(dev)
@@ -162,13 +189,80 @@ class Resource_Test(unittest.TestCase):
         aSensor.load(device_data)
 
         expectedSensor = ProductionDevice()
-        expectedSensor.id = None
-        expectedSensor.name = 'inversor1'
+        expectedSensor.name = 'sensor1'
+        print(aSensor.modmap['input_registers'].registers)
 
         self.assertEqual(aSensor.name, expectedSensor.name)
+        self.assertNotEqual(aSensor.modmap, {})
+        self.assertDictEqual(
+            dict(aSensor.modmap['input_registers'].registers),
+            {1: 'TemperatureCell'}
+        )
 
-    def __test__ProductionDevice_getRegisters__oneSensor(self):
+    # TODO mismatch type (detect if device ip changed)
+    def __test__ProductionDevice_load__typeMismatch(self):
         aSensor = ProductionDevice()
-        device_data = ns()
+        device_data = self.sensorDeviceNS()
+        device_data.type = 'wrongType'
+        result = aSensor.load(device_data)
+
+        self.assertFalse(result)
+
+    def test__ProductionDevice_getRegisters__oneInverter(self):
+        aSensor = ProductionDevice()
+        device_data = self.inverterDeviceNS()
         aSensor.load(device_data)
-        aSensor.get_registers()
+
+        dev = aSensor.modmap['holding_registers']
+        dev.get_registers = MagicMock(return_value=[626])
+
+        registers = aSensor.get_registers()
+
+        # list not empty
+        self.assertTrue(registers != [])
+
+        metric = registers[0]
+        expectedMetric = {
+            'name': 'inversor1',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': [626],
+        }
+        self.assertDictEqual(metric, expectedMetric)
+
+    def test__ProductionDevice_getRegisters__oneSensor(self):
+        aSensor = ProductionDevice()
+        device_data = self.sensorDeviceNS()
+        aSensor.load(device_data)
+
+        dev = aSensor.modmap['input_registers']
+        dev.get_registers = MagicMock(return_value=[626])
+
+        registers = aSensor.get_registers()
+
+        # list not empty
+        self.assertTrue(registers != [])
+
+        metric = registers[0]
+        expectedMetric = {
+            'name': 'sensor1',
+            'type': 'CellTemperatureSensor',
+            'model': 'Wattia',
+            'register_type': 'input_registers',
+            'fields': [626],
+        }
+        self.assertDictEqual(metric, expectedMetric)
+
+    # TODO: detect error or ban
+    def __test__ProductionDevice_getRegisters__connectionError(self):
+        aSensor = ProductionDevice()
+        device_data = self.sensorDeviceNS()
+        aSensor.load(device_data)
+
+        dev = aSensor.modmap['input_registers']
+        dev.get_registers = MagicMock(return_value=[-1])
+
+        registers = aSensor.get_registers()
+
+        self.assertTrue(registers == [])
