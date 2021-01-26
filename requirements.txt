@@ -10,6 +10,7 @@ decorator==4.4.2
 defusedxml==0.6.0
 environs==8.0.0
 ERPpeek==1.7.1
+fastapi==0.61.1
 idna==2.9
 influxdb==5.3.0
 isodate==0.6.0
