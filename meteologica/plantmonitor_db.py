@@ -198,6 +198,7 @@ class PlantmonitorDB:
     @staticmethod
     def demoDBsetup(configdb):
         with psycopg2.connect(
+            dbname='postgres',
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
@@ -249,16 +250,17 @@ class PlantmonitorDB:
                         percentil90 INTEGER, PRIMARY KEY(idForecastHead,time));
                     """
                 )
-                cursor.execute(
-                    """
-                    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
-                    SELECT create_hypertable('forecastData', 'time');
-                    """
-                )
+#                cursor.execute(
+#                    """
+#                    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+#                    SELECT create_hypertable('forecastData', 'time');
+#                    """
+#                )
 
     @staticmethod
     def dropDatabase(configdb):
         with psycopg2.connect(
+            dbname='postgres',
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
