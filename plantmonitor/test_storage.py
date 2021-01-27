@@ -42,7 +42,7 @@ import time
 import requests
 
 
-setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
+setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class ApiClient_Test(unittest.TestCase):
 

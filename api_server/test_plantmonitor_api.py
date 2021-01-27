@@ -36,7 +36,7 @@ from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 
 from .plantmonitor_api import api
 
-setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
+setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Api_Test(unittest.TestCase):
 

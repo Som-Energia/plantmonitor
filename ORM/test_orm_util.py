@@ -37,7 +37,7 @@ from .models import (
 from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 
-setupDatabase(create_tables=True, timescale_tables=True, drop_tables=True)
+setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 
 class ORMSetup_Test(unittest.TestCase):
