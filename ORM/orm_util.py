@@ -77,9 +77,11 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
             dsnDict = {pair.split('=')[0]:pair.split('=')[1] for pair in dsn.split(' ')}
             dsnDict['provider'] = database.provider_name
             dsnDict['database'] = dsnDict.pop('dbname')
+            if 'password' in databaseInfo:
+                dsnDict['password'] = databaseInfo['password']
             if not databaseInfo == dsnDict:
-                 print("Database was already bound to a different database.")
-                 raise e
+                print("Database was already bound to a different database.")
+                raise e
     else:
         #this `else` will not run if the database was already connected
         # (necessary for test multiple SetUps until we fix this)
