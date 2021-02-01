@@ -11,7 +11,8 @@ from yamlns import namespace as ns
 from .standardization import (
     alcolea_registers_to_plantdata,
     alcolea_inverter_to_plantdata,
-    registers_to_plant_data
+    registers_to_plant_data,
+    alcolea_sensorIrradiation_to_plantadata,
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -52,6 +53,14 @@ class Standardization_Test(unittest.TestCase):
         }]
 
         return registers
+
+    def sensorIrradiation_registers(self):
+        return ns([
+                ('time', dt.datetime(
+                    2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
+                ('irradiation_w_m2', 170),
+                ('temperature_dc', 45),
+            ])
 
     def test__alcolea_inverter_to_plantdata(self):
 
@@ -148,3 +157,26 @@ class Standardization_Test(unittest.TestCase):
 
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
+
+    def test__alcolea_sensorIrradiation_to_plantdata(self):
+
+        sensor_name = "Bob"
+
+        sensor_registers = self.sensorIrradiation_registers()
+
+        time = sensor_registers['time']
+
+        sensor_registries = alcolea_sensorIrradiation_to_plantadata(sensor_name, sensor_registers)
+
+        expected_sensor_registries = {
+            'id': 'Sensor:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'irradiation_w_m2': 170,
+                    'temperature_dc': 45,
+                    'time': time,
+                }]
+            }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_sensor_registries, sensor_registries)
