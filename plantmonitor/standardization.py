@@ -40,6 +40,23 @@ def alcolea_sensorIrradiation_to_plantadata(sensor_name, sensorIrradiation_regis
     irradiation_registers_plantdata['readings'].append(reading)
     return irradiation_registers_plantdata
 
+def alcolea_sensorTemperature_to_plantadata(sensor_name, sensorTemperature_registers):
+    logger.error("Not implemented yet")
+
+    temperature_registers_plantdata = {
+        'id': 'Sensor:{}'.format(sensor_name),
+        'readings': []
+    }
+    for register in sensorTemperature_registers:
+        time = sensorTemperature_registers['time']
+        temperature_dc = sensorTemperature_registers['temperature_dc']
+        reading = {
+            'temperature_dc': temperature_dc,
+            'time': time,
+        }
+    temperature_registers_plantdata['readings'].append(reading)
+    return temperature_registers_plantdata
+
 def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
         'id': 'Inverter:{}'.format(inverter_name),

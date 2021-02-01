@@ -13,6 +13,7 @@ from .standardization import (
     alcolea_inverter_to_plantdata,
     registers_to_plant_data,
     alcolea_sensorIrradiation_to_plantadata,
+    alcolea_sensorTemperature_to_plantadata,
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -59,6 +60,12 @@ class Standardization_Test(unittest.TestCase):
                 ('time', dt.datetime(
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
                 ('irradiation_w_m2', 170),
+                ('temperature_dc', 45),
+            ])
+    def sensorTemperature_registers(self):
+        return ns([
+                ('time', dt.datetime(
+                    2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
                 ('temperature_dc', 45),
             ])
 
@@ -173,6 +180,28 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'irradiation_w_m2': 170,
+                    'temperature_dc': 45,
+                    'time': time,
+                }]
+            }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_sensor_registries, sensor_registries)
+
+    def test__alcolea_sensorTemperature_to_plantdata(self):
+
+        sensor_name = "Bob"
+
+        sensor_registers = self.sensorTemperature_registers()
+
+        time = sensor_registers['time']
+
+        sensor_registries = alcolea_sensorTemperature_to_plantadata(sensor_name, sensor_registers)
+
+        expected_sensor_registries = {
+            'id': 'Sensor:{}'.format(sensor_name),
+            'readings':
+                [{
                     'temperature_dc': 45,
                     'time': time,
                 }]
