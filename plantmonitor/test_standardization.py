@@ -59,14 +59,14 @@ class Standardization_Test(unittest.TestCase):
         return ns([
                 ('time', dt.datetime(
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
-                ('irradiation_w_m2', 170),
-                ('temperature_dc', 45),
+                ('irradiation_w_m2', 3412),
+                ('temperature_dc', 531),
             ])
     def sensorTemperature_registers(self):
         return ns([
                 ('time', dt.datetime(
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
-                ('temperature_dc', 45),
+                ('temperature_dc', 531),
             ])
 
     def test__alcolea_inverter_to_plantdata(self):
@@ -179,8 +179,8 @@ class Standardization_Test(unittest.TestCase):
             'id': 'Sensor:{}'.format(sensor_name),
             'readings':
                 [{
-                    'irradiation_w_m2': 170,
-                    'temperature_dc': 45,
+                    'irradiation_w_m2': 341,
+                    'temperature_dc': 28,
                     'time': time,
                 }]
             }
@@ -202,7 +202,7 @@ class Standardization_Test(unittest.TestCase):
             'id': 'Sensor:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 45,
+                    'temperature_dc': 28,
                     'time': time,
                 }]
             }
