@@ -24,6 +24,9 @@ import time
 import datetime
 import conf.config as config
 
+from conf import envinfo
+
+
 from conf.logging_configuration import LOGGING
 import logging
 import logging.config
@@ -100,44 +103,9 @@ def task():
     try:
 
         plant = ProductionPlant()
+        plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
 
-        if not plant.load('conf/modmap.yaml','Alcolea'):
-            logger.error('Error loadinf yaml definition file...')
-            sys.exit(-1)
-
-        result = plant.get_registers()
-
-        plant_name = plant.name
-
-        ponyStorage = PonyMetricStorage()
-        fluxStorage = InfluxMetricStorage(plant.db)
-        tsStorage = TimeScaleMetricStorage(config.plant_postgres)
-        #apiStorage = ApiMetricStorage(url='http://')
-
-
-        for i, device in enumerate(plant.devices):
-            inverter_name = plant.devices[i].name
-            inverter_registers = result[i]['Alcolea'][0]['fields']
-
-            logger.info("**** Saving data in database ****")
-            logger.info("**** Metrics - tag - %s ****" %  inverter_name)
-            logger.info("**** Metrics - tag - location %s ****" % plant_name)
-            logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
-
-            fluxStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
-            ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
-            tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
-
-
-    except Exception as err:
-        logger.error("[ERROR] %s" % err)
-
-def task_plant_data_insert():
-    try:
-
-        plant = ProductionPlant()
-
-        if not plant.load('conf/modmap.yaml','Alcolea'):
+        if not plant.load('conf/modmap.yaml', plantname):
             logger.error('Error loading yaml definition file...')
             sys.exit(-1)
 

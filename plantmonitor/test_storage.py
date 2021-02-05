@@ -48,8 +48,8 @@ class ApiClient_Test(unittest.TestCase):
 
     def setUp(self):
 
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
@@ -148,8 +148,8 @@ class ApiClient_Test(unittest.TestCase):
 
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
     def test__ApiMetricStorage__storeInverterMeasures(self):
         plant_name, inverter_name, inverter_registers = self.createPlantDict()
@@ -175,8 +175,8 @@ class Storage_Test(unittest.TestCase):
 
     def setUp(self):
 
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
@@ -197,8 +197,8 @@ class Storage_Test(unittest.TestCase):
 
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
     def test_connection(self):
         with orm.db_session:

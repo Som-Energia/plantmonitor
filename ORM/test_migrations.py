@@ -68,8 +68,8 @@ class Migrations_Test(unittest.TestCase):
 
     def setUpORM(self):
 
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)

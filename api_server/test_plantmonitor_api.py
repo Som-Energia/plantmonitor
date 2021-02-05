@@ -42,8 +42,8 @@ class Api_Test(unittest.TestCase):
 
     def setUp(self):
 
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
@@ -77,11 +77,11 @@ class Api_Test(unittest.TestCase):
             """)
 
         importPlants(plantsns)
-    
+
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
     def test_connection(self):
         with orm.db_session:
@@ -90,15 +90,15 @@ class Api_Test(unittest.TestCase):
     def test__api_version(self):
 
         response = self.client.get('/version')
-        
+
         self.assertEqual(response.status_code,200)
         self.assertDictEqual(response.json(), {"version": "1.0"})
-    
+
     def __test__api_plantReadings__Empty(self):
 
         emptyplant = {}
         plant_id = 1
-            
+
         rv = self.client.put('/' + plant_id, emptyplant)
 
     def test__api_putPlantReadings__endpoint_response(self):
@@ -125,7 +125,7 @@ class Api_Test(unittest.TestCase):
                 }]
             }]
         }
- 
+
         with orm.db_session:
             self.setUpPlant()
 
@@ -159,7 +159,7 @@ class Api_Test(unittest.TestCase):
                 }]
             }]
         }
- 
+
         with orm.db_session:
             self.setUpPlant()
 
@@ -169,7 +169,7 @@ class Api_Test(unittest.TestCase):
             storage = PonyMetricStorage()
             readings = storage.inverterReadings()
             self.assertListEqual(
-                readings, 
+                readings,
                 [{
                     "inverter" : 1,
                     'power_w': 10,

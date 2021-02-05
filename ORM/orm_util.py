@@ -38,9 +38,9 @@ logger = logging.getLogger("plantmonitor")
 
 def dropTables():
 
-    from conf import dbinfo
+    from conf import envinfo
 
-    databaseInfo = dbinfo.DB_CONF
+    databaseInfo = envinfo.DB_CONF
 
     print("dropping tables in {}".format(databaseInfo))
 
@@ -50,9 +50,9 @@ def dropTables():
     database.disconnect()
 
 def connectDatabase():
-    from conf import dbinfo
+    from conf import envinfo
 
-    databaseInfo = dbinfo.DB_CONF
+    databaseInfo = envinfo.DB_CONF
 
     database.bind(**databaseInfo)
 
@@ -60,9 +60,9 @@ def connectDatabase():
 
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
-    from conf import dbinfo
+    from conf import envinfo
 
-    databaseInfo = dbinfo.DB_CONF
+    databaseInfo = envinfo.DB_CONF
 
     # print(databaseInfo)
 
