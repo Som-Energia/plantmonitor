@@ -111,6 +111,8 @@ def task():
 
         devices_registers = plant.get_registers()
 
+        logger.debug("Registers: {}".format(devices_registers))
+
         plant_data = registers_to_plant_data(plant.name, devices_registers)
 
         ponyStorage = PonyMetricStorage()
@@ -122,7 +124,7 @@ def task():
         # apiStorage.insertPlantData(plant_data)
 
     except Exception as err:
-        logger.error("[ERROR] %s" % err)
+        logger.exception("[ERROR] %s" % err)
 
 def task_counter_erp():
     c = Client(**config.erppeek)

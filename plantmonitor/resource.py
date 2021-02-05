@@ -238,7 +238,7 @@ class ProductionDeviceModMapHoldingRegisters(ProductionDeviceModMap):
 
 
 class ProductionDeviceModMapInputRegisters(ProductionDeviceModMap):
-    def get_registers(self, connection):
+    def get_register_values(self, connection):
         return connection.client.read_input_registers(
             self.scan.start,
             count=self.scan.range,

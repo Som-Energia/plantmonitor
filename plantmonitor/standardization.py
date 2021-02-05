@@ -130,6 +130,6 @@ def registers_to_plant_data(plant_name, devices_registers):
     if plant_name == 'Alcolea':
         return alcolea_registers_to_plantdata(devices_registers)
     else:
-        print("Unknown plant {}".format(plant_name))
+        logger.error("Unknown plant {}".format(plant_name))
 
     return {}
