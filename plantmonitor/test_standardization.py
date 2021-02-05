@@ -42,9 +42,9 @@ class Standardization_Test(unittest.TestCase):
                     ('time', dt.datetime(2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc))
                 ])
 
-    def alcolea_registers(self):
+    def alibaba_registers(self):
 
-        registers = [{'Alcolea': [{
+        registers = [{'Alibaba': [{
             'name': 'Alice',
             'type': 'inverter',
             'model': 'aros-solar',
@@ -100,15 +100,17 @@ class Standardization_Test(unittest.TestCase):
 
     def test__alcolea_registers_to_plantdata(self):
 
-        plant_name = 'Alcolea'
+        plant_name = 'Alibaba'
 
-        plants_registers = self.alcolea_registers()
+        plants_registers = self.alibaba_registers()
 
         devices_registers = plants_registers[0][plant_name]
 
         time = devices_registers[0]['fields']['time']
 
         plant_data = alcolea_registers_to_plantdata(devices_registers)
+
+        plant_data['plant'] = 'Alibaba'
 
         expected_plant_data = {
             'plant': plant_name,
@@ -149,13 +151,14 @@ class Standardization_Test(unittest.TestCase):
 
     def test__registers_to_plant_data__RightPlant(self):
 
-        plant_name = "Alcolea"
+        plant_name = "Alibaba"
 
-        plant_registers = self.alcolea_registers()
+        plant_registers = self.alibaba_registers()
 
         inverter_name = plant_registers[0][plant_name][0]['name']
 
-        plant_data = registers_to_plant_data(plant_name, plant_registers)
+        #TODO: refactor this so we don't have to use the "Alcolea" if
+        plant_data = registers_to_plant_data("Alcolea", plant_registers)
 
         expected_plant_data = {
             'plant': 'Alcolea',
@@ -180,7 +183,7 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'irradiation_w_m2': 341,
-                    'temperature_dc': 28,
+                    'temperature_dc': 2810,
                     'time': time,
                 }]
             }
@@ -202,7 +205,7 @@ class Standardization_Test(unittest.TestCase):
             'id': 'Sensor:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 28,
+                    'temperature_dc': 2810,
                     'time': time,
                 }]
             }

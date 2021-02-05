@@ -73,7 +73,7 @@ class ApiClient_Test(unittest.TestCase):
                         "log_level": log_level},
                     daemon=True)
         self.proc.start()
-        time.sleep(0.1) 
+        time.sleep(0.1)
 
     def tearDown(self):
         orm.rollback()
@@ -94,7 +94,7 @@ class ApiClient_Test(unittest.TestCase):
         return ApiMetricStorage(config)
 
     def createPlantDict(self):
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         inverter_name = 'Mary'
         metrics = ns([
             ('daily_energy_h_wh', 0),
@@ -116,7 +116,7 @@ class ApiClient_Test(unittest.TestCase):
         return plant_name, inverter_name, metrics
 
     def createPlant(self):
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         inverter_name = 'Mary'
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
@@ -140,7 +140,7 @@ class ApiClient_Test(unittest.TestCase):
 
             storage = PonyMetricStorage()
             storage.storeInverterMeasures(plant_name, inverter_name, metrics)
- 
+
     def test__api_hello_version(self):
         response = requests.get("http://localhost:{}/version".format(self.apiPort()))
         self.assertEqual(response.status_code, 200)
@@ -153,16 +153,16 @@ class ApiClient_Test(unittest.TestCase):
 
     def test__ApiMetricStorage__storeInverterMeasures(self):
         plant_name, inverter_name, inverter_registers = self.createPlantDict()
-        
+
         apiClient = self.createApiClient()
         result = apiClient.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
         self.assertTrue(result)
-    
+
     ## TODO
     def __test__ApiMetricStorage__storePlantData(self):
         plant_data = {}
-        
+
         apiClient = self.createApiClient()
         result = apiClient.storePlantData(plant_data)
 
@@ -194,7 +194,7 @@ class Storage_Test(unittest.TestCase):
         orm.db_session.__exit__()
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
- 
+
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import dbinfo
@@ -207,7 +207,7 @@ class Storage_Test(unittest.TestCase):
     #TODO deprecated as soon as we switch plant_data
     # test instead registries_to_plant_data in task.py
     def __test_PublishOrmOneInverterRegistry(self):
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         inverter_name = 'Mary'
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
@@ -237,12 +237,12 @@ class Storage_Test(unittest.TestCase):
             storage = PonyMetricStorage()
             storage.storeInverterMeasures(
                 plant_name, inverter_name, metrics)
- 
+
             metrics.pop('probe1value')
             metrics.pop('probe2value')
             metrics.pop('probe3value')
             metrics.pop('probe4value')
- 
+
             expectedRegistry = dict(metrics)
             expectedRegistry['inverter'] = inverter.id
 
@@ -251,7 +251,7 @@ class Storage_Test(unittest.TestCase):
 
     def __test_PublishOrmIfInverterNotExist(self):
         inverter_name = 'Alice'
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
@@ -281,10 +281,10 @@ class Storage_Test(unittest.TestCase):
                 plant_name, "UnknownInverter", metrics)
 
             self.assertListEqual(storage.inverterReadings(), [])
- 
+
     def __test_PublishOrmIfPlantNotExist(self):
         inverter_name = 'Alice'
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         with orm.db_session:
             alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
             inverter = Inverter(name=inverter_name, plant=alcolea)
@@ -312,12 +312,12 @@ class Storage_Test(unittest.TestCase):
             storage = PonyMetricStorage()
             storage.storeInverterMeasures(
                 'UnknownPlant', inverter_name, metrics)
- 
+
             self.assertListEqual(storage.inverterReadings(), [])
 
     def test__PonyMetricStorage_insertPlantData__storeTemperatureSensor(self):
         sensor_name = 'Alice'
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         time = datetime.datetime.now(datetime.timezone.utc)
 
         with orm.db_session:
@@ -344,8 +344,8 @@ class Storage_Test(unittest.TestCase):
                 'plant': plant_name,
                 'devices':
                 [{
-                    'id': 'SensorTemperatureAmbient:Alice', 
-                    'readings': 
+                    'id': 'SensorTemperatureAmbient:Alice',
+                    'readings':
                     [{
                         "temperature_dc": 1200,
                         "time": time,
@@ -356,7 +356,7 @@ class Storage_Test(unittest.TestCase):
 
     def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperature(self):
         sensor_name = 'Alice'
-        plant_name = 'SomEnergia_Alcolea'
+        plant_name = 'SomEnergia_Alibaba'
         time = datetime.datetime.now(datetime.timezone.utc)
 
         with orm.db_session:
@@ -378,7 +378,7 @@ class Storage_Test(unittest.TestCase):
             }
             storage = PonyMetricStorage()
             storage.insertPlantData(plant_data)
- 
+
             expected_plant_data = {
                 'plant': plant_name,
                 'devices': [{'id': 'SensorTemperatureAmbient:Alice', 'readings':

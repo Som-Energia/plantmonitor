@@ -22,6 +22,9 @@ class Resource_Test(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testPlantname(self):
+        return "Alibaba"
+
     def sensorDeviceNS(self):
         devicesns = ns.loads("""
 name: sensor1
@@ -112,7 +115,7 @@ protocol:
 
     def alcolea_registers(self):
 
-        registers = [{'Alcolea': [{
+        registers = [{'Alibaba': [{
             'name': 'Alice',
             'type': 'inverter',
             'model': 'aros-solar',
@@ -125,12 +128,11 @@ protocol:
 
     def plant_registers(self):
         return ns([
-                    ('name', 'Alcolea'),
-                    ('description', 'Alcolea'),
+                    ('name', self.testPlantname()),
+                    ('description', self.testPlantname()),
                     ('enable', None),
                     ('location', None)
                     #('devices', self.device_registers()),
-                    #('db', self.db_registers()),
                 ])
 
     def device_registers(self):
@@ -163,12 +165,12 @@ protocol:
     def test__productionplant_load(self):
         self.maxDiff = None
         expected_plant_ns = self.plant_registers()
+
         plant = ProductionPlant()
-        result = plant.load('conf/modmap_testing.yaml', 'Alcolea')
+        result = plant.load('conf/modmap_testing.yaml', self.testPlantname())
         self.assertTrue(result)
         plant = plant.todict()
         expected_plant = dict(expected_plant_ns)
-
         self.assertDictEqual(plant, expected_plant)
 
     def test__ProductionDeviceModMap_factory__oneDevice_knownTypes(self):
