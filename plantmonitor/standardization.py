@@ -32,8 +32,8 @@ def alcolea_sensorIrradiation_to_plantadata(sensor_name, sensorIrradiation_regis
         time = sensorIrradiation_registers['time']
         irradiation_w_m2 = sensorIrradiation_registers['irradiation_w_m2']
         temperature_dc = sensorIrradiation_registers['temperature_dc']
-        irradiation_w_m2 = int(round((irradiation_w_m2*0.1)+0))
-        temperature_dc = int(round((temperature_dc*0.1)-25)*100)
+        irradiation_w_m2 = int(round(irradiation_w_m2*0.1+0))
+        temperature_dc = int(round((temperature_dc*0.1-25)*100))
         reading = {
             'irradiation_w_m2': irradiation_w_m2,
             'temperature_dc': temperature_dc,
@@ -52,7 +52,7 @@ def alcolea_sensorTemperature_to_plantadata(sensor_name, sensorTemperature_regis
     for register in sensorTemperature_registers:
         time = sensorTemperature_registers['time']
         temperature_dc = sensorTemperature_registers['temperature_dc']
-        temperature_dc = int(round((temperature_dc*0.1)-25)*100)
+        temperature_dc = int(round((temperature_dc*0.1-25)*100))
         reading = {
             'temperature_dc': temperature_dc,
             'time': time,
