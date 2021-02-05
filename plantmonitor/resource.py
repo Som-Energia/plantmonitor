@@ -8,6 +8,8 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+class ModbusException(Exception):
+    pass
 
 class ProductionPlant():
     def __init__(self):
@@ -216,8 +218,10 @@ class ProductionDeviceModMap():
         connection.connect()
         logger.info("getting registers from inverter")
         rr = self.get_register_values(connection)
-        logger.debug(rr)
         connection.disconnect()
+        if rr.isError():
+            logger.error(rr)
+            raise ModbusException(str(rr))
         return self.extract_rr(rr, self.scan.start)
 
     def get_register_values(self, connection):

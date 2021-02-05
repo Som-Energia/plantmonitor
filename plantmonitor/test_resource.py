@@ -7,11 +7,13 @@ from unittest.mock import MagicMock
 
 from yamlns import namespace as ns
 
-#from pymodbus import client
+from pymodbus.pdu import ExceptionResponse
+
 from .resource import (
     ProductionPlant,
     ProductionDevice,
     ProductionDeviceModMap,
+    ProductionProtocol,
 )
 
 class Resource_Test(unittest.TestCase):
@@ -268,3 +270,21 @@ protocol:
         registers = aSensor.get_registers()
 
         self.assertTrue(registers == [])
+
+    #TODO test handling modbus exception correctly
+    def __test__ProductionDeviceModMap_get_registers__exception(self):
+
+        device_data = self.sensorDeviceNS()
+
+        item_data = device_data.modmap[0]
+        print(item_data)
+
+        devModMap = ProductionDeviceModMap.factory(item_data)
+
+        connection = ProductionProtocol.factory(device_data.protocol)
+
+        result = devModMap.get_registers(connection)
+
+        exception = ExceptionResponse(131, 1, "IllegalAddress")
+
+        self.assertEqual(result, exception)
