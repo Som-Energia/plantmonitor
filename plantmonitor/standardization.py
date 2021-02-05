@@ -125,10 +125,79 @@ def alcolea_registers_to_plantdata(devices_registers):
 
     return plant_data
 
+def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
+    inverter_registers_plantdata = {
+        'id': 'Inverter:{}'.format(inverter_name),
+        'readings': []
+    }
+
+    #TODO should we assume one single register instead of multiple?
+    #TODO check that registers values are watts, and not kilowatts
+    for register in inverter_registers:
+        time = inverter_registers['time']
+        #TODO meld toghether Uint16 _h _l into Uint32
+        energy_wh = inverter_registers['DailyEnergy_dWh_l']
+        power_w = inverter_registers['ActivePower_dW']
+        intensity_cc_mA = inverter_registers['Intensitycc_dA']
+        intensity_ca_mA = inverter_registers['Intensityca_dA']
+        voltage_cc_mV = inverter_registers['Voltatgecc_cV']
+        voltage_ca_mV = inverter_registers['Voltatgeca_cV']
+        uptime_h = inverter_registers['Uptime_h_l']
+        temperature_dc = None
+
+        reading = {
+            'energy_wh': energy_wh,
+            'power_w': power_w,
+            'intensity_cc_mA': None,
+            'intensity_ca_mA': None,
+            'voltage_cc_mV': None,
+            'voltage_ca_mV': None,
+            'uptime_h': None,
+            'temperature_dc': temperature_dc,
+            'time': time,
+        }
+
+    inverter_registers_plantdata['readings'].append(reading)
+
+    return inverter_registers_plantdata
+
+# TODO this function will always be the same accros plants
+def fontivsolar_registers_to_plantdata(devices_registers):
+
+    plant_data = {
+        'plant': 'Fontivsolar',
+        'devices': []
+    }
+
+    for device_register in devices_registers:
+
+        device_readings_packet = {}
+
+        if 'name' not in device_register:
+            logger.error("Device {} has no name".format(device_register))
+            continue
+
+        device_name = device_register['name']
+
+        if 'type' not in device_register:
+            logger.error("Device {} has no type".format(device_register))
+            continue
+        elif device_register['type'] == 'inverter':
+            device_readings_packet = fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])
+        else:
+            print("Unknown device type: {}".format(device_register['type']))
+            continue
+
+        plant_data['devices'].append(device_readings_packet)
+
+    return plant_data
+
 def registers_to_plant_data(plant_name, devices_registers):
     #TODO design this per-plant or per model
     if plant_name == 'Alcolea':
         return alcolea_registers_to_plantdata(devices_registers)
+    if plant_name == 'Fontivsolar':
+        return fontivsolar_registers_to_plantdata(devices_registers)
     else:
         logger.error("Unknown plant {}".format(plant_name))
 

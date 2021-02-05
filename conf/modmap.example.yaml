@@ -1,20 +1,20 @@
 plantmonitor:
-- name: Planta
-  description: 
+- name: Alibaba
+  description:
   enabled: True
   devices:
     - name: inversor1
-      type: inversorA345Zx
+      type: inverter
       description: inversor1
       model: aros-solar
       enabled: True
       modmap:
-        - type: holding_registers 
+        - type: holding_registers
           registers:
             0 :  1HR0
             1 :  1HR1
             2 :  1HR2
-            3 :  2HR3 
+            3 :  2HR3
             4 :  2HR4
             5 :  2HR5
           scan:
@@ -37,11 +37,11 @@ plantmonitor:
             start: 0
             range: 3
       protocol:
-        type: 
-        ip: 
-        port: 
-        slave: 
-        timeout: 
+        type:
+        ip:
+        port:
+        slave:
+        timeout:
 
-          
-# vim: ts=4 sw=4 et 
+
+# vim: ts=4 sw=4 et
