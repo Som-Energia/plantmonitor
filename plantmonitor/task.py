@@ -33,15 +33,17 @@ logger = logging.getLogger("plantmonitor")
 import os
 
 from plantmonitor.storage import (
-    PonyMetricStorage, 
-    ApiMetricStorage, 
-    InfluxMetricStorage, 
+    PonyMetricStorage,
+    ApiMetricStorage,
+    InfluxMetricStorage,
     TimeScaleMetricStorage,
 )
 
 from pony import orm
 
 import datetime
+
+from .standardization import registers_to_plant_data
 
 from ORM.models import database
 from ORM.models import (
@@ -130,37 +132,19 @@ def task():
     except Exception as err:
         logger.error("[ERROR] %s" % err)
 
-#TODO move this function, create its tests and finish it
-# WIP Prototype
-def registers_to_plantdata(registers):
-
-    plant_data = {}
-
-    for i, device in enumerate(plant.devices):
-        inverter_name = plant.devices[i].name
-        inverter_registers = result[i]['Alcolea'][0]['fields']
-
-        pac_r_w = inverter_registers["pac_r_w"]
-        ...
-        power_w = pac_r_w + pac_s_w + pac_t_w
-
-        plant_data[plant_name][inverter_name]["power_w"] = power_w
-
-    return plant_data
-
 def task_plant_data_insert():
     try:
 
         plant = ProductionPlant()
 
         if not plant.load('conf/modmap.yaml','Alcolea'):
-            logger.error('Error loadinf yaml definition file...')
+            logger.error('Error loading yaml definition file...')
             sys.exit(-1)
 
-        result = plant.get_registers()
-        
-        plant_data = registers_to_plantdata(result)
-    
+        devices_registers = plant.get_registers()
+
+        plant_data = registers_to_plant_data(plant.name, devices_registers)
+
         ponyStorage = PonyMetricStorage()
         #apiStorage = ApiMetricStorage(url='http://')
 
