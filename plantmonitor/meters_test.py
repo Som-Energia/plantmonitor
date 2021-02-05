@@ -25,19 +25,6 @@ class Meters_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
 
-    def test__telemeasure_meter_names(self):
-        c = Client(**config.erppeek)
-        names = telemeasure_meter_names(c)
-        self.assertEqual(sorted(names),[
-            '44711885',
-            '501215455',
-            '501215456',
-            '501215457',
-            '501600324',
-            '501815908',
-            '88300864',
-        ])
-
     @unittest.skipIf(True, "requires data in test erp database")
     def test__measures_from_date(self):
         c = Client(**config.erppeek)
@@ -50,6 +37,7 @@ class Meters_Test(unittest.TestCase):
             ('2019-10-02 11:00:00', 1687, 0, 0, 22, 0, 0),
         ])
 
+    @unittest.skipIf(True, "requires data in test erp database")
     def test__measures_from_date__whenEmpty(self):
         c = Client(**config.erppeek)
         meter = '88300864'
