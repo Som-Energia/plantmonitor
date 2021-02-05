@@ -16,7 +16,6 @@ class ProductionPlant():
         self.enable = None
         self.location = None
         self.devices = []
-        self.db = None
 
     def load(self, yamlFile,plant_name):
         data = ns.load(yamlFile)
@@ -24,7 +23,6 @@ class ProductionPlant():
             if plant_data.enabled and plant_data.name == plant_name:
                 self.name = plant_data.name
                 self.description = plant_data.description
-                self.db = plant_data.influx
                 for device_data in plant_data.devices:
                     new_device = ProductionDevice()
                     if new_device.load(device_data):
@@ -197,6 +195,7 @@ class ProductionDeviceModMap():
         connection.connect()
         logger.info("getting registers from inverter")
         rr = self.get_register_values(connection)
+        logger.debug(rr)
         connection.disconnect()
         return self.extract_rr(rr, self.scan.start)
 
