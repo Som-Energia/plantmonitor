@@ -1,0 +1,325 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 11.7 (Ubuntu 11.7-2.pgdg18.04+1)
+-- Dumped by pg_dump version 11.7 (Ubuntu 11.7-2.pgdg18.04+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: sistema_inversor; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sistema_inversor (
+    "time" timestamp without time zone NOT NULL,
+    inverter_name text,
+    location text,
+    "1HR" bigint,
+    "1HR0" bigint,
+    "2HR2" bigint,
+    "3HR3" bigint,
+    "4HR4" bigint,
+    daily_energy_h bigint,
+    daily_energy_l bigint,
+    e_total_h bigint,
+    e_total_l bigint,
+    h_total_h bigint,
+    h_total_l bigint,
+    pac_r bigint,
+    pac_s bigint,
+    pac_t bigint,
+    powereactive_t bigint,
+    powerreactive_r bigint,
+    powerreactive_s bigint,
+    probe1value bigint,
+    probe2value bigint,
+    probe3value bigint,
+    probe4value bigint,
+    temp_inv bigint
+);
+
+
+ALTER TABLE public.sistema_inversor OWNER TO postgres;
+
+--
+-- Name: sistema_contador; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sistema_contador (
+    "time" timestamp without time zone NOT NULL,
+    name text,
+    export_energy bigint,
+    import_energy bigint,
+    r1 bigint,
+    r2 bigint,
+    r3 bigint,
+    r4 bigint
+);
+
+
+ALTER TABLE public.sistema_contador OWNER TO postgres;
+
+--
+-- Name: sensors; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sensors (
+    "time" timestamp with time zone NOT NULL,
+    irradiation_w_m2 double precision,
+    temperature_celsius double precision,
+    rif_irr double precision
+);
+
+
+ALTER TABLE public.sensors OWNER TO postgres;
+
+--
+-- Name: forecastdata; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.forecastdata (
+    idforecasthead integer NOT NULL,
+    "time" timestamp with time zone NOT NULL,
+    percentil10 integer,
+    percentil50 integer,
+    percentil90 integer
+);
+
+
+ALTER TABLE public.forecastdata OWNER TO postgres;
+
+--
+-- Name: integrated_sensors; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.integrated_sensors (
+    "time" timestamp with time zone NOT NULL,
+    integral_irradiation_wh_m2 bigint
+);
+
+
+ALTER TABLE public.integrated_sensors OWNER TO postgres;
+
+--
+-- Name: facility_meter; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.facility_meter (
+    id integer NOT NULL,
+    facilityid character varying(200),
+    meter character varying(200)
+);
+
+
+ALTER TABLE public.facility_meter OWNER TO postgres;
+
+--
+-- Name: facility_meter_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.facility_meter_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.facility_meter_id_seq OWNER TO postgres;
+
+--
+-- Name: facility_meter_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.facility_meter_id_seq OWNED BY public.facility_meter.id;
+
+
+--
+-- Name: forecastdata_idforecasthead_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.forecastdata_idforecasthead_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.forecastdata_idforecasthead_seq OWNER TO postgres;
+
+--
+-- Name: forecastdata_idforecasthead_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.forecastdata_idforecasthead_seq OWNED BY public.forecastdata.idforecasthead;
+
+
+--
+-- Name: forecasthead; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.forecasthead (
+    id integer NOT NULL,
+    errorcode character varying(50),
+    facilityid character varying(50),
+    variableid character varying(50),
+    predictorid character varying(20),
+    forecastdate timestamp with time zone,
+    granularity integer
+);
+
+
+ALTER TABLE public.forecasthead OWNER TO postgres;
+
+--
+-- Name: forecasthead_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.forecasthead_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.forecasthead_id_seq OWNER TO postgres;
+
+--
+-- Name: forecasthead_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.forecasthead_id_seq OWNED BY public.forecasthead.id;
+
+
+--
+-- Name: facility_meter id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.facility_meter ALTER COLUMN id SET DEFAULT nextval('public.facility_meter_id_seq'::regclass);
+
+
+--
+-- Name: forecastdata idforecasthead; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forecastdata ALTER COLUMN idforecasthead SET DEFAULT nextval('public.forecastdata_idforecasthead_seq'::regclass);
+
+
+--
+-- Name: forecasthead id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forecasthead ALTER COLUMN id SET DEFAULT nextval('public.forecasthead_id_seq'::regclass);
+
+
+--
+-- Name: facility_meter facility_meter_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.facility_meter
+    ADD CONSTRAINT facility_meter_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: forecastdata forecastdata_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forecastdata
+    ADD CONSTRAINT forecastdata_pkey PRIMARY KEY (idforecasthead, "time");
+
+
+--
+-- Name: forecasthead forecasthead_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forecasthead
+    ADD CONSTRAINT forecasthead_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: forecastdata_time_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX forecastdata_time_idx ON public.forecastdata USING btree ("time" DESC);
+
+
+--
+-- Name: sensors_time_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sensors_time_idx ON public.sensors USING btree ("time" DESC);
+
+
+--
+-- Name: sistema_contador_time_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sistema_contador_time_idx ON public.sistema_contador USING btree ("time" DESC);
+
+
+--
+-- Name: sistema_inversor_time_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX sistema_inversor_time_idx ON public.sistema_inversor USING btree ("time" DESC);
+
+
+--
+-- Name: forecastdata ts_insert_blocker; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER ts_insert_blocker BEFORE INSERT ON public.forecastdata FOR EACH ROW EXECUTE PROCEDURE _timescaledb_internal.insert_blocker();
+
+
+--
+-- Name: sensors ts_insert_blocker; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER ts_insert_blocker BEFORE INSERT ON public.sensors FOR EACH ROW EXECUTE PROCEDURE _timescaledb_internal.insert_blocker();
+
+
+--
+-- Name: sistema_contador ts_insert_blocker; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER ts_insert_blocker BEFORE INSERT ON public.sistema_contador FOR EACH ROW EXECUTE PROCEDURE _timescaledb_internal.insert_blocker();
+
+
+--
+-- Name: sistema_inversor ts_insert_blocker; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER ts_insert_blocker BEFORE INSERT ON public.sistema_inversor FOR EACH ROW EXECUTE PROCEDURE _timescaledb_internal.insert_blocker();
+
+
+--
+-- Name: forecastdata forecastdata_idforecasthead_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forecastdata
+    ADD CONSTRAINT forecastdata_idforecasthead_fkey FOREIGN KEY (idforecasthead) REFERENCES public.forecasthead(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

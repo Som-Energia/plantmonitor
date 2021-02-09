@@ -1,0 +1,5 @@
+psql_user: postgres
+psql_password: nopassword
+psql_host: 127.0.0.1
+psql_port: 5432
+psql_db: testdump

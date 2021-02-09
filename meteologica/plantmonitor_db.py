@@ -155,6 +155,7 @@ class PlantmonitorDBMock(object):
             return None
         return records[-1][0]
 
+
 class PlantmonitorDB:
 
     # lingua franca: {facility: [('time', value)]}
@@ -165,8 +166,39 @@ class PlantmonitorDB:
         self._withinContextManager = False
 
     @staticmethod
+    def demoDBsetupFromDump(configdb, dumpfile):
+        with psycopg2.connect(
+            user=configdb['psql_user'],
+            password=configdb['psql_password'],
+            host=configdb['psql_host'],
+            port=configdb['psql_port']
+        ) as conn:
+            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "DROP DATABASE IF EXISTS {}".format(configdb['psql_db'])
+                )
+                cursor.execute(
+                    "CREATE DATABASE {};".format(configdb['psql_db'])
+                )
+        with psycopg2.connect(
+            user=configdb['psql_user'],
+            password=configdb['psql_password'],
+            host=configdb['psql_host'],
+            port=configdb['psql_port'],
+            database=configdb['psql_db']
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"
+                )
+                cursor.execute(open(dumpfile, "r").read())
+
+
+    @staticmethod
     def demoDBsetup(configdb):
         with psycopg2.connect(
+            dbname='postgres',
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
@@ -218,16 +250,17 @@ class PlantmonitorDB:
                         percentil90 INTEGER, PRIMARY KEY(idForecastHead,time));
                     """
                 )
-                cursor.execute(
-                    """
-                    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
-                    SELECT create_hypertable('forecastData', 'time');
-                    """
-                )
+#                cursor.execute(
+#                    """
+#                    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+#                    SELECT create_hypertable('forecastData', 'time');
+#                    """
+#                )
 
     @staticmethod
     def dropDatabase(configdb):
         with psycopg2.connect(
+            dbname='postgres',
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
@@ -343,6 +376,23 @@ class PlantmonitorDB:
                 cur.execute("insert into sistema_contador \
                     (time, name, export_energy)\
                     VALUES('{}', '{}', {});".format(t,m,e))
+
+    @withinContextManager
+    def addFullMeterData(self, facilityMeterData):
+        # if not self._client:
+        #     raise PlantmonitorDBError("Db client is None, have you logged in?")
+
+        cur = self._client.cursor()
+
+        for f, v in facilityMeterData.items():
+            m = self.facilityToMeter(f)
+            if not m:
+                raise PlantmonitorDBError('Facility {} has no associated meter'.format(f))
+            for t, e, i, r1, r2, r3, r4 in v:
+                cur.execute("insert into sistema_contador \
+                    (time, name, import_energy, export_energy, r1, r2, r3, r4)\
+                    VALUES('{}', '{}', {}, {}, {}, {}, {}, {});".format(t, m, i, e, r1, r2, r3, r4))
+
 
     @withinContextManager
     def getMeterData(self, facility=None, fromDate=None, toDate=None):

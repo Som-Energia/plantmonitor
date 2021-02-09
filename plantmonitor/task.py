@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import requests
+
 from pymodbus.client.sync import ModbusTcpClient
 from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant
@@ -28,6 +30,38 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+import os
+
+from plantmonitor.storage import (
+    PonyMetricStorage,
+    ApiMetricStorage,
+    InfluxMetricStorage,
+    TimeScaleMetricStorage,
+)
+
+from pony import orm
+
+import datetime
+
+from .standardization import registers_to_plant_data
+
+from ORM.models import database
+from ORM.models import (
+    Plant,
+    Meter,
+    MeterRegistry,
+    Inverter,
+    InverterRegistry,
+    Sensor,
+    SensorTemperatureAmbient,
+    SensorTemperatureModule,
+    SensorIrradiationRegistry,
+    SensorTemperatureAmbientRegistry,
+    SensorTemperatureModuleRegistry,
+)
+
+from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
+
 def client_db(db):
     try:
         logger.info("Connecting to Influxdb")
@@ -44,19 +78,13 @@ def client_db(db):
 
     return flux_client
 
-def publish_influx(metrics,flux_client):
-    flux_client.write_points([metrics] )
-    logger.info("[INFO] Sent to InfluxDB")
-
-def publish_timescale(metrics,db):
+def publish_timescale(plant_name, inverter_name, metrics, db):
     with psycopg2.connect(
             user=db['user'], password=db['password'],
             host=db['host'], port=db['port'], database=db['database']
         ) as conn:
         with conn.cursor() as cur:
-            measurement    = metrics['measurement']
-            inverter_name  = metrics['tags']['inverter_name']
-            location       = metrics['tags']['location']
+            measurement    = 'sistema_inversor'
             query_content  = ', '.join(metrics['fields'].keys())
             values_content = ', '.join(["'{}'".format(v) for v in metrics['fields'].values()])
 
@@ -64,7 +92,7 @@ def publish_timescale(metrics,db):
                 "INSERT INTO {}(time, inverter_name, location, {}) \
                 VALUES (timezone('utc',NOW()), '{}', '{}', {});".format(
                     measurement,query_content,
-                    inverter_name,location,values_content
+                    inverter_name,plant_name,values_content
                 )
             )
 
@@ -81,7 +109,11 @@ def task():
 
         plant_name = plant.name
 
-        flux_client = client_db(plant.db)
+        ponyStorage = PonyMetricStorage()
+        fluxStorage = InfluxMetricStorage(plant.db)
+        tsStorage = TimeScaleMetricStorage(config.plant_postgres)
+        #apiStorage = ApiMetricStorage(url='http://')
+
 
         for i, device in enumerate(plant.devices):
             inverter_name = plant.devices[i].name
@@ -92,23 +124,37 @@ def task():
             logger.info("**** Metrics - tag - location %s ****" % plant_name)
             logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
 
-            if flux_client is not None:
-                metrics = {}
-                tags = {}
-                fields = {}
-                metrics['measurement'] = 'sistema_inversor'
-                tags['location'] = plant_name
-                tags['inverter_name'] = inverter_name
-                metrics['tags'] = tags
-                metrics['fields'] = inverter_registers
+            fluxStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+            ponyStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
+            tsStorage.storeInverterMeasures(plant_name, inverter_name, inverter_registers)
 
-                publish_influx(metrics,flux_client)
-
-            publish_timescale(metrics, db=config.plant_postgres)
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)
 
+def task_plant_data_insert():
+    try:
+
+        plant = ProductionPlant()
+
+        if not plant.load('conf/modmap.yaml','Alcolea'):
+            logger.error('Error loading yaml definition file...')
+            sys.exit(-1)
+
+        devices_registers = plant.get_registers()
+
+        plant_data = registers_to_plant_data(plant.name, devices_registers)
+
+        ponyStorage = PonyMetricStorage()
+        #apiStorage = ApiMetricStorage(url='http://')
+
+        logger.info("**** Saving data in database ****")
+
+        ponyStorage.insertPlantData(plant_data)
+        # apiStorage.insertPlantData(plant_data)
+
+    except Exception as err:
+        logger.error("[ERROR] %s" % err)
 
 def task_counter_erp():
     c = Client(**config.erppeek)

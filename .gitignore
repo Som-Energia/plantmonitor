@@ -51,6 +51,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.noseids
 
 # Translations
 *.mo
@@ -65,12 +66,21 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Ipython Notebook
 .ipynb_checkpoints
 
 # vim swap files
 .*sw?
+
+# IDEs
+.vscode/
+*.code-workspace
+
 # plantmonitor excludes
 .env.*
 conf/configdb_test.yaml
 lastDateFile.yaml
+
+# sensitive data
+conf/plants.yaml
+conf/plants_base.yaml

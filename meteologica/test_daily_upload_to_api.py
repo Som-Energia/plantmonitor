@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
 from meteologica.daily_upload_to_api import upload_meter_data
 
 from meteologica.meteologica_api_utils import (

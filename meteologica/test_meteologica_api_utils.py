@@ -1,3 +1,7 @@
+
+import os
+os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
+
 from meteologica.meteologica_api_utils import (
     MeteologicaApi_Mock,
     MeteologicaApi,
@@ -291,15 +295,14 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
         api = self.createApi()
         result = api.getAllFacilities()
         print("Api's known facilities: {}".format(result))
-        self.assertEqual(
-            result,
-            [
-                'SCSOM04',
-                'SCSOM06',
+        self.assertTrue(
+            set([
+                'SomEnergia_Fontivsolar',
+                'SomEnergia_La_Florida',
                 'SomEnergia_Lleida_3',
                 'SomEnergia_Manlleu_Pav',
                 'SomEnergia_Manlleu_Pisc',
-                'SCSOM02',
+                'SomEnergia_Exiom',
                 'SomEnergia_Picanya',
                 'SomEnergia_Ramadera_Cassa',
                 'SomEnergia_Riudarenes_BR',
@@ -307,8 +310,8 @@ class MeteologicaApi_Test(MeteologicaApiMock_Test):
                 'SomEnergia_Riudarenes_ZE',
                 'SomEnergia_Tahal',
                 'SomEnergia_Torrefarrera',
-                'SCSOM01',
-            ]
+                'SomEnergia_Alcolea',
+            ]).issubset(set(result))
         )
 
 unittest.TestCase.__str__ = unittest.TestCase.id
