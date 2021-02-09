@@ -153,3 +153,20 @@ plant -> devices <|- Sensor <|- Sensor2
 				}]
 		}]
 }
+
+# manyplants
+
+[{
+		"plant": plant_name,
+		"version": "1.0",
+		"time": time.isoformat(),
+		"devices":
+		[{
+				"id": "SensorTemperature:thermometer1",
+				"readings":
+				[{
+						"temperature_mc": 12,
+						"time": datetime.datetime.now(datetime.timezone.utc),
+				}]
+		}]
+}]

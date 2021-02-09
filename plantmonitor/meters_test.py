@@ -13,6 +13,7 @@ from .meters import (
     uploaded_plantmonitor_measures,
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
+    insert_meter_readings_to_plants,
 )
 
 def assertTimeSeriesEqual(self, result, expected):
@@ -206,6 +207,23 @@ class MetersFlux_Test(unittest.TestCase):
             ])
 
         transfer_time_measure_to_influx(c, self.flux_client,upto='2019-10-02 12:00:00')
+
+        meter = '501815908',
+        result = uploaded_plantmonitor_measures(self.flux_client, meter)
+        self.assertTimeSeriesEqual(result,[
+            ('2019-10-02 10:00:00', 1407),
+            ('2019-10-02 11:00:00', 1687),
+        ])
+
+    # TODO fake/mock erp database
+    def _test__insert_meter_readings_to_plants(self):
+        c = Client(**config.erppeek)
+        for meter in telemeasure_meter_names(c):
+            upload_measures(self.flux_client, meter, [
+                ('2019-10-02 10:00:00', 1407),
+            ])
+
+        insert_meter_readings_to_plants(c, meter_name, upto='2019-10-02 12:00:00')
 
         meter = '501815908',
         result = uploaded_plantmonitor_measures(self.flux_client, meter)

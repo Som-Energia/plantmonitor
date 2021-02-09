@@ -60,6 +60,10 @@ def exportPlants():
                 for plant in Plant.select()]
     return plantsns
 
+# TODO might be useful to insert data from several plants at the same time
+# requires lingua franca dictionary re-nesting
+# def insertPlantsData(plants_data):
+#     results = [plant.insertPlantData(plant_data) for plant_name,plant_data in plants_data]
 
 class Municipality(database.Entity):
 
@@ -250,6 +254,13 @@ class Meter(database.Entity):
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.meterRegistries, exclude='meter', fromdate=fromdate, todate=todate)
         return readings
+
+    # TODO: implement
+    @classmethod
+    def getLastReadingsDate(cls):
+        select()
+
+        return []
 
 class MeterRegistry(database.Entity):
 
