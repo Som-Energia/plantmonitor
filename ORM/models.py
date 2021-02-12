@@ -15,6 +15,12 @@ from pony.orm import (
     unicode,
     )
 
+from conf.logging_configuration import LOGGING
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
+
 database = orm.Database()
 
 def getRegistries(entitySet, exclude, fromdate=None, todate=None):
@@ -45,7 +51,7 @@ def importPlants(nsplants):
                 plant = Plant(name=plantns.name, codename=plantns.codename)
                 plant.importPlant(plantns)
 
-def exportPlants():
+def exportPlants(skipEmpty=False):
     plantsns = ns()
     with orm.db_session:
         if Municipality.select().exists():
@@ -55,7 +61,7 @@ def exportPlants():
                     for municipality in Municipality.select()]
 
         plantsns['plants'] = [ns([
-                    ('plant', plant.exportPlant())
+                    ('plant', plant.exportPlant(skipEmpty))
                 ])
                 for plant in Plant.select()]
     return plantsns
@@ -127,7 +133,7 @@ class Plant(database.Entity):
                 self.municipality = Municipality.get(ineCode=plant['municipality'])
             else:
                 #TODO error or exception?
-                print("Error: municipality {} not found".format(plant['municipality']))
+                logger.error("Error: municipality {} not found".format(plant['municipality']))
                 raise
         if 'meters' in plant:
             [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
@@ -143,23 +149,49 @@ class Plant(database.Entity):
             [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
 
-    def exportPlant(self):
+    def exportPlant(self, skipEmpty=False):
         # print([meter.to_dict() for meter in Meter.select(lambda m: m.plant == self)])
 
-        plantns = ns(
-                name = self.name,
-                codename = self.codename,
-                description = self.description,
-                meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)],
-                inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)],
-                irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
-                temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
-                temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
-                integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)],
+        if not skipEmpty:
+            plantns = ns(
+                    name = self.name,
+                    codename = self.codename,
+                    description = self.description,
+                    meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)],
+                    inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)],
+                    irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
+                    temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
+                    temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
+                    integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)],
+                )
+        else:
+            plantns = ns(
+                    name = self.name,
+                    codename = self.codename,
+                    description = self.description
             )
+            meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)]
+            inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)]
+            irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)]
+            temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)]
+            temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)]
+            integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)]
+            if meters:
+                plantns['meters'] = meters
+            if inverters:
+                plantns['inverters'] = inverters
+            if irradiationSensors:
+                plantns['irradiationSensors'] = irradiationSensors
+            if temperatureAmbientSensors:
+                plantns['temperatureAmbientSensors'] = temperatureAmbientSensors
+            if temperatureModuleSensors:
+                plantns['temperatureModuleSensors'] = temperatureModuleSensors
+            if integratedSensors:
+                plantns['integratedSensors'] = integratedSensors
+
         if self.municipality:
             plantns.municipality = self.municipality.ineCode
-        print(plantns.dump())
+        logger.debug(plantns.dump())
         return plantns
 
     def createPlantFixture(self):
@@ -171,20 +203,21 @@ class Plant(database.Entity):
         SensorTemperatureModule(plant=self, name='TempMod'+self.name)
         SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
-    def plantData(self, fromdate=None, todate=None):
+    def plantData(self, fromdate=None, todate=None, skipEmpty=False):
         data = {"plant": self.name}
 
         #TODO generalize this
         meterList = [{
             "id":"Meter:{}".format(m.name), "readings": m.getRegistries(fromdate, todate)
-            } for m in orm.select(mc for mc in self.meters)]
+            } for m in orm.select(mc for mc in self.meters) if not skipEmpty or m.getRegistries(fromdate, todate)]
+
         inverterList = [{
             "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
-            } for i in orm.select(ic for ic in self.inverters)]
-        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors)]
+            } for i in orm.select(ic for ic in self.inverters) if not skipEmpty or i.getRegistries(fromdate, todate)]
+        sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors) if not skipEmpty or i.getRegistries(fromdate, todate)]
         forecastMetadatasList = [{
             "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
-            } for i in orm.select(ic for ic in self.forecastMetadatas)]
+            } for i in orm.select(ic for ic in self.forecastMetadatas) if not skipEmpty or i.getRegistries(fromdate, todate)]
 
         data["devices"] = inverterList + meterList + forecastMetadatasList + sensorList
         data["devices"].sort(key=lambda x : x['id'])
@@ -214,7 +247,7 @@ class Plant(database.Entity):
         devicetype, devicename = devicedata["id"].split(":")
         device = self.str2model(classname=devicetype, devicename=devicename)
         if not device:
-            print("unknown device {}:{}".format(devicetype, devicename))
+            logger.error("unknown device {}:{}".format(devicetype, devicename))
             return None
         return [device.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
 
@@ -258,7 +291,6 @@ class Meter(database.Entity):
     # TODO: implement
     @classmethod
     def getLastReadingsDate(cls):
-        select()
 
         return []
 

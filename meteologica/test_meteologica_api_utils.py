@@ -157,7 +157,7 @@ class MeteologicaApiMock_Test(unittest.TestCase):
                 )
 
         #expected [("2020-01-01 00:00:00", _)] since we don't know meteologica's algorithm
-        print(result)
+        logger.debug(result)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 2)
         self.assertEqual(result[0][0], todt("2020-01-01 00:00:00"))
