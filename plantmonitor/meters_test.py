@@ -13,7 +13,6 @@ from .meters import (
     uploaded_plantmonitor_measures,
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
-    insert_meter_readings_to_plants,
 )
 
 def assertTimeSeriesEqual(self, result, expected):

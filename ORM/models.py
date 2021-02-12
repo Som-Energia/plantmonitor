@@ -123,6 +123,16 @@ class Plant(database.Entity):
     simel = Set('Simel', lazy=True)
     nagios = Set('Nagios', lazy=True)
 
+    @classmethod
+    def insertPlantsData(cls, plantsData):
+        for plantData in plantsData:
+            logger.debug("importing plant data for plant {}".format(plantData['plant']))
+            plant = Plant.get(name=plantData['plant'])
+            if not plant:
+                logger.error("Plant {} is not known. Known plants: {}".format(plantData['plant'], Plant.select('name')))
+            else:
+                plant.insertPlantData(plantData)
+
     def importPlant(self, nsplant):
         plant = nsplant
         self.name = plant.name

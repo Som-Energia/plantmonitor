@@ -87,7 +87,6 @@ class ReadingsFacade():
     # otherwise plant.insertPlantData can't be used, or we can use a static/global method
     # that does the insert by searching the meter in Meter regardless of plant
 
-    plant_data = erp_meter_readings_to_plant_data(meter_name, measures)
+    # plant_data = erp_meter_readings_to_plant_data(meter_name, measures)
 
-    for plant in plants:
-        plant.insertPlantData(plant_data)
+    Plant.insertPlantsData(plants_data)
