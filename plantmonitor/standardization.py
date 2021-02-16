@@ -191,8 +191,11 @@ def fontivsolar_registers_to_plantdata(devices_registers):
         plant_data['devices'].append(device_readings_packet)
 
     return plant_data
-def erp_meter_readings_to_plant_data(plant_name, meter_name, readings):
-    pass
+
+def erp_meter_readings_to_plant_data(measures):
+    labels = ('time', 'export_energy_wh', 'import_energy_wh','r1_VArh','r2_VArh', 'r3_VArh','r4_VArh')
+    return [{**{k:v for k,v in zip(labels, measure)},**{"time":datetime.datetime.strptime(
+        measure[0], "%Y-%m-%d %H:%M:%S")}} for measure in measures]
 
 def registers_to_plant_data(plant_name, devices_registers):
     #TODO design this per-plant or per model

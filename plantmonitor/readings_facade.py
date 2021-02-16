@@ -67,26 +67,43 @@ class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
 
+  def getDeviceReadings(self, meterName, lastDate):
+    measures = measures_from_date(
+      self.client,
+      meterName,
+      beyond=lastDate.strftime("%Y-%m-%d %H:%M:%S"),
+      upto=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+    device = {
+        "id": "Meter:{}".format(meterName),
+        "readings": erp_meter_readings_to_plant_data(measures),
+    }
+
+    logger.debug("Retrieved {} measures for meter {} older than {} from erp to ponyorm".format(len(measures), meterName, lastDate))
+
+    return device
+
+  def getPlantNewMetersReadings(self, plant):
+
+    return {
+      "plant": plant['plant'],
+      "devices": [self.getDeviceReadings(
+          meterdate['id'].split(':')[1], meterdate['time'])
+          for meterdate in plant['devices']
+      ],
+    }
+
+
+  def getNewMetersReadings(self):
+
+    return [self.getPlantNewMetersReadings(plant)
+      for plant in Meter.getLastReadingDatesOfAllMeters()
+    ]
+
+
   def transfer_ERP_readings_to_model(self):
 
-    last_dates = Meter.getLastReadingsDate()
-
-    # build plants_data from last_dates
-    plants_data = {}
-
-    # zip o algo
-    plants_names = []
-
-    for plant in plants_names:
-        for meter_name, last_date in last_dates:
-            plants_data[plant_name] = {'plant'}
-            measures[meter_name] = measures_from_date(self.client, meter_name, beyond=last_date, upto=datetime.datetime.utcnow())
-            logger.debug("Uploading {} measures for meter {} older than {} from erp to ponyorm".format(len(measures), meter_name, last_date))
-
-    # TODO we need to ask the orm for the meter <-> plant correlation
-    # otherwise plant.insertPlantData can't be used, or we can use a static/global method
-    # that does the insert by searching the meter in Meter regardless of plant
-
-    # plant_data = erp_meter_readings_to_plant_data(meter_name, measures)
+    plants_data = self.getNewMetersReadings()
 
     Plant.insertPlantsData(plants_data)

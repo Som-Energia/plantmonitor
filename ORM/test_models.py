@@ -505,19 +505,19 @@ class Models_Test(unittest.TestCase):
             self.assertListEqual(registries, expectedRegistries)
 
     def test__Meter_getLastReadingsDate__empty(self):
-        result = Meter.getLastReadingsDate()
+        result = Meter.getLastReadingDatesOfAllMeters()
 
         expectedResult = []
 
         self.assertListEqual(result, expectedResult)
 
 
-    def _test__Meter_getLastReadingsDate__oneMeterOnePlantEmptyReadings(self):
+    def test__Meter_getLastReadingsDate__oneMeterOnePlantEmptyReadings(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
-        result = Meter.getLastReadingsDate()
+        result = Meter.getLastReadingDatesOfAllMeters()
 
         expectedResult = [{
             "plant": alcoleaPlantNS.name,
@@ -532,7 +532,7 @@ class Models_Test(unittest.TestCase):
         self.assertListEqual(result, expectedResult)
 
 
-    def _test__Meter_getLastReadingsDate__oneMeterOnePlantOneReading(self):
+    def test__Meter_getLastReadingsDate__oneMeterOnePlantOneReading(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
@@ -548,7 +548,7 @@ class Models_Test(unittest.TestCase):
             r4_VArh = 1,
         )
 
-        result = Meter.getLastReadingsDate()
+        result = Meter.getLastReadingDatesOfAllMeters()
 
         expectedResult = [{
             "plant": alcoleaPlantNS.name,
@@ -562,15 +562,15 @@ class Models_Test(unittest.TestCase):
 
         self.assertListEqual(result, expectedResult)
 
-    def _test__Meter_getLastReadingsDate__manyMetersManyPlantsManyReading(self):
+    def _test__Meter_getLastReadingsDate__OneMeterOnePlantOneReading(self):
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
         delta = dt.timedelta(minutes=30)
         plantsns = self.samplePlantsNS()
         importPlants(plantsns)
-        plantsData = self.samplePlantsData()
+        plantsData = self.samplePlantsData(time, delta)
         Plant.insertPlantsData(plantsData)
 
-        result = Meter.getLastReadingsDate()
+        result = Meter.getLastReadingDatesOfAllMeters()
 
         expectedResult = [{
             "plant": "alcolea",
@@ -581,6 +581,41 @@ class Models_Test(unittest.TestCase):
             }]
 
         }]
+
+        self.assertListEqual(result, expectedResult)
+
+    def test__Meter_getLastReadingsDate__manyMetersManyPlantsManyReadings(self):
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+        delta = dt.timedelta(minutes=30)
+        plantsns = self.samplePlantsNS()
+        importPlants(plantsns)
+        plantsData = self.samplePlantsData(time, delta)
+        Plant.insertPlantsData(plantsData)
+
+        result = Meter.getLastReadingDatesOfAllMeters()
+
+        expectedResult = [
+            {
+                "plant": "alcolea",
+                "devices":
+                    [{
+                        "id": "Meter:1234578",
+                        "time": time,
+                    }],
+            },
+            {
+                "plant": "figuerea",
+                "devices":
+                    [{
+                        "id": "Meter:5432",
+                        "time": time,
+                    },
+                    {
+                        "id": "Meter:9876",
+                        "time": time,
+                    }]
+            }
+        ]
 
         self.assertListEqual(result, expectedResult)
 
