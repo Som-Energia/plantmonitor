@@ -40,6 +40,39 @@ from .models import (
     Forecast,
 )
 
+def migrateLegacySensorIrradiationTableToPony(configdbns, plantName, deviceName, excerpt=False):
+
+    if excerpt:
+        sampleSize = 10
+    else:
+        sampleSize = 1000
+
+    with orm.db_session:
+        plant = Plant.get(name=plantName)
+        if not plant:
+            plant = Plant(name=plantName, codename=plantName)
+
+        sensor = SensorIrradiation(name=deviceName, plant=plant)
+
+        with PlantmonitorDB(configdbns) as db:
+            curr = db._client.cursor()
+            curr.execute("select distinct on (time) time, irradiation_w_m2, temperature_celsius from sensors limit {};".format(sampleSize))
+            while True:
+                records = curr.fetchmany(sampleSize)
+                if not records:
+                    break
+
+                for r in records:
+                    print(r)
+                    time, irradiation_w_m2, temperature_celsius = r
+                    time = time.replace(tzinfo=dt.timezone.utc)
+                    # TODO should we change to mw_m2 on the values to support decimals?
+                    irradiation_w_m2 = round(irradiation_w_m2)
+                    temperature_dc = round(temperature_celsius*10)
+                    sensor.insertRegistry(irradiation_w_m2=irradiation_w_m2, temperature_dc=temperature_dc, time=time)
+
+                if excerpt:
+                    break
 
 def migrateLegacySensorTableToPony(configdbns, plantName, tableName, deviceType, dataColumnName, deviceName, excerpt=False):
 
@@ -56,7 +89,7 @@ def migrateLegacySensorTableToPony(configdbns, plantName, tableName, deviceType,
         if deviceType == 'SensorIrradiation':
             device = SensorIrradiation(name=deviceName, plant=plant)
         elif deviceType == 'SensorTemperature':
-            device = SensorTemperature(name=deviceName, plant=plant)
+            device = SensorTemperatureAmbient(name=deviceName, plant=plant)
         elif deviceType == 'SensorIntegratedIrradiation':
             device = SensorIntegratedIrradiation(name=deviceName, plant=plant)
         else:
@@ -171,7 +204,7 @@ def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, e
     with orm.db_session:
         plant = Plant.get(name=plantName)
         inverter = Inverter(name=inverterName, plant=plant)
-        sensorIrradiation = SensorIrradiation(name=inverterName, plant=plant)
+        sensorTemperatureAmbient = SensorTemperatureAmbient(name=inverterName, plant=plant)
         plantName = plant.name
         if logging.INFO >= logger.level:
             curr = db._client.cursor("logging")
@@ -197,8 +230,8 @@ def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, e
             for r in records:
                 time, inverter_name, location, HR_1, HR0_1, HR2_2, HR3_3, HR4_4, *values, probe1value, probe2value, probe3value, probe4value, temp_inv  = r
                 time = time.replace(tzinfo=dt.timezone.utc)
-                inverter.insertRegistry(*values, temp_inv_c=temp_inv, time=time)
-                sensorIrradiation.insertRegistry(irradiation_w_m2=probe1value, time=time)
+                inverter.insertRegistry(*values, time=time)
+                sensorTemperatureAmbient.insertRegistry(temperature_dc=probe1value, time=time)
 
             if excerpt:
                 break
@@ -270,23 +303,10 @@ def migrateLegacyToPony(configdbns, excerpt=False, skipList=[]):
 
     if 'sensors' not in skipList:
         logger.info("Migrate SensorIrradiation")
-        migrateLegacySensorTableToPony(
+        migrateLegacySensorIrradiationTableToPony(
             configdbns,
             plantName=plantName,
-            tableName='sensors',
-            deviceType='SensorIrradiation',
-            dataColumnName='irradiation_w_m2',
             deviceName='irradiation_alcolea',
-            excerpt=excerpt
-        )
-        logger.info("Migrate SensorTemperature")
-        migrateLegacySensorTableToPony(
-            configdbns,
-            plantName=plantName,
-            tableName='sensors',
-            deviceType='SensorTemperature',
-            dataColumnName='temperature_celsius',
-            deviceName='thermometer_alcolea',
             excerpt=excerpt
         )
         logger.info("Migrate SensorIntegratedIrradiation")

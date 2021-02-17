@@ -12,6 +12,7 @@ import datetime as dt
 from .migrations import (
     createPlants,
     migrateLegacyInverterTableToPony,
+    migrateLegacySensorIrradiationTableToPony,
     migrateLegacySensorTableToPony,
     migrateLegacyMeterTableToPony,
     migrateLegacyToPony,
@@ -195,20 +196,24 @@ class Migrations_Test(unittest.TestCase):
                     irradiationSensors:
                     - irradiationSensor:
                         name: alberto
-                    temperatureSensors:
-                    - temperatureSensor:
+                    temperatureAmbientSensors:
+                    - temperatureAmbientSensor:
                         name: joana
+                    temperatureModuleSensors:
+                    - temperatureModuleSensor:
+                        name: juanpe
                     integratedSensors:
                     - integratedSensor:
                         name: voki""")
 
             alcoleaPlant = alcoleaPlantYAML.plants[0].plant
             alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
-            alcolea = alcolea.importPlant(alcoleaPlantYAML)
+            alcolea = alcolea.importPlant(alcoleaPlant)
+            orm.flush()
 
             #TODO test the whole fixture, not just the plant data
             plantns = alcolea.exportPlant()
-            self.assertNsEqual(plantns, alcoleaPlantYAML)
+            self.assertNsEqual(plantns, alcoleaPlant)
 
     def test_db_records(self):
         # Get data to migrate
@@ -267,12 +272,45 @@ class Migrations_Test(unittest.TestCase):
                 excerpt=True
             )
 
-    def test_migrateLegacySensorTableToPony_sensor(self):
+    def test_migrateLegacySensorIrradiationTableToPony_sensor(self):
         tableName = 'sensors'
         dataColumnName = 'irradiation_w_m2'
         plantName = 'Alcolea'
         deviceName = 'irradiation_alcolea'
         deviceType = 'SensorIrradiation'
+
+        migrateLegacySensorIrradiationTableToPony(
+            self.createConfig(),
+            plantName=plantName,
+            deviceName=deviceName,
+            excerpt=True
+        )
+
+        with self.createPlantmonitorDB() as db:
+            # retrieve expected
+            curr = db._client.cursor()
+            curr.execute("select time, {} from {} limit 1;".format(dataColumnName, tableName))
+            expectedFirstRegistry = list(curr.fetchone())
+
+        expectedTime = expectedFirstRegistry[0].replace(tzinfo=dt.timezone.utc)
+        expectedIrrValue = expectedFirstRegistry[1]
+        expectedTempValue = expectedFirstRegistry[1]
+        expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedIrrValue, expectedTempValue]
+
+        with orm.db_session:
+            query = SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
+            migratedRegistry = query.first()
+            id, time, irrValue, tempValue = list(migratedRegistry.to_dict().values())
+            migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, irrValue, tempValue]
+
+        self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
+
+    def test_migrateLegacySensorTableToPony_sensor(self):
+        tableName = 'integrated_sensors'
+        dataColumnName = 'integral_irradiation_wh_m2'
+        plantName = 'Alcolea'
+        deviceName = 'irradiation_alcolea'
+        deviceType = 'SensorIntegratedIrradiation'
 
         migrateLegacySensorTableToPony(
             self.createConfig(),
@@ -295,7 +333,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedValue]
 
         with orm.db_session:
-            query = SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
+            query = IntegratedIrradiationRegistry.select().order_by(IntegratedIrradiationRegistry.time)
             migratedRegistry = query.first()
             id, time, migratedValue = list(migratedRegistry.to_dict().values())
             migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, migratedValue]

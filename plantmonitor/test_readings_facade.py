@@ -46,7 +46,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
 
-    def samplePlantsNS(self):
+    def samplePlantsNS(self, altMeter=12345678):
         alcoleaPlantsNS = ns.loads("""\
             municipalities:
             - municipality:
@@ -69,7 +69,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                 municipality: '17066'
                 meters:
                 - meter:
-                    name: '88300864'
+                    name: '{}'
                 inverters:
                 - inverter:
                     name: '5555'
@@ -80,9 +80,9 @@ class ReadingsFacade_Test(unittest.TestCase):
                 municipality: '17079'
                 meters:
                 - meter:
-                    name: '9876'
-                - meter:
                     name: '5432'
+                - meter:
+                    name: '9876'
                 inverters:
                 - inverter:
                     name: '4444'
@@ -99,17 +99,16 @@ class ReadingsFacade_Test(unittest.TestCase):
                     name: benjami
                 integratedSensors:
                 - integratedSensor:
-                    name: david""")
+                    name: david""".format(altMeter))
         return alcoleaPlantsNS
 
-
-    def samplePlantsData(self, time, dt):
+    def samplePlantsData(self, time, dt, altMeter=12345678):
         plantsData = [
               {
               "plant": "alcolea",
               "devices":
                 sorted([{
-                    "id": "Meter:88300864",
+                    "id": "Meter:{}".format(altMeter),
                     "readings": [{
                         "time": time,
                         "export_energy_wh": 1,
@@ -165,11 +164,11 @@ class ReadingsFacade_Test(unittest.TestCase):
             }]
         return plantsData
 
-    def setupPlants(self, time):
+    def setupPlants(self, time, alternativeMeter=12345678):
         delta = dt.timedelta(minutes=30)
-        plantsns = self.samplePlantsNS()
+        plantsns = self.samplePlantsNS(altMeter=alternativeMeter)
         importPlants(plantsns)
-        plantsData = self.samplePlantsData(time, delta)
+        plantsData = self.samplePlantsData(time, delta, altMeter=alternativeMeter)
         Plant.insertPlantsData(plantsData)
 
     def test_getNewMetersReadings__noMeterInERP(self):
@@ -186,7 +185,7 @@ class ReadingsFacade_Test(unittest.TestCase):
               "plant": "alcolea",
               "devices":
                 [{
-                    "id": "Meter:1234578",
+                    "id": "Meter:12345678",
                     "readings": [],
                 }],
               },
@@ -205,11 +204,11 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         self.assertListEqual(expectedPlantData, plantData)
 
-
-    def test_getNewMetersReadings__meterInERPmanyReadings(self):
-        time = dt.datetime(2018, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-
-        self.setupPlants(time)
+    # TODO defragilize this tests via fake or mock
+    def test_getNewMetersReadings__meterInERP_OldReadings(self):
+        lastReadingTime = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+        erpMeter = 88300864 # removed meter
+        self.setupPlants(lastReadingTime, erpMeter)
 
         r = ReadingsFacade()
 
@@ -221,9 +220,57 @@ class ReadingsFacade_Test(unittest.TestCase):
               "devices":
                 [{
                     "id": "Meter:88300864",
+                    "readings": [],
+                }],
+              },
+              {
+              "plant": "figuerea",
+              "devices":
+                sorted([{
+                    "id": "Meter:9876",
+                    "readings": [],
+                },
+                {
+                    "id": "Meter:5432",
+                    "readings": [],
+                }],key=lambda d: d['id']),
+            }]
+
+        self.assertListEqual(expectedPlantData, plantData)
+
+    def test_getNewMetersReadings__meterInERPmanyReadings(self):
+        lastReadingTime = dt.datetime(2019, 10, 1, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+        erpMeter = 88300864
+        self.setupPlants(lastReadingTime, erpMeter)
+
+        r = ReadingsFacade()
+
+        upto = dt.datetime(2019, 10, 1, 17, 5, 10, 588861, tzinfo=dt.timezone.utc)
+        plantData = r.getNewMetersReadings(upto)
+
+        expectedPlantData = [
+              {
+              "plant": "alcolea",
+              "devices":
+                [{
+                    "id": "Meter:{}".format(erpMeter),
                     "readings": [{
-                        "time": dt.datetime(2019,10,2,10,00,00),
-                        "energy": 123,
+                        "time": dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc),
+                        "export_energy_wh": 1139,
+                        "import_energy_wh": 0,
+                        "r1_VArh": 0,
+                        "r2_VArh": 1,
+                        "r3_VArh": 2,
+                        "r4_VArh": 0,
+                    },
+                    {
+                        "time": dt.datetime(2019,10,1,17,00,00, tzinfo=dt.timezone.utc),
+                        "export_energy_wh": 568,
+                        "import_energy_wh": 0,
+                        "r1_VArh": 0,
+                        "r2_VArh": 0,
+                        "r3_VArh": 8,
+                        "r4_VArh": 0,
                     }]
                 }],
               },

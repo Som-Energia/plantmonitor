@@ -67,12 +67,12 @@ class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
 
-  def getDeviceReadings(self, meterName, lastDate):
+  def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.utcnow()):
     measures = measures_from_date(
       self.client,
       meterName,
       beyond=lastDate.strftime("%Y-%m-%d %H:%M:%S"),
-      upto=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+      upto=upto.strftime("%Y-%m-%d %H:%M:%S")
     )
 
     device = {
@@ -84,23 +84,21 @@ class ReadingsFacade():
 
     return device
 
-  def getPlantNewMetersReadings(self, plant):
+  def getPlantNewMetersReadings(self, plant, upto=datetime.datetime.utcnow()):
 
     return {
       "plant": plant['plant'],
       "devices": [self.getDeviceReadings(
-          meterdate['id'].split(':')[1], meterdate['time'])
+          meterdate['id'].split(':')[1], meterdate['time'], upto)
           for meterdate in plant['devices']
       ],
     }
 
+  def getNewMetersReadings(self, upto=datetime.datetime.utcnow()):
 
-  def getNewMetersReadings(self):
-
-    return [self.getPlantNewMetersReadings(plant)
+    return [self.getPlantNewMetersReadings(plant, upto)
       for plant in Meter.getLastReadingDatesOfAllMeters()
     ]
-
 
   def transfer_ERP_readings_to_model(self):
 
