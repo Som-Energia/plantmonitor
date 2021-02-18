@@ -47,6 +47,7 @@ from pony import orm
 import datetime
 
 from .standardization import registers_to_plant_data
+from .readings_facade import ReadingsFacade
 
 from ORM.models import database
 from ORM.models import (
@@ -134,6 +135,18 @@ def task_counter_erp():
     try:
         for meter in meter_names:
             transfer_meter_to_plantmonitor(c, flux_client, meter, utcnow)
+
+    except Exception as err:
+        logger.error("[ERROR] %s" % err)
+        raise
+
+def task_meters_erp_to_orm():
+    r = ReadingsFacade()
+
+    try:
+
+        # TODO mock measures or fake meters
+        r.transfer_ERP_readings_to_model()
 
     except Exception as err:
         logger.error("[ERROR] %s" % err)

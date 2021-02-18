@@ -593,7 +593,7 @@ class Models_Test(unittest.TestCase):
         Plant.insertPlantsData(plantsData)
 
         result = Meter.getLastReadingDatesOfAllMeters()
-
+        result[1]["devices"].sort(key=lambda d: d['id'])
         expectedResult = [
             {
                 "plant": "alcolea",

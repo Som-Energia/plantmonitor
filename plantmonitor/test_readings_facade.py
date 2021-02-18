@@ -26,8 +26,8 @@ setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 class ReadingsFacade_Test(unittest.TestCase):
 
     def setUp(self):
-        from conf import dbinfo
-        self.assertEqual(dbinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        from conf import envinfo
+        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)

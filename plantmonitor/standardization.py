@@ -74,7 +74,8 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
         pac_s_w = inverter_registers['pac_s_w']
         pac_t_w = inverter_registers['pac_t_w']
         power_w = int(round(pac_r_w + pac_s_w + pac_t_w))
-        energy_wh = int(round(inverter_registers['daily_energy_l_wh']))
+        energy_wh = int(round((inverter_registers['daily_energy_h_wh'] << 16) + inverter_registers['daily_energy_l_wh']))
+        uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
         temperature_dc = int(round(inverter_registers['temp_inv_c']*100))
 
         reading = {
@@ -84,7 +85,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
             'intensity_ca_mA': None,
             'voltage_cc_mV': None,
             'voltage_ca_mV': None,
-            'uptime_h': None,
+            'uptime_h': uptime_h,
             'temperature_dc': temperature_dc,
             'time': time,
         }
@@ -136,13 +137,9 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     for register in inverter_registers:
         time = inverter_registers['time']
         #TODO meld toghether Uint16 _h _l into Uint32
-        energy_wh = inverter_registers['DailyEnergy_dWh_l']
-        power_w = inverter_registers['ActivePower_dW']
-        intensity_cc_mA = inverter_registers['Intensitycc_dA']
-        intensity_ca_mA = inverter_registers['Intensityca_dA']
-        voltage_cc_mV = inverter_registers['Voltatgecc_cV']
-        voltage_ca_mV = inverter_registers['Voltatgeca_cV']
-        uptime_h = inverter_registers['Uptime_h_l']
+        energy_wh = int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))*10
+        power_w = int(round(inverter_registers['ActivePower_dW']/10))
+        uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
         temperature_dc = None
 
         reading = {
@@ -152,7 +149,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
             'intensity_ca_mA': None,
             'voltage_cc_mV': None,
             'voltage_ca_mV': None,
-            'uptime_h': None,
+            'uptime_h': uptime_h,
             'temperature_dc': temperature_dc,
             'time': time,
         }

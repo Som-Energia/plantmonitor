@@ -229,8 +229,22 @@ def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, e
 
             for r in records:
                 time, inverter_name, location, HR_1, HR0_1, HR2_2, HR3_3, HR4_4, *values, probe1value, probe2value, probe3value, probe4value, temp_inv  = r
+                daily_energy_h, daily_energy_l, e_total_h, e_total_l, h_total_h, h_total_l, pac_r, pac_s, pac_t, powereactive_t, powerreactive_r, powerreactive_s = values
                 time = time.replace(tzinfo=dt.timezone.utc)
-                inverter.insertRegistry(*values, time=time)
+                power_w = int(round(pac_r + pac_s + pac_t))
+                energy_wh = int(round((daily_energy_h << 16) + daily_energy_l))
+                uptime_h = int(round((h_total_h << 16) + h_total_l))
+                temperature_dc = int(round(temp_inv*100))
+                inverter.insertRegistry(
+                    power_w=power_w,
+                    energy_wh=energy_wh,
+                    intensity_cc_mA=None,
+                    intensity_ca_mA=None,
+                    voltage_cc_mV=None,
+                    voltage_ca_mV=None,
+                    uptime_h=uptime_h,
+                    temperature_dc=temperature_dc,
+                    time=time)
                 sensorTemperatureAmbient.insertRegistry(temperature_dc=probe1value, time=time)
 
             if excerpt:

@@ -5,6 +5,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from plantmonitor.task import task
 from plantmonitor.task import task_counter_erp
 from plantmonitor.task import task_get_meteologica_forecast
+from plantmonitor.task import task_meters_erp_to_orm
 from plantmonitor.task import task_daily_upload_to_api_meteologica
 from plantmonitor.task import task_daily_download_from_api_meteologica
 from ORM.orm_util import connectDatabase
@@ -38,6 +39,7 @@ def add_jobs(app):
         app.add_job(task, 'cron', minute='*/5')
     elif env_active == env['plantmonitor_server']:
         app.add_job(task_counter_erp, 'interval', minutes=20)
+        app.add_job(task_meters_erp_to_orm, 'invertal', minutes=20)
         app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=18, minute=5)
         app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':False}, hour=19, minute=5)
     else:

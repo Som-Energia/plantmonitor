@@ -89,7 +89,7 @@ class Standardization_Test(unittest.TestCase):
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
-                    'uptime_h': None,
+                    'uptime_h': 18827,
                     'temperature_dc': 32000,
                     'time': time,
                 }]
@@ -125,7 +125,7 @@ class Standardization_Test(unittest.TestCase):
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
-                    'uptime_h': None,
+                    'uptime_h': 18827,
                     'temperature_dc': 32000,
                     'time': time,
                 }]

@@ -134,19 +134,14 @@ class Migrations_Test(unittest.TestCase):
         signature = Inverter.insertRegistry.__code__.co_varnames
         expectedSignature = (
             "self",
-            "daily_energy_h_wh",
-            "daily_energy_l_wh",
-            "e_total_h_wh",
-            "e_total_l_wh",
-            "h_total_h_h",
-            "h_total_l_h",
-            "pac_r_w",
-            "pac_s_w",
-            "pac_t_w",
-            "powerreactive_t_v",
-            "powerreactive_r_v",
-            "powerreactive_s_v",
-            "temp_inv_c",
+            "power_w",
+            "energy_wh",
+            "intensity_cc_mA",
+            "intensity_ca_mA",
+            "voltage_cc_mV",
+            "voltage_ca_mV",
+            "uptime_h",
+            "temperature_dc",
             "time",
         )
         self.assertTupleEqual(expectedSignature, signature)
@@ -432,15 +427,16 @@ class Migrations_Test(unittest.TestCase):
         expectedTime = expectedFirstRegistry[0].replace(tzinfo=dt.timezone.utc)
         expectedPlant = expectedFirstRegistry[2]
         expectedInverter = expectedFirstRegistry[1]
-        expectedList = expectedFirstRegistry[8:-5]
-        expectedTempInv = expectedFirstRegistry[-1]
-        expectedMigrateRegistryList = [expectedTime, expectedPlant, expectedInverter] + expectedList + [expectedTempInv]
+        expectedEnergy = int(round((expectedFirstRegistry[8] << 16) + expectedFirstRegistry[9]))
+        expectedTempInv = expectedFirstRegistry[-1]*100
+        expectedMigrateRegistryList = [expectedTime, expectedPlant, expectedInverter,expectedEnergy,expectedTempInv]
 
         with orm.db_session:
             query = orm.select(r for r in InverterRegistry if r.inverter.name == expectedInverter and r.inverter.plant.name == expectedPlant).order_by(InverterRegistry.time)
+
             migratedRegistry = query.first()
-            id, time, *migratedRegistryList = list(migratedRegistry.to_dict().values())
-            migratedRegistryList = [time, migratedRegistry.inverter.plant.name, migratedRegistry.inverter.name] + migratedRegistryList
+            id, time, power, energy, *migratedRegistryList, temperature_dc = list(migratedRegistry.to_dict().values())
+            migratedRegistryList = [time, migratedRegistry.inverter.plant.name, migratedRegistry.inverter.name, energy, temperature_dc]
 
         self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
 
