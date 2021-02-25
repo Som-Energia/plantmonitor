@@ -119,7 +119,7 @@ def createPlants():
     # TODO què fem amb els records antics?
     Plant(name='Alcolea', codename='SCSOM01') # Vallehermoso
     Plant(name='Riudarenes_SM', codename='SomEnergia_Riudarenes_SM')
-    Plant(name='Fontivsolar I', codename='SCSOM04') # SomEnergia_Fontivsolar
+    Plant(name='Fontivsolar', codename='SCSOM04') # SomEnergia_Fontivsolar
     Plant(name='Riudarenes_BR', codename='SomEnergia_Riudarenes_BR')
     Plant(name='Riudarenes_ZE', codename='SomEnergia_Riudarenes_ZE')
     Plant(name='Florida', codename='SCSOM06') # SomEnergia_La_Florida
