@@ -48,3 +48,50 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 ```
 
 4. Run the project.
+
+Api
+===
+
+To run the api locally
+
+```
+~$ uvicorn api_server.plantmonitor_api:api --reload
+```
+
+Supervisor configuration
+------------------------
+
+```
+[fcgi-program:plantmonitor_api]
+socket=tcp://localhost:8000
+command=/home/plantmonitor/Envs/plantmonitor/bin/uvicorn --fd 0 api_server.plantmonitor_api:api 
+numprocs=4
+process_name=uvicorn-%(process_num)d
+environment=PATH="/home/plantmonitor/Envs/plantmonitor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+stdout_logfile=/var/log/supervisor/api_plantmonitor.log
+stderr_logfile=/var/log/supervisor/api_plantmonitor_stderr.log
+stdout_logfile_maxbytes=0
+stderr_logfile_maxbytes=0
+autostart=true
+autorestart=true
+directory=/home/plantmonitor/somenergia/plantmonitor
+user=plantmonitor
+```
+
+Troubleshooting
+===============
+
+* psycopg Python.h error
+
+```
+sudo apt install python3.7-dev
+```
+
+3.7 or the version you're using
+
+* ModuleNotFoundError: No module named 'apt_pkg'
+
+```
+sudo apt install python3-apt --reinstall
+```
+
