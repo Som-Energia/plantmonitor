@@ -36,6 +36,7 @@ termstyle==0.1.11
 tzlocal==2.1
 urllib3==1.25.9
 wcwidth==0.1.9
+uvicorn==0.12.2
 yamlns==0.8.3
 zeep==3.4.0
 environs==8.0.0
