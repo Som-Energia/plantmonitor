@@ -144,10 +144,8 @@ def task_meters_erp_to_orm():
     r = ReadingsFacade()
 
     try:
-
         # TODO mock measures or fake meters
         r.transfer_ERP_readings_to_model()
-
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise

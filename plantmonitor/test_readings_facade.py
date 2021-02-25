@@ -46,7 +46,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
 
-    def samplePlantsNS(self, altMeter=12345678):
+    def samplePlantsNS(self, altMeter="12345678"):
         alcoleaPlantsNS = ns.loads("""\
             municipalities:
             - municipality:
@@ -102,7 +102,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                     name: david""".format(altMeter))
         return alcoleaPlantsNS
 
-    def samplePlantsData(self, time, dt, altMeter=12345678):
+    def samplePlantsData(self, time, dt, altMeter="12345678"):
         plantsData = [
               {
               "plant": "alcolea",
@@ -164,7 +164,7 @@ class ReadingsFacade_Test(unittest.TestCase):
             }]
         return plantsData
 
-    def setupPlants(self, time, alternativeMeter=12345678):
+    def setupPlants(self, time, alternativeMeter="12345678"):
         delta = dt.timedelta(minutes=30)
         plantsns = self.samplePlantsNS(altMeter=alternativeMeter)
         importPlants(plantsns)
@@ -178,9 +178,13 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         r = ReadingsFacade()
 
-        plantData = r.getNewMetersReadings()
+        plantsData = r.getNewMetersReadings()
 
-        expectedPlantData = [
+        # orm returns unordered
+        for plantdata in plantsData:
+            plantdata["devices"].sort(key=lambda d: d['id'])
+
+        expectedPlantsData = [
               {
               "plant": "alcolea",
               "devices":
@@ -202,19 +206,23 @@ class ReadingsFacade_Test(unittest.TestCase):
                 }],key=lambda d: d['id']),
             }]
 
-        self.assertListEqual(expectedPlantData, plantData)
+        self.assertListEqual(expectedPlantsData, plantsData)
 
     # TODO defragilize this tests via fake or mock
     def test_getNewMetersReadings__meterInERP_OldReadings(self):
         lastReadingTime = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        erpMeter = 88300864 # removed meter
+        erpMeter = "88300864" # removed meter
         self.setupPlants(lastReadingTime, erpMeter)
 
         r = ReadingsFacade()
 
-        plantData = r.getNewMetersReadings()
+        plantsData = r.getNewMetersReadings()
 
-        expectedPlantData = [
+        # orm returns unordered
+        for plantdata in plantsData:
+            plantdata["devices"].sort(key=lambda d: d['id'])
+
+        expectedPlantsData = [
               {
               "plant": "alcolea",
               "devices":
@@ -227,28 +235,32 @@ class ReadingsFacade_Test(unittest.TestCase):
               "plant": "figuerea",
               "devices":
                 sorted([{
-                    "id": "Meter:9876",
+                    "id": "Meter:5432",
                     "readings": [],
                 },
                 {
-                    "id": "Meter:5432",
+                    "id": "Meter:9876",
                     "readings": [],
                 }],key=lambda d: d['id']),
             }]
 
-        self.assertListEqual(expectedPlantData, plantData)
+        self.assertListEqual(expectedPlantsData, plantsData)
 
     def test_getNewMetersReadings__meterInERPmanyReadings(self):
         lastReadingTime = dt.datetime(2019, 10, 1, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        erpMeter = 88300864
+        erpMeter = "88300864"
         self.setupPlants(lastReadingTime, erpMeter)
 
         r = ReadingsFacade()
 
         upto = dt.datetime(2019, 10, 1, 17, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        plantData = r.getNewMetersReadings(upto)
+        plantsData = r.getNewMetersReadings(upto)
 
-        expectedPlantData = [
+        # orm returns unordered
+        for plantdata in plantsData:
+            plantdata["devices"].sort(key=lambda d: d['id'])
+
+        expectedPlantsData = [
               {
               "plant": "alcolea",
               "devices":
@@ -278,19 +290,32 @@ class ReadingsFacade_Test(unittest.TestCase):
               "plant": "figuerea",
               "devices":
                 sorted([{
-                    "id": "Meter:9876",
+                    "id": "Meter:5432",
                     "readings": [],
                 },
                 {
-                    "id": "Meter:5432",
+                    "id": "Meter:9876",
                     "readings": [],
                 }],key=lambda d: d['id']),
             }]
 
-        self.assertListEqual(expectedPlantData, plantData)
+        self.assertListEqual(expectedPlantsData, plantsData)
 
     def _test_transfer_ERP_readings_to_model(self):
         r = ReadingsFacade()
 
         # TODO mock measures or fake meters
         r.transfer_ERP_readings_to_model()
+
+    def test_checkNewMeters(self):
+        erpMeter = "88300864"
+        self.setupPlants(dt.datetime.utcnow(), erpMeter)
+        newMeter = "3141519"
+
+        meterNames = [erpMeter, newMeter]
+
+        r = ReadingsFacade()
+        newMeters = r.checkNewMeters(meterNames)
+
+        self.assertListEqual(newMeters, [newMeter])
+

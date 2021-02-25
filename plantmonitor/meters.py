@@ -8,7 +8,7 @@ logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
 def telemeasure_meter_names(c):
-    Meter = c.model('giscedata.lectures.comptador')
+    Meter = c.model('giscedata.registrador')
     meter_ids = Meter.search([
         ('technology_type', '=', 'telemeasure'),
         ])

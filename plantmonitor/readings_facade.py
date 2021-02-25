@@ -100,7 +100,18 @@ class ReadingsFacade():
       for plant in Meter.getLastReadingDatesOfAllMeters()
     ]
 
+  def checkNewMeters(self, meterNames):
+    ormMeters = orm.select(m.name for m in Meter)[:]
+    return [m for m in meterNames if m not in ormMeters]
+
   def transfer_ERP_readings_to_model(self):
+
+    meter_names = telemeasure_meter_names(self.client)
+
+    newMeters = checkNewMeters(meter_names)
+
+    if newMeters:
+      logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
 
     plants_data = self.getNewMetersReadings()
 
