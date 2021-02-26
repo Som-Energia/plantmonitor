@@ -278,7 +278,10 @@ class Plant(database.Entity):
         if not device:
             logger.warning("New device {}:{}".format(devicetype, devicename))
             logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
-            self.createDevice(self, classname=devicetype, devicename=devicename)
+            device = self.createDevice(self, classname=devicetype, devicename=devicename)
+        if not device:
+            logger.warning("Unknown device type {}".format(devicetype))
+            return None
         return [device.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
 
     def insertPlantData(self, plantdata):
