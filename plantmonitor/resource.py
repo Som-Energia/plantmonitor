@@ -89,6 +89,7 @@ class ProductionDevice():
     def get_registers(self):
         devices_registers = []
         for _, dev in self.modmap.items():
+            logger.debug("Getting registers for device {} of type {}".format(self.name, self.type))
             registers = dev.get_registers(self.protocol)
             metrics = {}
             metrics['name'] = self.name
@@ -140,7 +141,7 @@ class ProductionProtocolTcp(ProductionProtocol):
 
     def connect(self):
         if not self.client:
-            logger.info("stablishing connection - %s" % self.ip)
+            logger.info("Establishing connection - %s" % self.ip)
             client = ModbusTcpClient(self.ip,
                                     timeout=self.timeout,
                                     RetryOnEmpty=True,
@@ -150,7 +151,7 @@ class ProductionProtocolTcp(ProductionProtocol):
             client.connect()
             self.client = client
         else:
-            logger.info("connection already stablished")
+            logger.info("connection already established")
 
     def disconnect(self):
         logger.info("closing connection")
