@@ -655,6 +655,28 @@ class Models_Test(unittest.TestCase):
     def __test__forecastMetadata(self):
         pass
 
+    def test__createDevice(self):
+        oneplant = Plant(name="Alice", codename="LaSuisse")
+        oneplant.createDevice(oneplant, "Inverter", "Bob")
+
+        plantData = oneplant.exportPlant()
+
+        expectedPlant = {"name": "Alice",
+            "codename": "LaSuisse",
+            "description": '',
+            "meters": [],
+            "inverters": [{
+                "inverter": { "name": "Bob" },
+            }],
+            "irradiationSensors": [],
+            "temperatureAmbientSensors": [],
+            "temperatureModuleSensors": [],
+            "integratedSensors": [],
+        }
+
+        self.assertDictEqual(plantData, expectedPlant)
+
+
     def test__plantData(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)

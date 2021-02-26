@@ -253,12 +253,32 @@ class Plant(database.Entity):
             return SensorIntegratedIrradiation.get(name=devicename)
         return None
 
+    def createDevice(self, plant, classname, devicename):
+        #TODO generalize this
+        #TODO distinguish between failure due to missing name and unknown class
+        if classname == "Meter":
+            return Meter(plant=plant, name=devicename)
+        if classname == "Inverter":
+            return Inverter(plant=plant, name=devicename)
+        if classname == "ForecastMetadata":
+            return ForecastMetadata(plant=plant, name=devicename)
+        if classname == "SensorIrradiation":
+            return SensorIrradiation(plant=plant, name=devicename)
+        if classname == "SensorTemperatureAmbient":
+            return SensorTemperatureAmbient(plant=plant, name=devicename)
+        if classname == "SensorTemperatureModule":
+            return SensorTemperatureModule(plant=plant, name=devicename)
+        if classname == "SensorIntegratedIrradiation":
+            return SensorIntegratedIrradiation(plant=plant, name=devicename)
+        return None
+
     def insertDeviceData(self, devicedata, packettime=None):
         devicetype, devicename = devicedata["id"].split(":")
         device = self.str2model(classname=devicetype, devicename=devicename)
         if not device:
-            logger.error("unknown device {}:{}".format(devicetype, devicename))
-            return None
+            logger.warning("New device {}:{}".format(devicetype, devicename))
+            logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
+            self.createDevice(self, classname=devicetype, devicename=devicename)
         return [device.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
 
     def insertPlantData(self, plantdata):
