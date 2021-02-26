@@ -112,33 +112,31 @@ def task():
 
         plants_registers = plant.get_registers()
 
-        logger.debug("plant Registers: {}".format(plants_registers))
+        logger.debug("plants Registers: {}".format(plants_registers))
 
-        if len(plants_registers) == 0:
-            logger.error("plant Registers is empty {}".format(plants_registers))
-            return
+        if len(plants_registers) > 0:
+            logger.error("plants Registers: {}".format(plants_registers))
 
         if plantname not in plants_registers[0]:
-            logger.error("plant Registers does not have plant {} plant registers: {}".format(plantname, plants_registers))
+            logger.error("plant {} is not in registers {}. Check the plant modmap.".format(plantname, plants_registers[0].keys()))
             return
 
-        devices_registers = plants_registers[0][plantname]
+        plant_registers = plants_registers[0][plantname]
 
-        logger.debug("device Registers: {}".format(devices_registers))
+        plant_data = registers_to_plant_data(plantname, plant_registers)
 
-        plant_data = registers_to_plant_data(plant.name, devices_registers)
         if not plant_data:
             logger.error("Registers to plant data returned {}".format(plant_data))
-        else:
-    
-            ponyStorage = PonyMetricStorage()
-            #apiStorage = ApiMetricStorage(url='http://')
-    
-            logger.info("**** Saving data in database ****")
-            logger.debug("plant_data: {}".format(plant_data))
-    
-            ponyStorage.insertPlantData(plant_data)
-            # apiStorage.insertPlantData(plant_data)
+            return
+
+        ponyStorage = PonyMetricStorage()
+        #apiStorage = ApiMetricStorage(url='http://')
+
+        logger.info("**** Saving data in database ****")
+        logger.debug("plant_data: {}".format(plant_data))
+
+        ponyStorage.insertPlantData(plant_data)
+        # apiStorage.insertPlantData(plant_data)
 
     except Exception as err:
         logger.exception("[ERROR] %s" % err)

@@ -48,7 +48,7 @@ def alcolea_sensorTemperature_to_plantadata(sensor_name, sensorTemperature_regis
         'readings': []
     }
     for register in sensorTemperature_registers:
-        time = sensorTemperature_registers['time']
+        time = sensorTemperature_registers['time'] if 'time' in sensorTemperature_registers else datetime.datetime.utcnow()
         temperature_dc = sensorTemperature_registers['temperature_dc']
         temperature_dc = int(round((temperature_dc*0.1-25)*100))
         reading = {
@@ -67,7 +67,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
     for register in inverter_registers:
-        time = inverter_registers['time']
+        time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.utcnow()
         pac_r_w = inverter_registers['pac_r_w']
         pac_s_w = inverter_registers['pac_s_w']
         pac_t_w = inverter_registers['pac_t_w']
@@ -134,7 +134,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
     for register in inverter_registers:
-        time = inverter_registers['time']
+        time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.utcnow()
         #TODO meld toghether Uint16 _h _l into Uint32
         energy_wh = int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))*10
         power_w = int(round(inverter_registers['ActivePower_dW']/10))
@@ -197,7 +197,7 @@ def erp_meter_readings_to_plant_data(measures):
 def registers_to_plant_data(plant_name, devices_registers):
     #TODO design this per-plant or per model
     if plant_name == 'Alcolea' or plant_name == 'Florida':
-        return alcolea_registers_to_plantdata(devices_registers, plant_name)
+        return alcolea_registers_to_plantdata(devices_registers, plantName=plant_name)
     if plant_name == 'Fontivsolar':
         return fontivsolar_registers_to_plantdata(devices_registers)
     else:
