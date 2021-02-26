@@ -110,19 +110,35 @@ def task():
             logger.error('Error loading yaml definition file...')
             sys.exit(-1)
 
-        devices_registers = plant.get_registers()
+        plants_registers = plant.get_registers()
 
-        logger.debug("Registers: {}".format(devices_registers))
+        logger.debug("plant Registers: {}".format(plants_registers))
+
+        if len(plants_registers) == 0:
+            logger.error("plant Registers is empty {}".format(plants_registers))
+            return
+
+        if plantname not in plants_registers[0]:
+            logger.error("plant Registers does not have plant {} plant registers: {}".format(plantname, plants_registers))
+            return
+
+        devices_registers = plants_registers[0][plantname]
+
+        logger.debug("device Registers: {}".format(devices_registers))
 
         plant_data = registers_to_plant_data(plant.name, devices_registers)
-
-        ponyStorage = PonyMetricStorage()
-        #apiStorage = ApiMetricStorage(url='http://')
-
-        logger.info("**** Saving data in database ****")
-
-        ponyStorage.insertPlantData(plant_data)
-        # apiStorage.insertPlantData(plant_data)
+        if not plant_data:
+            logger.error("Registers to plant data returned {}".format(plant_data))
+        else:
+    
+            ponyStorage = PonyMetricStorage()
+            #apiStorage = ApiMetricStorage(url='http://')
+    
+            logger.info("**** Saving data in database ****")
+            logger.debug("plant_data: {}".format(plant_data))
+    
+            ponyStorage.insertPlantData(plant_data)
+            # apiStorage.insertPlantData(plant_data)
 
     except Exception as err:
         logger.exception("[ERROR] %s" % err)

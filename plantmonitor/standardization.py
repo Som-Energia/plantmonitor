@@ -13,8 +13,6 @@ logger = logging.getLogger("plantmonitor")
 
 import os
 
-import datetime
-
 def alcolea_sensorTemperature_to_plantadata(alcolea_sensorTemperature_registers):
     logger.error("Not implemented yet")
 
@@ -94,10 +92,11 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
 
     return inverter_registers_plantdata
 
-def alcolea_registers_to_plantdata(devices_registers):
+def alcolea_registers_to_plantdata(devices_registers, plantName='Alcolea'):
 
     plant_data = {
-        'plant': 'Alcolea',
+        'plant': plantName,
+        'time': datetime.datetime.utcnow(),
         'devices': []
     }
 
@@ -163,6 +162,7 @@ def fontivsolar_registers_to_plantdata(devices_registers):
 
     plant_data = {
         'plant': 'Fontivsolar',
+        'time': datetime.datetime.utcnow(),
         'devices': []
     }
 
@@ -196,8 +196,8 @@ def erp_meter_readings_to_plant_data(measures):
 
 def registers_to_plant_data(plant_name, devices_registers):
     #TODO design this per-plant or per model
-    if plant_name == 'Alcolea':
-        return alcolea_registers_to_plantdata(devices_registers)
+    if plant_name == 'Alcolea' or plant_name == 'Florida':
+        return alcolea_registers_to_plantdata(devices_registers, plant_name)
     if plant_name == 'Fontivsolar':
         return fontivsolar_registers_to_plantdata(devices_registers)
     else:
