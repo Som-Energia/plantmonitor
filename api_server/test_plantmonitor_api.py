@@ -209,12 +209,12 @@ class Api_Test(unittest.TestCase):
                 }]
             }]
         }
- 
+
         expecteddata = {
-            "plant": "Alcolea", 
-            "devices": 
+            "plant": "Alcolea",
+            "devices":
             [{
-                "id": "Inverter:inversor1", 
+                "id": "Inverter:inversor1",
                 "readings": []
             },
             {
@@ -231,7 +231,7 @@ class Api_Test(unittest.TestCase):
             self.setUpPlant()
             plant_name = data['plant']
             SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
-            
+
             response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
 
             # check reading content
@@ -239,9 +239,64 @@ class Api_Test(unittest.TestCase):
             plantdata = storage.plantData(plant_name)
 
             self.assertDictEqual(
-                plantdata, 
+                plantdata,
                 expecteddata
             )
+
+
+    def test__api_putPlantReadings__None_reading(self):
+
+        time = datetime.datetime.now(datetime.timezone.utc)
+        thermoname = "thermometer1"
+        data = {
+            "plant": "Alcolea",
+            "version": "1.0",
+            "time": time.isoformat(), #consider using fastapi.jsonable_encoder
+            "devices":
+            [{
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
+                "readings":
+                [{
+                    "temperature_dc": None,
+                    "time": time.isoformat(),
+                }]
+            }]
+        }
+
+        expecteddata = {
+            "plant": "Alcolea",
+            "devices":
+            [{
+                "id": "Inverter:inversor1",
+                "readings": []
+            },
+            {
+                "id": "SensorTemperatureAmbient:{}".format(thermoname),
+                "readings":
+                [{
+                    "temperature_dc": None,
+                    "time": time,
+                }]
+            }]
+        }
+
+        with orm.db_session:
+            self.setUpPlant()
+            plant_name = data['plant']
+            SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
+
+            response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
+            print(response.text)
+
+            # check reading content
+            storage = PonyMetricStorage()
+            plantdata = storage.plantData(plant_name)
+
+            self.assertDictEqual(
+                plantdata,
+                expecteddata
+            )
+
 
 
 # vim: et sw=4 ts=4

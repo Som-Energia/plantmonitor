@@ -23,7 +23,7 @@ from typing import (
 #TODO find a way to not use Union because of time
 class Device(BaseModel):
     id: str
-    readings: List[Dict[str, Union[int, datetime.datetime]]]
+    readings: List[Dict[str, Union[int, datetime.datetime, None]]]
 
 class PlantReading(BaseModel):
     plant: str
