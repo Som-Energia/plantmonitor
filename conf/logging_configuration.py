@@ -31,5 +31,15 @@ LOGGING = {
             'propagate': True,
             'handlers': ['console'],
         },
+        'uvicorn': {
+            'level': 'DEBUG',
+            'propagate': True,
+            'handlers': ['console'],
+        },
+       'gunicorn': {
+            'level': 'DEBUG',
+            'propagate': True,
+            'handlers': ['console'],
+        },
     }
 }
