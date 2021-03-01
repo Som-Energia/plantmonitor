@@ -11,6 +11,8 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+from ORM.orm_util import connectDatabase
+
 from plantmonitor.task import PonyMetricStorage
 from yamlns import namespace as ns
 
@@ -32,6 +34,7 @@ class PlantReading(BaseModel):
     devices: List[Device]
 
 api = FastAPI()
+connectDatabase()
 
 @api.get('/version')
 def api_version():
