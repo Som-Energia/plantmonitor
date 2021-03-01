@@ -136,9 +136,10 @@ def task():
         logger.info("**** Saving data in database ****")
         logger.debug("plant_data: {}".format(plant_data))
 
+        logger.info("**** Saving data in Api ****")
         ponyStorage.insertPlantData(plant_data)
         result = apiStorage.insertPlantData(plant_data)
-        print(result)
+        logger.debug("api response: {}".format(result))
 
     except Exception as err:
         logger.exception("[ERROR] %s" % err)
