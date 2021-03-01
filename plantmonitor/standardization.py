@@ -96,6 +96,7 @@ def alcolea_registers_to_plantdata(devices_registers, plantName='Alcolea'):
 
     plant_data = {
         'plant': plantName,
+        'version': '1.0',
         'time': datetime.datetime.utcnow(),
         'devices': []
     }
@@ -162,6 +163,7 @@ def fontivsolar_registers_to_plantdata(devices_registers):
 
     plant_data = {
         'plant': 'Fontivsolar',
+        'version': '1.0',
         'time': datetime.datetime.utcnow(),
         'devices': []
     }

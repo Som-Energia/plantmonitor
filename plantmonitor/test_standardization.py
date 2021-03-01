@@ -116,6 +116,7 @@ class Standardization_Test(unittest.TestCase):
 
         expected_plant_data = {
             'plant': plant_name,
+            'version': '1.0',
             'time': packet_time,
             'devices':
             [{
@@ -160,6 +161,7 @@ class Standardization_Test(unittest.TestCase):
 
         expected_plant_data = {
             'plant': plant_name,
+            'version': '1.0',
             'time': packet_time,
             'devices':
             [{
@@ -211,6 +213,7 @@ class Standardization_Test(unittest.TestCase):
 
         expected_plant_data = {
             'plant': 'Alcolea',
+            'version': '1.0',
             'time': packet_time,
             'devices': []
         }
