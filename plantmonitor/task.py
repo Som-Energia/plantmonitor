@@ -105,6 +105,7 @@ def task():
 
         plant = ProductionPlant()
         plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
+        apiconfig = envinfo.API_CONFIG
 
         if not plant.load('conf/modmap.yaml', plantname):
             logger.error('Error loading yaml definition file...')
@@ -130,7 +131,7 @@ def task():
             return
 
         ponyStorage = PonyMetricStorage()
-        #apiStorage = ApiMetricStorage(url='http://')
+        apiStorage = ApiMetricStorage(apiconfig)
 
         logger.info("**** Saving data in database ****")
         logger.debug("plant_data: {}".format(plant_data))

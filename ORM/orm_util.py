@@ -95,7 +95,7 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
         if drop_tables:
             print("Dropping all tables")
-            database.drop_all_tables()
+            database.drop_all_tables(with_all_data=True)
         # database.disconnect()
 
         # map the models to the database

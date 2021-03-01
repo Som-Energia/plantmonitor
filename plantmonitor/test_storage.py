@@ -62,6 +62,7 @@ class ApiClient_Test(unittest.TestCase):
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
 
+        # log_level = "debug"
         log_level = "warning"
 
         # create api and launch local test server
@@ -115,7 +116,7 @@ class ApiClient_Test(unittest.TestCase):
 
         return plant_name, inverter_name, metrics
 
-    def createPlant(self):
+    def createPlantLegacy(self):
         plant_name = 'SomEnergia_Alibaba'
         inverter_name = 'Mary'
         with orm.db_session:
@@ -141,6 +142,59 @@ class ApiClient_Test(unittest.TestCase):
             storage = PonyMetricStorage()
             storage.storeInverterMeasures(plant_name, inverter_name, metrics)
 
+    def samplePlantNS(self):
+        plantNS = ns.loads("""\
+                name: alibaba
+                codename: SCSOM04
+                description: la bonica planta
+                inverters:
+                - inverter:
+                    name: '5555'
+                temperatureAmbientSensors:
+                - temperatureAmbientSensor:
+                    name: benjami""")
+        return plantNS
+
+    def samplePlantData(self, time):
+        plantData = {
+              "plant": "alibaba",
+              "devices":
+                sorted([{
+                    "id": "Meter:1234578",
+                    "readings": [{
+                        "time": time,
+                        "export_energy_wh": 1,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    }],
+                },
+                {
+                    "id": "SensorTemperatureAmbient:5555",
+                    "readings": [{
+                        "time": time,
+                        "temperature_dc": 1700,
+                    }]
+                }],key=lambda d: d['id']),
+              }
+        return plantData
+
+    def createPlant(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename, description=plantNS.description)
+        alibaba = alibaba.importPlant(plantNS)
+        orm.flush()
+        # do we need to add some data?
+        # time = datetime.datetime.utcnow()
+        # plant_data = self.samplePlantData(time)
+
+        # storage = PonyMetricStorage()
+        # storage.insertPlantData(plant_data)
+
+
     def test__api_hello_version(self):
         response = requests.get("http://localhost:{}/version".format(self.apiPort()))
         self.assertEqual(response.status_code, 200)
@@ -159,14 +213,44 @@ class ApiClient_Test(unittest.TestCase):
 
         self.assertTrue(result)
 
-    ## TODO
-    def __test__ApiMetricStorage__storePlantData(self):
-        plant_data = {}
+    def test__ApiMetricStorage_insertPlantData__empty(self):
+        plant_data = {
+            "plant": "Alibaba",
+            "version": "1.0",
+        }
 
         apiClient = self.createApiClient()
-        result = apiClient.storePlantData(plant_data)
+        result = apiClient.insertPlantData(plant_data)
 
-        self.assertTrue(result)
+        expectedError = {"detail":[{"loc":["body","time"],"msg":"field required","type":"value_error.missing"},{"loc":["body","devices"],"msg":"field required","type":"value_error.missing"}]}
+
+        self.assertDictEqual(result, expectedError)
+
+    def test__ApiMetricStorage_insertPlantData__someData(self):
+        self.createPlant()
+        time = datetime.datetime.utcnow()
+
+        plant_data = {
+            "plant": "alibaba",
+            "version": "1.0",
+            "time": time.isoformat(),
+            "devices":
+            [{
+                "id": "SensorTemperatureAmbient:benjami",
+                "readings":
+                [{
+                        "temperature_dc": 1200,
+                        "time": time.isoformat(),
+                }]
+            }]
+        }
+
+        apiClient = self.createApiClient()
+        result = apiClient.insertPlantData(plant_data)
+        print(result)
+        # expectedResponse = {"detail":[{"loc":["body","time"],"msg":"OK","type":"None"},{"loc":["body","devices"],"msg":"OK","type":"None"}]}
+
+        self.assertDictEqual(result, plant_data)
 
 
 class Storage_Test(unittest.TestCase):
@@ -195,6 +279,32 @@ class Storage_Test(unittest.TestCase):
         database.drop_all_tables(with_all_data=True)
         database.disconnect()
 
+    def samplePlantData(self, time):
+        plantData = {
+            "plant": "alibaba",
+            "devices":
+                sorted([{
+                    "id": "Meter:1234578",
+                    "readings": [{
+                        "time": time,
+                        "export_energy_wh": 1,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    }],
+                },
+                {
+                    "id": "SensorTemperatureAmbient:5555",
+                    "readings": [{
+                        "time": time,
+                        "temperature_dc": 1700,
+                    }]
+                }],key=lambda d: d['id']),
+            }
+        return plantData
+
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import envinfo
@@ -203,6 +313,14 @@ class Storage_Test(unittest.TestCase):
     def test_connection(self):
         with orm.db_session:
             self.assertEqual(database.get_connection().status, 1)
+
+    def test__datetimeToStr(self):
+        time = datetime.datetime.utcnow()
+        plant_data = self.samplePlantData(time)
+        ApiMetricStorage.datetimeToStr(plant_data)
+        expected_plant_data = self.samplePlantData(time.isoformat())
+
+        self.assertDictEqual(plant_data, expected_plant_data)
 
     #TODO deprecated as soon as we switch plant_data
     # test instead registries_to_plant_data in task.py

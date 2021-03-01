@@ -7,3 +7,5 @@ devel_env.read_env(os.path.join(BASE_DIR, '.env.devel'), override=True)
 DB_CONF = devel_env.json('DATABASE_CONF')
 
 ACTIVEPLANT_CONF = devel_env.json('PLANT_CONF')
+
+API_CONFIG = devel_env.json('API_CONFIG')

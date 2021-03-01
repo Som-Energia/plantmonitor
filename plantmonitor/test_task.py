@@ -22,6 +22,11 @@ class Task_Test(unittest.TestCase):
 
         plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
 
+        apiconfig = envinfo.API_CONFIG
+
+        expected_apiconfig = {"api_url":"http://localhost:5000","version":"1.0"}
+        self.assertDictEqual(apiconfig, expected_apiconfig)
+
         result = plant.load('conf/modmap_testing.yaml', plantname)
 
         self.assertTrue(result)

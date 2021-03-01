@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import requests
 
 from pymodbus.client.sync import ModbusTcpClient
@@ -105,11 +106,11 @@ class PonyMetricStorage:
             if not plant:
                 logger.warning("No plant named {}".format(plant_name))
                 return
-            data_time = plant_data["time"]
+            data_time = plant_data["time"] if "time" in plant_data else datetime.datetime.utcnow()
             result = plant.insertPlantData(plant_data)
             print(result)
             return result
-            
+
 
 class ApiMetricStorage:
     def __init__(self, config):
@@ -125,7 +126,7 @@ class ApiMetricStorage:
         time = datetime.datetime.now(datetime.timezone.utc)
 
         plant_data = {
-            "plant": plant_name, 
+            "plant": plant_name,
             "version": self.version,
             "time": time.isoformat(),
         }
@@ -142,6 +143,31 @@ class ApiMetricStorage:
 
         return plant_data
 
+    # TODO temporary hack. make json support datetime
+    @staticmethod
+    def datetimeToStr(plant_data):
+        if 'time' in plant_data and not isinstance(plant_data['time'], str):
+            plant_data['time'] = plant_data['time'].isoformat()
+
+        if 'devices' in plant_data:
+            for d in plant_data['devices']:
+                if 'readings' in d:
+                    for r in d['readings']:
+                        if 'time' in r and not isinstance(r['time'], str):
+                            r['time'] = r['time'].isoformat()
+
+    def insertPlantData(self, plant_data):
+        plant_name = plant_data['plant']
+        self.datetimeToStr(plant_data)
+        r = requests.put("{}/plant/{}/readings".format(self.api_url, plant_name), json=plant_data)
+        response_data = json.loads(r.text)
+        if r.status_code == 200:
+            return response_data
+
+        logger.error("Api error code {} response: {}".format(r.status_code, r))
+        return response_data
+
+
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         # connect to api and put readings
 
@@ -156,15 +182,15 @@ class ApiMetricStorage:
             # if inverter_name not in inverter:
             #     logger.debug("No inverter named {}".format(inverter_name))
             #     return
-            
+
             reading = dict(metrics)
             readings = [reading]
 
             device_type = "Inverter"
             plant_data = self.plant_data(
-                plant_name=plant_name, 
+                plant_name=plant_name,
                 device_type=device_type,
-                device_name=inverter_name, 
+                device_name=inverter_name,
                 readings=readings
                 )
 
