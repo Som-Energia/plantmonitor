@@ -107,9 +107,12 @@ def legacyInfluxUpload():
         logger.error('Error loading yaml definition file...')
         sys.exit(-1)
 
+    data = ns.load('conf/modmapLegacyInflux.yaml')
+    for plant_data in data.plantmonitor:
+        influxdb = plant_data.influx
     plantInfluxRegisters = plantInflux.get_registers()
 
-    fluxStorage = InfluxMetricStorage(plantInflux.db)
+    fluxStorage = InfluxMetricStorage(influxdb)
     for i, device in enumerate(plantInflux.devices):
         inverter_name = plantInflux.devices[i].name
         inverter_registers = plantInfluxRegisters[i]['Alcolea'][0]['fields']
