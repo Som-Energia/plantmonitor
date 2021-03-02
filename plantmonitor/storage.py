@@ -53,6 +53,22 @@ from ORM.models import (
 
 from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
 
+def client_db(db):
+    try:
+        logger.info("Connecting to Influxdb")
+        flux_client = InfluxDBClient(db['influxdb_ip'],
+                                db['influxdb_port'],
+                                db['influxdb_user'],
+                                db['influxdb_password'],
+                                db['influxdb_database'],
+                                ssl=db['influxdb_ssl'],
+                                verify_ssl=db['influxdb_verify_ssl'])
+    except Exception as e:
+        logger.warning("Failed to connect to influx client: {}".format(repr(e)))
+        flux_client = None
+
+    return flux_client
+
 class PonyMetricStorage:
 
     def sensor(self, sensor_fk):
