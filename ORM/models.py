@@ -240,7 +240,7 @@ class Plant(database.Entity):
         if classname == "Meter":
             return Meter.get(name=devicename)
         if classname == "Inverter":
-            return Inverter.get(name=devicename)
+            return Inverter.get(name=devicename, plant=self)
         if classname == "ForecastMetadata":
             return ForecastMetadata.get(name=devicename)
         if classname == "SensorIrradiation":

@@ -391,6 +391,29 @@ class Models_Test(unittest.TestCase):
         for plantData in plantsData:
             self.assertDictEqual(dict(plantData), Plant.get(name=plantData['plant']).plantData(skipEmpty=True))
 
+    def test__Plant_str2model__sameNameDifferentPlant(self):
+        plantsns = self.samplePlantsNS()
+        plantsns.plants[0].plant.inverters[0].inverter.name = '4444'
+        importPlants(plantsns)
+
+        plant = Plant.get(name='alcolea')
+
+        alcoleainverter = plant.str2model('Inverter', '4444')
+        print(alcoleainverter)
+
+        self.assertNotEqual(alcoleainverter, None)
+
+        plant = Plant.get(name='figuerea')
+
+        figuereainverter = plant.str2model('Inverter', '4444')
+        print(figuereainverter)
+
+        self.assertNotEqual(figuereainverter, None)
+
+        self.assertNotEqual(alcoleainverter.plant.name, figuereainverter.plant.name)
+        self.assertTrue(False)
+
+
     def test__Meter_getRegistries__emptyRegistries(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
@@ -401,7 +424,6 @@ class Models_Test(unittest.TestCase):
         expectedRegistries = []
 
         self.assertListEqual(registries, expectedRegistries)
-
 
     def test__Meter_getRegistries__OneRegistry(self):
         alcoleaPlantNS = self.samplePlantNS()
