@@ -100,10 +100,38 @@ def publish_timescale(plant_name, inverter_name, metrics, db):
                 )
             )
 
+def legacyInfluxUpload():
+    plantInflux = ProductionPlant()
+
+    if not plantInflux.load('conf/modmapLegacyInflux.yaml', 'Alcolea'):
+        logger.error('Error loading yaml definition file...')
+        sys.exit(-1)
+
+    plantInfluxRegisters = plantInflux.get_registers()
+
+    fluxStorage = InfluxMetricStorage(plantInflux.db)
+    for i, device in enumerate(plantInflux.devices):
+        inverter_name = plantInflux.devices[i].name
+        inverter_registers = plantInfluxRegisters[i]['Alcolea'][0]['fields']
+        logger.info("**** Saving data in database ****")
+        logger.info("**** Metrics - tag - %s ****" %  inverter_name)
+        logger.info("**** Metrics - tag - location %s ****" % plantInflux.name)
+        logger.info("**** Metrics - fields -  %s ****" % inverter_registers)
+        logger.info("**** Log to flux ****")
+        fluxStorage.storeInverterMeasures(plantInflux.name, inverter_name, inverter_registers)
+
+    logger.info("Sleeping 10 secs")
+    import time
+    time.sleep(10)
+    logger.info("Done influx upload")
+
 def task():
     try:
 
+        legacyInfluxUpload()
+
         plant = ProductionPlant()
+
         plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
         apiconfig = envinfo.API_CONFIG
 
