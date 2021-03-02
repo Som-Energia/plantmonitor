@@ -229,7 +229,7 @@ class InfluxMetricStorage:
         if self._flux is None:
             return
         point = dict(
-            mesurements = 'sistema_inversor',
+            mesurement = 'sistema_inversor',
             tags = dict(
                 location = plant_name,
                 inverter_name = inverter_name,
