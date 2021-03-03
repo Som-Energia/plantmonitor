@@ -168,8 +168,10 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
 # TODO this function will always be the same accros plants
 def fontivsolar_registers_to_plantdata(plant_registers):
 
+    plantName='Fontivsolar'
+
     plant_data = {
-        'plant': 'Fontivsolar',
+        'plant': plantName,
         'version': '1.0',
         'time': datetime.datetime.utcnow(),
         'devices': []
