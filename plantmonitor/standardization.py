@@ -74,7 +74,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
         power_w = int(round(pac_r_w + pac_s_w + pac_t_w))
         energy_wh = int(round((inverter_registers['daily_energy_h_wh'] << 16) + inverter_registers['daily_energy_l_wh']))
         uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
-        temperature_dc = int(round(inverter_registers['temp_inv_c']*100))
+        temperature_dc = int(round(inverter_registers['temp_inv_dc']))
 
         reading = {
             'energy_wh': energy_wh,

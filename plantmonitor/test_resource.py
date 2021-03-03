@@ -111,7 +111,7 @@ protocol:
                     ('powerreactive_t_v', 0),
                     ('powerreactive_r_v', 0),
                     ('powerreactive_s_v', 0),
-                    ('temp_inv_c', 320),
+                    ('temp_inv_dc', 320),
                     ('time', dt.datetime(2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc))
                 ])
 

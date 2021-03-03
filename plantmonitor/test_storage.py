@@ -110,7 +110,7 @@ class ApiClient_Test(unittest.TestCase):
             ('powerreactive_t_v', 0),
             ('powerreactive_r_v', 0),
             ('powerreactive_s_v', 0),
-            ('temp_inv_c', 320),
+            ('temp_inv_dc', 320),
             ('time', datetime.datetime.now(datetime.timezone.utc)),
         ])
 
@@ -135,7 +135,7 @@ class ApiClient_Test(unittest.TestCase):
                     ('powerreactive_t_v', 0),
                     ('powerreactive_r_v', 0),
                     ('powerreactive_s_v', 0),
-                    ('temp_inv_c', 320),
+                    ('temp_inv_dc', 320),
                     ('time', datetime.datetime.now(datetime.timezone.utc)),
                     ])
 
@@ -343,7 +343,7 @@ class Storage_Test(unittest.TestCase):
                     ('powerreactive_t_v', 0),
                     ('powerreactive_r_v', 0),
                     ('powerreactive_s_v', 0),
-                    ('temp_inv_c', 320),
+                    ('temp_inv_dc', 320),
                     ('time', datetime.datetime.now(datetime.timezone.utc)),
                     # Sensors registers  obtained from inverters
                     ('probe1value', 443),
@@ -386,7 +386,7 @@ class Storage_Test(unittest.TestCase):
                 ('powerreactive_t_v', 0),
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
-                ('temp_inv_c', 320),
+                ('temp_inv_dc', 320),
                 ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters
                 ('probe1value', 443),
@@ -419,7 +419,7 @@ class Storage_Test(unittest.TestCase):
                 ('powerreactive_t_v', 0),
                 ('powerreactive_r_v', 0),
                 ('powerreactive_s_v', 0),
-                ('temp_inv_c', 320),
+                ('temp_inv_dc', 320),
                 ('time', datetime.datetime.now(datetime.timezone.utc)),
                 # Sensors registers  obtained from inverters
                 ('probe1value', 443),

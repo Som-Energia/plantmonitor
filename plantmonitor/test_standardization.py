@@ -38,7 +38,7 @@ class Standardization_Test(unittest.TestCase):
                     ('powerreactive_t_v', 0),
                     ('powerreactive_r_v', 0),
                     ('powerreactive_s_v', 0),
-                    ('temp_inv_c', 320),
+                    ('temp_inv_dc', 320),
                     ('time', dt.datetime(2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc))
                 ])
 
@@ -117,7 +117,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': time,
                 }]
             }
@@ -153,7 +153,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': registers_time,
                 }]
             }],
@@ -190,7 +190,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': registers_time,
                 }]
             },{
@@ -204,7 +204,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': registers_time,
                 }]
             },{
@@ -218,7 +218,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': registers_time,
                 }]
             }],
@@ -260,7 +260,7 @@ class Standardization_Test(unittest.TestCase):
                     'voltage_cc_mV': None,
                     'voltage_ca_mV': None,
                     'uptime_h': 18827,
-                    'temperature_dc': 32000,
+                    'temperature_dc': 320,
                     'time': time,
                 }]
             }],

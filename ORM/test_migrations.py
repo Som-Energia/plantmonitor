@@ -248,7 +248,7 @@ class Migrations_Test(unittest.TestCase):
             time = time.replace(tzinfo=dt.timezone.utc)
             temp_inv = 190
             values = [0, 0, 492, 29998, 0, 16166, 0, 0, 0, 0, 0, 0]
-            inverter.insertRegistry(*values, temp_inv_c=temp_inv, time=time)
+            inverter.insertRegistry(*values, temp_inv_dc=temp_inv, time=time)
 
             orm.select(r for r in InverterRegistry).show()
 
