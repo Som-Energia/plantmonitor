@@ -238,19 +238,20 @@ class Plant(database.Entity):
         #TODO generalize this
         #TODO distinguish between failure due to missing name and unknown class
         if classname == "Meter":
-            return Meter.get(name=devicename)
+            return Meter.get(name=devicename, plant=self)
         if classname == "Inverter":
             return Inverter.get(name=devicename, plant=self)
         if classname == "ForecastMetadata":
-            return ForecastMetadata.get(name=devicename)
+            return ForecastMetadata.get(name=devicename, plant=self)
         if classname == "SensorIrradiation":
-            return SensorIrradiation.get(name=devicename)
+            return SensorIrradiation.get(name=devicename, plant=self)
         if classname == "SensorTemperatureAmbient":
-            return SensorTemperatureAmbient.get(name=devicename)
+            return SensorTemperatureAmbient.get(name=devicename, plant=self)
         if classname == "SensorTemperatureModule":
-            return SensorTemperatureModule.get(name=devicename)
+            return SensorTemperatureModule.get(name=devicename, plant=self)
         if classname == "SensorIntegratedIrradiation":
-            return SensorIntegratedIrradiation.get(name=devicename)
+            return SensorIntegratedIrradiation.get(name=devicename, plant=self)
+        logger.error("Device {} {} not found".format(classname, devicename))
         return None
 
     def createDevice(self, plant, classname, devicename):

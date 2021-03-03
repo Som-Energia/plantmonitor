@@ -54,9 +54,26 @@ def connectDatabase():
 
     databaseInfo = envinfo.DB_CONF
 
-    database.bind(**databaseInfo)
-
-    database.generate_mapping(create_tables=False, check_tables=False)
+    # TODO find a better way to avoid BindingError if database was bound from another test file
+    try:
+        # unbind necessary when mixing databases
+        database.bind(**databaseInfo)
+    except orm.core.BindingError as e:
+        # TODO: capturing this exception is pontentially dangerous if databaseInfo changed
+        # let's be sure
+        with orm.db_session:
+            dsn = database.get_connection().dsn
+            dsnDict = {pair.split('=')[0]:pair.split('=')[1] for pair in dsn.split(' ')}
+            dsnDict['provider'] = database.provider_name
+            dsnDict['database'] = dsnDict.pop('dbname')
+            if 'password' in databaseInfo:
+                dsnDict['password'] = databaseInfo['password']
+            if not databaseInfo == dsnDict:
+                print("Database was already bound to a different database.")
+                raise e
+    else:
+        database.bind(**databaseInfo)
+        database.generate_mapping(create_tables=False, check_tables=False)
 
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 

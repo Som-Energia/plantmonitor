@@ -395,23 +395,21 @@ class Models_Test(unittest.TestCase):
         plantsns = self.samplePlantsNS()
         plantsns.plants[0].plant.inverters[0].inverter.name = '4444'
         importPlants(plantsns)
+        orm.flush()
 
         plant = Plant.get(name='alcolea')
 
         alcoleainverter = plant.str2model('Inverter', '4444')
-        print(alcoleainverter)
 
         self.assertNotEqual(alcoleainverter, None)
 
         plant = Plant.get(name='figuerea')
 
         figuereainverter = plant.str2model('Inverter', '4444')
-        print(figuereainverter)
 
         self.assertNotEqual(figuereainverter, None)
 
         self.assertNotEqual(alcoleainverter.plant.name, figuereainverter.plant.name)
-        self.assertTrue(False)
 
 
     def test__Meter_getRegistries__emptyRegistries(self):
@@ -777,6 +775,7 @@ class Models_Test(unittest.TestCase):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
         plantData = {
