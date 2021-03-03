@@ -103,7 +103,7 @@ def publish_timescale(plant_name, inverter_name, metrics, db):
 def legacyInfluxUpload():
     plantInflux = ProductionPlant()
 
-    if not plantInflux.load('conf/modmap.yaml', 'Alcolea'):
+    if not plantInflux.load('conf/modmapLegacyInflux.yaml', 'Alcolea'):
         logger.error('Error loading yaml definition file...')
         sys.exit(-1)
 
@@ -141,7 +141,7 @@ def task():
 
         apiconfig = envinfo.API_CONFIG
 
-        if not plant.load('conf/modmapApi.yaml', plantname):
+        if not plant.load('conf/modmap.yaml', plantname):
             logger.error('Error loading yaml definition file...')
             sys.exit(-1)
 
