@@ -153,9 +153,7 @@ def task():
             logger.error("plant {} is not in registers {}. Check the plant modmap.".format(plantname, plants_registers[0].keys()))
             return
 
-        plant_registers = plants_registers[0][plantname]
-
-        plant_data = registers_to_plant_data(plantname, plant_registers)
+        plant_data = registers_to_plant_data(plantname, plants_registers)
 
         if not plant_data:
             logger.error("Registers to plant data returned {}".format(plant_data))

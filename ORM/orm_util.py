@@ -72,7 +72,6 @@ def connectDatabase():
                 print("Database was already bound to a different database.")
                 raise e
     else:
-        database.bind(**databaseInfo)
         database.generate_mapping(create_tables=False, check_tables=False)
 
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):

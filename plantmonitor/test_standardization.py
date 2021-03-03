@@ -55,6 +55,33 @@ class Standardization_Test(unittest.TestCase):
 
         return registers
 
+    def alibaba_registers_manyInverters(self):
+
+        registers = [{'Alibaba': [{
+            'name': 'Alice',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers(),
+            }]
+        },{'Alibaba': [{
+            'name': 'Bob',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers(),
+            }]
+        },{'Alibaba': [{
+            'name': 'Charlie',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers(),
+            }]
+        }]
+
+        return registers
+
     def sensorIrradiation_registers(self):
         return ns([
                 ('time', dt.datetime(
@@ -103,16 +130,12 @@ class Standardization_Test(unittest.TestCase):
         plant_name = 'Alibaba'
 
         plants_registers = self.alibaba_registers()
-        print(plants_registers)
-        plant_registers = plants_registers[0][plant_name]
 
-        devices_registers = plants_registers[0][plant_name]
-        registers_time = devices_registers[0]['fields']['time']
+        registers_time = plants_registers[0][plant_name][0]['fields']['time']
 
-        plant_data = alcolea_registers_to_plantdata(plant_registers, plantName=plant_name)
+        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
 
         packet_time = plant_data['time']
-
 
         expected_plant_data = {
             'plant': plant_name,
@@ -139,18 +162,80 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
 
+    def test__alcolea_registers_to_plantdata__manyInverters(self):
+
+        plant_name = 'Alibaba'
+
+        plants_registers = self.alibaba_registers_manyInverters()
+
+        registers_time = plants_registers[0][plant_name][0]['fields']['time']
+
+        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
+
+        packet_time = plant_data['time']
+
+        expected_plant_data = {
+            'plant': plant_name,
+            'version': '1.0',
+            'time': packet_time,
+            'devices':
+            [{
+                'id': 'Inverter:Alice',
+                'readings':
+                [{
+                    'energy_wh': 17556,
+                    'power_w': 60000,
+                    'intensity_cc_mA': None,
+                    'intensity_ca_mA': None,
+                    'voltage_cc_mV': None,
+                    'voltage_ca_mV': None,
+                    'uptime_h': 18827,
+                    'temperature_dc': 32000,
+                    'time': registers_time,
+                }]
+            },{
+                'id': 'Inverter:Bob',
+                'readings':
+                [{
+                    'energy_wh': 17556,
+                    'power_w': 60000,
+                    'intensity_cc_mA': None,
+                    'intensity_ca_mA': None,
+                    'voltage_cc_mV': None,
+                    'voltage_ca_mV': None,
+                    'uptime_h': 18827,
+                    'temperature_dc': 32000,
+                    'time': registers_time,
+                }]
+            },{
+                'id': 'Inverter:Charlie',
+                'readings':
+                [{
+                    'energy_wh': 17556,
+                    'power_w': 60000,
+                    'intensity_cc_mA': None,
+                    'intensity_ca_mA': None,
+                    'voltage_cc_mV': None,
+                    'voltage_ca_mV': None,
+                    'uptime_h': 18827,
+                    'temperature_dc': 32000,
+                    'time': registers_time,
+                }]
+            }],
+        }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_plant_data, plant_data)
+
     def test__alcolea_registers_to_plantdata__notime(self):
 
         plant_name = 'Alibaba'
 
         plants_registers = self.alibaba_registers()
 
-        devices_registers = plants_registers[0][plant_name]
-        del devices_registers[0]['fields']['time']
+        del plants_registers[0][plant_name][0]['fields']['time']
 
-        plant_registers = plants_registers[0][plant_name]
-
-        plant_data = alcolea_registers_to_plantdata(plant_registers, plantName=plant_name)
+        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
         packet_time = plant_data['time']
 
         self.assertIn('time', plant_data['devices'][0]['readings'][0])

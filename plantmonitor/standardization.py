@@ -92,7 +92,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
 
     return inverter_registers_plantdata
 
-def alcolea_registers_to_plantdata(devices_registers, plantName='Alcolea'):
+def alcolea_registers_to_plantdata(plant_registers, plantName='Alcolea'):
 
     plant_data = {
         'plant': plantName,
@@ -101,30 +101,37 @@ def alcolea_registers_to_plantdata(devices_registers, plantName='Alcolea'):
         'devices': []
     }
 
-    for device_register in devices_registers:
-
-        device_readings_packet = {}
-
-        if 'name' not in device_register:
-            logger.error("Device {} has no name".format(device_register))
-            continue
-
-        device_name = device_register['name']
-
-        if 'type' not in device_register:
-            logger.error("Device {} has no type".format(device_register))
-            continue
-        elif device_register['type'] == 'inverter':
-            device_readings_packet = alcolea_inverter_to_plantdata(device_name, device_register['fields'])
-        elif device_register['type'] == 'sensorTemperature':
-            device_readings_packet = alcolea_sensorTemperature_to_plantadata(device_register['fields'])
+    for plant_register in plant_registers:
+        if not plantName in plant_register:
+           logger.error("Plant {} not in plant_register {}".format(plantName, plant_register))
         else:
-            print("Unknown device type: {}".format(device_register['type']))
-            continue
+            for device_register in plant_register[plantName]:
+                device_readings_packet = {}
 
-        plant_data['devices'].append(device_readings_packet)
+                if 'name' not in device_register:
+                    logger.error("Device {} has no name".format(device_register))
+                    continue
+
+                device_name = device_register['name']
+
+                if 'type' not in device_register:
+                    logger.error("Device {} has no type".format(device_register))
+                    continue
+                elif device_register['type'] == 'inverter':
+                    device_readings_packet = alcolea_inverter_to_plantdata(device_name, device_register['fields'])
+                elif device_register['type'] == 'sensorTemperature':
+                    device_readings_packet = alcolea_sensorTemperature_to_plantadata(device_register['fields'])
+                else:
+                    print("Unknown device type: {}".format(device_register['type']))
+                    continue
+
+                plant_data['devices'].append(device_readings_packet)
 
     return plant_data
+
+def fontivsolar_sensorTemperature_to_plantadata(sensor_name, sensorTemperature_registers):
+    logger.error("To be implemented")
+
 
 def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
@@ -167,27 +174,31 @@ def fontivsolar_registers_to_plantdata(devices_registers):
         'time': datetime.datetime.utcnow(),
         'devices': []
     }
-
-    for device_register in devices_registers:
-
-        device_readings_packet = {}
-
-        if 'name' not in device_register:
-            logger.error("Device {} has no name".format(device_register))
-            continue
-
-        device_name = device_register['name']
-
-        if 'type' not in device_register:
-            logger.error("Device {} has no type".format(device_register))
-            continue
-        elif device_register['type'] == 'inverter':
-            device_readings_packet = fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])
+    for plant_register in plant_registers:
+        if not plantName in plant_register:
+           logger.error("Plant {} not in plant_register {}".format(plantName, plant_register))
         else:
-            print("Unknown device type: {}".format(device_register['type']))
-            continue
+            for device_register in plant_register[plantName]:
+                device_readings_packet = {}
 
-        plant_data['devices'].append(device_readings_packet)
+                if 'name' not in device_register:
+                    logger.error("Device {} has no name".format(device_register))
+                    continue
+
+                device_name = device_register['name']
+
+                if 'type' not in device_register:
+                    logger.error("Device {} has no type".format(device_register))
+                    continue
+                elif device_register['type'] == 'inverter':
+                    device_readings_packet = fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])
+                elif device_register['type'] == 'sensorTemperature':
+                    device_readings_packet = fontivsolar_sensorTemperature_to_plantadata(device_register['fields'])
+                else:
+                    print("Unknown device type: {}".format(device_register['type']))
+                    continue
+
+                plant_data['devices'].append(device_readings_packet)
 
     return plant_data
 
