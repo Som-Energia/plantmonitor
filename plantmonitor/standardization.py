@@ -166,7 +166,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     return inverter_registers_plantdata
 
 # TODO this function will always be the same accros plants
-def fontivsolar_registers_to_plantdata(devices_registers):
+def fontivsolar_registers_to_plantdata(plant_registers):
 
     plant_data = {
         'plant': 'Fontivsolar',
