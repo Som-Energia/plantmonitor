@@ -123,19 +123,22 @@ def legacyInfluxUpload():
         logger.info("**** Log to flux ****")
         fluxStorage.storeInverterMeasures(plantInflux.name, inverter_name, inverter_registers)
 
-    logger.info("Sleeping 10 secs")
+    logger.info("Sleeping 5 secs")
     import time
-    time.sleep(10)
+    time.sleep(5)
     logger.info("Done influx upload")
 
 def task():
     try:
 
-        legacyInfluxUpload()
+        plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
+
+        # TODO remove legacy
+        if plantname == 'Alcolea':
+            legacyInfluxUpload()
 
         plant = ProductionPlant()
 
-        plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
         apiconfig = envinfo.API_CONFIG
 
         if not plant.load('conf/modmapApi.yaml', plantname):
