@@ -108,7 +108,7 @@ class ReadingsFacade():
 
     meter_names = telemeasure_meter_names(self.client)
 
-    newMeters = checkNewMeters(meter_names)
+    newMeters = self.checkNewMeters(meter_names)
 
     if newMeters:
       logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
