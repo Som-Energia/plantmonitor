@@ -67,12 +67,12 @@ class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
 
-  def getDeviceReadings(self, meterName, lastDate=None, upto=datetime.datetime.utcnow()):
+  def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.utcnow()):
 
     measures = measures_from_date(
       self.client,
       meterName,
-      beyond=lastDate.strftime("%Y-%m-%d %H:%M:%S"),
+      beyond=lastDate and lastDate.strftime("%Y-%m-%d %H:%M:%S"),
       upto=upto.strftime("%Y-%m-%d %H:%M:%S")
     )
 
