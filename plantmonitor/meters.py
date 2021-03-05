@@ -10,7 +10,7 @@ logger = logging.getLogger("plantmonitor")
 def telemeasure_meter_names(c):
     Meter = c.model('giscedata.registrador')
     meter_ids = Meter.search([
-        ('technology_type', '=', 'telemeasure'),
+        ('technology', '=', 'telemeasure'),
         ])
     meters = Meter.read(meter_ids, ['name'])
     return [meter['name'] for meter in meters]
