@@ -71,6 +71,23 @@ class Meters_Test(unittest.TestCase):
             ('2019-06-01 02:00:00', 0, 0, 0, 0, 0, 0),
             ])
 
+    def test__measures_from_date__summerToWintertime_noDuppedDates(self):
+        c = Client(**config.erppeek)
+        meter = '501600324'
+        measures = measures_from_date(c, meter,
+            beyond="2020-10-24 20:00:00",
+            upto  ="2020-10-25 03:00:00",
+        )
+        self.assertTimeSeriesEqual(measures,[
+            ('2020-10-24 21:00:00', 0, 4, 0, 0, 0, 4),
+            ('2020-10-24 22:00:00', 0, 3, 0, 0, 0, 5),
+            ('2020-10-24 23:00:00', 0, 3, 0, 0, 0, 6),
+            #('2020-10-25 00:00:00', 0, 2, 0, 0, 0, 5), # Without wrong data this should be the one
+            #('2020-10-25 01:00:00', 0, 2, 0, 0, 0, 5), # Appears this one, filtered as workaround
+            ('2020-10-25 01:00:00', 0, 3, 0, 0, 0, 6),
+            ('2020-10-25 02:00:00', 0, 3, 0, 0, 0, 5),
+            ])
+
 @unittest.skipIf(True, "requires influx database")
 class MetersFlux_Test(unittest.TestCase):
     from yamlns.testutils import assertNsEqual

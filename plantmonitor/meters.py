@@ -35,6 +35,11 @@ def measures_from_date(c, meter, beyond, upto):
         'ae',
         'utc_timestamp',
         ])
+    # TODO: Workaround to remove dupped dates
+    measures = {
+        measure['utc_timestamp'] : measure
+        for measure in measures
+    }.values()
     return [(
             measure['utc_timestamp'],
             int(measure['ae']),
