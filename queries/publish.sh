@@ -1,7 +1,7 @@
 #!/bin/bash
 # Publishes the sql file as view in the database
 
-# Should define environs PGHOST PGPORT PGUSER PGDATABASE PGOPTIONS
+# Should export PGHOST PGPORT PGUSER PGDATABASE PGPASSWORD PGOPTIONS
 [ -e dbconfig.sh ] && source dbconfig.sh
 
 viewname=${1%.sql}
@@ -9,7 +9,7 @@ filename=$viewname.sql
 echo Publishing \"$viewname\"
 VIEWSQL=$(cat $filename)
 
-psql -d plantmonitor <<EOF
+psql -d $PGDATABASE <<EOF
 DROP VIEW IF EXISTS public.$viewname;
 CREATE VIEW public.$viewname AS
 $VIEWSQL
