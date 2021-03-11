@@ -1,6 +1,6 @@
 #!/bin/bash
-
-for query in *sql;
+views=${@:-*sql}
+for query in $views;
 do
 	echo "Running $query"
 	base="${query%.sql}"
