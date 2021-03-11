@@ -6,8 +6,11 @@ do
 	base="${query%.sql}"
 	result="b2bdata/${base}-result.tsv"
 	expected="b2bdata/${base}-expected.tsv"
+	rm -f "$result"
 	./run.sh "$query" | sort > "$result"
-	diff -q "${result}" "${expected}" || {
+	diff -q "${result}" "${expected}" && {
+		rm -f "${result}"
+	} || {
 		failed="$failed $base"
 	}
 done
