@@ -6,4 +6,4 @@
 
 viewname=${1%.sql}
 filename=$viewname.sql
-psql -d plantmonitor -f "$filename"
+psql -d $PGDATABASE -f "$filename"
