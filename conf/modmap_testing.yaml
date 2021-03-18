@@ -53,6 +53,25 @@ plantmonitor:
         port:
         slave:
         timeout:
-
+    - name: wattiaSensor1
+      type: wattiasensor
+      description: WattiaSensor1
+      model: aros-solar
+      enabled: True
+      modmap:
+        - type: input_registers
+          registers:
+            0 :  irradiance_dw_m2
+            1 :  module_temperature_dc
+            2 :  ambient_temperature_dc
+          scan:
+            start: 0
+            range: 3
+      protocol:
+        type:
+        ip:
+        port:
+        slave:
+        timeout:
 
 # vim: ts=4 sw=4 et

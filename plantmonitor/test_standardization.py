@@ -14,6 +14,7 @@ from .standardization import (
     registers_to_plant_data,
     alcolea_sensorIrradiation_to_plantadata,
     alcolea_sensorTemperature_to_plantadata,
+    wattia_sensor_to_plantadata,
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -89,6 +90,16 @@ class Standardization_Test(unittest.TestCase):
                 ('irradiation_w_m2', 3412),
                 ('temperature_dc', 531),
             ])
+
+    def sensorWattia_registers(self):
+        return ns([
+                ('time', dt.datetime(
+                    2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
+                ('irradiance_dw_m2', 5031),
+                ('module_temperature_dc', 520),
+                ('ambient_temperature_dc', 492)
+            ])
+
     def sensorTemperature_registers(self):
         return ns([
                 ('time', dt.datetime(
@@ -344,6 +355,30 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'temperature_dc': 2810,
+                    'time': time,
+                }]
+            }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_sensor_registries, sensor_registries)
+
+    def test__sensorWattia_to_plantdata(self):
+
+        sensor_name = "WattMan"
+
+        sensor_registers = self.sensorWattia_registers()
+
+        time = sensor_registers['time']
+
+        sensor_registries = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
+
+        expected_sensor_registries = {
+            'id': 'Sensor:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'irradiance_dw_m2': 3495,
+                    'module_temperature_dc': 3210,
+                    'ambient_temperature_dc': 2810,
                     'time': time,
                 }]
             }

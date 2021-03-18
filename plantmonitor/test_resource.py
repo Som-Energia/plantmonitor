@@ -27,71 +27,73 @@ class Resource_Test(unittest.TestCase):
     def testPlantname(self):
         return "Alibaba"
 
-    def sensorDeviceNS(self):
-        devicesns = ns.loads("""
-name: sensor1
-type: CellTemperatureSensor
-description: sensor1wattia
-model: Wattia
-enabled: True
-modmap:
-  - type: input_registers
-    registers:
-        1 : TemperatureCell
-    scan:
-        start: 1
-        range: 1
-protocol:
-    type: modbus
-    ip: 192.168.1.100
-    port: 502
-    slave: 37
-    timeout:
-""")
-        return devicesns
-
     def inverterDeviceNS(self):
         devicesns = ns.loads("""
-      name: inversor1
-      type: inverter
-      description: inversor1
-      model: aros-solar
-      enabled: True
-      modmap:
-        - type: holding_registers
-          registers:
-            0 :  1HR0
-            1 :  1HR1
-            2 :  1HR2
-            3 :  2HR3
-            4 :  2HR4
-            5 :  2HR5
-          scan:
-            start: 0
-            range: 3
-        - type: coils
-          registers:
-            0 : xcx
-            1 : sdf
-            2 : fkl
-          scan:
-            start: 0
-            range: 3
-        - type: write_coils
-          registers:
-            0 : xcx
-            1 : sdf
-            2 : fkl
-          scan:
-            start: 0
-            range: 3
-      protocol:
-        type:
-        ip:
-        port:
-        slave:
-        timeout:
-""")
+            name: inversor1
+            type: inverter
+            description: inversor1
+            model: aros-solar
+            enabled: True
+            modmap:
+              - type: holding_registers
+                registers:
+                    0 :  1HR0
+                    1 :  1HR1
+                    2 :  1HR2
+                    3 :  2HR3
+                    4 :  2HR4
+                    5 :  2HR5
+                scan:
+                    start: 0
+                    range: 3
+              - type: coils
+                registers:
+                    0 : xcx
+                    1 : sdf
+                    2 : fkl
+                scan:
+                    start: 0
+                    range: 3
+              - type: write_coils
+                registers:
+                    0 : xcx
+                    1 : sdf
+                    2 : fkl
+                scan:
+                    start: 0
+                    range: 3
+            protocol:
+                type:
+                ip:
+                port:
+                slave:
+                timeout:
+            """)
+        return devicesns
+
+    def sensorDeviceNS(self):
+        devicesns = ns.loads("""
+            name: wattiaSensor1
+            type: wattiasensor
+            description: WattiaSensor1
+            model: Wattia
+            enabled: True
+            modmap:
+              - type: input_registers
+                registers:
+                    0 :  irradiance_dw_m2
+                    1 :  module_temperature_dc
+                    2 :  ambient_temperature_dc
+                scan:
+                    start: 0
+                    range: 3
+            protocol:
+                type:
+                ip:
+                port:
+                slave:
+                timeout:
+            """)
         return devicesns
 
     def modmapNS(self):
@@ -193,14 +195,14 @@ protocol:
         aSensor.load(device_data)
 
         expectedSensor = ProductionDevice()
-        expectedSensor.name = 'sensor1'
+        expectedSensor.name = 'wattiaSensor1'
         print(aSensor.modmap['input_registers'].registers)
 
         self.assertEqual(aSensor.name, expectedSensor.name)
         self.assertNotEqual(aSensor.modmap, {})
         self.assertDictEqual(
             dict(aSensor.modmap['input_registers'].registers),
-            {1: 'TemperatureCell'}
+            {0: 'irradiance_dw_m2', 1: 'module_temperature_dc', 2: 'ambient_temperature_dc'}
         )
 
     # TODO mismatch type (detect if device ip changed)
@@ -250,8 +252,8 @@ protocol:
 
         metric = registers[0]
         expectedMetric = {
-            'name': 'sensor1',
-            'type': 'CellTemperatureSensor',
+            'name': 'wattiaSensor1',
+            'type': 'wattiasensor',
             'model': 'Wattia',
             'register_type': 'input_registers',
             'fields': [626],

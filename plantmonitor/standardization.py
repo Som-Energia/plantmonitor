@@ -19,6 +19,25 @@ def alcolea_sensorTemperature_to_plantadata(alcolea_sensorTemperature_registers)
     temperature_registers = {}
     return temperature_registers
 
+def wattia_sensor_to_plantadata(wattia_sensor_registers):
+    MultiSensor_registers_plantdata = {
+        #TODO multi devices here
+        'id': 'SensorModuleTemperature:{}'.format(sensor_name),
+        'readings': []
+    }
+    for register in wattia_sensor_registers:
+        time = wattia_sensor_registers['time']
+        irradiation_w_m2 = int(round(wattia_sensor_registers['irradiation_dw_m2']*0.1))
+        temperature_dc = wattia_sensor_registers['temperature_dc']
+        temperature_dc = int(round((temperature_dc*0.1-25)*100))
+        reading = {
+            'irradiation_w_m2': irradiation_w_m2,
+            'temperature_dc': temperature_dc,
+            'time': time,
+        }
+    MultiSensor_registers_plantdata['readings'].append(reading)
+    return MultiSensor_registers_plantdata
+
 def alcolea_sensorIrradiation_to_plantadata(sensor_name, sensorIrradiation_registers):
     logger.error("Not implemented yet")
 
@@ -121,6 +140,8 @@ def alcolea_registers_to_plantdata(plant_registers, plantName='Alcolea'):
                     device_readings_packet = alcolea_inverter_to_plantdata(device_name, device_register['fields'])
                 elif device_register['type'] == 'sensorTemperature':
                     device_readings_packet = alcolea_sensorTemperature_to_plantadata(device_register['fields'])
+                elif device_register['type'] == 'wattiasensor':
+                    device_readings_packet = wattia_sensor_to_plantadata(device_register['fields'])
                 else:
                     print("Unknown device type: {}".format(device_register['type']))
                     continue
