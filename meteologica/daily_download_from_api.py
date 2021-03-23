@@ -95,6 +95,8 @@ def download_meter_data(configdb, test_env=True):
                     logger.info("No forecast data for {}".format(facility))
                     continue
 
+                # TODO api uses start-hour, we should change to end-hour before inserting
+
                 # conversion from energy to power
                 # (Not necessary for hourly values)
                 forecastDict = {facility: meterDataForecast}
