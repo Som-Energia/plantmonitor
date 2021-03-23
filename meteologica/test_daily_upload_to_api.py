@@ -16,6 +16,7 @@ from meteologica.plantmonitor_db import (
 )
 
 from meteologica.utils import todt
+from datetime import timedelta
 
 #from django.conf import settings
 from yamlns import namespace as ns
@@ -124,8 +125,8 @@ class DailyUpload_Test(unittest.TestCase):
             db.addFacilityMeterRelation(self.mainFacility(), '123401234')
             tworeadings = {
                 self.mainFacility(): [
-                    (todt("2040-01-02 00:00:00"), 10),
-                    (todt("2040-01-02 01:00:00"), 20),
+                    (todt("2040-01-02 01:00:00"), 10),
+                    (todt("2040-01-02 02:00:00"), 20),
                 ],
             }
             db.addMeterData(tworeadings)
@@ -135,7 +136,7 @@ class DailyUpload_Test(unittest.TestCase):
 
         # TODO check uploaded content from api if they ever add GetObservations
         with self.createApi() as api:
-            self.assertEqual(api.lastDateUploaded(self.mainFacility()), todt("2040-01-02 01:00:00"))
+            self.assertEqual(api.lastDateUploaded(self.mainFacility()), todt("2040-01-02 02:00:00") - timedelta(hours=1))
 
     def test_uploadProductionFromDB_ExcludedFacilities(self):
         config = self.createConfig()
@@ -220,12 +221,12 @@ class DailyUpload_Test(unittest.TestCase):
             db.addFacilityMeterRelation(self.unexistantFacility(), '432104321')
             data = {
                 self.mainFacility(): [
-                    (todt("2040-01-02 00:00:00"), 50),
-                    (todt("2040-01-02 01:00:00"), 70),
+                    (todt("2040-01-02 01:00:00"), 50),
+                    (todt("2040-01-02 02:00:00"), 70),
                 ],
                 self.unexistantFacility(): [
-                    (todt("2040-01-02 00:00:00"), 10),
-                    (todt("2040-01-02 01:00:00"), 20),
+                    (todt("2040-01-02 01:00:00"), 10),
+                    (todt("2040-01-02 02:00:00"), 20),
                 ],
             }
             db.addMeterData(data)
@@ -239,7 +240,7 @@ class DailyUpload_Test(unittest.TestCase):
             responses
         )
         with self.createApi() as api:
-            self.assertEqual(api.lastDateUploaded(self.mainFacility()), todt("2040-01-02 01:00:00"))
+            self.assertEqual(api.lastDateUploaded(self.mainFacility()), todt("2040-01-02 02:00:00") - timedelta(hours=1))
             self.assertEqual(api.lastDateUploaded(self.unexistantFacility()), None)
 
 
