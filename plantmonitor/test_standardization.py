@@ -87,7 +87,7 @@ class Standardization_Test(unittest.TestCase):
         return ns([
                 ('time', dt.datetime(
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
-                ('irradiation_w_m2', 3412),
+                ('irradiance_w_m2', 3412),
                 ('temperature_dc', 531),
             ])
 
@@ -106,6 +106,19 @@ class Standardization_Test(unittest.TestCase):
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
                 ('temperature_dc', 531),
             ])
+
+    def alibaba_registers_WattiaSensor(self):
+
+        registers = [{'Alibaba': [{
+            'name': 'Alice',
+            'type': 'wattiasensor',
+            'model': 'aros-solar',
+            'register_type': 'input_registers',
+            'fields': self.sensorWattia_registers(),
+            }]
+        }]
+
+        return registers
 
     def test__alcolea_inverter_to_plantdata(self):
 
@@ -370,18 +383,80 @@ class Standardization_Test(unittest.TestCase):
 
         time = sensor_registers['time']
 
-        sensor_registries = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
+        sensor_packets = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
 
-        expected_sensor_registries = {
-            'id': 'Sensor:{}'.format(sensor_name),
+        expected_sensor_registries = [{
+            'id': 'SensorIrradiation:{}'.format(sensor_name),
             'readings':
                 [{
-                    'irradiance_dw_m2': 3495,
-                    'module_temperature_dc': 3210,
-                    'ambient_temperature_dc': 2810,
+                    'irradiation_w_m2': 503,
+                    'temperature_dc': 2700,
                     'time': time,
                 }]
-            }
+            },{
+            'id': 'SensorTemperatureModule:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2700,
+                    'time': time,
+                }]
+            },{
+            'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2420,
+                    'time': time,
+                }]
+            }]
 
         self.maxDiff=None
-        self.assertDictEqual(expected_sensor_registries, sensor_registries)
+        for packet, expected_packet in zip(sensor_packets, expected_sensor_registries):
+            self.assertDictEqual(expected_packet, packet)
+
+    def test__alcolea_registers_to_plantdata__sensorWattia(self):
+
+        sensor_name = "Alice"
+        plant_name = 'Alibaba'
+
+        plant_registers = self.alibaba_registers_WattiaSensor()
+
+        time = plant_registers[0][plant_name][0]['fields']['time']
+
+        plant_data = alcolea_registers_to_plantdata(plant_registers, plantName=plant_name)
+        packet_time = plant_data['time']
+
+        expected_plant_data = {
+                    'plant': plant_name,
+                    'version': '1.0',
+                    'time': packet_time,
+                    'devices': [{
+            'id': 'SensorIrradiation:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'irradiation_w_m2': 503,
+                    'temperature_dc': 2700,
+                    'time': time,
+                }]
+            },{
+            'id': 'SensorTemperatureModule:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2700,
+                    'time': time,
+                }]
+            },{
+            'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2420,
+                    'time': time,
+                }]
+            }]
+        }
+
+        self.maxDiff=None
+        self.assertDictEqual(plant_data, expected_plant_data)
+
+
+    def test__registers_to_plantdata__sensorWattia_inverter(self):
+        pass
