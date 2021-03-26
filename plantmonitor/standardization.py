@@ -35,7 +35,7 @@ def wattia_sensor_to_plantadata(sensor_name, wattia_sensor_registers):
         }
     ]
 
-    time = wattia_sensor_registers['time']
+    time = wattia_sensor_registers['time'] if 'time' in wattia_sensor_registers else datetime.datetime.utcnow()
     irradiation_w_m2 = int(round(wattia_sensor_registers['irradiance_dw_m2']*0.1))
     module_temperature_dc = wattia_sensor_registers['module_temperature_dc']
     module_temperature_dc = int(round((module_temperature_dc*0.1-25)*100))
@@ -61,45 +61,6 @@ def wattia_sensor_to_plantadata(sensor_name, wattia_sensor_registers):
     MultiSensor_registers_plantdata[2]['readings'].append(ambient_reading)
 
     return MultiSensor_registers_plantdata
-
-def alcolea_sensorIrradiation_to_plantadata(sensor_name, sensorIrradiation_registers):
-    logger.error("Not implemented yet")
-
-    irradiation_registers_plantdata = {
-        'id': 'Sensor:{}'.format(sensor_name),
-        'readings': []
-    }
-    time = sensorIrradiation_registers['time']
-    irradiation_w_m2 = sensorIrradiation_registers['irradiance_w_m2']
-    temperature_dc = sensorIrradiation_registers['temperature_dc']
-    irradiation_w_m2 = int(round(irradiation_w_m2*0.1+0))
-    temperature_dc = int(round((temperature_dc*0.1-25)*100))
-    reading = {
-        'irradiation_w_m2': irradiation_w_m2,
-        'temperature_dc': temperature_dc,
-        'time': time,
-    }
-    irradiation_registers_plantdata['readings'].append(reading)
-    return irradiation_registers_plantdata
-
-def alcolea_sensorTemperature_to_plantadata(sensor_name, sensorTemperature_registers):
-    logger.error("Not implemented yet")
-
-    temperature_registers_plantdata = {
-        'id': 'Sensor:{}'.format(sensor_name),
-        'readings': []
-    }
-
-    time = sensorTemperature_registers['time'] if 'time' in sensorTemperature_registers else datetime.datetime.utcnow()
-    temperature_dc = sensorTemperature_registers['temperature_dc']
-    temperature_dc = int(round((temperature_dc*0.1-25)*100))
-    reading = {
-        'temperature_dc': temperature_dc,
-        'time': time,
-    }
-    temperature_registers_plantdata['readings'].append(reading)
-
-    return temperature_registers_plantdata
 
 def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
@@ -162,11 +123,16 @@ def alcolea_registers_to_plantdata(plant_registers, plantName='Alcolea'):
                 elif device_register['type'] == 'inverter':
                     device_readings_packets = [alcolea_inverter_to_plantdata(device_name, device_register['fields'])]
                 elif device_register['type'] == 'sensorTemperature':
-                    device_readings_packets = [alcolea_sensorTemperature_to_plantadata(device_register['fields'])]
+                    logger.error("SensorTemperature Not implemented")
                 elif device_register['type'] == 'wattiasensor':
+                    if 'fields' not in device_register:
+                        logger.error("Missing 'fields' key in registers {}".format(device_register))
+                        continue
+                    if not 'time' in device_register['fields']:
+                        device_register['fields']['time'] = plant_data['time']
                     device_readings_packets = wattia_sensor_to_plantadata(device_name, device_register['fields'])
                 else:
-                    print("Unknown device type: {}".format(device_register['type']))
+                    logger.error("Unknown device type: {}".format(device_register['type']))
                     continue
 
                 plant_data['devices'] += device_readings_packets

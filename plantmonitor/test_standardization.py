@@ -12,8 +12,6 @@ from .standardization import (
     alcolea_registers_to_plantdata,
     alcolea_inverter_to_plantdata,
     registers_to_plant_data,
-    alcolea_sensorIrradiation_to_plantadata,
-    alcolea_sensorTemperature_to_plantadata,
     wattia_sensor_to_plantadata,
 )
 
@@ -92,6 +90,13 @@ class Standardization_Test(unittest.TestCase):
             ])
 
     def sensorWattia_registers(self):
+        return ns([
+                ('irradiance_dw_m2', 5031),
+                ('module_temperature_dc', 520),
+                ('ambient_temperature_dc', 492)
+            ])
+
+    def sensorWattia_registers__withtime(self):
         return ns([
                 ('time', dt.datetime(
                     2021, 1, 20, 10, 38, 14, 261754, tzinfo=dt.timezone.utc)),
@@ -330,60 +335,52 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
 
-    def test__alcolea_sensorIrradiation_to_plantdata(self):
+    def test__wattia_sensor_to_plantadata(self):
 
-        sensor_name = "Bob"
+        sensor_name = "WattMan"
 
-        sensor_registers = self.sensorIrradiation_registers()
-
-        time = sensor_registers['time']
-
-        sensor_registries = alcolea_sensorIrradiation_to_plantadata(sensor_name, sensor_registers)
-
-        expected_sensor_registries = {
-            'id': 'Sensor:{}'.format(sensor_name),
-            'readings':
-                [{
-                    'irradiation_w_m2': 341,
-                    'temperature_dc': 2810,
-                    'time': time,
-                }]
-            }
-
-        self.maxDiff=None
-        self.assertDictEqual(expected_sensor_registries, sensor_registries)
-
-    def test__alcolea_sensorTemperature_to_plantdata(self):
-
-        sensor_name = "Bob"
-
-        sensor_registers = self.sensorTemperature_registers()
+        sensor_registers = self.sensorWattia_registers__withtime()
 
         time = sensor_registers['time']
 
-        sensor_registries = alcolea_sensorTemperature_to_plantadata(sensor_name, sensor_registers)
+        sensor_packets = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
 
-        expected_sensor_registries = {
-            'id': 'Sensor:{}'.format(sensor_name),
+        expected_sensor_registries = [{
+            'id': 'SensorIrradiation:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2810,
+                    'irradiation_w_m2': 503,
+                    'temperature_dc': 2700,
                     'time': time,
                 }]
-            }
+            },{
+            'id': 'SensorTemperatureModule:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2700,
+                    'time': time,
+                }]
+            },{
+            'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
+            'readings':
+                [{
+                    'temperature_dc': 2420,
+                    'time': time,
+                }]
+            }]
 
         self.maxDiff=None
-        self.assertDictEqual(expected_sensor_registries, sensor_registries)
+        for packet, expected_packet in zip(sensor_packets, expected_sensor_registries):
+            self.assertDictEqual(expected_packet, packet)
 
-    def test__sensorWattia_to_plantdata(self):
+    def test__wattia_sensor_to_plantadata__notime(self):
 
         sensor_name = "WattMan"
 
         sensor_registers = self.sensorWattia_registers()
 
-        time = sensor_registers['time']
-
         sensor_packets = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
+        time = sensor_packets[0]['readings'][0]['time']
 
         expected_sensor_registries = [{
             'id': 'SensorIrradiation:{}'.format(sensor_name),
@@ -420,8 +417,6 @@ class Standardization_Test(unittest.TestCase):
 
         plant_registers = self.alibaba_registers_WattiaSensor()
 
-        time = plant_registers[0][plant_name][0]['fields']['time']
-
         plant_data = alcolea_registers_to_plantdata(plant_registers, plantName=plant_name)
         packet_time = plant_data['time']
 
@@ -435,21 +430,21 @@ class Standardization_Test(unittest.TestCase):
                 [{
                     'irradiation_w_m2': 503,
                     'temperature_dc': 2700,
-                    'time': time,
+                    'time': packet_time,
                 }]
             },{
             'id': 'SensorTemperatureModule:{}'.format(sensor_name),
             'readings':
                 [{
                     'temperature_dc': 2700,
-                    'time': time,
+                    'time': packet_time,
                 }]
             },{
             'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
             'readings':
                 [{
                     'temperature_dc': 2420,
-                    'time': time,
+                    'time': packet_time,
                 }]
             }]
         }
