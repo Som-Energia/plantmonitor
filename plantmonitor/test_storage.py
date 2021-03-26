@@ -188,7 +188,7 @@ class ApiClient_Test(unittest.TestCase):
         alibaba = alibaba.importPlant(plantNS)
         orm.flush()
         # do we need to add some data?
-        # time = datetime.datetime.utcnow()
+        # time = datetime.datetime.now(datetime.timezone.utc)
         # plant_data = self.samplePlantData(time)
 
         # storage = PonyMetricStorage()
@@ -228,7 +228,7 @@ class ApiClient_Test(unittest.TestCase):
 
     def test__ApiMetricStorage_insertPlantData__someData(self):
         self.createPlant()
-        time = datetime.datetime.utcnow()
+        time = datetime.datetime.now(datetime.timezone.utc)
 
         plant_data = {
             "plant": "alibaba",
@@ -315,7 +315,7 @@ class Storage_Test(unittest.TestCase):
             self.assertEqual(database.get_connection().status, 1)
 
     def test__datetimeToStr(self):
-        time = datetime.datetime.utcnow()
+        time = datetime.datetime.now(datetime.timezone.utc)
         plant_data = self.samplePlantData(time)
         ApiMetricStorage.datetimeToStr(plant_data)
         expected_plant_data = self.samplePlantData(time.isoformat())

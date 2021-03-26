@@ -67,7 +67,7 @@ class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
 
-  def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.utcnow()):
+  def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.now(datetime.timezone.utc)):
 
     measures = measures_from_date(
       self.client,
@@ -85,7 +85,7 @@ class ReadingsFacade():
 
     return device
 
-  def getPlantNewMetersReadings(self, plant, upto=datetime.datetime.utcnow()):
+  def getPlantNewMetersReadings(self, plant, upto=datetime.datetime.now(datetime.timezone.utc)):
 
     return {
       "plant": plant['plant'],
@@ -95,7 +95,7 @@ class ReadingsFacade():
       ],
     }
 
-  def getNewMetersReadings(self, upto=datetime.datetime.utcnow()):
+  def getNewMetersReadings(self, upto=datetime.datetime.now(datetime.timezone.utc)):
 
     return [self.getPlantNewMetersReadings(plant, upto)
       for plant in Meter.getLastReadingDatesOfAllMeters()

@@ -122,7 +122,7 @@ class PonyMetricStorage:
             if not plant:
                 logger.warning("No plant named {}".format(plant_name))
                 return
-            data_time = plant_data["time"] if "time" in plant_data else datetime.datetime.utcnow()
+            data_time = plant_data["time"] if "time" in plant_data else datetime.datetime.now(datetime.timezone.utc)
             result = plant.insertPlantData(plant_data)
             print(result)
             return result

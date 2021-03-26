@@ -35,7 +35,7 @@ def wattia_sensor_to_plantadata(sensor_name, wattia_sensor_registers):
         }
     ]
 
-    time = wattia_sensor_registers['time'] if 'time' in wattia_sensor_registers else datetime.datetime.utcnow()
+    time = wattia_sensor_registers['time'] if 'time' in wattia_sensor_registers else datetime.datetime.now(datetime.timezone.utc)
     irradiation_w_m2 = int(round(wattia_sensor_registers['irradiance_dw_m2']*0.1))
     module_temperature_dc = wattia_sensor_registers['module_temperature_dc']
     module_temperature_dc = int(round((module_temperature_dc*0.1-25)*100))
@@ -70,7 +70,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
 
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
-    time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.utcnow()
+    time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
     pac_r_w = inverter_registers['pac_r_w']
     pac_s_w = inverter_registers['pac_s_w']
     pac_t_w = inverter_registers['pac_t_w']
@@ -100,7 +100,7 @@ def alcolea_registers_to_plantdata(plant_registers, plantName='Alcolea'):
     plant_data = {
         'plant': plantName,
         'version': '1.0',
-        'time': datetime.datetime.utcnow(),
+        'time': datetime.datetime.now(datetime.timezone.utc),
         'devices': []
     }
 
@@ -152,7 +152,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
     for register in inverter_registers:
-        time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.utcnow()
+        time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
         #TODO meld toghether Uint16 _h _l into Uint32
         energy_wh = int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))*10
         power_w = int(round(inverter_registers['ActivePower_dW']/10))
@@ -183,7 +183,7 @@ def fontivsolar_registers_to_plantdata(plant_registers):
     plant_data = {
         'plant': plantName,
         'version': '1.0',
-        'time': datetime.datetime.utcnow(),
+        'time': datetime.datetime.now(datetime.timezone.utc),
         'devices': []
     }
     for plant_register in plant_registers:
