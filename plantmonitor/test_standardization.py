@@ -9,7 +9,7 @@ import datetime as dt
 from yamlns import namespace as ns
 
 from .standardization import (
-    alcolea_registers_to_plantdata,
+    registers_to_plant_data,
     alcolea_inverter_to_plantdata,
     registers_to_plant_data,
     wattia_sensor_to_plantadata,
@@ -154,7 +154,7 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertDictEqual(expected_inverter_registries, inverter_registries)
 
-    def test__alcolea_registers_to_plantdata(self):
+    def test__registers_to_plant_data(self):
 
         plant_name = 'Alibaba'
 
@@ -162,7 +162,7 @@ class Standardization_Test(unittest.TestCase):
 
         registers_time = plants_registers[0][plant_name][0]['fields']['time']
 
-        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
+        plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
 
         packet_time = plant_data['time']
 
@@ -191,7 +191,7 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
 
-    def test__alcolea_registers_to_plantdata__manyInverters(self):
+    def test__registers_to_plant_data__manyInverters(self):
 
         plant_name = 'Alibaba'
 
@@ -199,7 +199,7 @@ class Standardization_Test(unittest.TestCase):
 
         registers_time = plants_registers[0][plant_name][0]['fields']['time']
 
-        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
+        plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
 
         packet_time = plant_data['time']
 
@@ -256,7 +256,7 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
 
-    def test__alcolea_registers_to_plantdata__notime(self):
+    def test__registers_to_plant_data__notime(self):
 
         plant_name = 'Alibaba'
 
@@ -264,7 +264,7 @@ class Standardization_Test(unittest.TestCase):
 
         del plants_registers[0][plant_name][0]['fields']['time']
 
-        plant_data = alcolea_registers_to_plantdata(plants_registers, plantName=plant_name)
+        plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
         packet_time = plant_data['time']
 
         self.assertIn('time', plant_data['devices'][0]['readings'][0])
@@ -410,14 +410,14 @@ class Standardization_Test(unittest.TestCase):
         for packet, expected_packet in zip(sensor_packets, expected_sensor_registries):
             self.assertDictEqual(expected_packet, packet)
 
-    def test__alcolea_registers_to_plantdata__sensorWattia(self):
+    def test__registers_to_plantdata__sensorWattia(self):
 
         sensor_name = "Alice"
         plant_name = 'Alibaba'
 
         plant_registers = self.alibaba_registers_WattiaSensor()
 
-        plant_data = alcolea_registers_to_plantdata(plant_registers, plantName=plant_name)
+        plant_data = registers_to_plant_data(plant_name, plant_registers, generic_plant=True)
         packet_time = plant_data['time']
 
         expected_plant_data = {
