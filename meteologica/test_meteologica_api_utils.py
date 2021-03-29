@@ -8,7 +8,7 @@ from meteologica.meteologica_api_utils import (
     MeteologicaApiError,
 )
 
-from meteologica.utils import todt
+from meteologica.utils import todt, todtaware
 
 #from django.conf import settings
 from yamlns import namespace as ns
@@ -160,7 +160,7 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         logger.debug(result)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 2)
-        self.assertEqual(result[0][0], todt("2020-01-01 00:00:00"))
+        self.assertEqual(result[0][0], todtaware("2020-01-01 00:00:00"))
 
     def test_getFacilities(self):
         pass

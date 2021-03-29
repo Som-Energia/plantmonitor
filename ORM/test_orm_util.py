@@ -276,7 +276,7 @@ class ORMSetup_Test(unittest.TestCase):
             meter = Meter(name='Mary', plant=alcolea)
             meterRegistry = MeterRegistry(
                 meter = meter,
-                time = datetime.datetime.now(),
+                time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
                 import_energy_wh = 77,
                 r1_VArh = 0,

@@ -2,7 +2,7 @@ import psycopg2
 
 from psycopg2 import OperationalError
 import psycopg2.extras
-from datetime import datetime
+from datetime import datetime, timezone
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from meteologica.utils import todt
 import decorator
@@ -84,7 +84,7 @@ class PlantmonitorDBMock(object):
     def getMeterData(self, facility=None, fromDate=None, toDate=None):
 
         if not toDate:
-            toDate = datetime.now()
+            toDate = datetime.now(timezone.utc)
 
         selectedData = {}
         if facility and not fromDate:
@@ -400,7 +400,7 @@ class PlantmonitorDB:
         #     raise PlantmonitorDBError("Db client is None, have you logged in?")
 
         if not toDate:
-            toDate = datetime.now()
+            toDate = datetime.now(timezone.utc)
 
         condition = ''
         if facility:
@@ -491,7 +491,7 @@ class PlantmonitorDB:
     def getForecast(self):
         cur = self._client.cursor()
         cur.execute(
-            "select facilityid, time at time zone 'Europe/Madrid',\
+            "select facilityid, time,\
                 percentil50 from forecastData \
             inner join forecastHead on forecastData.idForecastHead = forecastHead.id;"
         )

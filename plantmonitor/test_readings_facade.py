@@ -309,7 +309,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
     def test_checkNewMeters(self):
         erpMeter = "88300864"
-        self.setupPlants(dt.datetime.utcnow(), erpMeter)
+        self.setupPlants(dt.datetime.now(dt.timezone.utc), erpMeter)
         newMeter = "3141519"
 
         meterNames = [erpMeter, newMeter]

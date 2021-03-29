@@ -86,7 +86,7 @@ def upload_meter_data(configdb, test_env=True):
                 if not lastUploadDT:
                     meterData = db.getMeterData(facility)
                 else:
-                    toDate = dt.datetime.now()
+                    toDate = dt.datetime.now(dt.datetime.timezone.utc)
                     # TODO refactor this undo the hour shift due to api understanding start-hours instead of end-hours (see below @101)
                     fromDate = lastUploadDT + dt.timedelta(hours=1)
                     meterData = db.getMeterData(facility, fromDate, toDate)
