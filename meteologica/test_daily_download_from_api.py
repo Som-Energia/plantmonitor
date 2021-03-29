@@ -15,7 +15,7 @@ from meteologica.plantmonitor_db import (
     PlantmonitorDBError,
 )
 
-from meteologica.utils import todt
+from meteologica.utils import todt, todtaware
 
 
 #from django.conf import settings
@@ -102,7 +102,7 @@ class DailyDownload_Test(unittest.TestCase):
         with self.createApi() as api:
             for facility, values in data.items():
                 resultForecast = api.getForecast(facility, fromDate, toDate)
-                self.assertEqual(resultForecast[0][0], todt("2020-01-01 00:00:00"))
+                self.assertEqual(resultForecast[0][0], todtaware("2020-01-01 00:00:00"))
 
     def test_downloadForecastToEmptyDB_checkResponses(self):
         configdb = self.createConfig()
@@ -120,7 +120,7 @@ class DailyDownload_Test(unittest.TestCase):
         with self.createPlantmonitorDB() as db:
             forecastDB = db.getForecast()
 
-        now = dt.datetime.now()
+        now = dt.datetime.now(dt.timezone.utc)
         fromDate = now - dt.timedelta(days=14)
         toDate = now
         forecast = []

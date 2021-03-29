@@ -5,8 +5,7 @@ import stat
 import pytz
 from pathlib import Path
 
-from datetime import datetime
-from datetime import timedelta
+from datetime import (datetime, timedelta, timezone)
 
 #from django.conf import settings
 
@@ -90,6 +89,10 @@ class MeteologicaApi_Mock(object):
 
     def getForecast(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
+        if fromDate.tzinfo is None or fromDate.tzinfo.utcoffset(fromDate) is None:
+            fromDate = fromDate.replace(tzinfo=timezone.utc)
+        if toDate.tzinfo is None or toDate.tzinfo.utcoffset(toDate) is None:
+            toDate = toDate.replace(tzinfo=timezone.utc)
         return [
             (date, 0) for date in self.dateRange(fromDate, toDate, timedelta(hours=1))
         ]
@@ -226,10 +229,10 @@ class MeteologicaApi:
         return resultForecast
 
     def unixStrtoDT(self, unix_ts_str):
-        return datetime.utcfromtimestamp(int(unix_ts_str))
+        return datetime.utcfromtimestamp(int(unix_ts_str)).replace(tzinfo=timezone.utc)
 
     def unixToUtcStr(self, unix_ts):
-        return str(datetime.utcfromtimestamp(int(unix_ts)))
+        return str(datetime.utcfromtimestamp(int(unix_ts)).replace(tzinfo=timezone.utc))
 
     @withinSession
     def getAllFacilities(self):

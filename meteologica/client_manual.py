@@ -108,7 +108,7 @@ def forecast():
     variableId = 'prod'
     predictorId = 'aggregated'
     granularity = '60'
-    utcnow = datetime.utcnow()
+    utcnow = datetime.now(datetime.timezone.utc)
     forecastDate = '2020-05-05T00:00:00.0000+02:00' #addtz(utcnow)
     fromDate = forecastDate
     utcthen = utcnow + timedelta(days=30)

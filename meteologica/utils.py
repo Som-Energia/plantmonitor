@@ -1,11 +1,16 @@
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def todt(datetimestr):
     if not datetimestr:
         return None
     return datetime.strptime(datetimestr, '%Y-%m-%d %H:%M:%S')
+
+def todtaware(datetimestr):
+    if not datetimestr:
+        return None
+    return datetime.strptime(datetimestr, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
 
 
 def tztodt(datetimestr):
