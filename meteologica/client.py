@@ -99,7 +99,7 @@ def forecast():
     variableId = 'prod'
     predictorId = 'aggregated'
     granularity = '60'
-    utcnow = datetime.utcnow()
+    utcnow = datetime.now(datetime.timezone.utc)
     forecastDate = addtz(utcnow)
     fromDate = forecastDate
     utcthen = utcnow + timedelta(days=1)
