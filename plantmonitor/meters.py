@@ -24,7 +24,11 @@ def measures_from_date(c, meter, beyond, upto):
             ('utc_timestamp','>', beyond)
         ] if beyond else []),
         ) # TODO: Manage duplicated datetimes
-    if not measure_ids: return []
+    if not measure_ids:
+        logger.debug("erp {} returned 0 measures with {} {} {}".format(c, meter, upto, beyond))
+        return []
+    else:
+        logger.debug("erp {} returned {} measures with {} {} {}".format(c, len(measure_ids), meter, upto, beyond))
     measure_ids = [int(m) for m in measure_ids]
     measures = c.TmProfile.read(measure_ids,[
         'r1',

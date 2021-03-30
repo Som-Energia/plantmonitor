@@ -69,6 +69,8 @@ class ReadingsFacade():
 
   def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.now(datetime.timezone.utc)):
 
+    logger.debug("Asking for measures for meter {} older than {} upto {} from erp to ponyorm".format(meterName, lastDate.strftime("%Y-%m-%d %H:%M:%S"), upto.strftime("%Y-%m-%d %H:%M:%S")))
+
     measures = measures_from_date(
       self.client,
       meterName,
