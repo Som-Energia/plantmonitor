@@ -130,7 +130,7 @@ class Plant(database.Entity):
             logger.debug("importing plant data for plant {}".format(plantData['plant']))
             plant = Plant.get(name=plantData['plant'])
             if not plant:
-                logger.error("Plant {} is not known. Known plants: {}".format(plantData['plant'], Plant.select('name')))
+                logger.error("Plant {} is not known. Known plants: {}".format(plantData['plant'], [p.name for p in Plant.select()]))
             else:
                 plant.insertPlantData(plantData)
 
