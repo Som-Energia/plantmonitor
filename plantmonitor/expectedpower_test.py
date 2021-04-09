@@ -18,9 +18,10 @@ from yamlns import namespace as ns
 import datetime
 from ORM.orm_util import setupDatabase
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
-
+from decimal import Decimal
 
 class ExpectedPower_Test(TestCase):
+    from b2btest.b2btest import assertB2BEqual
 
     @classmethod
     def setUpClass(cls):
@@ -28,6 +29,7 @@ class ExpectedPower_Test(TestCase):
 
     def setUp(self):
         self.maxDiff=None
+        self.b2bdatapath='b2bdata'
         from conf import envinfo
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
@@ -113,19 +115,81 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
         plant.flush()
         self.sensor = SensorIrradiation.select().first().id
 
-    def test_insertData(self):
-        self.setupPlant()
-        for time, irradiation_w_m2, temperature_c in readTimedDataTsv('expectedPower-2020-06-Alcolea.csv', [
+    def importData(self, sensor, filename, output=None):
+        tsvContent = readTimedDataTsv(filename, [
             'Temperatura modul',
             'Irradiación (W/m2)',
-        ]):
-            print(time)
+            output or 'Potencia parque calculada con temperatura kW con degradación placas',
+        ])
+        for time, temperature_c, irradiation_w_m2, outputValue in tsvContent:
             SensorIrradiationRegistry(
                 sensor=self.sensor,
                 time=datetime.datetime.fromisoformat(time),
-                irradiation_w_m2=irradiation_w_m2,
-                temperature_dc=round(temperature_c*10),
-            ).flush()
+                irradiation_w_m2=int(round(irradiation_w_m2)),
+                temperature_dc=int(round(temperature_c*10)),
+            )
+        database.flush()
+
+        return [
+            (time, outputValue)
+            for time, temperature_c, irradiation_w_m2, outputValue in tsvContent
+        ]
+
+    parametersAlcolea = dict(
+        Imp = 8.27, # A, module model param
+        Vmp = 30.2, # V, module model param
+        temperatureCoefficientI = 0.088, # %/ºC, module model param
+        temperatureCoefficientV = -0.352, # %/ºC, module model param
+        irradiationSC = 1000, # W/m2, module model param
+        temperatureSC = 25, # ºC, module model param
+        nModules = 8640, # plant parameter
+        degradation=0.97, # coeff, module model param
+    )
+
+    parametersFlorida = dict(
+        Imp = 9.07, # A, module model param
+        Vmp = 37.5, # V, module model param
+        temperatureCoefficientI = 0.05, # %/ºC, module model param
+        temperatureCoefficientV = -0.31, # %/ºC, module model param
+        irradiationSC = 1000., # W/m2, module model param
+        temperatureSC = 25, # ºC, module model param
+        nModules = 4878, # plant parameter
+        degradation=97.5, # %, module model param
+        #Voc = 46.1, # V, module model param
+        #Isc = 9.5, # A, module model param
+    )
+
+    def assertOutputB2B(self, result):
+        result = "\n".join((
+            "{}\n{}".format(time.isoformat(),value)
+            for time, value in result
+        ))
+        self.assertB2BEqual(result)
+
+    def test_expectedPower_Florida_2020_09(self):
+        self.setupPlant()
+        expected = self.importData(self.sensor, 'expectedPower-2020-09-Florida.csv')
+        result = database.select("""select
+            time,
+            CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
+                $nModules *
+                $Imp *
+                $Vmp *  (
+                    irradiation_w_m2 / $irradiationSC +
+                    (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientI/100.0
+                ) * (
+                    1 +
+                    (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientV/100.0
+                )
+                * $degradation/100.
+                / 1000.0   -- W -> kW
+            ) 
+            END AS expectedpower
+            FROM sensorirradiationregistry
+            ORDER BY time
+        """, self.parametersFlorida)
+
+        self.assertOutputB2B(result)
 
 
 
