@@ -186,8 +186,9 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
             ) 
             END AS expectedpower
             FROM sensorirradiationregistry
+            WHERE sensor = $sensor
             ORDER BY time
-        """, self.parametersFlorida)
+        """, dict(sensor=self.sensor, **self.parametersFlorida))
 
         self.assertOutputB2B(result)
 
