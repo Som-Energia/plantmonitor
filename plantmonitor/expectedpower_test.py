@@ -143,7 +143,7 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
         irradiationSC = 1000, # W/m2, module model param
         temperatureSC = 25, # ºC, module model param
         nModules = 8640, # plant parameter
-        degradation=0.97, # coeff, module model param
+        degradation=97.0, # coeff, module model param
     )
 
     parametersFlorida = dict(
