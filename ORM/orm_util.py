@@ -63,14 +63,20 @@ def connectDatabase():
         # let's be sure
         with orm.db_session:
             dsn = database.get_connection().dsn
-            dsnDict = {pair.split('=')[0]:pair.split('=')[1] for pair in dsn.split(' ')}
+            dsnDict = {
+                key: value if value!="''" else ""
+                for key, value in (
+                    pair.split('=')
+                    for pair in dsn.split()
+                )
+            }
             dsnDict['provider'] = database.provider_name
             dsnDict['database'] = dsnDict.pop('dbname')
             if 'password' in databaseInfo:
                 dsnDict['password'] = databaseInfo['password']
             if not databaseInfo == dsnDict:
-                print("Database was already bound to a different database.")
-                raise e
+                logger.debug("Database was already bound to a different database.")
+                raise
     else:
         database.generate_mapping(create_tables=False, check_tables=False)
 
@@ -90,14 +96,20 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
         # let's be sure
         with orm.db_session:
             dsn = database.get_connection().dsn
-            dsnDict = {pair.split('=')[0]:pair.split('=')[1] for pair in dsn.split(' ')}
+            dsnDict = {
+                key: value if value!="''" else ""
+                for key, value in (
+                    pair.split('=')
+                    for pair in dsn.split()
+                )
+            }
             dsnDict['provider'] = database.provider_name
             dsnDict['database'] = dsnDict.pop('dbname')
             if 'password' in databaseInfo:
                 dsnDict['password'] = databaseInfo['password']
             if not databaseInfo == dsnDict:
-                print("Database was already bound to a different database.")
-                raise e
+                logger.debug("Database was already bound to a different database.")
+                raise
     else:
         #this `else` will not run if the database was already connected
         # (necessary for test multiple SetUps until we fix this)
