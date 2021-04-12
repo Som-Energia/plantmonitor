@@ -26,8 +26,17 @@ pip install -r requirements.txt
 
 ## Testing
 
+Testing requires:
+
+- The running user requires createdb grants in postgres (`ALTER USER myuser CREATEDB;`)
+- `createdb orm_test`
+- Copy `.env.example` as `.env.testing` and change the content
+- Copy `conf/config.example.py` as `conf/config.py` and change the content
+- Copy `conf/config_meteologica.example.yaml` as `conf/configdb_test.py` and change the content
+
 A series of mock, modbus sensors are available under `testingtools`.
 Both client and server modbus can be simulated.
+
 
 ## Installation
 
