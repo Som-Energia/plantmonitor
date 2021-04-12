@@ -172,12 +172,14 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
         result = database.select("""select
             time,
             CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
-                $nModules *
-                $Imp *
-                $Vmp *  (
+                $nModules
+                * $Imp
+                * $Vmp
+                * (
                     irradiation_w_m2 / $irradiationSC +
                     (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientI/100.0
-                ) * (
+                )
+                * (
                     1 +
                     (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientV/100.0
                 )
