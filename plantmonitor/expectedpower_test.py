@@ -140,10 +140,10 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
         Vmp = 30.2, # V, module model param
         temperatureCoefficientI = 0.088, # %/ºC, module model param
         temperatureCoefficientV = -0.352, # %/ºC, module model param
-        irradiationSC = 1000, # W/m2, module model param
+        irradiationSC = 1000.0, # W/m2, module model param
         temperatureSC = 25, # ºC, module model param
         nModules = 8640, # plant parameter
-        degradation=97.0, # coeff, module model param
+        degradation=97.0, # %, module model param
     )
 
     parametersFlorida = dict(
@@ -151,7 +151,7 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
         Vmp = 37.5, # V, module model param
         temperatureCoefficientI = 0.05, # %/ºC, module model param
         temperatureCoefficientV = -0.31, # %/ºC, module model param
-        irradiationSC = 1000., # W/m2, module model param
+        irradiationSC = 1000.0, # W/m2, module model param
         temperatureSC = 25, # ºC, module model param
         nModules = 4878, # plant parameter
         degradation=97.5, # %, module model param
