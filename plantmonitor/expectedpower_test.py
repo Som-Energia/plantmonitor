@@ -168,7 +168,7 @@ Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la
 
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
-        expected = self.importData(self.sensor, 'expectedPower-2020-09-Florida.csv')
+        expected = self.importData(self.sensor, 'b2bdata/expectedPower-2020-09-Florida.csv')
         result = database.select("""select
             time,
             CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
