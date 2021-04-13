@@ -77,6 +77,15 @@ def integrateSensor(sensorName, metricName, fromDate, toDate):
 
     return irradiation
 
+def integrateArbitraryMetric():
+    pass
+
+def integrateAllSensors():
+    pass
+
+def computeIntegralMetrics():
+    pass
+
 
 # def dropNonMonotonicRows(df):
 #     ''' strictly monotonic increasing '''

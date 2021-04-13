@@ -15,6 +15,8 @@ from .meters import (
     transfer_meter_to_plantmonitor,
 )
 
+from .operations import computeIntegralMetrics
+
 from meteologica.daily_upload_to_api import upload_meter_data
 from meteologica.daily_download_from_api import download_meter_data
 
@@ -212,3 +214,7 @@ def task_daily_upload_to_api_meteologica(test_env=True):
 def task_daily_download_from_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
     download_meter_data(configdb, test_env=test_env)
+
+
+def task_integral():
+    computeIntegralMetrics()
