@@ -34,6 +34,7 @@ setup(
             'environs',
             'zeep',
             'b2btest',
+            'uvicorn',
 	],
 	include_package_data = True,
 	test_suite = 'plantmonitor',
