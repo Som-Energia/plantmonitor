@@ -350,21 +350,21 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'irradiation_w_m2': 503,
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': time,
                 }]
             },{
             'id': 'SensorTemperatureModule:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': time,
                 }]
             },{
             'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2420,
+                    'temperature_dc': 242,
                     'time': time,
                 }]
             }]
@@ -387,21 +387,21 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'irradiation_w_m2': 503,
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': time,
                 }]
             },{
             'id': 'SensorTemperatureModule:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': time,
                 }]
             },{
             'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2420,
+                    'temperature_dc': 242,
                     'time': time,
                 }]
             }]
@@ -429,21 +429,21 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'irradiation_w_m2': 503,
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': packet_time,
                 }]
             },{
             'id': 'SensorTemperatureModule:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2700,
+                    'temperature_dc': 270,
                     'time': packet_time,
                 }]
             },{
             'id': 'SensorTemperatureAmbient:{}'.format(sensor_name),
             'readings':
                 [{
-                    'temperature_dc': 2420,
+                    'temperature_dc': 242,
                     'time': packet_time,
                 }]
             }]

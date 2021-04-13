@@ -311,7 +311,7 @@ class ORMSetup_Test(unittest.TestCase):
             sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
-                temperature_dc = 2500
+                temperature_dc = 250
             )
 
             sensor_registry_read = list(SensorIrradiationRegistry.select())[0]

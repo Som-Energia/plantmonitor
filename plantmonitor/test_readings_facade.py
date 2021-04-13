@@ -130,7 +130,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                         "voltage_cc_mV": 200,
                         "voltage_ca_mV": 100,
                         "uptime_h": 15,
-                        "temperature_dc": 1700,
+                        "temperature_dc": 170,
                     }]
                 }],key=lambda d: d['id']),
               },

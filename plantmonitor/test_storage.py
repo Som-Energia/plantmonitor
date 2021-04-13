@@ -175,7 +175,7 @@ class ApiClient_Test(unittest.TestCase):
                     "id": "SensorTemperatureAmbient:5555",
                     "readings": [{
                         "time": time,
-                        "temperature_dc": 1700,
+                        "temperature_dc": 170,
                     }]
                 }],key=lambda d: d['id']),
               }
@@ -239,7 +239,7 @@ class ApiClient_Test(unittest.TestCase):
                 "id": "SensorTemperatureAmbient:benjami",
                 "readings":
                 [{
-                        "temperature_dc": 1200,
+                        "temperature_dc": 120,
                         "time": time.isoformat(),
                 }]
             }]
@@ -299,7 +299,7 @@ class Storage_Test(unittest.TestCase):
                     "id": "SensorTemperatureAmbient:5555",
                     "readings": [{
                         "time": time,
-                        "temperature_dc": 1700,
+                        "temperature_dc": 170,
                     }]
                 }],key=lambda d: d['id']),
             }
@@ -450,7 +450,7 @@ class Storage_Test(unittest.TestCase):
                     "id": "SensorTemperatureAmbient:Alice",
                     "readings":
                     [{
-                        "temperature_dc": 1200,
+                        "temperature_dc": 120,
                         "time": time,
                     }]
                 }]
@@ -465,7 +465,7 @@ class Storage_Test(unittest.TestCase):
                     'id': 'SensorTemperatureAmbient:Alice',
                     'readings':
                     [{
-                        "temperature_dc": 1200,
+                        "temperature_dc": 120,
                         "time": time,
                     }]
                 }],

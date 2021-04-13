@@ -38,9 +38,9 @@ def wattia_sensor_to_plantadata(sensor_name, wattia_sensor_registers):
     time = wattia_sensor_registers['time'] if 'time' in wattia_sensor_registers else datetime.datetime.now(datetime.timezone.utc)
     irradiation_w_m2 = int(round(wattia_sensor_registers['irradiance_dw_m2']*0.1))
     module_temperature_dc = wattia_sensor_registers['module_temperature_dc']
-    module_temperature_dc = int(round((module_temperature_dc*0.1-25)*100))
+    module_temperature_dc = int(round((module_temperature_dc*0.1-25)*10))
     ambient_temperature_dc = wattia_sensor_registers['ambient_temperature_dc']
-    ambient_temperature_dc = int(round((ambient_temperature_dc*0.1-25)*100))
+    ambient_temperature_dc = int(round((ambient_temperature_dc*0.1-25)*10))
     # TODO aclarir si la temperatura de mòdul és la temperatura de sonda
     irradiation_reading = {
         'irradiation_w_m2': irradiation_w_m2,

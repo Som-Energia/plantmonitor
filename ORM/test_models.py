@@ -196,7 +196,7 @@ class Models_Test(unittest.TestCase):
                         "voltage_cc_mV": 200,
                         "voltage_ca_mV": 100,
                         "uptime_h": 15,
-                        "temperature_dc": 1700,
+                        "temperature_dc": 170,
                     }]
                 }],key=lambda d: d['id']),
               },
@@ -715,7 +715,7 @@ class Models_Test(unittest.TestCase):
         SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
-            temperature_dc = 2500,
+            temperature_dc = 250,
         )
 
         plantdata = alcolea.plantData()
@@ -753,7 +753,7 @@ class Models_Test(unittest.TestCase):
                 "readings":
                 [{
                     "irradiation_w_m2": 15,
-                    'temperature_dc': 2500,
+                    'temperature_dc': 250,
                     "time": time,
                 }]
             },
@@ -811,7 +811,7 @@ class Models_Test(unittest.TestCase):
                     "readings":
                     [{
                         "irradiation_w_m2": 15,
-                        "temperature_dc": 2500,
+                        "temperature_dc": 250,
                         "time": time,
                     }]
                 },

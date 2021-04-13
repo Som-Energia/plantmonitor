@@ -234,7 +234,7 @@ def migrateLegacyInverterToPony(db, inverterName, plantName, sampleSize=10000, e
                 power_w = int(round(pac_r + pac_s + pac_t))
                 energy_wh = int(round((daily_energy_h << 16) + daily_energy_l))
                 uptime_h = int(round((h_total_h << 16) + h_total_l))
-                temperature_dc = int(round(temp_inv*100))
+                temperature_dc = int(round(temp_inv*10))
                 inverter.insertRegistry(
                     power_w=power_w,
                     energy_wh=energy_wh,
