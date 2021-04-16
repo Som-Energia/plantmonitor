@@ -103,10 +103,18 @@ class Operations_Test(unittest.TestCase):
               "plant": "alibaba",
               "devices":
                 sorted([{
-                    "id": "SensorIrradiation:1234578",
+                    "id": "SensorIrradiation:12345678",
                     "readings": [{
                         "time": time + i*dt,
                         "irradiation_w_m2": 120 + i*30,
+                        "temperature_dc": 1230 + i*1,
+                    } for i in range(0,100)],
+                },
+                {
+                    "id": "SensorIrradiation:87654321",
+                    "readings": [{
+                        "time": time + i*dt,
+                        "irradiation_w_m2": 220 + i*30,
                         "temperature_dc": 1230 + i*1,
                     } for i in range(0,100)],
                 }],key=lambda d: d['id']),
@@ -176,7 +184,7 @@ class Operations_Test(unittest.TestCase):
         toDate = fromDate + datetime.timedelta(hours=11)
         metricName = 'irradiation_w_m2'
 
-        sensorName = '1234578'
+        sensorName = '12345678'
 
         integratedMetric = integrateSensor(sensorName, metricName, fromDate, toDate)
 
