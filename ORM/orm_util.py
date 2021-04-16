@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-
+from pathlib import Path
 from pony import orm
 
 from conf.config import env, env_active
@@ -120,6 +120,13 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
         #orm.set_sql_debug(True)
         database.generate_mapping(create_tables=False, check_tables=False)
+        currentschema = (
+            "-- Before commit changes in this file, create the corresponding migration\n\n{}"
+            .format(database.schema.generate_create_script()))
+        schemafile = Path(__file__).parent/"schema.sql"
+        if not schemafile.exists() or schemafile.read_text(encoding='utf8'):
+            logger.info("Database models modified, updated schema at {}".format(schemafile))
+            schemafile.write_text(currentschema, encoding='utf8')
 
         if drop_tables:
             print("Dropping all tables")
