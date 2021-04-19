@@ -200,7 +200,7 @@ class ExpectedPower_Test(TestCase):
                 * par.max_power_current_ma/1000.0
                 * par.max_power_voltage_mv/1000.0
                 * (
-                    irradiation_w_m2 / $irradiationSTC +
+                    irradiation_w_m2 / par.standard_conditions_irradiation_w_m2::float +
                     (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientI/100.0
                 )
                 * (
