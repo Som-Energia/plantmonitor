@@ -7,6 +7,7 @@ from ORM.models import (
     Plant,
     SensorIrradiation,
     SensorIrradiationRegistry,
+    PlantModuleParameters,
 )
 from pony import orm
 from pathlib import Path
@@ -38,6 +39,7 @@ class ExpectedPower_Test(TestCase):
 
         orm.set_sql_debug(True)
         database.create_tables()
+
 
         orm.db_session.__enter__()
 
@@ -113,6 +115,7 @@ class ExpectedPower_Test(TestCase):
         )
         plant.importPlant(plantDefinition)
         plant.flush()
+        self.plant = plant.id
         self.sensor = SensorIrradiation.select().first().id
 
     def importData(self, sensor, filename, outputColumn):
@@ -155,9 +158,26 @@ class ExpectedPower_Test(TestCase):
         temperatureSTC = 25, # ºC, module model param
         nModules = 4878, # plant parameter
         degradation=97.5, # %, module model param
-        #Voc = 46.1, # V, module model param
-        #Isc = 9.5, # A, module model param
+        Voc = 46.1, # V, module model param
+        Isc = 9.5, # A, module model param
     )
+
+    def setPlantParameters(self, **data):
+        data = ns(data)
+        plant = PlantModuleParameters(
+            plant=self.plant,
+            n_modules = data.nModules,
+            max_power_current_ma = int(data.Imp*1000),
+            max_power_voltage_mv = int(data.Vmp*1000),
+            current_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientI*1000),
+            voltage_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientV*1000),
+            standard_conditions_irradiation_w_m2 = int(data.irradiationSTC),
+            standard_conditions_temperature_dc = int(data.temperatureSTC*10),
+            degradation_cpercent = int(data.degradation*100),
+            opencircuit_voltage_mv = int(data.Voc*1000),
+            shortcircuit_current_ma = int(data.Isc*1000),
+        )
+        plant.flush()
 
     def assertOutputB2B(self, result):
         result = "\n".join((
@@ -168,6 +188,7 @@ class ExpectedPower_Test(TestCase):
 
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
+        self.setPlantParameters(**self.parametersFlorida)
         expected = self.importData(self.sensor,
             'b2bdata/expectedPower-2020-09-Florida.csv',
             'Potencia parque calculada con temperatura kW con degradación placas',
@@ -190,8 +211,12 @@ class ExpectedPower_Test(TestCase):
                 / 1000.0   -- W -> kW
             ) 
             END AS expectedpower
-            FROM sensorirradiationregistry
-            WHERE sensor = $sensor
+            FROM sensorirradiationregistry as reg
+            LEFT JOIN sensor as sensor
+            on sensor.id = reg.sensor
+            LEFT JOIN plantmoduleparameters as par
+            ON par.plant = sensor.plant
+            WHERE reg.sensor = $sensor
             ORDER BY time
         """, dict(sensor=self.sensor, **self.parametersFlorida))
 
