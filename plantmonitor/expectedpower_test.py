@@ -181,7 +181,7 @@ class ExpectedPower_Test(TestCase):
 
     def assertOutputB2B(self, result):
         result = "\n".join((
-            "{}\n{}".format(time.isoformat(),value)
+            "{}\n{:.9f}".format(time.isoformat(),value)
             for time, value in result
         ))
         self.assertB2BEqual(result)
