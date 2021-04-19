@@ -218,7 +218,7 @@ class ExpectedPower_Test(TestCase):
             ON par.plant = sensor.plant
             WHERE sensor.plant = $plant
             ORDER BY time
-        """, dict(plant=self.plant, **self.parametersFlorida))
+        """, dict(plant=self.plant))
 
         self.assertOutputB2B(result)
 
