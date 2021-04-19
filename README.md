@@ -56,6 +56,13 @@ CREATE database plants;
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 ```
 
+To apply migrations the database 
+
+```bash
+yoyo apply -d postgres://postgres:mypassword@localhost/plants ORM/yoyo
+```
+
+
 4. Run the project.
 
 Api

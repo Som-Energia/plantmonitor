@@ -122,6 +122,7 @@ class Plant(database.Entity):
     marketRepresentative = Set('MarketRepresentative', lazy=True)
     simel = Set('Simel', lazy=True)
     nagios = Set('Nagios', lazy=True)
+    moduleParameters = Optional('PlantModuleParameters')
 
     @classmethod
     def insertPlantsData(cls, plantsData):
@@ -659,3 +660,20 @@ class NagiosRegistry(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(nagios, time)
     status = Optional(str)
+
+class PlantModuleParameters(database.Entity):
+    plant = Required(Plant)
+    n_modules = Required(int)
+    degradation_cpercent = Required(int)
+    max_power_current_ma = Required(int)
+    max_power_voltage_mv = Required(int)
+    current_temperature_coefficient_mpercent_c = Required(int)
+    voltage_temperature_coefficient_mpercent_c = Required(int)
+    standard_conditions_irradiation_w_m2 = Required(int)
+    standard_conditions_temperature_dc = Required(int)
+    opencircuit_voltage_mv = Required(int)
+    shortcircuit_current_ma = Required(int)
+
+
+
+
