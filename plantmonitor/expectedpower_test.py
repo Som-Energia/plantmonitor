@@ -205,7 +205,7 @@ class ExpectedPower_Test(TestCase):
                 )
                 * (
                     1 +
-                    (temperature_dc/10.0 - par.standard_conditions_temperature_dc/10.0) * par.voltage_temperature_coefficient_mpercent_c/100000.0
+                    (temperature_dc - par.standard_conditions_temperature_dc)/10.0 * par.voltage_temperature_coefficient_mpercent_c/100000.0
                 )
                 * par.degradation_cpercent/100.0/100.0
                 / 1000.0   -- W -> kW
