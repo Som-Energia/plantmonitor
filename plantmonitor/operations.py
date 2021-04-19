@@ -48,9 +48,8 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
     # slice
     timeSeries = [
-        # (r.time, r.irradiation_w_m2)
-        r
-        for r in query.filter( lambda r: hourstart <= r.time and r.time <= hourend )
+        (t, v)
+        for t,v in query.filter( lambda t,v: hourstart <= t and t <= hourend )
     ]
 
     if not timeSeries:
@@ -66,23 +65,6 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
     return integralMetricValue
 
-
-# deprecated
-def integrateSensor(sensorName, metricName, fromDate, toDate):
-
-    metricModel = SensorIrradiationRegistry
-
-    integralMetric = []
-
-    dt = timedelta(hours=1)
-
-    fromHourDate = fromDate.replace(minute=0, second=0, microsecond=0)
-
-    hours = [fromHourDate + i*dt for i in range(math.ceil((toDate - fromHourDate)/dt)) ]
-
-    irradiation = [(hourstart + dt, integrateHour(hourstart, metricModel, dt)) for hourstart in hours]
-
-    return irradiation
 
 def integrateMetric(registries, fromDate, toDate):
 
@@ -100,30 +82,49 @@ def integrateMetric(registries, fromDate, toDate):
     # should return [(r.time, r.irradiation_w_m2)]
     return integralMetric
 
+
+# TODO needs a db refactor to relate sensorIrradiation (or arbitrary metric) with the integral of the registries
+def getLatestIntegratedTime():
+    lastRegistry = IntegratedIrradiationRegistry.select().order_by(orm.desc(IntegratedIrradiationRegistry.time)).first()
+    if not lastRegistry:
+        return None
+    return lastRegistry.time
+
+
 def integrateAllSensors(metrics, fromDate, toDate):
     sensors = orm.select(sensor for sensor in SensorIrradiation)
     registry = SensorIrradiationRegistry
 
     integratedMetrics = {}
 
+    # Note how we use getattr to generalize which metric we select
+    # we need something to ensure the column (aka metric) exists
+
     for metric in metrics:
+        integratedMetrics[metric] = {}
         for sensor in sensors:
-            devicesRegistries = orm.select(r[metric]
+            # TODO we're missing the relation between sensorIrradiation and sensorIntegralIrradiation
+            sensorLatestIntegratedTime = getLatestIntegratedTime()
+            devicesRegistries = orm.select((r.time,  getattr(r, metric))
                 for r in registry
                 if r.sensor == sensor and fromDate <= r.time and r.time <= toDate
             )
-            integratedValues = integrateMetric(devicesRegistries)
+            integratedValues = integrateMetric(devicesRegistries, fromDate, toDate)
             integratedMetrics[metric][sensor] = integratedValues
 
     return integratedMetrics
-    # insert
 
 def computeIntegralMetrics():
     #todo only full hours can be integrated or we'll get shit
     # change toDate
     toDate = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     fromDate = None # TODO set to the latest integrated datetime for example.
-    integrateAllSensors(['irradiation_w_m2', fromDate, toDate])
+    integratedMetrics = integrateAllSensors(['irradiation_w_m2'], fromDate, toDate)
+
+    # store metric into database
+    # TODO use plant data instead of direct insert?
+    if 'irradiation_w_m2' in integratedMetrics:
+        [SensorIntegratedIrradiation.insertRegistry() for time, irradiation in integratedMetrics['irradiation_w_m2']]
 
 
 # def dropNonMonotonicRows(df):
