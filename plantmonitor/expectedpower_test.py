@@ -198,7 +198,7 @@ class ExpectedPower_Test(TestCase):
             CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
                 par.n_modules
                 * par.max_power_current_ma/1000.0
-                * $Vmp
+                * par.max_power_voltage_mv/1000.0
                 * (
                     irradiation_w_m2 / $irradiationSTC +
                     (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientI/100.0
