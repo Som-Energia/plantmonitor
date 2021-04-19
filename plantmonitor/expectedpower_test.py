@@ -115,11 +115,11 @@ class ExpectedPower_Test(TestCase):
         plant.flush()
         self.sensor = SensorIrradiation.select().first().id
 
-    def importData(self, sensor, filename, output=None):
+    def importData(self, sensor, filename, outputColumn):
         tsvContent = readTimedDataTsv(filename, [
             'Temperatura modul',
             'Irradiación (W/m2)',
-            output or 'Potencia parque calculada con temperatura kW con degradación placas',
+            outputColumn or 'Potencia parque calculada con temperatura kW con degradación placas',
         ])
         for time, temperature_c, irradiation_w_m2, outputValue in tsvContent:
             SensorIrradiationRegistry(
@@ -168,7 +168,10 @@ class ExpectedPower_Test(TestCase):
 
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
-        expected = self.importData(self.sensor, 'b2bdata/expectedPower-2020-09-Florida.csv')
+        expected = self.importData(self.sensor,
+            'b2bdata/expectedPower-2020-09-Florida.csv',
+            'Potencia parque calculada con temperatura kW con degradación placas',
+        )
         result = database.select("""select
             time,
             CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
