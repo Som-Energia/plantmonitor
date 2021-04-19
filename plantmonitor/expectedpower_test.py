@@ -196,7 +196,7 @@ class ExpectedPower_Test(TestCase):
         result = database.select("""select
             time,
             CASE WHEN irradiation_w_m2 <=0 THEN 0 ELSE (
-                $nModules
+                par.n_modules
                 * $Imp
                 * $Vmp
                 * (
