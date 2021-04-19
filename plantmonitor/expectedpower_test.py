@@ -140,8 +140,8 @@ class ExpectedPower_Test(TestCase):
         Vmp = 30.2, # V, module model param
         temperatureCoefficientI = 0.088, # %/ºC, module model param
         temperatureCoefficientV = -0.352, # %/ºC, module model param
-        irradiationSC = 1000.0, # W/m2, module model param
-        temperatureSC = 25, # ºC, module model param
+        irradiationSTC = 1000.0, # W/m2, module model param
+        temperatureSTC = 25, # ºC, module model param
         nModules = 8640, # plant parameter
         degradation=97.0, # %, module model param
     )
@@ -151,8 +151,8 @@ class ExpectedPower_Test(TestCase):
         Vmp = 37.5, # V, module model param
         temperatureCoefficientI = 0.05, # %/ºC, module model param
         temperatureCoefficientV = -0.31, # %/ºC, module model param
-        irradiationSC = 1000.0, # W/m2, module model param
-        temperatureSC = 25, # ºC, module model param
+        irradiationSTC = 1000.0, # W/m2, module model param
+        temperatureSTC = 25, # ºC, module model param
         nModules = 4878, # plant parameter
         degradation=97.5, # %, module model param
         #Voc = 46.1, # V, module model param
@@ -179,12 +179,12 @@ class ExpectedPower_Test(TestCase):
                 * $Imp
                 * $Vmp
                 * (
-                    irradiation_w_m2 / $irradiationSC +
-                    (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientI/100.0
+                    irradiation_w_m2 / $irradiationSTC +
+                    (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientI/100.0
                 )
                 * (
                     1 +
-                    (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientV/100.0
+                    (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientV/100.0
                 )
                 * $degradation/100.0
                 / 1000.0   -- W -> kW
