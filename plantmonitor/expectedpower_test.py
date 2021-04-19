@@ -186,7 +186,7 @@ class ExpectedPower_Test(TestCase):
                     1 +
                     (temperature_dc/10.0 - $temperatureSC) * $temperatureCoefficientV/100.0
                 )
-                * $degradation/100.
+                * $degradation/100.0
                 / 1000.0   -- W -> kW
             ) 
             END AS expectedpower
@@ -196,7 +196,5 @@ class ExpectedPower_Test(TestCase):
         """, dict(sensor=self.sensor, **self.parametersFlorida))
 
         self.assertOutputB2B(result)
-
-
 
 
