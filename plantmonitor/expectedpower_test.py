@@ -201,11 +201,11 @@ class ExpectedPower_Test(TestCase):
                 * par.max_power_voltage_mv/1000.0
                 * (
                     irradiation_w_m2 / par.standard_conditions_irradiation_w_m2::float +
-                    (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientI/100.0
+                    (temperature_dc/10.0 - par.standard_conditions_temperature_dc/10.0) * $temperatureCoefficientI/100.0
                 )
                 * (
                     1 +
-                    (temperature_dc/10.0 - $temperatureSTC) * $temperatureCoefficientV/100.0
+                    (temperature_dc/10.0 - par.standard_conditions_temperature_dc/10.0) * $temperatureCoefficientV/100.0
                 )
                 * $degradation/100.0
                 / 1000.0   -- W -> kW
