@@ -38,12 +38,12 @@ def importPlants(nsplants):
                 municipality = Municipality(
                     name=municipality.name,
                     ineCode=municipality.ineCode,
-                    countryCode=municipality.countryCode if "countryCode" in municipality else None,
-                    country=municipality.country if "countryCode" in municipality else None,
-                    regionCode=municipality.regionCode if "regionCode" in municipality else None,
-                    region=municipality.region if "region" in municipality else None,
-                    provinceCode=municipality.provinceCode if "provinceCode" in municipality else None,
-                    province=municipality.province if "province" in municipality else None,
+                    countryCode=municipality.get("countryCode"),
+                    country=municipality.get("country"),
+                    regionCode=municipality.get("regionCode"),
+                    region=municipality.get("region"),
+                    provinceCode=municipality.get("provinceCode"),
+                    province=municipality.get("province"),
                 )
         if 'plants' in nsplants:
             for kplantns in nsplants.plants:
