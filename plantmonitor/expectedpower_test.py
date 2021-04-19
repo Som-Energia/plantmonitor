@@ -37,7 +37,7 @@ class ExpectedPower_Test(TestCase):
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
 
-        orm.set_sql_debug(True)
+        #orm.set_sql_debug(True)
         database.create_tables()
 
 
@@ -216,9 +216,9 @@ class ExpectedPower_Test(TestCase):
             on sensor.id = reg.sensor
             LEFT JOIN plantmoduleparameters as par
             ON par.plant = sensor.plant
-            WHERE reg.sensor = $sensor
+            WHERE sensor.plant = $plant
             ORDER BY time
-        """, dict(sensor=self.sensor, **self.parametersFlorida))
+        """, dict(plant=self.plant, **self.parametersFlorida))
 
         self.assertOutputB2B(result)
 
