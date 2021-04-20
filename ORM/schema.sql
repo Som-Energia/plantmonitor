@@ -264,14 +264,15 @@ CREATE INDEX "idx_sensor__plant" ON "sensor" ("plant");
 
 ALTER TABLE "sensor" ADD CONSTRAINT "fk_sensor__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id") ON DELETE CASCADE;
 
-CREATE TABLE "integratedirradiationregistry" (
+CREATE TABLE "hourlysensorirradiationregistry" (
   "sensor" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
   "integratedirradiation_wh_m2" BIGINT,
+  "expected_energy_wh" BIGINT,
   PRIMARY KEY ("sensor", "time")
 );
 
-ALTER TABLE "integratedirradiationregistry" ADD CONSTRAINT "fk_integratedirradiationregistry__sensor" FOREIGN KEY ("sensor") REFERENCES "sensor" ("id") ON DELETE CASCADE;
+ALTER TABLE "hourlysensorirradiationregistry" ADD CONSTRAINT "fk_hourlysensorirradiationregistry__sensor" FOREIGN KEY ("sensor") REFERENCES "sensor" ("id") ON DELETE CASCADE;
 
 CREATE TABLE "sensorirradiationregistry" (
   "sensor" INTEGER NOT NULL,

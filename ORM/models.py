@@ -415,6 +415,7 @@ class Sensor(database.Entity):
 class SensorIrradiation(Sensor):
 
     sensorRegistries = Set('SensorIrradiationRegistry', lazy=True)
+    hourlySensorIrradiationRegistries = Set('HourlySensorIrradiationRegistry', lazy=True)
 
     def toDict(self, fromdate=None, todate=None):
         return {
@@ -477,28 +478,6 @@ class SensorTemperatureModule(Sensor):
         readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
         return readings
 
-
-class SensorIntegratedIrradiation(Sensor):
-
-    sensorRegistries = Set('IntegratedIrradiationRegistry', lazy=True)
-
-    def toDict(self, fromdate=None, todate=None):
-        return {
-            "id": "{}:{}".format(self.classtype, self.name),
-            "readings": self.getRegistries(fromdate, todate)
-        }
-
-    def insertRegistry(self, integratedIrradiation_wh_m2, time=None):
-        return IntegratedIrradiationRegistry(
-            sensor = self,
-            time = time or datetime.datetime.now(datetime.timezone.utc),
-            integratedIrradiation_wh_m2 = integratedIrradiation_wh_m2
-            )
-
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
-        return readings
-
 class SensorIrradiationRegistry(database.Entity):
 
     sensor = Required(SensorIrradiation)
@@ -549,12 +528,13 @@ class AnemometerRegistry(database.Entity):
 
 # third-party / derived
 
-class IntegratedIrradiationRegistry(database.Entity):
+class HourlySensorIrradiationRegistry(database.Entity):
 
-    sensor = Required(SensorIntegratedIrradiation)
+    sensor = Required(SensorIrradiation)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(sensor, time)
     integratedIrradiation_wh_m2 = Optional(int, size=64)
+    expected_energy_wh = Optional(int, size=64)
 
 
 class ForecastVariable(database.Entity):
