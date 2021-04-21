@@ -26,14 +26,13 @@ from .models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -90,8 +89,6 @@ def migrateLegacySensorTableToPony(configdbns, plantName, tableName, deviceType,
             device = SensorIrradiation(name=deviceName, plant=plant)
         elif deviceType == 'SensorTemperature':
             device = SensorTemperatureAmbient(name=deviceName, plant=plant)
-        elif deviceType == 'SensorIntegratedIrradiation':
-            device = SensorIntegratedIrradiation(name=deviceName, plant=plant)
         else:
             raise PlantmonitorDBError("Unknown device type {}".format(deviceType))
 
@@ -321,16 +318,6 @@ def migrateLegacyToPony(configdbns, excerpt=False, skipList=[]):
             configdbns,
             plantName=plantName,
             deviceName='irradiation_alcolea',
-            excerpt=excerpt
-        )
-        logger.info("Migrate SensorIntegratedIrradiation")
-        migrateLegacySensorTableToPony(
-            configdbns,
-            plantName=plantName,
-            tableName='integrated_sensors',
-            deviceType='SensorIntegratedIrradiation',
-            dataColumnName='integral_irradiation_wh_m2',
-            deviceName='integratedIrradiation_alcolea',
             excerpt=excerpt
         )
     logger.info("Migration complete")

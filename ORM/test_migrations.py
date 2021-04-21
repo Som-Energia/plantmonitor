@@ -38,14 +38,13 @@ from .models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -300,7 +299,8 @@ class Migrations_Test(unittest.TestCase):
 
         self.assertListEqual(migratedRegistryList, expectedMigrateRegistryList)
 
-    def test_migrateLegacySensorTableToPony_sensor(self):
+    # @TODO deprecated integrated sensors are deprecated
+    def _test_migrateLegacySensorTableToPony_sensor(self):
         tableName = 'integrated_sensors'
         dataColumnName = 'integral_irradiation_wh_m2'
         plantName = 'Alcolea'
@@ -328,7 +328,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedValue]
 
         with orm.db_session:
-            query = IntegratedIrradiationRegistry.select().order_by(IntegratedIrradiationRegistry.time)
+            query = HourlySensorIrradiationRegistry.select().order_by(HourlySensorIrradiationRegistry.time)
             migratedRegistry = query.first()
             id, time, migratedValue = list(migratedRegistry.to_dict().values())
             migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, migratedValue]

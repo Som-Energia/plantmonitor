@@ -41,14 +41,13 @@ from .models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -136,9 +135,7 @@ class Models_Test(unittest.TestCase):
                 temperatureAmbientSensors:
                 - temperatureAmbientSensor:
                     name: benjami
-                integratedSensors:
-                - integratedSensor:
-                    name: david""")
+        """)
         return alcoleaPlantsNS
 
     def samplePlantNS(self):
@@ -163,9 +160,7 @@ class Models_Test(unittest.TestCase):
             temperatureAmbientSensors:
             - temperatureAmbientSensor:
                 name: joana
-            integratedSensors:
-            - integratedSensor:
-                name: voki""")
+        """)
         return alcoleaPlantNS
 
     def samplePlantsData(self, time, dt):
@@ -266,14 +261,14 @@ class Models_Test(unittest.TestCase):
 
         alcoleaPlantNS = self.samplePlantNS()
 
-        del alcoleaPlantNS['integratedSensors']
+        del alcoleaPlantNS['temperatureAmbientSensors']
 
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
         expectedPlantNS = alcoleaPlantNS
-        expectedPlantNS['integratedSensors'] = []
+        expectedPlantNS['temperatureAmbientSensors'] = []
 
         #TODO test the whole fixture, not just the plant data
         plantns = alcolea.exportPlant()
@@ -289,7 +284,6 @@ class Models_Test(unittest.TestCase):
         expectedPlantNS = ns.loads("""\
             codename: SCSOM04
             description: la bonica planta
-            integratedSensors: []
             inverters: []
             irradiationSensors: []
             meters: []
@@ -705,7 +699,6 @@ class Models_Test(unittest.TestCase):
             "irradiationSensors": [],
             "temperatureAmbientSensors": [],
             "temperatureModuleSensors": [],
-            "integratedSensors": [],
         }
 
         self.assertDictEqual(plantData, expectedPlant)
@@ -757,10 +750,6 @@ class Models_Test(unittest.TestCase):
                     "r4_VArh": 1,
                     "time": time,
                 }]
-            },
-            {
-                "id": "SensorIntegratedIrradiation:voki",
-                "readings": []
             },
             {
                 "id": "SensorIrradiation:alberto",
@@ -815,10 +804,6 @@ class Models_Test(unittest.TestCase):
                         "r4_VArh": 1,
                         "time": time,
                     }]
-                },
-                {
-                    "id": "SensorIntegratedIrradiation:voki",
-                    "readings": []
                 },
                 {
                     "id": "SensorIrradiation:alberto",

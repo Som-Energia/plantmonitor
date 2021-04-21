@@ -20,14 +20,13 @@ from .models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -75,7 +74,6 @@ class ORMSetup_Test(unittest.TestCase):
         sensorIrr = sensorsIrr[0]
 
         sensorTemp = list(SensorTemperatureAmbient.select(lambda p: p.plant==plant))[0]
-        sensorIntegratedIrr = list(SensorIntegratedIrradiation.select(lambda p: p.plant==plant))[0]
 
         dt = datetime.timedelta(minutes=5)
         value = 60
@@ -93,7 +91,7 @@ class ORMSetup_Test(unittest.TestCase):
                 time = timeStart + i*dt,
                 temperature_dc = 300 + value + i*(dv+10),
             )
-            sensorIntegratedIrr.insertRegistry(
+            sensorIrr.insertIntegratedIrradiationRegistry(
                 time = timeStart + i*dt,
                 integratedIrradiation_wh_m2 = 5000 + value + i*(dv+50),
             )
@@ -389,9 +387,7 @@ class ORMSetup_Test(unittest.TestCase):
                     temperatureAmbientSensors:
                     - temperatureAmbientSensor:
                         name: joana
-                    integratedSensors:
-                    - integratedSensor:
-                        name: voki""")
+            """)
 
             importPlants(plantsNS)
 
@@ -430,7 +426,7 @@ class ORMSetup_Test(unittest.TestCase):
 
             q1 = orm.select(r for r in SensorIrradiationRegistry if r.sensor.plant == alcolea)
             q2 = orm.select(r for r in SensorTemperatureAmbientRegistry if r.sensor.plant == alcolea)
-            q3 = orm.select(r for r in IntegratedIrradiationRegistry if r.sensor.plant == alcolea)
+            q3 = orm.select(r for r in HourlySensorIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
                 (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_dc, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)

@@ -16,14 +16,13 @@ from ORM.models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -85,7 +84,7 @@ def integrateMetric(registries, fromDate, toDate):
 
 # TODO needs a db refactor to relate sensorIrradiation (or arbitrary metric) with the integral of the registries
 def getLatestIntegratedTime():
-    lastRegistry = IntegratedIrradiationRegistry.select().order_by(orm.desc(IntegratedIrradiationRegistry.time)).first()
+    lastRegistry = HourlySensorIrradiationRegistry.select().order_by(orm.desc(HourlySensorIrradiationRegistry.time)).first()
     if not lastRegistry:
         return None
     return lastRegistry.time
@@ -124,7 +123,7 @@ def computeIntegralMetrics():
     # store metric into database
     # TODO use plant data instead of direct insert?
     if 'irradiation_w_m2' in integratedMetrics:
-        [SensorIntegratedIrradiation.insertRegistry() for time, irradiation in integratedMetrics['irradiation_w_m2']]
+        [SensorIrradiation.insertIntegratedIrradiationRegistry(irradiation, time) for time, irradiation in integratedMetrics['irradiation_w_m2']]
 
 
 # def dropNonMonotonicRows(df):

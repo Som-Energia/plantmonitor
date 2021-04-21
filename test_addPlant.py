@@ -32,14 +32,13 @@ from ORM.models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -109,10 +108,7 @@ class ImportPlant_Test(unittest.TestCase):
                         name: joana
                     temperatureModuleSensors:
                     - temperatureModuleSensor:
-                        name: pol
-                    integratedSensors:
-                    - integratedSensor:
-                        name: voki""")
+                        name: pol""")
 
             importPlants(plantsns)
 
@@ -150,10 +146,7 @@ class ImportPlant_Test(unittest.TestCase):
                     name: joana
                 temperatureModuleSensors:
                 - temperatureModuleSensor:
-                    name: pol
-                integratedSensors:
-                - integratedSensor:
-                    name: voki"""
+                    name: pol"""
 
         p = Path(fakePlantYaml)
         with p.open("w", encoding="utf-8") as f:
@@ -167,7 +160,7 @@ class ImportPlant_Test(unittest.TestCase):
 
         with orm.db_session:
             plantns = exportPlants()
-        
+
         self.assertNsEqual(plantns, content)
 
 
@@ -196,10 +189,7 @@ class ImportPlant_Test(unittest.TestCase):
                     name: joana
                 temperatureModuleSensors:
                 - temperatureModuleSensor:
-                    name: pol
-                integratedSensors:
-                - integratedSensor:
-                    name: voki"""
+                    name: pol"""
 
         p = Path(fakePlantsYaml)
         with p.open("w", encoding="utf-8") as f:
@@ -211,7 +201,7 @@ class ImportPlant_Test(unittest.TestCase):
 
         with orm.db_session:
             plantns = exportPlants()
-        
+
         self.assertNsEqual(plantns, content)
 
     def test__importPlant_File__withMunicipalities(self):
@@ -249,10 +239,7 @@ class ImportPlant_Test(unittest.TestCase):
                     name: joana
                 temperatureModuleSensors:
                 - temperatureModuleSensor:
-                    name: pol
-                integratedSensors:
-                - integratedSensor:
-                    name: voki"""
+                    name: pol"""
 
         p = Path(fakePlantsYaml)
         with p.open("w", encoding="utf-8") as f:
@@ -264,5 +251,5 @@ class ImportPlant_Test(unittest.TestCase):
 
         with orm.db_session:
             plantns = exportPlants()
-        
+
         self.assertNsEqual(plantns, content)

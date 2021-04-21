@@ -19,14 +19,13 @@ from ORM.models import (
     Inverter,
     InverterRegistry,
     Sensor,
-    SensorIntegratedIrradiation,
     SensorIrradiation,
     SensorTemperatureAmbient,
     SensorTemperatureModule,
     SensorIrradiationRegistry,
     SensorTemperatureAmbientRegistry,
     SensorTemperatureModuleRegistry,
-    IntegratedIrradiationRegistry,
+    HourlySensorIrradiationRegistry,
     ForecastMetadata,
     ForecastVariable,
     ForecastPredictor,
@@ -274,7 +273,6 @@ class Operations_Test(unittest.TestCase):
             {
                 SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
                 SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor5'])),
-                SensorIrradiation[6] : list(zip(times, expectedIntegrals['sensor6'])),
             }
         }
 
@@ -295,9 +293,48 @@ class Operations_Test(unittest.TestCase):
         integralHour = datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)
 
         sensor = SensorIrradiation[1]
-        integratedSensor = SensorIntegratedIrradiation(name=sensor.name, plant=sensor.plant, description="Integral of " + sensor.description)
-        IntegratedIrradiationRegistry(sensor=integratedSensor, time=integralHour, integratedIrradiation_wh_m2=100)
+        HourlySensorIrradiationRegistry(sensor=sensor, time=integralHour, integratedIrradiation_wh_m2=100)
 
         time = getLatestIntegratedTime()
 
         self.assertEqual(time, integralHour)
+
+    def _test__integrateMetric__rawSqlQuery(self):
+
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=11)
+        metricName = 'irradiation_w_m2'
+
+        sensorName = '12345678'
+        # TODO use raw sql query
+
+        registries = orm.select(orm.raw_sql("select * from sensorirradiationregistry;"))
+        registries.show()
+        integratedMetric = integrateMetric(registries, fromDate, toDate)
+
+        expected = [
+            (datetime.datetime(2020, 12, 10, 15, 0, tzinfo=datetime.timezone.utc), None),
+            (datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc), 225),
+            (datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc), 563),
+            (datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc), 893),
+            (datetime.datetime(2020, 12, 10, 19, 0, tzinfo=datetime.timezone.utc), 1223),
+            (datetime.datetime(2020, 12, 10, 20, 0, tzinfo=datetime.timezone.utc), 1553),
+            (datetime.datetime(2020, 12, 10, 21, 0, tzinfo=datetime.timezone.utc), 1883),
+            (datetime.datetime(2020, 12, 10, 22, 0, tzinfo=datetime.timezone.utc), 2213),
+            (datetime.datetime(2020, 12, 10, 23, 0, tzinfo=datetime.timezone.utc), 2543),
+            (datetime.datetime(2020, 12, 11, 0, 0, tzinfo=datetime.timezone.utc), 1010),
+            (datetime.datetime(2020, 12, 11, 1, 0, tzinfo=datetime.timezone.utc), None),
+        ]
+
+        # +720 every 24h
+        self.assertListEqual(integratedMetric, expected)

@@ -156,8 +156,6 @@ class Plant(database.Entity):
             [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
         if 'temperatureModuleSensors' in plant:
             [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
-        if 'integratedSensors' in plant:
-            [SensorIntegratedIrradiation(plant=self, name=sensor['integratedSensor'].name) for sensor in plant.integratedSensors]
         return self
 
     def exportPlant(self, skipEmpty=False):
@@ -173,7 +171,6 @@ class Plant(database.Entity):
                     irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
                     temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
                     temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
-                    integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)],
                 )
         else:
             plantns = ns(
@@ -186,7 +183,6 @@ class Plant(database.Entity):
             irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)]
             temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)]
             temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)]
-            integratedSensors  = [ns(integratedSensor=ns(name=sensor.name)) for sensor in SensorIntegratedIrradiation.select(lambda inv: inv.plant == self)]
             if meters:
                 plantns['meters'] = meters
             if inverters:
@@ -197,8 +193,6 @@ class Plant(database.Entity):
                 plantns['temperatureAmbientSensors'] = temperatureAmbientSensors
             if temperatureModuleSensors:
                 plantns['temperatureModuleSensors'] = temperatureModuleSensors
-            if integratedSensors:
-                plantns['integratedSensors'] = integratedSensors
 
         if self.municipality:
             plantns.municipality = self.municipality.ineCode
@@ -212,7 +206,6 @@ class Plant(database.Entity):
         SensorIrradiation(plant=self, name='Irrad'+self.name)
         SensorTemperatureAmbient(plant=self, name='TempAmb'+self.name)
         SensorTemperatureModule(plant=self, name='TempMod'+self.name)
-        SensorIntegratedIrradiation(plant=self, name='IntegIrr'+self.name)
 
     def plantData(self, fromdate=None, todate=None, skipEmpty=False):
         data = {"plant": self.name}
@@ -250,8 +243,6 @@ class Plant(database.Entity):
             return SensorTemperatureAmbient.get(name=devicename, plant=self)
         if classname == "SensorTemperatureModule":
             return SensorTemperatureModule.get(name=devicename, plant=self)
-        if classname == "SensorIntegratedIrradiation":
-            return SensorIntegratedIrradiation.get(name=devicename, plant=self)
         logger.error("Device {} {} not found".format(classname, devicename))
         return None
 
@@ -270,8 +261,6 @@ class Plant(database.Entity):
             return SensorTemperatureAmbient(plant=plant, name=devicename)
         if classname == "SensorTemperatureModule":
             return SensorTemperatureModule(plant=plant, name=devicename)
-        if classname == "SensorIntegratedIrradiation":
-            return SensorIntegratedIrradiation(plant=plant, name=devicename)
         return None
 
     def insertDeviceData(self, devicedata, packettime=None):
@@ -429,8 +418,14 @@ class SensorIrradiation(Sensor):
             time = time or datetime.datetime.now(datetime.timezone.utc),
             irradiation_w_m2 = irradiation_w_m2,
             temperature_dc = temperature_dc
-            )
+        )
 
+    def insertIntegratedIrradiationRegistry(self, integratedIrradiation_wh_m2, time):
+        return HourlySensorIrradiationRegistry(
+            sensor = self,
+            time = time,
+            integratedIrradiation_wh_m2=integratedIrradiation_wh_m2
+        )
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
         return readings

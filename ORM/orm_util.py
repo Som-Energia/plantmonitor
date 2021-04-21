@@ -153,7 +153,7 @@ def getTablesToTimescale():
         "SensorIrradiationRegistry",
         "SensorTemperatureAmbientRegistry",
         "SensorTemperatureModuleRegistry",
-        "IntegratedIrradiationRegistry",
+        "HourlySensorIrradiationRegistry",
         "InclinometerRegistry",
         "AnemometerRegistry",
         "OmieRegistry",
