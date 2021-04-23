@@ -15,6 +15,7 @@ from .expectedpower import (
     readTimedDataTsv,
     spanishDateToISO,
 )
+from .operations import integrateExpectedPower
 from yamlns import namespace as ns
 import datetime
 from ORM.orm_util import setupDatabase
@@ -199,3 +200,30 @@ class ExpectedPower_Test(TestCase):
         self.assertOutputB2B(result)
 
 
+    # TODO construir la view d'expected power i calcular l'expected energy via la integral
+    # comparar resultats amb les dades de projectes
+    def _test_expectedEnergy_Florida_2020_09(self):
+        self.setupPlant()
+        self.setPlantParameters(**self.parametersFlorida)
+        expected = None
+        # expected = self.importData(self.sensor,
+        #     'b2bdata/expectedEnergy-2020-09-Florida.csv',
+        #     'Potencia parque calculada con temperatura kW con degradación placas',
+        # )
+        self.importData(self.sensor,
+            'b2bdata/expectedPower-2020-09-Florida.csv',
+            'Potencia parque calculada con temperatura kW con degradación placas',
+        )
+
+        time = datetime.datetime(2020, 9, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=11)
+
+        query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        expectedPowerQuery = database.select(query)
+
+        # end of setup
+
+        result = integrateExpectedPower(expectedPowerQuery, fromDate, toDate)
+
+        self.assertOutputB2B(result)

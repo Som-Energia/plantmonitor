@@ -113,6 +113,32 @@ def integrateAllSensors(metrics, fromDate, toDate):
 
     return integratedMetrics
 
+# TODO refactor this function so it can be merged with integrateAllSensors above
+def integrateExpectedPower(expectedPowerViewQuery, fromDate, toDate):
+    sensors = orm.select(sensor for sensor in SensorIrradiation)
+    query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+    registry = expectedPowerViewQuery
+    metrics = ["expectedpower"]
+
+    integratedMetrics = {}
+
+    # Note how we use getattr to generalize which metric we select
+    # we need something to ensure the column (aka metric) exists
+
+    for metric in metrics:
+        integratedMetrics[metric] = {}
+        for sensor in sensors:
+            # TODO change to the latest expected power instead of the getLatestIntegratedTime which is only for Irradiation
+            sensorLatestIntegratedTime = getLatestIntegratedTime()
+            devicesRegistries = orm.select((r.time,  getattr(r, metric))
+                for r in registry
+                if r.sensor == sensor and fromDate <= r.time and r.time <= toDate
+            )
+            integratedValues = integrateMetric(devicesRegistries, fromDate, toDate)
+            integratedMetrics[metric][sensor] = integratedValues
+
+    return integratedMetrics
+
 def computeIntegralMetrics():
     #todo only full hours can be integrated or we'll get shit
     # change toDate

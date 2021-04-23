@@ -7,6 +7,8 @@ os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 import unittest
 from unittest import mock
 
+from pathlib import Path
+
 from pony import orm
 
 import datetime
@@ -42,6 +44,11 @@ from .operations import (
     integrateMetric,
     integrateAllSensors,
     getLatestIntegratedTime,
+)
+
+from .expectedpower import (
+    readTimedDataTsv,
+    spanishDateToISO,
 )
 
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
@@ -272,7 +279,8 @@ class Operations_Test(unittest.TestCase):
             'irradiation_w_m2':
             {
                 SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
-                SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor5'])),
+                SensorIrradiation[4] : list(zip(times, expectedIntegrals['sensor5'])),
+                SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor6'])),
             }
         }
 
