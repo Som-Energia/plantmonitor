@@ -42,8 +42,13 @@ import datetime
 from .operations import (
     integrateHour,
     integrateMetric,
-    integrateAllSensors,
-    getLatestIntegratedTime,
+    integrateIrradiance,
+    integrateExpectedPower,
+    computeIntegralMetrics,
+    getNewestTime,
+    getOldestTime,
+    getTimeRange,
+    insertHourlySensorIrradiationMetrics,
 )
 
 from .expectedpower import (
@@ -70,10 +75,6 @@ class Operations_Test(unittest.TestCase):
 
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
-
-        # log_level = "debug"
-        log_level = "warning"
-
 
     def tearDown(self):
         orm.rollback()
@@ -246,8 +247,75 @@ class Operations_Test(unittest.TestCase):
         # +720 every 24h
         self.assertListEqual(integratedMetric, expected)
 
+    def test__getTimeRange__None(self):
+        plantNS = self.samplePlantNS()
 
-    def test__integrateAllSensors(self):
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+
+        metricFromDate, metricToDate = getTimeRange(
+            SensorIrradiationRegistry,
+            HourlySensorIrradiationRegistry,
+            'irradiation_w_m2',
+            'integratedIrradiation_wh_m2',
+        )
+
+        self.assertIsNone(metricFromDate)
+        self.assertIsNone(metricToDate)
+
+    def test__dbTimezoneCoherence__getOneReading(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        SensorIrradiation.get(name='alberto').insertRegistry(0,0,time)
+        orm.flush()
+
+        # this is required everywhere otherwise you get fixedoffset everytime you read
+        # TIMESTAMP WITH TIMEZONE from a postgres with a non-UTC default timezone db
+        database.execute("set timezone to 'UTC';")
+
+        dbTime = orm.select(r.time for r in SensorIrradiationRegistry).order_by(orm.desc(1)).first()
+
+        self.assertEqual(time, dbTime)
+        print(time.__repr__())
+        print(dbTime.__repr__())
+        self.assertEqual(time.isoformat(), dbTime.isoformat())
+
+
+    def test__getTimeRange__SomeMany(self):
+
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        expectedFromDate = time
+        expectedToDate   = time + 100*delta
+
+        metricFromDate, metricToDate = getTimeRange(
+            SensorIrradiation.get(name='12345678'),
+            SensorIrradiationRegistry,
+            HourlySensorIrradiationRegistry,
+            'irradiation_w_m2',
+            'integratedIrradiation_wh_m2',
+        )
+
+        print(SensorIrradiation.get(name='12345678').to_dict())
+
+        q = orm.select(r.time for r in SensorIrradiationRegistry if r.sensor == SensorIrradiation.get(name='12345678') and getattr(r, 'irradiation_w_m2')).order_by(1)
+        print(list(q)[0].isoformat())
+        print(list(q)[-1].isoformat())
+        # assert metricFromDate.isoformat() == expectedFromDate.isoformat()
+        assert metricToDate.isoformat() == expectedToDate.isoformat()
+
+    def test__getTimeRange__SomeMany_FromTo(self):
         plantNS = self.samplePlantNS()
 
         alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
@@ -260,9 +328,35 @@ class Operations_Test(unittest.TestCase):
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(hours=2)
-        metrics = ['irradiation_w_m2']
 
-        integratedMetrics = integrateAllSensors(metrics, fromDate, toDate)
+        metricFromDate, metricToDate = getTimeRange(
+            SensorIrradiation[1],
+            SensorIrradiationRegistry,
+            HourlySensorIrradiationRegistry,
+            'irradiation_w_m2',
+            'integratedIrradiation_wh_m2',
+            fromDate,
+            toDate
+        )
+
+        self.assertEqual(metricFromDate, fromDate)
+        self.assertEqual(metricToDate, toDate)
+
+    def test__integrateIrradiance(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=2)
+
+        integratedMetrics = integrateIrradiance(fromDate, toDate)
 
         times = [
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
@@ -273,26 +367,23 @@ class Operations_Test(unittest.TestCase):
             'sensor1' : [None,None],
             'sensor5' : [563,893],
             'sensor6' : [655,985],
-            }
+        }
 
         expectedDict = {
-            'irradiation_w_m2':
-            {
-                SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
-                SensorIrradiation[4] : list(zip(times, expectedIntegrals['sensor5'])),
-                SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor6'])),
-            }
+            SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
+            SensorIrradiation[4] : list(zip(times, expectedIntegrals['sensor5'])),
+            SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor6'])),
         }
 
         self.assertDictEqual(integratedMetrics, expectedDict)
 
-    def test__getLatestIntegratedTime__None(self):
+    def test__getNewestTime__None(self):
 
-        time = getLatestIntegratedTime()
+        time = getNewestTime(SensorIrradiationRegistry, 'irradiation_w_m2')
 
         self.assertIsNone(time)
 
-    def test__getLatestIntegratedTime__Many(self):
+    def test__getNewestTime__Many(self):
 
         plantNS = self.samplePlantNS()
 
@@ -303,7 +394,7 @@ class Operations_Test(unittest.TestCase):
         sensor = SensorIrradiation[1]
         HourlySensorIrradiationRegistry(sensor=sensor, time=integralHour, integratedIrradiation_wh_m2=100)
 
-        time = getLatestIntegratedTime()
+        time = getNewestTime(HourlySensorIrradiationRegistry, 'integratedIrradiation_wh_m2')
 
         self.assertEqual(time, integralHour)
 

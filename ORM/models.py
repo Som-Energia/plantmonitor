@@ -420,11 +420,13 @@ class SensorIrradiation(Sensor):
             temperature_dc = temperature_dc
         )
 
-    def insertIntegratedIrradiationRegistry(self, integratedIrradiation_wh_m2, time):
+    # TODO should we allow None as time and use now() to maintain insertRegistry argument order?
+    def insertHourlySensorIrradiationMetric(self, time, integratedIrradiation_wh_m2=None, expected_energy_wh=None):
         return HourlySensorIrradiationRegistry(
             sensor = self,
             time = time,
-            integratedIrradiation_wh_m2=integratedIrradiation_wh_m2
+            integratedIrradiation_wh_m2=integratedIrradiation_wh_m2,
+            expected_energy_wh=expected_energy_wh
         )
     def getRegistries(self, fromdate=None, todate=None):
         readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)

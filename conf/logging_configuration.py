@@ -41,5 +41,16 @@ LOGGING = {
             'propagate': True,
             'handlers': ['console'],
         },
+        # TODO does adding this add a bunch of messages on production?
+        # 'pony.orm': {
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     'handlers': ['console'],
+        # },
+        # 'pony.orm.sql': {
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     'handlers': ['console'],
+        # }
     }
 }
