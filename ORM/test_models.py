@@ -610,9 +610,23 @@ class Models_Test(unittest.TestCase):
         plantsns = self.samplePlantsNS()
         importPlants(plantsns)
         plantsData = self.samplePlantsData(time, delta)
+
+        extraReadings = [{
+                        "time": time + i*delta,
+                        "export_energy_wh": 1 + i*50,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    } for i in range(5)]
+
+        plantsData[1]["devices"][0]["readings"] = extraReadings
         Plant.insertPlantsData(plantsData)
+        extratime = time+4*delta
 
         result = Meter.getLastReadingDatesOfAllMeters()
+
         result[1]["devices"].sort(key=lambda d: d['id'])
         expectedResult = [
             {
@@ -628,7 +642,7 @@ class Models_Test(unittest.TestCase):
                 "devices":
                     [{
                         "id": "Meter:5432",
-                        "time": time,
+                        "time": extratime,
                     },
                     {
                         "id": "Meter:9876",
