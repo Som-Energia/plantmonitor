@@ -67,9 +67,16 @@ class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
 
-  def getDeviceReadings(self, meterName, lastDate, upto=datetime.datetime.now(datetime.timezone.utc)):
+  def getDeviceReadings(self, meterName, lastDate, upto=None):
+    upto = upto or datetime.datetime.now(datetime.timezone.utc)
 
-    logger.debug("Asking for measures for meter {} older than {} upto {} from erp to ponyorm".format(meterName, None if not lastDate else lastDate.strftime("%Y-%m-%d %H:%M:%S"), upto.strftime("%Y-%m-%d %H:%M:%S")))
+    logger.debug(
+      "Asking for measures for meter {} older than {} upto {} from erp to ponyorm".format(
+        meterName,
+        None if not lastDate else lastDate.strftime("%Y-%m-%d %H:%M:%S"),
+        upto.strftime("%Y-%m-%d %H:%M:%S")
+      )
+    )
 
     measures = measures_from_date(
       self.client,
@@ -87,8 +94,8 @@ class ReadingsFacade():
 
     return device
 
-  def getPlantNewMetersReadings(self, plant, upto=datetime.datetime.now(datetime.timezone.utc)):
-
+  def getPlantNewMetersReadings(self, plant, upto=None):
+    upto = upto or datetime.datetime.now(datetime.timezone.utc)
     return {
       "plant": plant['plant'],
       "devices": [self.getDeviceReadings(
@@ -97,8 +104,8 @@ class ReadingsFacade():
       ],
     }
 
-  def getNewMetersReadings(self, upto=datetime.datetime.now(datetime.timezone.utc)):
-
+  def getNewMetersReadings(self, upto=None):
+    upto = upto or datetime.datetime.now(datetime.timezone.utc)
     return [self.getPlantNewMetersReadings(plant, upto)
       for plant in Meter.getLastReadingDatesOfAllMeters()
     ]
