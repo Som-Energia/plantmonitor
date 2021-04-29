@@ -99,10 +99,25 @@ def getTimeRange(sensor, srcregistry, dstregistry, srcCol, dstCol, fromDate=None
     if not toDate:
         toDate = getNewestTime(sensor, srcregistry, srcCol)
 
+    if not fromDate:
+        if not srcregistry.select().count():
+            logger.warning("{} has no registries".format(srcregistry))
+        else:
+            logger.warning(
+                "fromDate is {} for sensor {} because {} of {} has {} non-null registries".format(
+                    fromDate, sensor.to_dict(), srcregistry, srcCol,
+                    orm.count(r for r in srcregistry if r.sensor == sensor and getattr(r, srcCol))
+                )
+            )
+            # TODO raise?
+
+    if not toDate:
+        logger.warning("toDate is {} for sensor {}".format(toDate, sensor))
+
     return fromDate, toDate
 
 # TODO refactor this function so it can be merged with integrateAllSensors above
-def integrateExpectedPower(expectedPowerViewQuery, fromDate, toDate):
+def integrateExpectedPower(fromDate=None, toDate=None):
     sensors = orm.select(sensor for sensor in SensorIrradiation)
     expectedPowerViewQuery = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
     srcregistry = expectedPowerViewQuery
@@ -117,6 +132,9 @@ def integrateExpectedPower(expectedPowerViewQuery, fromDate, toDate):
 
     for sensor in sensors:
         metricFromDate, metricToDate = getTimeRange(sensor, srcregistry, dstregistry, srcCol, dstCol, fromDate, toDate)
+        if not metricFromDate:
+            logger.warning("sensor {} {} has no valid registries. skipping.".format(sensor.to_dict(), srcCol))
+            continue
         devicesRegistries = orm.select((r.time, getattr(r, srcCol))
             for r in srcregistry
             if r.sensor == sensor and metricFromDate <= r.time and r.time <= metricToDate
@@ -139,8 +157,12 @@ def integrateIrradiance(fromDate=None, toDate=None):
     integratedMetric = {}
 
     for sensor in sensors:
-        metricFromDate, metricToDate = getTimeRange(srcregistry, dstregistry, srcCol, dstCol, fromDate, toDate)
-        devicesRegistries = orm.select((r.time, getattr(r, srcCol))
+        metricFromDate, metricToDate = getTimeRange(sensor, srcregistry, dstregistry, srcCol, dstCol, fromDate, toDate)
+        if not metricFromDate:
+            logger.warning("sensor {} {} has no valid registries. skipping.".format(sensor.to_dict(), srcCol))
+            continue
+        devicesRegistries = orm.select(
+            (r.time, getattr(r, srcCol))
             for r in srcregistry
             if r.sensor == sensor and metricFromDate <= r.time and r.time <= metricToDate
         )
@@ -150,22 +172,21 @@ def integrateIrradiance(fromDate=None, toDate=None):
 
 def insertHourlySensorIrradiationMetrics(integratedMetrics, columnName):
     # update registry column or create if it doesn't exist
-    for sensor, timeseries in integratedMetrics:
+    for sensor, timeseries in integratedMetrics.items():
             for time, value in timeseries:
                 reg = HourlySensorIrradiationRegistry.get(sensor=sensor, time=time)
                 if not reg:
-                    sensor.insertHourlySensorIrradiationMetric(
-                        sensor=sensor, time=time, **{columnName : value}
+                    sensor.insertHourlySensorIrradiationMetric(time=time, **{columnName : value}
                     )
                 else:
                     reg.set(**{columnName:value})
 
 def computeIntegralMetrics():
     irradiance = integrateIrradiance()
-    insertHourlySensorIrradiationMetrics(irradiance)
-
+    insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
+    orm.flush()
     expectedEnergy = integrateExpectedPower()
-    insertHourlySensorIrradiationMetrics(expectedEnergy)
+    insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
 
 
 # def dropNonMonotonicRows(df):
