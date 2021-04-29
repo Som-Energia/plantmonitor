@@ -272,9 +272,11 @@ class Operations_Test(unittest.TestCase):
         SensorIrradiation.get(name='alberto').insertRegistry(0,0,time)
         orm.flush()
 
-        # this is required everywhere otherwise you get fixedoffset everytime you read
+        # setting the timezone required everywhere
+        # otherwise you get fixedoffset everytime you read
         # TIMESTAMP WITH TIMEZONE from a postgres with a non-UTC default timezone db
-        database.execute("set timezone to 'UTC';")
+        # database.execute("set timezone to 'UTC';")
+        # we're currently setting PGTZ at setupDatabase@orm_util:85
 
         dbTime = orm.select(r.time for r in SensorIrradiationRegistry).order_by(orm.desc(1)).first()
 
@@ -297,7 +299,7 @@ class Operations_Test(unittest.TestCase):
         orm.flush()
 
         expectedFromDate = time
-        expectedToDate   = time + 100*delta
+        expectedToDate   = time + 99*delta
 
         metricFromDate, metricToDate = getTimeRange(
             SensorIrradiation.get(name='12345678'),
@@ -394,7 +396,7 @@ class Operations_Test(unittest.TestCase):
         sensor = SensorIrradiation[1]
         HourlySensorIrradiationRegistry(sensor=sensor, time=integralHour, integratedIrradiation_wh_m2=100)
 
-        time = getNewestTime(HourlySensorIrradiationRegistry, 'integratedIrradiation_wh_m2')
+        time = getNewestTime(sensor, HourlySensorIrradiationRegistry, 'integratedIrradiation_wh_m2')
 
         self.assertEqual(time, integralHour)
 

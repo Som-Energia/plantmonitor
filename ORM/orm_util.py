@@ -82,6 +82,7 @@ def connectDatabase():
 def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
 
     from conf import envinfo
+    os.environ['PGTZ'] = 'UTC'
 
     databaseInfo = envinfo.DB_CONF
 
@@ -116,6 +117,10 @@ def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
         # requires superuser privileges
         # with orm.db_session:
         #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
+
+        # this only needs to be done once
+        # with orm.db_session():
+        #     database.execute("ALTER DATABASE {} SET timezone = 'UTC'".format(databaseInfo['database']))
 
         #orm.set_sql_debug(True)
         database.generate_mapping(create_tables=False, check_tables=False)
