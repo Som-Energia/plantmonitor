@@ -1,0 +1,21 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alarma de comptador
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 18
+    type: query
+    locals: []
+schedule: null
+tags: []
+version: 1

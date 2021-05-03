@@ -1,0 +1,39 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: false
+name: Sonda d'Irradiació
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    locals: []
+    type: text
+    parentQueryId: 4
+  - name: granularity
+    title: granularity
+    global: false
+    value: hour
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+    parentQueryId: 4
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_week
+    locals: []
+    type: datetime-range
+    parentQueryId: 4
+schedule: null
+tags: []
+version: 1

@@ -1,0 +1,62 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Mètriques d'Inversor v2 dropdown per mètrica amb rollup
+options:
+  parameters:
+  - name: metrics
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - energy_kwh
+    - max_temperature_c
+    - min_temperature_c
+    - avg_temperature_c
+    - power_kw
+    enumOptions: |-
+      energy_kwh
+      max_temperature_c
+      min_temperature_c
+      avg_temperature_c
+      power_kw
+    parentQueryId: 27
+    title: metrics
+    type: enum
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: day
+    enumOptions: |
+      minute
+      hour
+      day
+      month
+    parentQueryId: 27
+    type: enum
+    locals: []
+  - name: plant
+    title: plant
+    global: false
+    value: '1'
+    queryId: queries/all-plants-by-id
+    parentQueryId: 27
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    locals: []
+    type: datetime-range
+    parentQueryId: 27
+schedule: null
+tags: []
+version: 1

@@ -1,0 +1,40 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Potència tots els inversors amb temps i granularitat
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 12
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 12
+  - name: granularity
+    title: granularity
+    global: false
+    value: month
+    enumOptions: |-
+      hour
+      day
+      month
+      year
+    parentQueryId: 12
+    type: enum
+    locals: []
+schedule: null
+tags: []
+version: 1

@@ -1,0 +1,14 @@
+description: ''
+name: Potència Activa
+options:
+  tooltipFormat: 0,0.000
+  formatTargetValue: true
+  rowNumber: 1
+  stringDecChar: ','
+  stringSuffix: kW
+  stringDecimal: 0
+  counterColName: power_kw
+  counterLabel: ' '
+  stringThouSep: .
+  targetRowNumber: 1
+type: COUNTER

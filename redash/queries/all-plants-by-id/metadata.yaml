@@ -1,0 +1,14 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: All plants by id
+options:
+  parameters: []
+schedule: null
+tags:
+- query param
+version: 1

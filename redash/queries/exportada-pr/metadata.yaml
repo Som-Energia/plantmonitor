@@ -1,0 +1,39 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Exportada + PR
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 19
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: day
+    enumOptions: |-
+      day
+      month
+      year
+    parentQueryId: 19
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_month
+    locals: []
+    type: datetime-range
+    parentQueryId: 19
+schedule: null
+tags: []
+version: 1

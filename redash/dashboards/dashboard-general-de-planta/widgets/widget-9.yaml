@@ -1,0 +1,18 @@
+options:
+  position:
+    autoHeight: false
+    sizeX: 6
+    sizeY: 3
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 1
+    col: 0
+    row: 0
+  isHidden: false
+  parameterMappings: {}
+text: |-
+  TODO: Anar a [Dashboard general](http://plantmonitor.somenergia.coop:5000/dashboard)
+
+  Anar a [Detall de planta](http://plantmonitor.somenergia.coop:5000/dashboard/plantmonitor-detall-de-planta?p_granularity=day&p_planta=Alcolea&p_interval=d_this_month)
+width: 1
