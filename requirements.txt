@@ -41,3 +41,4 @@ yamlns==0.8.3
 zeep==3.4.0
 environs==8.0.0
 pony==0.7.13
+redasher
