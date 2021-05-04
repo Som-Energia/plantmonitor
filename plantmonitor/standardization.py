@@ -173,7 +173,7 @@ def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
 
                 if device_register['type'] == 'inverter':
                     if plant_name == 'Fontivsolar':
-                        device_readings_packet = fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])
+                        device_readings_packets = [fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])]
                     elif plant_name == 'Alcolea' or plant_name == 'Florida' or generic_plant:
                         device_readings_packets = [alcolea_inverter_to_plantdata(device_name, device_register['fields'])]
                     else:
@@ -181,6 +181,7 @@ def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
                         continue
                 elif device_register['type'] == 'sensorTemperature':
                     logger.error("SensorTemperature Not implemented")
+                    continue
                 elif device_register['type'] == 'wattiasensor':
                     device_readings_packets = wattia_sensor_to_plantadata(device_name, device_register['fields'])
                 else:
