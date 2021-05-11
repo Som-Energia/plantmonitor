@@ -18,6 +18,7 @@ from .expectedpower import (
 from .operations import integrateExpectedPower
 from yamlns import namespace as ns
 import datetime
+# import pytz
 from ORM.orm_util import setupDatabase
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 from decimal import Decimal
@@ -187,6 +188,23 @@ class ExpectedPower_Test(TestCase):
         ))
         self.assertB2BEqual(result)
 
+    # TODO fancy_replace calls make B2B too slow when changing timezone
+    # see https://bugs.python.org/issue6931 I guess
+    # def assertOutputB2BNoPlant(self, result):
+    #     tz = pytz.timezone("Europe/Madrid")
+    #     result = "\n".join((
+    #         "{},{},{:.9f}".format(t[0].astimezone(tz).isoformat(),sensor.name,t[1])
+    #         for sensor, l in result.items() for t in l
+    #     ))
+    #     self.assertB2BEqual(result)
+
+    def assertOutputB2BNoPlant(self, result):
+        result = "\n".join((
+            "{},{},{:.9f}".format(t[0].isoformat(),sensor.name,t[1])
+            for sensor, l in result.items() for t in l
+        ))
+        self.assertB2BEqual(result)
+
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
         self.setPlantParameters(**self.parametersFlorida)
@@ -202,7 +220,7 @@ class ExpectedPower_Test(TestCase):
 
     # TODO construir la view d'expected power i calcular l'expected energy via la integral
     # comparar resultats amb les dades de projectes
-    def _test_expectedEnergy_Florida_2020_09(self):
+    def test_expectedEnergy_Florida_2020_09(self):
         self.setupPlant()
         self.setPlantParameters(**self.parametersFlorida)
         expected = None
@@ -215,15 +233,15 @@ class ExpectedPower_Test(TestCase):
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
 
-        time = datetime.datetime(2020, 9, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        time = datetime.datetime(2020, 9, 1, 2, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)
-        toDate = fromDate + datetime.timedelta(hours=11)
+        toDate = fromDate + datetime.timedelta(days=30)
 
         query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
         expectedPowerQuery = database.select(query)
 
         # end of setup
 
-        result = integrateExpectedPower(expectedPowerQuery, fromDate, toDate)
+        result = integrateExpectedPower(fromDate, toDate)
 
-        self.assertOutputB2B(result)
+        self.assertOutputB2BNoPlant(result)

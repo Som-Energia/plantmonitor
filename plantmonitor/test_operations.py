@@ -32,6 +32,7 @@ from ORM.models import (
     ForecastVariable,
     ForecastPredictor,
     Forecast,
+    PlantModuleParameters,
 )
 from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
@@ -49,6 +50,7 @@ from .operations import (
     getOldestTime,
     getTimeRange,
     insertHourlySensorIrradiationMetrics,
+    integrateHourFromTimeseries,
 )
 
 from .expectedpower import (
@@ -134,6 +136,47 @@ class Operations_Test(unittest.TestCase):
               }
             ]
         return plantsData
+
+    parametersAlcolea = dict(
+        Imp = 8.27, # A, module model param
+        Vmp = 30.2, # V, module model param
+        temperatureCoefficientI = 0.088, # %/ºC, module model param
+        temperatureCoefficientV = -0.352, # %/ºC, module model param
+        irradiationSTC = 1000.0, # W/m2, module model param
+        temperatureSTC = 25, # ºC, module model param
+        nModules = 8640, # plant parameter
+        degradation=97.0, # %, module model param
+    )
+
+    parametersFlorida = dict(
+        Imp = 9.07, # A, module model param
+        Vmp = 37.5, # V, module model param
+        temperatureCoefficientI = 0.05, # %/ºC, module model param
+        temperatureCoefficientV = -0.31, # %/ºC, module model param
+        irradiationSTC = 1000.0, # W/m2, module model param
+        temperatureSTC = 25, # ºC, module model param
+        nModules = 4878, # plant parameter
+        degradation=97.5, # %, module model param
+        Voc = 46.1, # V, module model param
+        Isc = 9.5, # A, module model param
+    )
+
+    def createPlantParameters(self, plant_id, **data):
+        data = ns(data)
+        plant = PlantModuleParameters(
+            plant=plant_id,
+            n_modules = data.nModules,
+            max_power_current_ma = int(data.Imp*1000),
+            max_power_voltage_mv = int(data.Vmp*1000),
+            current_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientI*1000),
+            voltage_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientV*1000),
+            standard_conditions_irradiation_w_m2 = int(data.irradiationSTC),
+            standard_conditions_temperature_dc = int(data.temperatureSTC*10),
+            degradation_cpercent = int(data.degradation*100),
+            opencircuit_voltage_mv = int(data.Voc*1000),
+            shortcircuit_current_ma = int(data.Isc*1000),
+        )
+        plant.flush()
 
     def test__integrateHour(self):
         plantNS = self.samplePlantNS()
@@ -504,6 +547,28 @@ class Operations_Test(unittest.TestCase):
 
         self.assertIsNone(result)
 
+    # TODO check this dummy integral of acceleration 10 to distance
+    def test__integrateHourFromTimeseries(self):
+
+        def speed(dt):
+            return (datastart + dt, 50 + 10*dt.total_seconds()/3600.0)
+
+        def distance(dt):
+            return (datastart + dt, 50*dt.total_seconds()/3600 + 10*0.5*dt.total_seconds()/3600*dt.total_seconds()/3600.0)
+
+        datastart = datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)
+        hourstart = datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc)
+        dt = datetime.timedelta(minutes=5)
+        # timeseries = [(hourstart + i*dt, 50 + i*10) for i in range(20)]
+        timeseries = [speed(i*dt) for i in range(50)]
+        print(timeseries)
+
+        integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
+
+        expected = distance(hourstart-datastart+datetime.timedelta(hours=1))[1] - distance(hourstart-datastart)[1]
+
+        self.assertEqual(integralMetricValue, expected)
+
     def test__integrateExpectedPower__NoReadings(self):
         plantNS = self.samplePlantNS()
 
@@ -515,6 +580,42 @@ class Operations_Test(unittest.TestCase):
 
         self.assertDictEqual(integratedMetric, {})
 
+    def test__integrateExpectedPower__SomeReadings(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+        self.createPlantParameters(alibaba.id, **self.parametersFlorida)
+
+        fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=2)
+
+        result = integrateExpectedPower(fromDate, toDate)
+
+        times = [
+            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc)
+        ]
+
+        expected = {
+            SensorIrradiation[4]:
+            [
+                (times[0], 681),
+                (times[1], 1045),
+            ],
+            SensorIrradiation[5]:
+            [
+                (times[0], 783),
+                (times[1], 1146),
+            ]
+        }
+
+        self.assertDictEqual(result, expected)
 
     def test__computeIntegralMetrics(self):
         plantNS = self.samplePlantNS()
@@ -523,7 +624,7 @@ class Operations_Test(unittest.TestCase):
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
-        plantsData = self.samplePlantsData(time, delta)
+        plantsData = self.samplePlantsData(time, delta, numreadings=20)
         Plant.insertPlantsData(plantsData)
         orm.flush()
 
@@ -538,16 +639,18 @@ class Operations_Test(unittest.TestCase):
 
         times = [
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc)
+            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc),
+
         ]
 
         expected = [
             {'sensor': 1, 'time': times[0], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
             {'sensor': 1, 'time': times[1], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
-            {'sensor': 4, 'time': times[0], 'integratedIrradiation_wh_m2': 563, 'expected_energy_wh': "TODO"},
-            {'sensor': 4, 'time': times[1], 'integratedIrradiation_wh_m2': 893, 'expected_energy_wh': "TODO"},
-            {'sensor': 5, 'time': times[0], 'integratedIrradiation_wh_m2': 655, 'expected_energy_wh': "TODO"},
-            {'sensor': 5, 'time': times[1], 'integratedIrradiation_wh_m2': 985, 'expected_energy_wh': "TODO"}
+            {'sensor': 4, 'time': times[0], 'integratedIrradiation_wh_m2': 563, 'expected_energy_wh': 681},
+            {'sensor': 4, 'time': times[1], 'integratedIrradiation_wh_m2': 893, 'expected_energy_wh': 1045},
+            {'sensor': 5, 'time': times[0], 'integratedIrradiation_wh_m2': 655, 'expected_energy_wh': 785},
+            {'sensor': 5, 'time': times[1], 'integratedIrradiation_wh_m2': 985, 'expected_energy_wh': 1146}
         ]
 
         self.assertListEqual(result, expected)

@@ -83,6 +83,10 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
 
     xvalues, yvalues = list(zip(*timeSeriesSlice))
 
+    if all(v is None for v in yvalues):
+        logger.warning("No values in hour range {} - {}".format(xvalues[0], xvalues[-1]))
+        return None
+
     # hourly_trapezoidal_approximation
     integralMetricValueDateTime = integrate.trapz(y=yvalues, x=xvalues)
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
@@ -153,27 +157,36 @@ def integrateExpectedPower(fromDate=None, toDate=None):
 
     if not expectedPowerRegs:
         logger.warning("No expectedPower registries. expected energy will not be computed.")
-        return None
+        return {}
+
+    if all(getattr(r, srcCol) is None for r in expectedPowerRegs):
+        logger.warning("All expectedPower readings are None. expected energy will not be computed.")
+        return {}
+
 
     integratedMetric = {}
 
     # TODO use fromDate. toDate
     for sensor in sensors:
-        metricFromDate = getOldestTime(sensor, HourlySensorIrradiationRegistry, dstCol)
-
-        sensorExpectedPower = [(r['time'],r[srcCol] )for r in expectedPowerRegs if r.sensor == sensor.name]
+        sensorExpectedPower = [(r.time, getattr(r,srcCol) ) for r in expectedPowerRegs if r.sensor == sensor.id]
         if not sensorExpectedPower:
             logger.warning("No expectedPower for sensor {}. Skipping".format(sensor.name))
+            continue
+
         # TODO assuming ordered by time (it's in the query)
-        metricToDate = sensorExpectedPower[-1]
-        if not metricFromDate:
-            metricFromDate = sensorExpectedPower[0]
+        metricToDate = sensorExpectedPower[-1][0] or datetime.now(timezone.utc)
+        metricFromDate = getOldestTime(sensor, HourlySensorIrradiationRegistry, dstCol) or sensorExpectedPower[0][0]
+
+        # apply from/to filter
+        metricFromDate = fromDate if fromDate and metricFromDate < fromDate else metricFromDate
+        metricToDate   = toDate if toDate and toDate < metricToDate else metricToDate
 
         dt = timedelta(hours=1)
-        fromHourDate = fromDate.replace(minute=0, second=0, microsecond=0)
-        hours = [fromHourDate + i*dt for i in range(math.ceil((toDate - fromHourDate)/dt)) ]
+        fromHourDate = metricFromDate.replace(minute=0, second=0, microsecond=0)
+        hours = [fromHourDate + i*dt for i in range(math.ceil((metricToDate - fromHourDate)/dt)) ]
 
         # TODO sensorExpectedPower is a list, not a pony query, we have to rewrite evreything
+        print(hours)
 
         integratedMetric[sensor] = [(hourstart + dt, integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
 
