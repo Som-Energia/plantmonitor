@@ -140,7 +140,7 @@ class Standardization_Test(unittest.TestCase):
             'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
@@ -176,7 +176,7 @@ class Standardization_Test(unittest.TestCase):
                 'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
@@ -213,7 +213,7 @@ class Standardization_Test(unittest.TestCase):
                 'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
@@ -227,7 +227,7 @@ class Standardization_Test(unittest.TestCase):
                 'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
@@ -241,7 +241,7 @@ class Standardization_Test(unittest.TestCase):
                 'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
@@ -283,7 +283,7 @@ class Standardization_Test(unittest.TestCase):
                 'readings':
                 [{
                     'energy_wh': 17556,
-                    'power_w': 60000,
+                    'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
                     'voltage_cc_mV': None,
