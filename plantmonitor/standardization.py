@@ -71,11 +71,11 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
     time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
-    pac_r_w = inverter_registers['pac_r_w'] * 10
-    pac_s_w = inverter_registers['pac_s_w'] * 10
-    pac_t_w = inverter_registers['pac_t_w'] * 10
-    power_w = int(round(pac_r_w + pac_s_w + pac_t_w))
-    energy_wh = int(round((inverter_registers['daily_energy_h_wh'] << 16) + inverter_registers['daily_energy_l_wh']))
+    pac_r_dw = inverter_registers['pac_r_w']
+    pac_s_dw = inverter_registers['pac_s_w']
+    pac_t_dw = inverter_registers['pac_t_w']
+    power_w = 10*int(round(pac_r_dw + pac_s_dw + pac_t_dw))
+    energy_wh = 100*int(round((inverter_registers['daily_energy_h_wh'] << 16) + inverter_registers['daily_energy_l_wh']))
     uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
     temperature_dc = int(round(inverter_registers['temp_inv_dc']))
 
@@ -106,7 +106,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     for register in inverter_registers:
         time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
         #TODO meld toghether Uint16 _h _l into Uint32
-        energy_wh = int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))*10
+        energy_wh = 10*int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))
         power_w = int(round(inverter_registers['ActivePower_dW']/10))
         uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
         temperature_dc = None

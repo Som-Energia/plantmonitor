@@ -139,7 +139,7 @@ class Standardization_Test(unittest.TestCase):
             'id': 'Inverter:{}'.format(inverter_name),
             'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
@@ -175,7 +175,7 @@ class Standardization_Test(unittest.TestCase):
                 'id': 'Inverter:Alice',
                 'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
@@ -212,7 +212,7 @@ class Standardization_Test(unittest.TestCase):
                 'id': 'Inverter:Alice',
                 'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
@@ -226,7 +226,7 @@ class Standardization_Test(unittest.TestCase):
                 'id': 'Inverter:Bob',
                 'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
@@ -240,7 +240,7 @@ class Standardization_Test(unittest.TestCase):
                 'id': 'Inverter:Charlie',
                 'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
@@ -282,7 +282,7 @@ class Standardization_Test(unittest.TestCase):
                 'id': 'Inverter:Alice',
                 'readings':
                 [{
-                    'energy_wh': 17556,
+                    'energy_wh': 1755600,
                     'power_w': 600000,
                     'intensity_cc_mA': None,
                     'intensity_ca_mA': None,
