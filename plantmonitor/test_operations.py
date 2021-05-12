@@ -717,11 +717,10 @@ class Operations_Test(unittest.TestCase):
 
         orm.flush()
 
-        expectedPowerViewQuery = Path('queries/new/view_expected_power_test.sql').read_text(encoding='utf8')
+        expectedPowerViewQuery = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
 
         result = database.select(expectedPowerViewQuery)
 
-        print(result)
         self.assertFalse(all(r.expectedpower is None for r in result))
 
     def test__computeIntegralMetrics(self):

@@ -91,7 +91,7 @@ class ORMSetup_Test(unittest.TestCase):
                 time = timeStart + i*dt,
                 temperature_dc = 300 + value + i*(dv+10),
             )
-            sensorIrr.insertIntegratedIrradiationRegistry(
+            sensorIrr.insertHourlySensorIrradiationMetric(
                 time = timeStart + i*dt,
                 integratedIrradiation_wh_m2 = 5000 + value + i*(dv+50),
             )

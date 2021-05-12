@@ -173,8 +173,9 @@ class Plant(database.Entity):
                     irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
                     temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
                     temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
-                    moduleParameters = self.moduleParameters.export(),
                 )
+            if self.moduleParameters:
+                plantns.moduleParameters = self.moduleParameters.export()
         else:
             plantns = ns(
                     name = self.name,
