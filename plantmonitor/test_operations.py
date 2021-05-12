@@ -552,7 +552,9 @@ class Operations_Test(unittest.TestCase):
 
         self.assertListEqual(result, expected)
 
-    def test__getOldestTime__WithAQueryObject(self):
+    # TODO deprecate if orm knows about views
+    # or activate if getOldestTime suports python lists instead of pony queries
+    def _test__getOldestTime__WithAQueryObject(self):
 
         plant = Plant(name='alibaba', codename='alibaba')
         sensor = SensorIrradiation(name='Alice', plant=plant)
@@ -640,8 +642,90 @@ class Operations_Test(unittest.TestCase):
 
         self.assertDictEqual(result, expected)
 
-    def test__computeIntegralMetrics(self):
+    def test__insertHourlySensorIrradiationMetrics__updateRows(self):
         plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta, numreadings=20)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=2)
+
+        orm.flush()
+
+        times = [
+            datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
+        ]
+
+        sensor = Sensor.select().first()
+        irradiance = {sensor: [(times[0], 10), (times[1], 20)]}
+
+        insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
+
+        expectedEnergy = {sensor: [(times[0], 30), (times[1], 40)]}
+
+        insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
+
+        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select().order_by(1)]
+
+        expected = [
+            {'sensor': 1, 'time': times[0], 'integratedIrradiation_wh_m2': 10, 'expected_energy_wh': 30},
+            {'sensor': 1, 'time': times[1], 'integratedIrradiation_wh_m2': 20, 'expected_energy_wh': 40},
+        ]
+
+        print("HourlySensor {}".format(result))
+        print("ExpectedHourlySensor {}".format(expected))
+
+        self.assertListEqual(result, expected)
+
+        self.assertListEqual(result, expected)
+
+    def test__plantParametersInsert(self):
+        plantNS = self.samplePlantNSWithModuleParameters()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta, numreadings=20)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        numpp = PlantModuleParameters.select().count()
+
+        self.assertEqual(numpp, 1)
+
+    def test__selectPowerViaQuery(self):
+        plantNS = self.samplePlantNSWithModuleParameters()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        plantsData = self.samplePlantsData(time, delta, numreadings=20)
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
+        toDate = fromDate + datetime.timedelta(hours=2)
+
+        orm.flush()
+
+        expectedPowerViewQuery = Path('queries/new/view_expected_power_test.sql').read_text(encoding='utf8')
+
+        result = database.select(expectedPowerViewQuery)
+
+        print(result)
+        self.assertFalse(all(r.expectedpower is None for r in result))
+
+    def test__computeIntegralMetrics(self):
+        plantNS = self.samplePlantNSWithModuleParameters()
 
         alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
@@ -658,22 +742,18 @@ class Operations_Test(unittest.TestCase):
 
         computeIntegralMetrics()
 
-        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select()]
+        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select().order_by(1)]
 
         times = [
+            datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc),
-
         ]
 
         expected = [
-            {'sensor': 1, 'time': times[0], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
-            {'sensor': 1, 'time': times[1], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
-            {'sensor': 4, 'time': times[0], 'integratedIrradiation_wh_m2': 563, 'expected_energy_wh': 681},
-            {'sensor': 4, 'time': times[1], 'integratedIrradiation_wh_m2': 893, 'expected_energy_wh': 1045},
-            {'sensor': 5, 'time': times[0], 'integratedIrradiation_wh_m2': 655, 'expected_energy_wh': 785},
-            {'sensor': 5, 'time': times[1], 'integratedIrradiation_wh_m2': 985, 'expected_energy_wh': 1146}
+            {'sensor': 2, 'time': times[0], 'integratedIrradiation_wh_m2': 225, 'expected_energy_wh': 298},
+            {'sensor': 2, 'time': times[1], 'integratedIrradiation_wh_m2': 380, 'expected_energy_wh': 462},
+            {'sensor': 3, 'time': times[0], 'integratedIrradiation_wh_m2': 308, 'expected_energy_wh': 392},
+            {'sensor': 3, 'time': times[1], 'integratedIrradiation_wh_m2': 446, 'expected_energy_wh': 536}
         ]
 
         self.assertListEqual(result, expected)

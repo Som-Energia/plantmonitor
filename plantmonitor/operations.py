@@ -234,6 +234,7 @@ def computeIntegralMetrics():
     irradiance = integrateIrradiance()
     insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
     orm.flush()
+
     expectedEnergy = integrateExpectedPower()
     insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
 
