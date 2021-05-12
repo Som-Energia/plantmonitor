@@ -163,6 +163,42 @@ class Models_Test(unittest.TestCase):
         """)
         return alcoleaPlantNS
 
+    def samplePlantNSWithModuleParameters(self):
+        alcoleaPlantNS = ns.loads("""\
+            name: alcolea
+            codename: SCSOM04
+            description: la bonica planta
+            moduleParameters:
+                nModules: 4878
+                Imp: 9.07
+                Vmp: 37.5
+                temperatureCoefficientI: 0.05
+                temperatureCoefficientV: -0.31
+                irradiationSTC: 1000.0
+                temperatureSTC: 25
+                degradation: 97.5
+                Voc: 46.1
+                Isc: 9.5
+            meters:
+            - meter:
+                name: '1234578'
+            inverters:
+            - inverter:
+                name: '5555'
+            - inverter:
+                name: '6666'
+            irradiationSensors:
+            - irradiationSensor:
+                name: alberto
+            temperatureModuleSensors:
+            - temperatureModuleSensor:
+                name: pol
+            temperatureAmbientSensors:
+            - temperatureAmbientSensor:
+                name: joana
+        """)
+        return alcoleaPlantNS
+
     def samplePlantsData(self, time, dt):
         plantsData = [
               {
@@ -269,6 +305,32 @@ class Models_Test(unittest.TestCase):
 
         expectedPlantNS = alcoleaPlantNS
         expectedPlantNS['temperatureAmbientSensors'] = []
+
+        #TODO test the whole fixture, not just the plant data
+        plantns = alcolea.exportPlant()
+        self.assertNsEqual(plantns, expectedPlantNS)
+
+    def test__Plant_importExport__ModuleParameters(self):
+
+        alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
+
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+
+        expectedPlantNS = alcoleaPlantNS
+        expectedPlantNS['moduleParameters'] = {
+            'nModules': 4878,
+            'Imp': 9070,
+            'Vmp': 37500,
+            'temperatureCoefficientI': 50,
+            'temperatureCoefficientV': -310,
+            'irradiationSTC': 1000,
+            'temperatureSTC': 250,
+            'degradation': 9750,
+            'Voc': 46100,
+            'Isc': 9500,
+        }
 
         #TODO test the whole fixture, not just the plant data
         plantns = alcolea.exportPlant()

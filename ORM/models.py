@@ -156,6 +156,8 @@ class Plant(database.Entity):
             [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
         if 'temperatureModuleSensors' in plant:
             [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
+        if 'moduleParameters' in plant:
+            self.setModuleParameters(**plant['moduleParameters'])
         return self
 
     def exportPlant(self, skipEmpty=False):
@@ -171,6 +173,7 @@ class Plant(database.Entity):
                     irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
                     temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
                     temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
+                    moduleParameters = self.moduleParameters.export(),
                 )
         else:
             plantns = ns(
@@ -193,6 +196,8 @@ class Plant(database.Entity):
                 plantns['temperatureAmbientSensors'] = temperatureAmbientSensors
             if temperatureModuleSensors:
                 plantns['temperatureModuleSensors'] = temperatureModuleSensors
+            if self.moduleParameters:
+                plantns['moduleParameters'] = self.moduleParameters.export()
 
         if self.municipality:
             plantns.municipality = self.municipality.ineCode
@@ -227,6 +232,33 @@ class Plant(database.Entity):
         data["devices"].sort(key=lambda x : x['id'])
 
         return data
+
+    def setModuleParameters(
+        self,
+        nModules,
+        Imp,
+        Vmp,
+        temperatureCoefficientI,
+        temperatureCoefficientV,
+        irradiationSTC,
+        temperatureSTC,
+        degradation,
+        Voc,
+        Isc):
+
+        self.moduleParameters = PlantModuleParameters(
+            plant=self,
+            n_modules = nModules,
+            max_power_current_ma = int(Imp*1000),
+            max_power_voltage_mv = int(Vmp*1000),
+            current_temperature_coefficient_mpercent_c = int(temperatureCoefficientI*1000),
+            voltage_temperature_coefficient_mpercent_c = int(temperatureCoefficientV*1000),
+            standard_conditions_irradiation_w_m2 = int(irradiationSTC),
+            standard_conditions_temperature_dc = int(temperatureSTC*10),
+            degradation_cpercent = int(degradation*100),
+            opencircuit_voltage_mv = int(Voc*1000),
+            shortcircuit_current_ma = int(Isc*1000),
+        )
 
     def str2model(self, classname, devicename):
         #TODO generalize this
@@ -650,6 +682,21 @@ class PlantModuleParameters(database.Entity):
     standard_conditions_temperature_dc = Required(int)
     opencircuit_voltage_mv = Required(int)
     shortcircuit_current_ma = Required(int)
+
+    def export(self):
+        mp = {
+            'nModules': self.n_modules,
+            'degradation': self.degradation_cpercent,
+            'Imp': self.max_power_current_ma,
+            'Vmp': self.max_power_voltage_mv,
+            'temperatureCoefficientI': self.current_temperature_coefficient_mpercent_c,
+            'temperatureCoefficientV': self.voltage_temperature_coefficient_mpercent_c,
+            'irradiationSTC': self.standard_conditions_irradiation_w_m2,
+            'temperatureSTC': self.standard_conditions_temperature_dc,
+            'Voc': self.opencircuit_voltage_mv,
+            'Isc': self.shortcircuit_current_ma,
+        }
+        return mp
 
 
 

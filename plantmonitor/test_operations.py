@@ -112,6 +112,29 @@ class Operations_Test(unittest.TestCase):
                 name: voki""")
         return plantNS
 
+    def samplePlantNSWithModuleParameters(self):
+        plantNS = ns.loads("""\
+            name: alibaba
+            codename: SCSOM04
+            description: la bonica planta
+            moduleParameters:
+                nModules: 4878
+                Imp: 9.07
+                Vmp: 37.5
+                temperatureCoefficientI: 0.05
+                temperatureCoefficientV: -0.31
+                irradiationSTC: 1000.0
+                temperatureSTC: 25
+                nModules: 4878
+                degradation: 97.5
+                Voc: 46.1
+                Isc: 9.5
+            irradiationSensors:
+            - irradiationSensor:
+                name: alberto
+            """)
+        return plantNS
+
     def samplePlantsData(self, time, dt, numreadings=100):
         plantsData = [
               {
