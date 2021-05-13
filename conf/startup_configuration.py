@@ -2,12 +2,15 @@
 import conf.logging_configuration
 from influxdb import InfluxDBClient
 from apscheduler.schedulers.blocking import BlockingScheduler
-from plantmonitor.task import task
-from plantmonitor.task import task_counter_erp
-from plantmonitor.task import task_get_meteologica_forecast
-from plantmonitor.task import task_meters_erp_to_orm
-from plantmonitor.task import task_daily_upload_to_api_meteologica
-from plantmonitor.task import task_daily_download_from_api_meteologica
+from plantmonitor.task import (
+    task,
+    task_counter_erp,
+    task_get_meteologica_forecast,
+    task_meters_erp_to_orm,
+    task_daily_upload_to_api_meteologica,
+    task_daily_download_from_api_meteologica,
+    task_integral,
+)
 from ORM.orm_util import connectDatabase
 from conf.config import env, env_active
 
@@ -42,5 +45,6 @@ def add_jobs(app):
         app.add_job(task_meters_erp_to_orm, 'interval', minutes=20)
         app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=18, minute=5)
         app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':False}, hour=19, minute=5)
+        app.add_job(task_integral, 'cron', minute=20) # run at every *:20 of every hour
     else:
         logger.error("Environment not configured")
