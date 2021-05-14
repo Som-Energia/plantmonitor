@@ -18,7 +18,10 @@ from .meters import (
 from .operations import computeIntegralMetrics
 
 from meteologica.daily_upload_to_api import upload_meter_data
-from meteologica.daily_download_from_api import download_meter_data
+from meteologica.forecasts import (
+    downloadMeterForecasts,
+    uploadMeterReadings
+)
 
 import sys
 import psycopg2
@@ -201,19 +204,16 @@ def task_meters_erp_to_orm():
         logger.error("[ERROR] %s" % err)
         raise
 
-
-def task_get_meteologica_forecast():
-    forecast()
-
-
 def task_daily_upload_to_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
-    upload_meter_data(configdb, test_env=test_env)
+    with orm.db_session:
+        uploadMeterReadings(configdb, test_env=test_env)
 
 
 def task_daily_download_from_api_meteologica(test_env=True):
     configdb = ns.load('conf/config_meteologica.yaml')
-    download_meter_data(configdb, test_env=test_env)
+    with orm.db_session:
+        downloadMeterForecasts(configdb, test_env=test_env)
 
 
 def task_integral():

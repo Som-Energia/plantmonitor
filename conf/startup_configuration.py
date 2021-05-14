@@ -5,7 +5,6 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from plantmonitor.task import (
     task,
     task_counter_erp,
-    task_get_meteologica_forecast,
     task_meters_erp_to_orm,
     task_daily_upload_to_api_meteologica,
     task_daily_download_from_api_meteologica,

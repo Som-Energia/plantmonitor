@@ -26,7 +26,7 @@ from meteologica.meteologica_api_utils import (
     MeteologicaApiError,
 )
 
-from meteologica.utils import todt
+from meteologica.utils import todt, shiftOneHour, shiftOneHourWithoutFacility
 
 import time
 import sys
@@ -42,14 +42,71 @@ logger = logging.getLogger("plantmonitor")
 def parseArguments():
     # TODO parse arguments into a ns
     args = ns()
+
     if len(sys.argv) == 3:
         args[sys.argv[1]] = sys.argv[2]
-        return args
+
+    return args
+
+class ForecastStatus():
+    UNKNOWNFACILITY = "Unknown facility"
+    UPTODATE = "UPTODATE"
+    OK = "OK"
+
+# TODO use enum on status, or change to exception
+
+def getForecast(api, facility):
+    plant = Plant.getFromMeteologica(facility)
+
+    if not plant:
+        logger.error("meteologica facility {} is not known to database. Please add it.".format(facility))
+        return None, ForecastStatus.UNKNOWNFACILITY
+
+    lastDownload = plant.lastForecastDownloaded()
+
+    now = dt.datetime.now(dt.timezone.utc)
+    toDate = now
+
+    if not lastDownload:
+        fromDate = now - dt.timedelta(days=14)
+    elif now - lastDownload < dt.timedelta(hours=1):
+        logger.info("{} already up to date".format(facility))
+        return None, ForecastStatus.UPTODATE
     else:
-        return args
+        fromDate = lastDownload
 
+    try:
+        meterDataForecast = api.getForecast(facility, fromDate, toDate)
+        status = ForecastStatus.OK
+    except MeteologicaApiError as e:
+        logger.warning("Silenced exception: {}".format(e))
+        status = str(e)
+        meterDataForecast = None
 
-def download_meter_data(configdb, test_env=True):
+    if not meterDataForecast:
+        logger.info("No forecast data for {}".format(facility))
+        return None, status
+
+    return meterDataForecast, status
+
+def addForecast(facility, meterDataForecast, status):
+
+    deltat = datetime.timedelta(hours=1)
+
+    # TODO api uses start-hour, we should change to end-hour before inserting
+    forecasts = [(time + deltat, int(1000*forecast)) for time, forecast in meterDataForecast]
+
+    # conversion from energy to power
+    # (Not necessary for hourly values)
+
+    forecastDate = datetime.datetime.now(datetime.timezone.utc)
+
+    plant = Plant.get(codename=facility)
+    forecastMetadata = ForecastMetadata.create(plant=plant, forecastdate=forecastDate, errorcode=status)
+    if status == ForecastStatus.OK:
+        forecastMetadata.addForecasts(forecasts)
+
+def downloadMeterForecasts(configdb, test_env=True):
 
     if test_env:
         target_wsdl = configdb['meteo_test_url']
@@ -70,70 +127,148 @@ def download_meter_data(configdb, test_env=True):
 
     start = time.perf_counter()
 
-    downloadStatus = {}
+    statuses = {}
 
     with MeteologicaApi(**params) as api:
-        with orm.session():
+        facilities = api.getAllFacilities()
 
-            facilities = api.getAllFacilities()
+        if not facilities:
+            logger.info("No facilities in api {}".format(target_wsdl))
+            return {}
 
-            if not facilities:
-                logger.info("No facilities in api {}".format(target_wsdl))
-                return downloadStatus
+        for facility in facilities:
+            forecast, status = getForecast(api, facility)
+            statuses[facility] = status
 
-            for facility in facilities:
-                plant = Plant.getFromMeteologica(facility)
+            if status == ForecastStatus.UPTODATE or status == ForecastStatus.UNKNOWNFACILITY:
+                logger.info("Forecast for {} resulted in {}. Skipping.".format(facility, status))
+            else:
 
-                if not plant:
-                    logger.error("meteologica facility {} is not known to database. Please add it.")
-                    continue
-
-                lastDownload = plant.lastForecastDownloaded()
-
-                now = dt.datetime.now(dt.timezone.utc)
-                toDate = now
-
-                if not lastDownload:
-                    fromDate = now - dt.timedelta(days=14)
-                elif now - lastDownload < dt.timedelta(hours=1):
-                    logger.info("{} already up to date".format(facility))
-                    downloadStatus[facility] = "UPTODATE"
-                    continue
-                else:
-                    fromDate = lastDownload
-
-                try:
-                    meterDataForecast = api.getForecast(facility, fromDate, toDate)
-                    downloadStatus[facility] = "OK"
-                except MeteologicaApiError as e:
-                    logger.warning("Silenced exception: {}".format(e))
-                    downloadStatus[facility] = str(e)
-                    meterDataForecast = None
-
-                if not meterDataForecast:
-                    logger.info("No forecast data for {}".format(facility))
-                    continue
-
-                # TODO api uses start-hour, we should change to end-hour before inserting
-
-                # conversion from energy to power
-                # (Not necessary for hourly values)
-                forecastDict = {facility: meterDataForecast}
-                forecastDate = now
-                db.addForecast(forecastDict, forecastDate)
+                with orm.db_session:
+                    addForecast(facility, forecast, status)
 
                 logger.info(
                     "Saved {} forecast records from {} to db - {} ".format
                     (
-                        len(meterDataForecast), facility, downloadStatus[facility]
+                        len(forecast), facility, status
                     )
                 )
 
     elapsed = time.perf_counter() - start
     logger.info('Total elapsed time {:0.4}'.format(elapsed))
 
-    return downloadStatus
+    return statuses
 
+def getMeterReadings(facility, fromDate=None, toDate=None):
+    toDate = toDate or dt.datetime.now(dt.timezone.utc)
+    plant = Plant.get(codename=facility)
+    if not plant:
+        logger.warning("Plant codename {} is unknown to db".format(facility))
+        return None
+    meter = plant.getMeter()
+    if not meter:
+        logger.error("Plant {} doesn't have any meter".format(plant.name))
+        return None
+
+    query = orm.select(r for r in MeterRegistry if r.meter == meter)
+    if fromDate:
+        query.filter(lambda r: fromDate <= r.time)
+    if toDate:
+        query.filter(lambda r: r.time <= toDate)
+
+    data = [(r.time, r.export_energy_wh) for r in query]
+
+    return data
+
+def getMeterReadingsFromLastUpload(api, facility):
+    # TODO use forecastMetadata instead of api lastDateUploaded!
+    # Fixes the TODO below and can remote the undo (I guess)
+    lastUploadDT = api.lastDateUploaded(facility)
+    logger.debug("Facility {} last updated: {}".format(facility, lastUploadDT))
+    meterReadings = []
+    if not lastUploadDT:
+        meterReadings = getMeterReadings(facility)
+    else:
+        # TODO refactor this undo the hour shift due to api understanding start-hours instead of end-hours (see below @101)
+        fromDate = lastUploadDT + dt.timedelta(hours=1)
+        meterReadings = getMeterReadings(facility, fromDate)
+
+    if not meterReadings:
+        logger.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
+
+    return meterReadings
+
+def uploadFacilityMeterReadings(api, facility):
+    meterReadings = getMeterReadingsFromLastUpload(api, facility)
+
+    if not meterReadings:
+        return None
+
+    #Seems to be correct according to documentation (meteologica said the contrary):
+    #Hour correction, meteologica expects start hour insted of end hour for readings
+    #ERP has end hour. Verified with validated readings. Assumes horari type.
+    #Uploaded are one hour behind validated
+    meterDataShifted = shiftOneHourWithoutFacility(meterReadings)
+
+    # conversion from energy to power
+    # (Not necessary for hourly values)
+    logger.debug("Uploading {} data: {} ".format(facility, meterDataShifted))
+
+    response = api.uploadProduction(facility, meterDataShifted)
+
+    logger.info("Uploaded {} observations for facility {} : {}".format(len(meterDataShifted), facility, response))
+
+    return response
+
+def uploadMeterReadings(configdb, test_env=True):
+
+    if test_env:
+        target_wsdl = configdb['meteo_test_url']
+        lastDateFile = 'lastDateFile-test.yaml'
+    else:
+        target_wsdl = configdb['meteo_url']
+        lastDateFile = 'lastDateFile.yaml'
+
+    params = dict(
+        wsdl=target_wsdl,
+        username=configdb['meteo_user'],
+        password=configdb['meteo_password'],
+        lastDateFile=lastDateFile,
+        showResponses=False,
+    )
+
+    excludedFacilities = ['test_facility']
+
+    responses = {}
+    start = time.perf_counter()
+
+    with MeteologicaApi(**params) as api:
+        with orm.db_session:
+            apifacilities = api.getAllFacilities()
+
+            facilities = [plant.codename for plant in Plant.select()]
+
+            logger.info('Uploading data from {} facilities in db'.format(len(facilities)))
+
+            if not facilities:
+                logger.warning("No facilities in db")
+                return
+
+            for facility in facilities:
+                if facility in excludedFacilities:
+                    logger.info("Facility {} excluded manually".format(facility))
+                    continue
+                if facility not in apifacilities:
+                    logger.warning("Facility {} in db is not known for the API, skipping.".format(facility))
+                    responses[facility] = "INVALID_FACILITY_ID: {}".format(facility)
+                    continue
+
+                responses[facility] = uploadFacilityMeterReadings(api, facility)
+
+    elapsed = time.perf_counter() - start
+    logger.info('Total elapsed time {:0.4}'.format(elapsed))
+
+    return responses
 
 def main():
     args = parseArguments()
@@ -143,7 +278,7 @@ def main():
 
     configdb.update(args)
 
-    download_meter_data(configdb)
+    downloadMeterForecasts(configdb)
 
 
 if __name__ == "__main__":

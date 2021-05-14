@@ -370,6 +370,28 @@ class Models_Test(unittest.TestCase):
 
         self.assertNsEqual(plantsns, resultPlantns)
 
+    def test__Plant__getMeter(self):
+        plantName = 'alibaba'
+        alibaba = Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
+        meterName = '1234'
+        meter = Meter(plant=alibaba, name=meterName)
+        orm.flush()
+
+        resultMeter = alibaba.getMeter()
+
+        self.assertEqual(resultMeter, meter)
+
+    def test__Plant__getMeter__ManyGivesNewest(self):
+        plantName = 'alibaba'
+        alibaba = Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
+        oldmeter = Meter(plant=alibaba, name='oldmeter')
+        newmeter = Meter(plant=alibaba, name='newmeter')
+        orm.flush()
+
+        resultMeter = alibaba.getMeter()
+
+        self.assertEqual(resultMeter, newmeter)
+
     def test_Municipality__importMunicipality__OneMunicipality(self):
         plantsns = ns()
 
