@@ -134,6 +134,15 @@ class Plant(database.Entity):
             else:
                 plant.insertPlantData(plantData)
 
+    @classmethod
+    def getFromMeteologica(cls, plant_code):
+        return Plant.get(codename=plant_code)
+
+    def lastForecastDownloaded(self):
+        # TODO when the forecast was made doesn't represent the forecast dates,
+        # we might prefer checking all forecasts and get the latest
+        return orm.select(f.forecastdate for f in self.forecastMetadatas).order_by(1).first()
+
     def importPlant(self, nsplant):
         plant = nsplant
         self.name = plant.name
@@ -269,7 +278,8 @@ class Plant(database.Entity):
         if classname == "Inverter":
             return Inverter.get(name=devicename, plant=self)
         if classname == "ForecastMetadata":
-            return ForecastMetadata.get(name=devicename, plant=self)
+            logger.info("ForecastMetadata is always created")
+            return None
         if classname == "SensorIrradiation":
             return SensorIrradiation.get(name=devicename, plant=self)
         if classname == "SensorTemperatureAmbient":
@@ -279,7 +289,7 @@ class Plant(database.Entity):
         logger.error("Device {} {} not found".format(classname, devicename))
         return None
 
-    def createDevice(self, plant, classname, devicename):
+    def createDevice(self, plant, classname, devicename, devicedata=None):
         #TODO generalize this
         #TODO distinguish between failure due to missing name and unknown class
         if classname == "Meter":
@@ -287,7 +297,7 @@ class Plant(database.Entity):
         if classname == "Inverter":
             return Inverter(plant=plant, name=devicename)
         if classname == "ForecastMetadata":
-            return ForecastMetadata(plant=plant, name=devicename)
+            return ForecastMetadata.create(plant=plant, devicedata)
         if classname == "SensorIrradiation":
             return SensorIrradiation(plant=plant, name=devicename)
         if classname == "SensorTemperatureAmbient":
@@ -302,7 +312,7 @@ class Plant(database.Entity):
         if not device:
             logger.warning("New device {}:{}".format(devicetype, devicename))
             logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
-            device = self.createDevice(self, classname=devicetype, devicename=devicename)
+            device = self.createDevice(self, classname=devicetype, devicename=devicename, devicedata=devicedata)
         if not device:
             logger.warning("Unknown device type {}".format(devicetype))
             return None
@@ -574,6 +584,17 @@ class ForecastMetadata(database.Entity):
     granularity = Optional(int)
     forecasts = Set('Forecast', lazy=True)
 
+    @classmethod
+    def create(cls, plant, devicedata):
+        return ForecastMetadata(
+            plant=plant,
+            errorcode=devicedata.get('errorcode'),
+            variable=devicedata.get('variable'),
+            predictor=devicedata.get('predictor'),
+            forecastdate=devicedata.get('forecastdate', datetime.datetime.now(datetime.timezone.utc)),
+            granularity=devicedata.get('granularity'),
+        )
+
     def insertForecast(self, percentil10, percentil50, percentil90, time=None):
         return Forecast(
             forecastMetadata = self,
@@ -594,9 +615,35 @@ class Forecast(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(forecastMetadata, time)
 
+    # TODO remove percentil10 and 90 since we won't use them
     percentil10 = Optional(int)
     percentil50 = Optional(int)
     percentil90 = Optional(int)
+
+    @classmethod
+    def metadataToDeviceData(cls, forecastMeta, forecasts):
+        # create metadata info so that insertDevice can create the metadata instance
+        forecastKeys = ('time', 'percentil50')
+        return {
+            'id': 'ForecastMetadata:',
+            'errorcode': forecastMeta['errorcode'],
+            'variable': forecastMeta['variableId'],
+            'predictor': forecastMeta['predictorId'],
+            'forecastdate': forecastMeta.get('forecastDate', datetime.datetime.now(datetime.timezone.utc)),
+            'granularity': int(forecastMeta['granularity']),
+            'forecasts': [{'time': f[0], 'percentil50': f[1]} for f in forecasts],
+        }
+
+    @classmethod
+    def meteologicaToPlantsData(cls, forecastMeta, data):
+        plants_data = [{
+                'plant': plant_name,
+                'version': '1.0',
+                'time': datetime.datetime.now(datetime.timezone.utc),
+                'devices': [ cls.metadataToDeviceData(forecastMeta, forecasts) ],
+            } for plant_name, forecasts in data.items()]
+        return plants_data
+
 
 class Omie(database.Entity):
     name = Required(unicode)
