@@ -332,7 +332,8 @@ class Meter(database.Entity):
     meterRegistries = Set('MeterRegistry', lazy=True)
 
     def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None):
-        return MeterRegistry(
+        logger.debug("inserting {} into {} ".format(time, self.name))
+        r = MeterRegistry(
             meter = self,
             time = time or datetime.datetime.now(datetime.timezone.utc),
             export_energy_wh = export_energy_wh,

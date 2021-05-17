@@ -41,6 +41,8 @@ from plantmonitor.storage import (
 
 from pony import orm
 
+import mock
+
 import datetime
 
 from .standardization import erp_meter_readings_to_plant_data
@@ -62,7 +64,6 @@ from ORM.models import (
 
 from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
 
-
 class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
@@ -78,12 +79,7 @@ class ReadingsFacade():
       )
     )
 
-    measures = measures_from_date(
-      self.client,
-      meterName,
-      beyond=lastDate and lastDate.strftime("%Y-%m-%d %H:%M:%S"),
-      upto=upto.strftime("%Y-%m-%d %H:%M:%S")
-    )
+    measures = self.measuresFromDate(meterName, lastDate, upto)
 
     device = {
         "id": "Meter:{}".format(meterName),
@@ -114,15 +110,32 @@ class ReadingsFacade():
     ormMeters = orm.select(m.name for m in Meter)[:]
     return [m for m in meterNames if m not in ormMeters]
 
+  def telemeasureMetersNames(self):
+    return telemeasure_meter_names(self.client)
+
+  def measuresFromDate(self, meterName, beyond, upto):
+    return measures_from_date(
+      self.client,
+      meterName,
+      beyond=beyond and beyond.strftime("%Y-%m-%d %H:%M:%S"),
+      upto=upto.strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+  def warnNewMeters(self):
+    meter_names = self.telemeasureMetersNames()
+
+    newMeters = self.checkNewMeters(meter_names)
+
+    if newMeters:
+      logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
+
+    return newMeters
+
   def transfer_ERP_readings_to_model(self):
-      with orm.db_session:
-          meter_names = telemeasure_meter_names(self.client)
+    with orm.db_session:
 
-          newMeters = self.checkNewMeters(meter_names)
+      self.warnNewMeters()
 
-          if newMeters:
-            logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
+      plants_data = self.getNewMetersReadings()
 
-          plants_data = self.getNewMetersReadings()
-
-          Plant.insertPlantsData(plants_data)
+      Plant.insertPlantsData(plants_data)
