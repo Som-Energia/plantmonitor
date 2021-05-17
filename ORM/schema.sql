@@ -244,7 +244,8 @@ CREATE TABLE "plantmoduleparameters" (
   "standard_conditions_irradiation_w_m2" INTEGER NOT NULL,
   "standard_conditions_temperature_dc" INTEGER NOT NULL,
   "opencircuit_voltage_mv" INTEGER NOT NULL,
-  "shortcircuit_current_ma" INTEGER NOT NULL
+  "shortcircuit_current_ma" INTEGER NOT NULL,
+  "expected_power_correction_factor_cpercent" INTEGER DEFAULT 10000 NOT NULL
 );
 
 CREATE INDEX "idx_plantmoduleparameters__plant" ON "plantmoduleparameters" ("plant");
