@@ -41,8 +41,6 @@ from plantmonitor.storage import (
 
 from pony import orm
 
-import mock
-
 import datetime
 
 from .standardization import erp_meter_readings_to_plant_data

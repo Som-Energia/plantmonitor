@@ -13,7 +13,7 @@ from .readings_facade import ReadingsFacade
 
 from pony import orm
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ORM.models import database
 from ORM.models import (
@@ -174,6 +174,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         importPlants(plantsns)
         plantsData = self.samplePlantsData(time, delta, altMeter=alternativeMeter)
         Plant.insertPlantsData(plantsData)
+        orm.flush()
 
     def test_getNewMetersReadings__noMeterInERP(self):
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -331,22 +332,27 @@ class ReadingsFacade_Test(unittest.TestCase):
         erp_meters = ['12345678', '87654321']
 
         # mock telemeasure_meters_name
-        mock = MagicMock(return_value=['12345678', '87654321'])
-        with patch('plantmonitor.readings_facade.ReadingsFacade.telemeasureMetersNames', mock):
-            r = ReadingsFacade()
-            newMeters = r.warnNewMeters()
+        r = ReadingsFacade()
+        r.telemeasureMetersNames = MagicMock(return_value=['12345678', '87654321'])
+        newMeters = r.warnNewMeters()
 
         self.assertListEqual(newMeters, erp_meters)
 
-    def test__getDeviceReadings__differentLastDates(self):
+    # TODO this test is just to remind us that inputting timestamp instead of timestamptz
+    # in an entity causes the obscure pony.orm.core.UnrepeatableReadError: Phantom object.
+    # times should always have dt.datetime.now(tz=dt.timezone.utc)
+    def test__setupPlants__registries(self):
 
         erpMeter = '88300864'
-        self.setupPlants(dt.datetime.utcnow(), erpMeter)
+        self.setupPlants(dt.datetime.now(), erpMeter)
 
-        orm.flush()
+        with self.assertRaises(orm.core.UnrepeatableReadError):
+            MeterRegistry.select().show()
 
-        MeterRegistry.select().show()
+    def _test__getDeviceReadings__differentLastDates(self):
 
+        erpMeter = '88300864'
+        self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
 
         plant = Plant.get(name='alcolea')
         meter = Meter.get(plant=plant, name=erpMeter)
@@ -359,7 +365,6 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         erp_meters = ['12345678', '87654321']
 
-        # mock telemeasure_meters_name
         # mockreturn = [(
         #         measure['utc_timestamp'],
         #         int(measure['ae']),
@@ -379,6 +384,24 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         self.assertListEqual(newMeters, erp_meters)
 
+    def mock_meter_readings(self, time, random=True):
+        import random
+        time.replace(minute=0,second=0,microsecond=0)
+        delta = dt.timedelta(hours=1)
+
+        values = [0]*8 + [11, 80, 366, 716, 991, 1182, 1293, 1315, 1268, 1132, 894, 609, 323, 104, 1, 0]
+        i = 0
+        while True:
+            yield (time + i*delta, values[(time.hour+i)%24] + random.randint(30,70),0,0,0,0,0) if random else 0
+            i = i + 1
+
+    def test__mock_meter_readings(self):
+        time = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        readingGenerator = self.mock_meter_readings(time, random=False)
+        readings = list(next(readingGenerator) for i in range(4))
+
+        self.assertTrue(readings)
+
     def _test__transferERPreadingsToModel__differentLastDates(self):
 
         erpMeter = '12345678'
@@ -388,9 +411,22 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         lastDate = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
 
-        # mock telemeasure_meters_name
+        mockreturn = [(
+                measure['utc_timestamp'],
+                int(measure['ae']),
+                int(measure['ai']),
+                int(measure['r1']),
+                int(measure['r2']),
+                int(measure['r3']),
+                int(measure['r4']),
+            )
+            for measure in sorted(measures,
+                key=lambda x: x['utc_timestamp'])
+        ]
 
-        r = ReadingsFacade()
-        newMeters = r.getDeviceReadings(erpMeter, lastDate, upto=None)
+        mock = MagicMock(return_value=['12345678', '87654321'])
+        with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
+            r = ReadingsFacade()
+            newMeters = r.transfer_ERP_readings_to_model(quiet=True)
 
         self.assertListEqual(newMeters, erp_meters)
