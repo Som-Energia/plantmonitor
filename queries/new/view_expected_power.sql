@@ -15,6 +15,7 @@ SELECT
 	    (temperature_dc - par.standard_conditions_temperature_dc)/10.0 * par.voltage_temperature_coefficient_mpercent_c/100000.0
 	)
 	* par.degradation_cpercent/10000.0 -- c% -> factor
+	* par.expected_power_correction_factor_cpercent/10000.0 -- c% -> factor
 	/ 1000.0   -- W -> kW
     ) 
     END AS expectedpower

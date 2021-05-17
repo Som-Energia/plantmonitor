@@ -178,6 +178,7 @@ class ExpectedPower_Test(TestCase):
             degradation_cpercent = int(data.degradation*100),
             opencircuit_voltage_mv = int(data.Voc*1000),
             shortcircuit_current_ma = int(data.Isc*1000),
+            expected_power_correction_factor_cpercent = int(data.get('correctionFactorPercent', 100)*100),
         )
         plant.flush()
 
@@ -208,6 +209,20 @@ class ExpectedPower_Test(TestCase):
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
         self.setPlantParameters(**self.parametersFlorida)
+        expected = self.importData(self.sensor,
+            'b2bdata/expectedPower-2020-09-Florida.csv',
+            'Potencia parque calculada con temperatura kW con degradación placas',
+        )
+        query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result)
+
+    def test_expectedPower_Florida_2020_09_withCorrection(self):
+        self.setupPlant()
+        self.setPlantParameters(**dict(self.parametersFlorida,
+            correctionFactorPercent=90,
+        ))
         expected = self.importData(self.sensor,
             'b2bdata/expectedPower-2020-09-Florida.csv',
             'Potencia parque calculada con temperatura kW con degradación placas',
