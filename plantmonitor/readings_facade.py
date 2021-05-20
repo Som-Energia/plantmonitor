@@ -65,8 +65,9 @@ from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
 class ReadingsFacade():
   def __init__(self):
     self.client = Client(**config.erppeek)
+    self.erpMeters = []
 
-  def getDeviceReadings(self, meterName, lastDate, upto=None):
+  def getNewErpReadings(self, meterName, lastDate=None, upto=None):
     upto = upto or datetime.datetime.now(datetime.timezone.utc)
 
     logger.debug(
@@ -77,32 +78,39 @@ class ReadingsFacade():
       )
     )
 
-    measures = self.measuresFromDate(meterName, lastDate, upto)
+    # TODO we're filtering out the meters that might be in pony
+    # but not in ERP at getPlantNewMetersReadings,
+    # but maybe we should raise or handle it more clearly here
 
-    device = {
-        "id": "Meter:{}".format(meterName),
-        "readings": erp_meter_readings_to_plant_data(measures),
-    }
+    measures = self.measuresFromDate(meterName, lastDate, upto)
 
     logger.debug("Retrieved {} measures for meter {} older than {} from erp to ponyorm".format(len(measures), meterName, lastDate))
 
-    return device
+    readings = erp_meter_readings_to_plant_data(measures)
 
+    return readings
+
+  # returns plant_data
   def getPlantNewMetersReadings(self, plant, upto=None):
+    if not self.erpMeters:
+      self.refreshERPmeters()
+
     upto = upto or datetime.datetime.now(datetime.timezone.utc)
     return {
-      "plant": plant['plant'],
-      "devices": [self.getDeviceReadings(
-          meterdate['id'].split(':')[1], meterdate['time'], upto)
-          for meterdate in plant['devices']
-      ],
+      "plant": plant.name,
+      "devices": [
+        {
+          "id": "Meter:{}".format(meter.name),
+          "readings": self.getNewErpReadings(meter.name, meter.getLastReadingDate(), upto)
+        } for meter in plant.meters if meter.name in self.erpMeters
+      ]
     }
 
+  # returns plants_data
   def getNewMetersReadings(self, upto=None):
     upto = upto or datetime.datetime.now(datetime.timezone.utc)
     return [self.getPlantNewMetersReadings(plant, upto)
-      for plant in Meter.getLastReadingDatesOfAllMeters()
-    ]
+      for plant in Plant.select().order_by(Plant.name)]
 
   def checkNewMeters(self, meterNames):
     ormMeters = orm.select(m.name for m in Meter)[:]
@@ -112,25 +120,32 @@ class ReadingsFacade():
     return telemeasure_meter_names(self.client)
 
   def measuresFromDate(self, meterName, beyond, upto):
+    naivebeyond = beyond.astimezone(tz=datetime.timezone.utc).replace(tzinfo=None)
+    naiveupto = upto.astimezone(tz=datetime.timezone.utc).replace(tzinfo=None)
+
     return measures_from_date(
       self.client,
       meterName,
-      beyond=beyond and beyond.strftime("%Y-%m-%d %H:%M:%S"),
-      upto=upto.strftime("%Y-%m-%d %H:%M:%S")
+      beyond=naivebeyond and naivebeyond.strftime("%Y-%m-%d %H:%M:%S"),
+      upto=naiveupto.strftime("%Y-%m-%d %H:%M:%S")
     )
 
-  def warnNewMeters(self):
-    meter_names = self.telemeasureMetersNames()
+  def refreshERPmeters(self):
+    self.erpMeters = self.telemeasureMetersNames()
 
-    newMeters = self.checkNewMeters(meter_names)
+  def warnNewMeters(self):
+    newMeters = self.checkNewMeters(self.ERPmeters)
 
     if newMeters:
       logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
 
     return newMeters
 
-  def transfer_ERP_readings_to_model(self):
+  def transfer_ERP_readings_to_model(self, refreshERPmeters=True):
     with orm.db_session:
+
+      if refreshERPmeters:
+        self.refreshERPmeters()
 
       self.warnNewMeters()
 

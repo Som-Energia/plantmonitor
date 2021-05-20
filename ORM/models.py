@@ -314,9 +314,6 @@ class Plant(database.Entity):
         packettime = plantdata.get("time")
         return [self.insertDeviceData(d, packettime) for d in plantdata["devices"]]
 
-    def getLastReadingDatesMeters(self):
-        return [m.getLastReadingDate() for m in self.meters]
-
 class PlantLocation(database.Entity):
     plant = Required(Plant)
     latitude = Required(float)
@@ -351,20 +348,7 @@ class Meter(database.Entity):
 
     def getLastReadingDate(self):
         newestRegistry = self.meterRegistries.select().order_by(orm.desc(MeterRegistry.time)).first()
-        newestTime = None if not newestRegistry else newestRegistry.time
-        return {
-            'id': 'Meter:{}'.format(self.name),
-            'time': newestTime
-        }
-
-    # TODO: implement
-    @classmethod
-    def getLastReadingDatesOfAllMeters(cls):
-
-        return [{
-            'plant': p.name,
-            'devices': p.getLastReadingDatesMeters(),
-        } for p in Plant.select()]
+        return newestRegistry.time if newestRegistry else None
 
 class MeterRegistry(database.Entity):
 
