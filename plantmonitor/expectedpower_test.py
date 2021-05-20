@@ -213,7 +213,7 @@ class ExpectedPower_Test(TestCase):
             'b2bdata/expectedPower-2020-09-Florida.csv',
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
-        query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         result = database.select(query)
 
         self.assertOutputB2B(result)
@@ -227,7 +227,7 @@ class ExpectedPower_Test(TestCase):
             'b2bdata/expectedPower-2020-09-Florida.csv',
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
-        query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         result = database.select(query)
 
         self.assertOutputB2B(result)
@@ -252,7 +252,7 @@ class ExpectedPower_Test(TestCase):
         fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(days=30)
 
-        query = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         expectedPowerQuery = database.select(query)
 
         # end of setup

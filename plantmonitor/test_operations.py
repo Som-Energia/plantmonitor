@@ -559,7 +559,7 @@ class Operations_Test(unittest.TestCase):
         plant = Plant(name='alibaba', codename='alibaba')
         sensor = SensorIrradiation(name='Alice', plant=plant)
 
-        expectedPowerViewQuery = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         metric = 'expected_energy_wh'
 
         dummy = database.select(expectedPowerViewQuery)
@@ -717,7 +717,7 @@ class Operations_Test(unittest.TestCase):
 
         orm.flush()
 
-        expectedPowerViewQuery = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+        expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
 
         result = database.select(expectedPowerViewQuery)
 

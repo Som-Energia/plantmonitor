@@ -149,7 +149,7 @@ def integrateExpectedPower(fromDate=None, toDate=None):
 
     sensors = orm.select(sensor for sensor in SensorIrradiation)
 
-    expectedPowerViewQuery = Path('queries/new/view_expected_power.sql').read_text(encoding='utf8')
+    expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
     srcCol = 'expectedpower'
     dstCol = 'expected_energy_wh'
 
