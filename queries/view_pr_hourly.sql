@@ -10,17 +10,20 @@ SELECT timezone('Europe/Madrid'::text, sub."time") AS timezone,
 FROM (
      SELECT 
         (
-            (public.sistema_contador.export_energy)::double precision / (2160.0)::double precision
+            (public.meterregistry.export_energy_wh)::double precision / (2160.0)::double precision
         ) / (
-            NULLIF((integrated_sensors.integral_irradiation_wh_m2)::double precision, (0.0)::double precision) / 1000000.0::double precision
+            NULLIF((hourly_sensor_registry.irradiation_wh_m2)::double precision, (0.0)::double precision) / 1000000.0::double precision
         ) AS brute_pr,
-	public.sistema_contador."time" AS "time",
-	public.sistema_contador.name as meter,
-	public.sistema_contador.export_energy * 1000 AS export_energy_wh,
-	public.integrated_sensors.integral_irradiation_wh_m2
-     FROM public.sistema_contador
-     JOIN public.integrated_sensors
-	ON integrated_sensors."time" = timezone('UTC'::text, sistema_contador."time")
+	public.meterregistry."time" AS "time",
+	public.meter.name as meter,
+	public.meterregistry.export_energy_wh * 1000 AS export_energy_wh,
+	public.hourly_sensor_registry.irradiation_wh_m2
+     FROM public.hourly_sensor_registry
+     JOIN public.meter
+	ON meterregistry.meter = meter.id
+     JOIN public.hourlysensorirradiationregistry
+	ON hourlysensorirradiationregistry.meter = meter.id
+	AND hourlysensorirradiationregistry."time" = timezone('UTC'::text, meterregistry."time")
 ) as sub
 
 
