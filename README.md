@@ -94,6 +94,21 @@ directory=/home/plantmonitor/somenergia/plantmonitor
 user=plantmonitor
 ```
 
+Upgrading
+=========
+
+
+- Upgrade the repository: `git rebase master`
+- Activate env: `workon plantmonitor`
+- Install the dependencies: `pip install -r requirements.txt ; python ./setup.py develop`
+- Apply yoyo migration: `yoyo apply`
+- Publish the new views: `cd queries/;  ./publish.sh name_of_view.sql`
+- Start monitoring the logs in background: `multitail /var/log/supervisor/plantmonitor_stderr.log /var/log/supervisor/api_plantmonitor*`
+- Restart services: `sudo supervisorctl restart all`
+- Check for startup errors in the service logs
+- Wait for the first insert in the api from the plants to return 200 OK
+- Check insert on database
+
 Troubleshooting
 ===============
 
@@ -110,4 +125,3 @@ sudo apt install python3.7-dev
 ```
 sudo apt install python3-apt --reinstall
 ```
-
