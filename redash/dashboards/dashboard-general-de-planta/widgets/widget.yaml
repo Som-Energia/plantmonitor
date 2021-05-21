@@ -21,14 +21,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 2
-    sizeY: 8
+    sizeX: 3
+    sizeY: 10
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 0
-    row: 21
+    col: 2
+    row: 15
 text: ''
 visualization: queries/exportada-pr/visualizations/chart.yaml
 width: 1

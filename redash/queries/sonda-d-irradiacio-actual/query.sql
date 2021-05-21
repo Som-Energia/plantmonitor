@@ -1,7 +1,7 @@
 SELECT coalesce(irradiationsensor.time, ambientreg.time) as temps,
        irradiationsensor.irradiation_w_m2 as irradiation_w_m2,
-       irradiationsensor.temperature_dc as irradiation_temp_dc,
-       ambientreg.temperature_dc as ambient_temp_dc
+       irradiationsensor.temperature_dc/10.0 as irradiation_temp_c,
+       ambientreg.temperature_dc/10.0 as temperature_modul_c
 FROM
   (SELECT plant.name,
        reg.irradiation_w_m2,

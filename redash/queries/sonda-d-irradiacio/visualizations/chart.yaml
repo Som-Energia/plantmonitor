@@ -8,7 +8,7 @@ options:
   error_y:
     visible: true
     type: data
-  numberFormat: 0,0[.]00000
+  numberFormat: 0[.]00
   yAxis:
   - type: linear
     title:
@@ -16,7 +16,7 @@ options:
   - opposite: true
     type: linear
     title:
-      text: Irradiació W/m2
+      text: Irradiació [W/m2]
   series:
     stacking: null
     error_y:
@@ -50,11 +50,10 @@ options:
       text: ''
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
-    plant: unused
-    irradiation_w_m2: y
     temps: x
-    'null': series
+    plant: unused
     ambient_temp_c: y
+    irradiation_w_m2: y
     irradiation_temp_c: y
   textFormat: ''
   customCode: |-

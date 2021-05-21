@@ -1,4 +1,72 @@
 description: ''
 name: Table
-options: {}
+options:
+  itemsPerPage: 25
+  columns:
+  - linkUrlTemplate: '{{ @ }}'
+    name: temps
+    title: temps
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: right
+    imageHeight: ''
+    order: 100000
+    displayAs: datetime
+    dateTimeFormat: DD/MM/YY HH:mm
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: datetime
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: exported_energy
+    numberFormat: '0.00'
+    title: exported_energy
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: center
+    imageHeight: ''
+    order: 100001
+    displayAs: number
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: float
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: pr
+    numberFormat: '0.00'
+    title: pr
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: right
+    imageHeight: ''
+    order: 100002
+    displayAs: number
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: float
+    highlightLinks: false
 type: TABLE

@@ -6,9 +6,9 @@ options:
   rowNumber: 1
   stringDecChar: ','
   stringSuffix: kW
-  stringDecimal: 0
+  stringDecimal: 2
   counterColName: power_kw
   counterLabel: ' '
-  stringThouSep: .
+  stringThouSep: ' '
   targetRowNumber: 1
 type: COUNTER

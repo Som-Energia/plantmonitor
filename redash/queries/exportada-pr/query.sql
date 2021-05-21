@@ -1,6 +1,6 @@
 SELECT coalesce(meter_energy.temps, inverter_energy.temps) as temps,
-       meter_energy.total_energy_wh as exported_energy,
-       inverter_energy.total_energy_wh as produced_energy
+       meter_energy.total_energy_wh/1000.0 as exported_energy_kwh,
+       round(inverter_energy.total_energy_wh/150000)/100.0 as pr
 FROM
   (SELECT date_trunc('{{ granularity }}', reg.time) AS temps,
           plant.name AS plant,

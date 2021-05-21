@@ -10,7 +10,7 @@ options:
     minSizeY: 1
     minSizeX: 1
     col: 0
-    row: 15
+    row: 18
 text: ''
 visualization: queries/sonda-d-irradiacio-actual/visualizations/sonda-irradiacio-details-view.yaml
 width: 1

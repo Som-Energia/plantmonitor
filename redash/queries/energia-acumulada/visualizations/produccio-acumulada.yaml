@@ -5,9 +5,9 @@ options:
   rowNumber: 1
   stringDecChar: ','
   stringSuffix: ' MWh'
-  stringDecimal: 3
+  stringDecimal: 2
   counterColName: energy_mwh
   counterLabel: ' '
-  stringThouSep: .
+  stringThouSep: ' '
   targetRowNumber: 1
 type: COUNTER

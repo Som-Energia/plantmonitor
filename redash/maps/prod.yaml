@@ -21,6 +21,10 @@ query:
   5: queries/all-plants
   4: queries/sonda-d-irradiacio
   3: queries/potencia-inversors-amb-total
+  32: queries/new-query
+  31: queries/energia-diaria-total-inversors
+  30: queries/new-query-2
+  29: queries/numero-de-lectures-d-inversor
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -57,6 +61,13 @@ visualization:
   6: queries/sonda-d-irradiacio/visualizations/chart.yaml
   3: queries/potencia-inversors-amb-total/visualizations/table.yaml
   4: queries/potencia-inversors-amb-total/visualizations/chart.yaml
+  52: queries/new-query/visualizations/chart.yaml
+  51: queries/new-query/visualizations/table.yaml
+  49: queries/energia-diaria-total-inversors/visualizations/table.yaml
+  50: queries/energia-diaria-total-inversors/visualizations/energia-diaria.yaml
+  48: queries/new-query-2/visualizations/table.yaml
+  46: queries/numero-de-lectures-d-inversor/visualizations/table.yaml
+  47: queries/numero-de-lectures-d-inversor/visualizations/chart.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -77,3 +88,5 @@ widget:
   9: dashboards/dashboard-general-de-planta/widgets/widget-9.yaml
   2: dashboards/grafiques-puntuals/widgets/widget.yaml
   3: dashboards/grafiques-puntuals/widgets/widget-2.yaml
+  30: dashboards/dashboard-general-de-planta/widgets/widget-10.yaml
+  25: dashboards/grafiques-puntuals/widgets/widget-3.yaml

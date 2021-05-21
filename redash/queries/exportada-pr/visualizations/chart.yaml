@@ -8,16 +8,16 @@ options:
   error_y:
     visible: true
     type: data
-  numberFormat: 0,0[.]00000
+  numberFormat: 0[.]00
   yAxis:
   - type: linear
     rangeMin: null
     title:
-      text: Energy
+      text: Energia Exportada Comptadors [kWh]
   - opposite: true
     type: linear
     title:
-      text: PR
+      text: PR [%]
   series:
     stacking: null
     error_y:
@@ -27,17 +27,16 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    produced_energy:
+    pr:
       zIndex: 1
       index: 0
       type: scatter
-      name: PR
+      name: PR inventat
       yAxis: 1
-    exported_energy:
+    exported_energy_kwh:
       zIndex: 0
       index: 0
       type: column
-      name: exported energy
       yAxis: 0
   valuesOptions: {}
   xAxis:
@@ -47,9 +46,9 @@ options:
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
     temps: x
-    produced_energy: y
-    exported_energy: y
-  textFormat: '{{ @@y }} wh'
+    pr: y
+    exported_energy_kwh: y
+  textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly
     // Type console.log(x, ys); for more info about x and ys

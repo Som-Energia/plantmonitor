@@ -23,12 +23,13 @@ options:
   sortX: true
   seriesOptions:
     power_w:
-      zIndex: 1
+      zIndex: 3
       index: 0
       type: column
+      color: '#FB8D3D'
       yAxis: 0
     min_temperature_dc:
-      zIndex: 2
+      zIndex: 1
       index: 0
       type: line
       yAxis: 1
@@ -38,12 +39,13 @@ options:
       type: line
       yAxis: 1
     energy_wh:
-      zIndex: 3
+      zIndex: 4
       index: 0
       type: column
+      color: '#A58AFF'
       yAxis: 0
     avg_temperature_dc:
-      zIndex: 4
+      zIndex: 2
       index: 0
       type: line
       yAxis: 1
@@ -59,8 +61,6 @@ options:
     min_temperature_dc: y
     energy_wh: y
     time: x
-    inverter_name: unused
-    inverter: unused
     avg_temperature_dc: y
   textFormat: ''
   customCode: |-

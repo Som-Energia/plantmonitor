@@ -18,34 +18,54 @@ options:
     error_y:
       visible: true
       type: data
-  globalSeriesType: line
+  globalSeriesType: scatter
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    inversor1:
-      zIndex: 4
+    inversor2_transition:
+      zIndex: 7
       index: 0
-      type: line
+      type: scatter
       yAxis: 0
-    inversor3:
-      zIndex: 2
+    inversor4_transition:
+      zIndex: 5
       index: 0
-      type: line
-      yAxis: 0
-    inversor2:
-      zIndex: 3
-      index: 0
-      type: line
-      yAxis: 0
-    inversor4:
-      zIndex: 1
-      index: 0
-      type: line
+      type: scatter
       yAxis: 0
     Tots els inversors:
       zIndex: 0
       index: 0
-      type: line
+      type: scatter
+      yAxis: 0
+    inversor1:
+      zIndex: 4
+      index: 0
+      type: scatter
+      yAxis: 0
+    inversor3:
+      zIndex: 2
+      index: 0
+      type: scatter
+      yAxis: 0
+    inversor2:
+      zIndex: 3
+      index: 0
+      type: scatter
+      yAxis: 0
+    inversor4:
+      zIndex: 1
+      index: 0
+      type: scatter
+      yAxis: 0
+    inversor3_transition:
+      zIndex: 6
+      index: 0
+      type: scatter
+      yAxis: 0
+    inversor1_transition:
+      zIndex: 8
+      index: 0
+      type: scatter
       yAxis: 0
   valuesOptions: {}
   xAxis:

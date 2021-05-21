@@ -12,12 +12,6 @@ options:
       name: interval
       value: null
       title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
   isHidden: false
   position:
     autoHeight: false
