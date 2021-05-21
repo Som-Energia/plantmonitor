@@ -52,7 +52,7 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
         for t,v in query.filter( lambda t,v: hourstart <= t and t <= hourend )
     ]
 
-    if not timeSeries:
+    if not timeSeries or len(timeSeries) <= 1:
         # logger.warning("No values in hour range")
         return None
 
@@ -77,7 +77,7 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
         for t,v in timeseries if hourstart <= t and t <= hourend
     ]
 
-    if not timeSeriesSlice:
+    if not timeSeriesSlice or len(timeSeriesSlice) <= 1:
         # logger.warning("No values in hour range")
         return None
 
