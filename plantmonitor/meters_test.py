@@ -71,7 +71,7 @@ class Meters_Test(unittest.TestCase):
             ('2019-06-01 02:00:00', 0, 0, 0, 0, 0, 0),
             ])
 
-    # @unittest.skipIf(True, "gisce has to fix utc problems in erp database")
+    @unittest.skipIf(True, "requires production db and gisce has to fix utc problems in erp database")
     def test__measures_from_date__summerToWintertime_noDuppedDates(self):
         c = Client(**config.erppeek)
         meter = '501600324'
