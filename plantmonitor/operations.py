@@ -47,10 +47,10 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     hourend = hourstart + dt
 
     # slice
-    timeSeries = [
+    timeSeries = sorted([
         (t, v)
         for t,v in query.filter( lambda t,v: hourstart <= t and t <= hourend )
-    ]
+    ])
 
     if not timeSeries or len(timeSeries) <= 1:
         # logger.warning("No values in hour range")
@@ -80,10 +80,10 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
     hourend = hourstart + dt
 
     # slice
-    timeSeriesSlice = [
+    timeSeriesSlice = sorted([
         (t, v)
         for t,v in timeseries if hourstart <= t and t <= hourend
-    ]
+    ])
 
     if not timeSeriesSlice or len(timeSeriesSlice) <= 1:
         # logger.warning("No values in hour range")

@@ -257,6 +257,46 @@ class Operations_Test(unittest.TestCase):
 
         self.assertIsNone(integralMetricValue)
 
+    def test__integrateHourFromTimeSeries__AllValuesNoneButOne(self):
+
+        dt = datetime.timedelta(minutes=5)
+
+        readingTime = datetime.datetime(2021, 3, 26, 11, 55, 6, 766707, tzinfo=datetime.timezone.utc)
+
+        hourstart = readingTime.replace(minute=0, second=0, microsecond=0)
+
+        timeseries = [(hourstart + i*dt, None) for i in range(11)]
+        timeseries.append((hourstart + 12*dt, 0.0))
+
+        integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
+
+        self.assertIsNone(integralMetricValue)
+
+    def test__integrateHourFromTimeSeries__UnorderedPositiveTest(self):
+
+        readingTime = datetime.datetime(2021, 5, 21, 8, 0, 6, 766707, tzinfo=datetime.timezone.utc)
+
+        hourstart = readingTime.replace(minute=0, second=0, microsecond=0)
+
+        timeseries = [
+            (datetime.datetime(2021, 5, 21, 8, 25, 6, 839190, tzinfo=datetime.timezone.utc), 82),
+            (datetime.datetime(2021, 5, 21, 8, 40, 6, 707526, tzinfo=datetime.timezone.utc), 136),
+            (datetime.datetime(2021, 5, 21, 8, 5, 7, 62183, tzinfo=datetime.timezone.utc), 45),
+            (datetime.datetime(2021, 5, 21, 8, 30, 6, 904319, tzinfo=datetime.timezone.utc), 90),
+            (datetime.datetime(2021, 5, 21, 8, 50, 6, 890866, tzinfo=datetime.timezone.utc), 173),
+            (datetime.datetime(2021, 5, 21, 8, 45, 6, 765174, tzinfo=datetime.timezone.utc), 143),
+            (datetime.datetime(2021, 5, 21, 8, 55, 6, 873454, tzinfo=datetime.timezone.utc), 152),
+            (datetime.datetime(2021, 5, 21, 8, 35, 6, 780839, tzinfo=datetime.timezone.utc), 109),
+            (datetime.datetime(2021, 5, 21, 8, 0, 6, 927305, tzinfo=datetime.timezone.utc), 42),
+            (datetime.datetime(2021, 5, 21, 8, 10, 6, 812438, tzinfo=datetime.timezone.utc), 51),
+            (datetime.datetime(2021, 5, 21, 8, 20, 6, 776351, tzinfo=datetime.timezone.utc), 67),
+            (datetime.datetime(2021, 5, 21, 8, 15, 6, 699902, tzinfo=datetime.timezone.utc), 59)
+        ]
+
+        integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
+
+        self.assertTrue(integralMetricValue >= 0)
+
     def _test__integrateHour__nulls(self):
         pass
 
