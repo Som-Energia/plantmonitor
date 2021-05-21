@@ -58,6 +58,10 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
     xvalues, yvalues = list(zip(*timeSeries))
 
+    if yvalues.count(None) >= len(yvalues)-1:
+        logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
+        return None
+
     # hourly_trapezoidal_approximation
     integralMetricValueDateTime = integrate.trapz(y=yvalues, x=xvalues)
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
@@ -81,10 +85,13 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
         # logger.warning("No values in hour range")
         return None
 
+    # logger.debug("hourstart {}".format(hourstart))
+    # logger.debug("timeSeriesSlice {}".format(timeSeriesSlice))
+
     xvalues, yvalues = list(zip(*timeSeriesSlice))
 
-    if all(v is None for v in yvalues):
-        logger.warning("No values in hour range {} - {}".format(xvalues[0], xvalues[-1]))
+    if yvalues.count(None) >= len(yvalues)-1:
+        logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
         return None
 
     # hourly_trapezoidal_approximation
@@ -185,9 +192,7 @@ def integrateExpectedPower(fromDate=None, toDate=None):
         fromHourDate = metricFromDate.replace(minute=0, second=0, microsecond=0)
         hours = [fromHourDate + i*dt for i in range(math.ceil((metricToDate - fromHourDate)/dt)) ]
 
-        # TODO sensorExpectedPower is a list, not a pony query, we have to rewrite evreything
-        print(hours)
-
+        # TODO sensorExpectedPower is a list, not a pony query, we have to rewrite everything
         integratedMetric[sensor] = [(hourstart + dt, integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
 
     return integratedMetric

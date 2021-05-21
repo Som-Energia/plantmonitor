@@ -242,6 +242,21 @@ class Operations_Test(unittest.TestCase):
 
         self.assertIsNone(integralMetricValue)
 
+    def test__integrateHourFromTimeSeries__AllValuesNoneButOne(self):
+
+        dt = datetime.timedelta(minutes=5)
+
+        readingTime = datetime.datetime(2021, 3, 26, 11, 55, 6, 766707, tzinfo=datetime.timezone.utc)
+
+        hourstart = readingTime.replace(minute=0, second=0, microsecond=0)
+
+        timeseries = [(hourstart + i*dt, None) for i in range(11)]
+        timeseries.append((hourstart + 12*dt, 0.0))
+
+        integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
+
+        self.assertIsNone(integralMetricValue)
+
     def _test__integrateHour__nulls(self):
         pass
 
