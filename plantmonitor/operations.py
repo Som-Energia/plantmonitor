@@ -58,8 +58,12 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
     xvalues, yvalues = list(zip(*timeSeries))
 
-    if yvalues.count(None) >= len(yvalues)-1:
-        logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
+    # if yvalues.count(None) >= len(yvalues)-1:
+    #     logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
+    #     return None
+
+    if None in yvalues:
+        logger.warning("None values in hour range {} - {}. Skipping.".format(xvalues[0], xvalues[-1]))
         return None
 
     # hourly_trapezoidal_approximation
@@ -90,8 +94,13 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
 
     xvalues, yvalues = list(zip(*timeSeriesSlice))
 
-    if yvalues.count(None) >= len(yvalues)-1:
-        logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
+    # if yvalues.count(None) >= len(yvalues)-1:
+    #     logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
+    #     return None
+
+    # TODO add support for handling a few None values in hour range
+    if None in yvalues:
+        logger.warning("None values in hour range {} - {}. Skipping.".format(xvalues[0], xvalues[-1]))
         return None
 
     # hourly_trapezoidal_approximation
