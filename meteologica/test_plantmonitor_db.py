@@ -281,11 +281,11 @@ class PlantmonitorDB_Test(unittest.TestCase):
         with self.createPlantmonitorDB() as db:
             data = {
                 self.mainFacility(): [
-                    (todt("2020-01-02 00:00:00"), 10),
-                    (todt("2020-01-02 01:00:00"), 20),
+                    (todtaware("2020-01-02 00:00:00"), 10),
+                    (todtaware("2020-01-02 01:00:00"), 20),
                 ],
             }
-            forecastDate = todt("2020-01-01 00:00:00")
+            forecastDate = todtaware("2020-01-01 00:00:00")
             db.addForecast(data, forecastDate)
 
             result = db.lastDateDownloaded(self.mainFacility())
