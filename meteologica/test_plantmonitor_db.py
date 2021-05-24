@@ -290,7 +290,7 @@ class PlantmonitorDB_Test(unittest.TestCase):
 
             result = db.lastDateDownloaded(self.mainFacility())
 
-            self.assertEqual(result, todt("2020-01-02 01:00:00"))
+            self.assertEqual(result, todtaware("2020-01-02 01:00:00"))
 
 class PlantmonitorDBMock_Test(PlantmonitorDB_Test):
 

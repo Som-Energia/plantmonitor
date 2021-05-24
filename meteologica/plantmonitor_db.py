@@ -423,7 +423,7 @@ class PlantmonitorDB:
     def lastDateDownloaded(self, facility):
         cur = self._client.cursor()
         cur.execute(
-            "select time at time zone 'Europe/Madrid' from forecastData \
+            "select time from forecastData \
                 inner join forecastHead on forecastData.idForecastHead = forecastHead.id \
                 where facilityId = '{}' \
                 order by time DESC limit 1;".format(facility)
