@@ -148,7 +148,10 @@ class ExpectedPower_Test(TestCase):
         irradiationSTC = 1000.0, # W/m2, module model param
         temperatureSTC = 25, # ºC, module model param
         nModules = 8640, # plant parameter
+        Is = 8.75, # A, module model param
+        Voc = 37.8, # V, module model param
         degradation=97.0, # %, module model param
+        correctionFactorPercent = 90., # %, plant parameter
     )
 
     parametersFlorida = dict(
@@ -160,8 +163,9 @@ class ExpectedPower_Test(TestCase):
         temperatureSTC = 25, # ºC, module model param
         nModules = 4878, # plant parameter
         degradation=97.5, # %, module model param
-        Voc = 46.1, # V, module model param
         Isc = 9.5, # A, module model param
+        Voc = 46.1, # V, module model param
+        correctionFactorPercent = 90., # %, plant parameter
     )
 
     def setPlantParameters(self, **data):
@@ -208,7 +212,9 @@ class ExpectedPower_Test(TestCase):
 
     def test_expectedPower_Florida_2020_09(self):
         self.setupPlant()
-        self.setPlantParameters(**self.parametersFlorida)
+        self.setPlantParameters(**dict(self.parametersFlorida,
+            correctionFactorPercent=100,
+        ))
         expected = self.importData(self.sensor,
             'b2bdata/expectedPower-2020-09-Florida.csv',
             'Potencia parque calculada con temperatura kW con degradación placas',
@@ -237,7 +243,9 @@ class ExpectedPower_Test(TestCase):
     # comparar resultats amb les dades de projectes
     def test_expectedEnergy_Florida_2020_09(self):
         self.setupPlant()
-        self.setPlantParameters(**self.parametersFlorida)
+        self.setPlantParameters(**dict(self.parametersFlorida,
+            correctionFactorPercent=100,
+        ))
         expected = None
         # expected = self.importData(self.sensor,
         #     'b2bdata/expectedEnergy-2020-09-Florida.csv',
