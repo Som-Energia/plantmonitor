@@ -202,7 +202,8 @@ def integrateExpectedPower(fromDate=None, toDate=None):
         hours = [fromHourDate + i*dt for i in range(math.ceil((metricToDate - fromHourDate)/dt)) ]
 
         # TODO sensorExpectedPower is a list, not a pony query, we have to rewrite everything
-        integratedMetric[sensor] = [(hourstart + dt, integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
+        # TODO expectedPower is in kWh! we have to multiply by 1000. Remove as soon as expectedpower is in wh
+        integratedMetric[sensor] = [(hourstart + dt, 1000*integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
 
     return integratedMetric
 
