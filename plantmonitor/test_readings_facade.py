@@ -319,7 +319,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                     "id": "Meter:{}".format(erpMeter),
                     "readings": [{
                         "time": dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc),
-                        "export_energy_wh": 1139,
+                        "export_energy_wh": 1139000,
                         "import_energy_wh": 0,
                         "r1_VArh": 0,
                         "r2_VArh": 1,
@@ -328,7 +328,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                     },
                     {
                         "time": dt.datetime(2019,10,1,17,00,00, tzinfo=dt.timezone.utc),
-                        "export_energy_wh": 568,
+                        "export_energy_wh": 568000,
                         "import_energy_wh": 0,
                         "r1_VArh": 0,
                         "r2_VArh": 0,
@@ -449,8 +449,8 @@ class ReadingsFacade_Test(unittest.TestCase):
                 expected = (meterName, [
                         (
                             reading['time'].strftime("%Y-%m-%d %H:%M:%S"),
-                            reading['export_energy_wh'],
-                            0,0,0,0,0
+                            reading['export_energy_wh']/1000.0,
+                            0/1000.0,0,0,0,0
                         ) for reading in device['readings']
                     ])
                 self.assertTupleEqual(data, expected)

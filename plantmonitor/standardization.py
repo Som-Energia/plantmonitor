@@ -129,8 +129,20 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
 
 def erp_meter_readings_to_plant_data(measures):
     labels = ('time', 'export_energy_wh', 'import_energy_wh','r1_VArh','r2_VArh', 'r3_VArh','r4_VArh')
-    return [{**{k:v for k,v in zip(labels, measure)},**{"time":datetime.datetime.strptime(
-        measure[0], "%Y-%m-%d %H:%M:%S").replace(tzinfo=datetime.timezone.utc)}} for measure in measures]
+    return [
+        {
+            'time':datetime.datetime.strptime(
+                    measure[0], "%Y-%m-%d %H:%M:%S"
+                ).replace(tzinfo=datetime.timezone.utc),
+            'export_energy_wh': 1000*measure[1],
+            'import_energy_wh': 1000*measure[2],
+            'r1_VArh': measure[3],
+            'r2_VArh': measure[4],
+            'r3_VArh': measure[5],
+            'r4_VArh': measure[6],
+        }
+        for measure in measures
+    ]
 
 def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
 
