@@ -346,10 +346,21 @@ class ReadingsFacade_Test(unittest.TestCase):
 
     def _test_transfer_ERP_readings_to_model(self):
         r = ReadingsFacade()
-        r.ERPmeters = ['12345678']
+        r.erpMeters = ['12345678']
 
         # TODO mock measures or fake meters
         r.transfer_ERP_readings_to_model(refreshERPmeters=False)
+
+    def test__warnNewMeters(self):
+        erpMeter = "88300864"
+        self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
+
+        r = ReadingsFacade()
+        r.erpMeters = ['3141519']
+        newMeters = r.warnNewMeters()
+        expectedNewMeters = ['3141519']
+
+        self.assertListEqual(newMeters, expectedNewMeters)
 
     def test_checkNewMeters(self):
         erpMeter = "88300864"

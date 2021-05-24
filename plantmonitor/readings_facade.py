@@ -134,7 +134,7 @@ class ReadingsFacade():
     self.erpMeters = self.telemeasureMetersNames()
 
   def warnNewMeters(self):
-    newMeters = self.checkNewMeters(self.ERPmeters)
+    newMeters = self.checkNewMeters(self.erpMeters)
 
     if newMeters:
       logger.error("New meters in ERP unknown to ORM. Please add them: {}".format(newMeters))
