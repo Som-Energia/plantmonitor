@@ -5,7 +5,7 @@ readme = open("README.md").read()
 
 setup(
 	name = "plantmonitor",
-	version = "1.0",
+	version = "1.0.1",
 	description =
 		"Distributed energy plant monitoring application",
 	author = "Som Energia SCCL",
