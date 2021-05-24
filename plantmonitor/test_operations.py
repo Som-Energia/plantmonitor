@@ -697,13 +697,13 @@ class Operations_Test(unittest.TestCase):
         expected = {
             SensorIrradiation[4]:
             [
-                (times[0], 681),
-                (times[1], 1045),
+                (times[0], 681000),
+                (times[1], 1045000),
             ],
             SensorIrradiation[5]:
             [
-                (times[0], 783),
-                (times[1], 1146),
+                (times[0], 783000),
+                (times[1], 1146000),
             ]
         }
 
