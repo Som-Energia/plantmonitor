@@ -25,6 +25,12 @@ query:
   31: queries/energia-diaria-total-inversors
   30: queries/new-query-2
   29: queries/numero-de-lectures-d-inversor
+  37: queries/metriques-de-comptadors-base-query
+  36: queries/hd-daily-via-redash
+  35: queries/pr-amb-granularitat
+  34: queries/pr-mensual-via-redash
+  33: queries/pr-horari
+  38: queries/metriques-mensuals-de-comptadors
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -68,6 +74,13 @@ visualization:
   48: queries/new-query-2/visualizations/table.yaml
   46: queries/numero-de-lectures-d-inversor/visualizations/table.yaml
   47: queries/numero-de-lectures-d-inversor/visualizations/chart.yaml
+  58: queries/metriques-de-comptadors-base-query/visualizations/table.yaml
+  57: queries/hd-daily-via-redash/visualizations/table.yaml
+  56: queries/pr-amb-granularitat/visualizations/chart.yaml
+  55: queries/pr-amb-granularitat/visualizations/table.yaml
+  54: queries/pr-mensual-via-redash/visualizations/table.yaml
+  53: queries/pr-horari/visualizations/table.yaml
+  59: queries/metriques-mensuals-de-comptadors/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -90,3 +103,5 @@ widget:
   3: dashboards/grafiques-puntuals/widgets/widget-2.yaml
   30: dashboards/dashboard-general-de-planta/widgets/widget-10.yaml
   25: dashboards/grafiques-puntuals/widgets/widget-3.yaml
+  31: dashboards/grafiques-puntuals/widgets/widget-4.yaml
+  32: dashboards/grafiques-puntuals/widgets/widget-5.yaml

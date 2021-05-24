@@ -2,40 +2,33 @@ can_edit: true
 data_source_id: datasources/plantmonitor.yaml
 description: null
 is_archived: false
-is_draft: false
+is_draft: true
 is_favorite: false
-is_safe: true
-name: Mètriques de Comptador
+is_safe: false
+name: New Query
 options:
   parameters:
   - name: granularity
     title: granularity
     global: false
-    value: month
-    enumOptions: |-
-      hour
-      day
-      week
-      month
-      year
-    parentQueryId: 19
-    type: enum
+    value: minute
     locals: []
-  - name: plant
-    title: plant
+    type: text
+    parentQueryId: 30
+  - name: planta
+    title: planta
     global: false
-    value: '1'
-    queryId: queries/all-plants-by-id
-    parentQueryId: 19
-    type: query
+    value: Fontivsolar
     locals: []
+    type: text
+    parentQueryId: 30
   - name: interval
     title: interval
     global: false
-    value: d_last_year
+    value: d_last_month
     locals: []
     type: datetime-range
-    parentQueryId: 19
+    parentQueryId: 30
 schedule: null
 tags: []
 version: 1

@@ -18,5 +18,5 @@ options:
     col: 2
     row: 3
 text: ''
-visualization: queries/energia-exportada-comptadors-diaria/visualizations/energia-diaria.yaml
+visualization: queries/energia-diaria-total-inversors/visualizations/energia-diaria.yaml
 width: 1

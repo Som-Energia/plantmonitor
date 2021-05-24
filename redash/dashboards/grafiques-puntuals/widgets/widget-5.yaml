@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 16
+text: ''
+visualization: queries/pr-amb-granularitat/visualizations/chart.yaml
+width: 1

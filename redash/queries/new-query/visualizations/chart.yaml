@@ -15,53 +15,18 @@ options:
     opposite: true
   series:
     stacking: null
+    percentValues: false
     error_y:
       visible: true
       type: data
-  globalSeriesType: line
+  globalSeriesType: column
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    qimportada:
-      zIndex: 2
-      index: 0
-      type: line
-      yAxis: 1
-    cos_phi_importacio:
-      zIndex: 6
-      index: 0
-      type: line
-      yAxis: 0
-    qexportada:
-      zIndex: 3
-      index: 0
-      type: line
-      yAxis: 1
-    sexportada:
-      zIndex: 5
-      index: 0
-      type: line
-      yAxis: 0
-    import_energy_wh:
+    '1':
       zIndex: 0
       index: 0
-      type: line
-      color: '#FB8D3D'
-      yAxis: 0
-    export_energy_wh:
-      zIndex: 1
-      index: 0
-      type: line
-      yAxis: 0
-    cos_phi_exportacio:
-      zIndex: 7
-      index: 0
-      type: line
-      yAxis: 0
-    simportada:
-      zIndex: 4
-      index: 0
-      type: line
+      type: column
       yAxis: 0
   valuesOptions: {}
   xAxis:
@@ -70,16 +35,11 @@ options:
     type: '-'
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
-    qimportada: y
-    cos_phi_importacio: y
-    qexportada: y
-    sexportada: y
-    import_energy_wh: y
-    plant_name: unused
+    plant: series
+    pr_hourly: y
+    export_energy_wh: unused
+    meter: unused
     time: x
-    cos_phi_exportacio: y
-    simportada: y
-    export_energy_wh: y
   textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly

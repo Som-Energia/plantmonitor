@@ -1,0 +1,31 @@
+can_edit: true
+data_source_id: datasources/redash-query-results.yaml
+description: null
+is_archived: false
+is_draft: true
+is_favorite: false
+is_safe: false
+name: Mètriques mensuals de comptadors
+options:
+  parameters:
+  - name: granularity
+    title: granularity
+    global: false
+    value: null
+    type: text
+    locals: []
+  - name: plant
+    title: plant
+    global: false
+    value: null
+    type: text
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: null
+    type: text
+    locals: []
+schedule: null
+tags: []
+version: 1
