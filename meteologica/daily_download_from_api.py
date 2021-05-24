@@ -71,7 +71,7 @@ def download_meter_data(configdb, test_env=True):
             for facility in facilities:
                 lastDownload = db.lastDateDownloaded(facility)
 
-                now = dt.datetime.now(dt.timezone.utc)
+                now = dt.datetime.now()
                 toDate = now
 
                 if not lastDownload:
