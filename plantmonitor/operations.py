@@ -249,8 +249,8 @@ def computeIntegralMetrics():
     insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
     orm.flush()
 
-    # expectedEnergy = integrateExpectedPower()
-    # insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
+    expectedEnergy = integrateExpectedPower()
+    insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
 
 
 # def dropNonMonotonicRows(df):
