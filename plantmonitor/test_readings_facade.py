@@ -25,6 +25,8 @@ from ORM.models import (
 )
 from ORM.orm_util import setupDatabase
 
+from meteologica.utils import todtaware
+
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class ReadingsFacade_Test(unittest.TestCase):
@@ -168,11 +170,73 @@ class ReadingsFacade_Test(unittest.TestCase):
             }]
         return plantsData
 
-    def setupPlants(self, time, alternativeMeter="12345678"):
+    def samplePlantsData_DifferentTimes(self, basetime, differenttime, altMeter='12345678'):
+        plantsData = [
+              {
+              "plant": "alcolea",
+              "devices":
+                sorted([{
+                    "id": "Meter:{}".format(altMeter),
+                    "readings": [{
+                        "time": differenttime,
+                        "export_energy_wh": 1,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    }],
+                },
+                {
+                    "id": "Inverter:5555",
+                    "readings": [{
+                        "time": basetime,
+                        "power_w": 156,
+                        "energy_wh": 154,
+                        "intensity_cc_mA": 222,
+                        "intensity_ca_mA": 500,
+                        "voltage_cc_mV": 200,
+                        "voltage_ca_mV": 100,
+                        "uptime_h": 15,
+                        "temperature_dc": 170,
+                    }]
+                }],key=lambda d: d['id']),
+              },
+              {
+              "plant": "figuerea",
+              "devices":
+                sorted([{
+                    "id": "Meter:9876",
+                    "readings": [{
+                        "time": basetime,
+                        "export_energy_wh": 1,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    }],
+                },
+                {
+                    "id": "Meter:5432",
+                    "readings": [{
+                        "time": basetime,
+                        "export_energy_wh": 1,
+                        "import_energy_wh": 123,
+                        "r1_VArh": 1234,
+                        "r2_VArh": 124,
+                        "r3_VArh": 1234,
+                        "r4_VArh": 124,
+                    }],
+                }],key=lambda d: d['id']),
+            }]
+        return plantsData
+
+    def setupPlants(self, time, alternativeMeter="12345678", plantsData = None):
         delta = dt.timedelta(minutes=30)
         plantsns = self.samplePlantsNS(altMeter=alternativeMeter)
         importPlants(plantsns)
-        plantsData = self.samplePlantsData(time, delta, altMeter=alternativeMeter)
+        plantsData = plantsData or self.samplePlantsData(time, delta, altMeter=alternativeMeter)
         Plant.insertPlantsData(plantsData)
         orm.flush()
 
@@ -362,6 +426,11 @@ class ReadingsFacade_Test(unittest.TestCase):
 
     def assertPlantsData(self, plants_data, meterReadings):
         # print("meterreadings\n{}\n mock\n{}\n".format(plants_data, meterReadings))
+
+        plants_data_meters = sorted([device['id'].split(':')[1] for plant_data in plants_data for device in plant_data['devices']])
+        meters = sorted(meterReadings.keys())
+        self.assertListEqual(plants_data_meters, meters)
+
         for plant_data in plants_data:
             for device in plant_data['devices']:
                 meterName = device['id'].split(':')[1]
@@ -406,11 +475,10 @@ class ReadingsFacade_Test(unittest.TestCase):
             yield (toUTCstr(time + i*delta), values[(time.hour+i)%24] + dr,0,0,0,0,0)
             i = i + 1
 
-    def setupReadingsDB(self, readingsDict=None):
+    def setupReadingsDB(self, time, readingsDict=None):
         def toUTCstr(dtaware):
             return dtaware.astimezone(tz=dt.timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
 
-        time = dt.datetime(2019,10,1,16,0,0, tzinfo=dt.timezone.utc)
         h = dt.timedelta(hours=1)
         self.readingsDB = readingsDict or {
             '12345678': [
@@ -440,7 +508,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         }
 
     def mockMeterReadingsSideEffects(self, meterName, beyond, upto):
-         return self.readingsDB[meterName]
+         return [r for r in self.readingsDB[meterName] if beyond < todtaware(r[0]) and todtaware(r[0]) < upto]
 
     def test__mock_meter_readings(self):
         time = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
@@ -478,16 +546,12 @@ class ReadingsFacade_Test(unittest.TestCase):
     def test__transferERPreadingsToModel__manyMetersSameDates_ManyNewReadings(self):
 
         erpMeter = '12345678'
-        self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
-        self.setupReadingsDB()
+        ormtime = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        erptime = dt.datetime(2020,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        self.setupPlants(ormtime, erpMeter)
+        self.setupReadingsDB(erptime)
 
         erpMeters = ['12345678', '1234', '9876', '5432']
-
-        meterTimes = [
-            dt.datetime(2019,10,1,16,00,00),
-            dt.datetime(2019,10,1,16,00,00),
-            dt.datetime(2019,10,1,16,00,00)
-        ]
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
@@ -495,37 +559,20 @@ class ReadingsFacade_Test(unittest.TestCase):
             r.erpMeters = erpMeters
             plantsData = r.getNewMetersReadings()
 
-        expectedPlantsData = {k:v for k,v in self.readingsDB.items() if k in erpMeters}
-        self.assertPlantsData(plantsData, expectedPlantsData)
+        expectedErpMeters = ['12345678', '9876', '5432']
+        expectedMeterReadings = {k:v for k,v in self.readingsDB.items() if k in expectedErpMeters}
+        self.assertPlantsData(plantsData, expectedMeterReadings)
 
-    def test__transferERPreadingsToModel__manyMetersDifferentDates_ManyNewReadings(self):
+    def test__transferERPreadingsToModel__manyMetersDifferentDates_OneWithoutNewReadings(self):
 
         erpMeter = '12345678'
-        self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
-        self.setupReadingsDB()
-
-        erpMeters = ['12345678', '1234', '9876', '5432']
-
-        mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
-        with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
-            plants_data = r.getNewMetersReadings()
-
-        expectedPlantsData = {k:v for k,v in self.readingsDB.items() if k in erpMeters}
-        self.assertPlantsData(plants_data, expectedPlantsData)
-
-    def test__transferERPreadingsToModel__ormMeterNotInERP(self):
-        erpMeter = '12345678'
-        self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
-        self.setupReadingsDB()
-
-        erpMeters = ['1234', '9876'] # missing erpMeter and 5432
-        meterTimes = [
-            dt.datetime(2019,10,1,16,00,00),
-            dt.datetime(2019,10,1,20,00,00),
-        ]
-
-        lastDate = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        obsoleteTime = dt.datetime(2020,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        updatedTime = dt.datetime(2021,4,1,16,00,00, tzinfo=dt.timezone.utc)
+        erpTime = dt.datetime(2021,3,1,16,00,00, tzinfo=dt.timezone.utc)
+        plantsData_different = self.samplePlantsData_DifferentTimes(basetime=obsoleteTime, differenttime=updatedTime)
+        self.setupPlants(alternativeMeter=erpMeter, time=None, plantsData=plantsData_different)
+        self.setupReadingsDB(erpTime)
+        erpMeters = [erpMeter, '1234', '9876', '5432']
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
@@ -533,7 +580,27 @@ class ReadingsFacade_Test(unittest.TestCase):
             r.erpMeters = erpMeters
             plants_data = r.getNewMetersReadings()
 
-        expectedPlantsData = {k:v for k,v in self.readingsDB.items() if k in erpMeters}
+        expectedMeters = [erpMeter, '9876', '5432']
+        expectedMeterReadings = {k:v for k,v in self.readingsDB.items() if k in expectedMeters}
+        expectedMeterReadings[erpMeter] = []
+        self.assertPlantsData(plants_data, expectedMeterReadings)
+
+    def test__transferERPreadingsToModel__ormMetersNotInERP(self):
+        erpMeter = '12345678'
+        ormtime = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        self.setupPlants(ormtime, alternativeMeter=erpMeter)
+        erptime = dt.datetime(2018,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        self.setupReadingsDB(erptime)
+
+        erpMeters = ['1234', '9876'] # missing erpMeter and 5432
+
+        mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
+        with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
+            r = ReadingsFacade()
+            r.erpMeters = erpMeters
+            plants_data = r.getNewMetersReadings()
+
+        expectedPlantsData = {'9876':[]}
         self.assertPlantsData(plants_data, expectedPlantsData)
 
     def _test__transferERPreadingsToModel__differentLastDates(self):
