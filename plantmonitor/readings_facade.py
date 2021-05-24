@@ -126,7 +126,7 @@ class ReadingsFacade():
     return measures_from_date(
       self.client,
       meterName,
-      beyond=naivebeyond and naivebeyond.strftime("%Y-%m-%d %H:%M:%S"),
+      beyond=naivebeyond.strftime("%Y-%m-%d %H:%M:%S") if naivebeyond else None,
       upto=naiveupto.strftime("%Y-%m-%d %H:%M:%S")
     )
 
