@@ -659,7 +659,8 @@ class Operations_Test(unittest.TestCase):
 
         expected = distance(hourstart-datastart+datetime.timedelta(hours=1))[1] - distance(hourstart-datastart)[1]
 
-        self.assertEqual(integralMetricValue, expected)
+        # TODO remove 1000* when expectedPower is in wh
+        self.assertEqual(integralMetricValue, 1000*expected)
 
     def test__integrateExpectedPower__NoReadings(self):
         plantNS = self.samplePlantNS()
