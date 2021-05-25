@@ -230,6 +230,92 @@ class Operations_Test(unittest.TestCase):
         # self.assertEqual(integratedValue, 270)
         self.assertEqual(integratedValue, 225)
 
+    def test__integrateHour__irradiation(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2021, 5, 25, 10, 0, 0, 0, tzinfo=datetime.timezone.utc)
+        delta = datetime.timedelta(minutes=5)
+        irradiance_w_m2 = [980,970,970,964,956,943,957,904,809,623,895,869]
+        plantsData = [
+              {
+              "plant": "alibaba",
+              "devices":
+                [{
+                    "id": "SensorIrradiation:12345678",
+                    "readings": [{
+                        "time": time + i*delta,
+                        "irradiation_w_m2": irradiance_w_m2[i],
+                        "temperature_dc": 0,
+                    } for i in range(0,12)],
+                }],
+              }
+            ]
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        metricName = 'irradiation_w_m2'
+
+        sensorName = '12345678'
+        registry = SensorIrradiationRegistry
+
+        query = orm.select(
+            (r.time, getattr(r, metricName))
+            for r in registry
+            if r.sensor.name == sensorName
+        )
+
+        hourstart = time.replace(minute=0, second=0, microsecond=0)
+        integratedValue = integrateHour(hourstart, query)
+
+        # Fix border error
+        self.assertEqual(integratedValue, 826)
+
+
+    def test__integrateHour__irradiation2(self):
+        plantNS = self.samplePlantNS()
+
+        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = alibaba.importPlant(plantNS)
+        time = datetime.datetime(2021, 5, 25, 16, 0, 6, 926371, tzinfo=datetime.timezone.utc)
+        time = time.replace(minute=0, second=0, microsecond=0)
+        delta = datetime.timedelta(minutes=5)
+        irradiance_w_m2 = [909, 900, 889, 877, 866, 851, 840, 828, 818, 808, 792, 778, 780]
+        plantsData = [
+              {
+              "plant": "alibaba",
+              "devices":
+                [{
+                    "id": "SensorIrradiation:12345678",
+                    "readings": [{
+                        "time": time + i*delta,
+                        "irradiation_w_m2": irradiance_w_m2[i],
+                        "temperature_dc": 0,
+                    } for i in range(13)],
+                }],
+              }
+            ]
+        Plant.insertPlantsData(plantsData)
+        orm.flush()
+
+        metricName = 'irradiation_w_m2'
+
+        sensorName = '12345678'
+        registry = SensorIrradiationRegistry
+
+        query = orm.select(
+            (r.time, getattr(r, metricName))
+            for r in registry
+            if r.sensor.name == sensorName
+        )
+
+        hourstart = time.replace(minute=0, second=0, microsecond=0)
+        integratedValue = integrateHour(hourstart, query)
+
+        # Fix border error
+        self.assertEqual(integratedValue, 840)
+
     def test__integrateHourFromTimeSeries__OnlyOnePoint(self):
 
         readingTime = datetime.datetime(2021, 3, 26, 11, 55, 6, 766707, tzinfo=datetime.timezone.utc)

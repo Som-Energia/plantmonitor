@@ -42,10 +42,8 @@ def getRegistryQuery(registry, deviceName, metric, fromDate, toDate):
 
 def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
-    # for each hour within fromDate and toDate
-
     hourend = hourstart + dt
-
+    query.show()
     # slice
     timeSeries = sorted([
         (t, v)
@@ -71,7 +69,7 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
     # round to integer with //
     integralMetricValue = integralMetricValueDateTime.days * 24 + integralMetricValueDateTime.seconds // 3600
-
+    logger.debug("range {}- {}\nxvalues {}\nyvalues {}\nresult {}".format(hourstart, hourend, xvalues,yvalues,integralMetricValue))
     return integralMetricValue
 
 def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
@@ -226,12 +224,17 @@ def integrateIrradiance(fromDate=None, toDate=None):
         if not metricFromDate:
             logger.warning("sensor {} {} has no valid registries. skipping.".format(sensor.to_dict(), srcCol))
             continue
+        # Round to nearest hour to avoid computing uncompleted hours
+        metricToDate = metricToDate.replace(minute=0, second=0, microsecond=0)
         devicesRegistries = orm.select(
             (r.time, getattr(r, srcCol))
             for r in srcregistry
             if r.sensor == sensor and metricFromDate <= r.time and r.time <= metricToDate
         )
-        integratedMetric[sensor] = integrateMetric(devicesRegistries, metricFromDate, metricToDate)
+        if metricFromDate.replace(minute=0, second=0, microsecond=0) == metricToDate:
+            logger.info("Sensor {} already up to date. Skipping.".format(sensor))
+        else:
+            integratedMetric[sensor] = integrateMetric(devicesRegistries, metricFromDate, metricToDate)
 
     return integratedMetric
 
