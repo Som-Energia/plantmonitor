@@ -108,7 +108,8 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
     integralMetricValue = integralMetricValueDateTime.days * 24 + integralMetricValueDateTime.seconds // 3600
 
-    return integralMetricValue
+    # TODO expectedPower is in kWh! we have to multiply by 1000. Remove as soon as expectedpower is in wh
+    return 1000*integralMetricValue
 
 def integrateMetric(registries, fromDate, toDate):
     # for each hour within fromDate and toDate
@@ -202,8 +203,7 @@ def integrateExpectedPower(fromDate=None, toDate=None):
         hours = [fromHourDate + i*dt for i in range(math.ceil((metricToDate - fromHourDate)/dt)) ]
 
         # TODO sensorExpectedPower is a list, not a pony query, we have to rewrite everything
-        # TODO expectedPower is in kWh! we have to multiply by 1000. Remove as soon as expectedpower is in wh
-        integratedMetric[sensor] = [(hourstart + dt, 1000*integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
+        integratedMetric[sensor] = [(hourstart + dt, integrateHourFromTimeseries(hourstart, sensorExpectedPower, dt)) for hourstart in hours]
 
     return integratedMetric
 
