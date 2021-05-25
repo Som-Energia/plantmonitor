@@ -615,13 +615,11 @@ class Operations_Test(unittest.TestCase):
 
         times = [
             datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc)
-        ]
+            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)        ]
 
         expectedIntegrals = {
-            '12345678' : [225, 563, 68],
-            '87654321' : [308, 655, 77],
+            '12345678' : [225, 563],
+            '87654321' : [308, 655],
         }
 
         expectedDict = {
@@ -650,13 +648,12 @@ class Operations_Test(unittest.TestCase):
 
         times = [
             datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
-            datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc)
+            datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)
         ]
 
         expectedIntegrals = {
-            '12345678' : [225, 563, 68],
-            '87654321' : [308, 655, 77],
+            '12345678' : [225, 563],
+            '87654321' : [308, 655],
         }
 
         expectedDict = {

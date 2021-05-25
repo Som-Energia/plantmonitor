@@ -43,7 +43,6 @@ def getRegistryQuery(registry, deviceName, metric, fromDate, toDate):
 def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
     hourend = hourstart + dt
-    query.show()
     # slice
     timeSeries = sorted([
         (t, v)
