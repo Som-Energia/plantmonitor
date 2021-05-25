@@ -519,7 +519,10 @@ class ReadingsFacade_Test(unittest.TestCase):
         }
 
     def mockMeterReadingsSideEffects(self, meterName, beyond, upto):
-         return [r for r in self.readingsDB[meterName] if beyond < todtaware(r[0]) and todtaware(r[0]) < upto]
+        if not beyond:
+            return [r for r in self.readingsDB[meterName] if todtaware(r[0]) < upto]
+        else:
+            return [r for r in self.readingsDB[meterName] if beyond < todtaware(r[0]) and todtaware(r[0]) < upto]
 
     def test__mock_meter_readings(self):
         time = dt.datetime(2019,10,1,16,00,00, tzinfo=dt.timezone.utc)
@@ -612,6 +615,28 @@ class ReadingsFacade_Test(unittest.TestCase):
             plants_data = r.getNewMetersReadings()
 
         expectedPlantsData = {'9876':[]}
+        self.assertPlantsData(plants_data, expectedPlantsData)
+
+    def test__transferERPreadingsToModel__ormEmpty(self):
+        erpMeter = '12345678'
+        emptyPlantsData = [{
+              "plant": "alcolea",
+              "devices": []
+        }]
+        self.setupPlants(None, alternativeMeter=erpMeter, plantsData=emptyPlantsData)
+        erptime = dt.datetime(2020,10,1,16,00,00, tzinfo=dt.timezone.utc)
+        self.setupReadingsDB(erptime)
+
+        erpMeters = ['12345678', '1234', '9876', '5432']
+
+        mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
+        with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
+            r = ReadingsFacade()
+            r.erpMeters = erpMeters
+            plants_data = r.getNewMetersReadings()
+
+        expectedErpMeters = ['12345678', '9876', '5432']
+        expectedPlantsData = {k:v for k,v in self.readingsDB.items() if k in expectedErpMeters}
         self.assertPlantsData(plants_data, expectedPlantsData)
 
     def _test__transferERPreadingsToModel__differentLastDates(self):

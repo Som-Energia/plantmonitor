@@ -120,7 +120,7 @@ class ReadingsFacade():
     return telemeasure_meter_names(self.client)
 
   def measuresFromDate(self, meterName, beyond, upto):
-    naivebeyond = beyond.astimezone(tz=datetime.timezone.utc).replace(tzinfo=None) if naivebeyond else None
+    naivebeyond = beyond.astimezone(tz=datetime.timezone.utc).replace(tzinfo=None) if beyond else None
     naiveupto = upto.astimezone(tz=datetime.timezone.utc).replace(tzinfo=None)
 
     return measures_from_date(
