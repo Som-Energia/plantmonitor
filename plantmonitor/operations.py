@@ -69,6 +69,7 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     # hourly_trapezoidal_approximation
     integralMetricValueDateTime = integrate.trapz(y=yvalues, x=xvalues)
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
+    # round to integer with //
     integralMetricValue = integralMetricValueDateTime.days * 24 + integralMetricValueDateTime.seconds // 3600
 
     return integralMetricValue
