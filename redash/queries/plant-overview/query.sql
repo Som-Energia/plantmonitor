@@ -1,4 +1,4 @@
-select 'Spain' as region,
+select 'Vallehermoso' as plant_name,
        'Alcolea del Rio, 41449, Sevilla' as plant_location, 
        '2160kWp' as installed_capacity, 
        '2016-05-06'::date as grid_connection_time, 

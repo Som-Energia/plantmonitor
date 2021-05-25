@@ -5,16 +5,21 @@ is_archived: false
 is_draft: false
 is_favorite: false
 is_safe: true
-name: Energia diaria total inversors
+name: Potència esperada
 options:
   parameters:
-  - name: planta
-    title: planta
+  - name: plant
+    title: plant
     global: false
-    value: Alcolea
-    queryId: queries/all-plants
-    parentQueryId: 31
+    value: '1'
+    queryId: queries/all-plants-by-id
     type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    type: datetime-range
     locals: []
 schedule: null
 tags: []

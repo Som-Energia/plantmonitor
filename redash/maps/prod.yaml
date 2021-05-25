@@ -31,6 +31,8 @@ query:
   34: queries/pr-mensual-via-redash
   33: queries/pr-horari
   38: queries/metriques-mensuals-de-comptadors
+  40: queries/potencia-esperada
+  39: queries/energia-esperada-i-energia-perduda
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -81,6 +83,10 @@ visualization:
   54: queries/pr-mensual-via-redash/visualizations/table.yaml
   53: queries/pr-horari/visualizations/table.yaml
   59: queries/metriques-mensuals-de-comptadors/visualizations/table.yaml
+  63: queries/potencia-esperada/visualizations/chart.yaml
+  62: queries/potencia-esperada/visualizations/table.yaml
+  61: queries/energia-esperada-i-energia-perduda/visualizations/chart.yaml
+  60: queries/energia-esperada-i-energia-perduda/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -105,3 +111,5 @@ widget:
   25: dashboards/grafiques-puntuals/widgets/widget-3.yaml
   31: dashboards/grafiques-puntuals/widgets/widget-4.yaml
   32: dashboards/grafiques-puntuals/widgets/widget-5.yaml
+  33: dashboards/dashboard-general-de-planta/widgets/widget-5.yaml
+  34: dashboards/grafiques-puntuals/widgets/widget-6.yaml
