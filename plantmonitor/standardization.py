@@ -136,10 +136,10 @@ def erp_meter_readings_to_plant_data(measures):
                 ).replace(tzinfo=datetime.timezone.utc),
             'export_energy_wh': 1000*measure[1],
             'import_energy_wh': 1000*measure[2],
-            'r1_VArh': measure[3],
-            'r2_VArh': measure[4],
-            'r3_VArh': measure[5],
-            'r4_VArh': measure[6],
+            'r1_VArh': 1000*measure[3],
+            'r2_VArh': 1000*measure[4],
+            'r3_VArh': 1000*measure[5],
+            'r4_VArh': 1000*measure[6],
         }
         for measure in measures
     ]
