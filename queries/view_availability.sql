@@ -1,4 +1,4 @@
- SELECT
+SELECT
     view_ht_monthly."time" AS "time",
     view_ht_monthly.plant,
     hd/ht AS "availability"
