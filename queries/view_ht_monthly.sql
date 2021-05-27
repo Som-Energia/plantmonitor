@@ -1,13 +1,13 @@
-SELECT r.sensor,
-       date_trunc('month', r.time AT TIME ZONE 'EUROPE/MADRID') AT TIME ZONE 'EUROPE/MADRID' AS "time",
-       count(r.integratedirradiation_wh_m2) AS ht,
-       p.name as plant
-FROM plant AS p
-INNER JOIN sensor s ON s.plant = p.id
-INNER JOIN hourlysensorirradiationregistry AS r ON r.sensor = s.id
+SELECT reg.sensor,
+       date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid') AS "time",
+       count(*) AS ht,
+       plant.name AS plant
+FROM plant
+INNER JOIN sensor ON sensor.plant = plant.id
+INNER JOIN hourlysensorirradiationregistry AS reg ON reg.sensor = sensor.id
 WHERE integratedirradiation_wh_m2 > 5
-GROUP BY date_trunc('month', r.time AT TIME ZONE 'EUROPE/MADRID'),
-         r.sensor,
-         p.name,
-	 r.time
-ORDER BY r.time;
+  AND sensor.classtype = 'SensorIrradiation'
+GROUP BY date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid'),
+         reg.sensor,
+         plant.name
+ORDER BY date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid');
