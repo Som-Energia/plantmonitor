@@ -322,8 +322,8 @@ class ReadingsFacade_Test(unittest.TestCase):
                         "export_energy_wh": 1139000,
                         "import_energy_wh": 0,
                         "r1_VArh": 0,
-                        "r2_VArh": 1,
-                        "r3_VArh": 2,
+                        "r2_VArh": 1000,
+                        "r3_VArh": 2000,
                         "r4_VArh": 0,
                     },
                     {
@@ -332,7 +332,7 @@ class ReadingsFacade_Test(unittest.TestCase):
                         "import_energy_wh": 0,
                         "r1_VArh": 0,
                         "r2_VArh": 0,
-                        "r3_VArh": 8,
+                        "r3_VArh": 8000,
                         "r4_VArh": 0,
                     }]
                 }],
