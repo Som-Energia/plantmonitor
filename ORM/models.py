@@ -122,6 +122,7 @@ class Plant(database.Entity):
     marketRepresentative = Set('MarketRepresentative', lazy=True)
     simel = Set('Simel', lazy=True)
     nagios = Set('Nagios', lazy=True)
+    plantParameters = Optional('PlantParameters')
     moduleParameters = Optional('PlantModuleParameters')
     plantMonthlyLegacy = Optional('PlantMonthlyLegacy')
 
@@ -246,27 +247,33 @@ class Plant(database.Entity):
 
     def setModuleParameters(
         self,
+        nominalPowerMWp,
+        efficiency,
         nModules,
+        degradation,
         Imp,
         Vmp,
         temperatureCoefficientI,
         temperatureCoefficientV,
+        temperatureCoefficientPmax,
         irradiationSTC,
         temperatureSTC,
-        degradation,
         Voc,
         Isc):
 
         self.moduleParameters = PlantModuleParameters(
             plant=self,
+            nominal_power_wp=int(nominalPowerMWp*1000000),
+            efficency_cpercent=int(efficiency*100),
             n_modules = nModules,
+            degradation_cpercent = int(degradation*100),
             max_power_current_ma = int(Imp*1000),
             max_power_voltage_mv = int(Vmp*1000),
             current_temperature_coefficient_mpercent_c = int(temperatureCoefficientI*1000),
             voltage_temperature_coefficient_mpercent_c = int(temperatureCoefficientV*1000),
+            max_power_temperature_coefficient_mpercent_c = int(temperatureCoefficientPmax*1000),
             standard_conditions_irradiation_w_m2 = int(irradiationSTC),
             standard_conditions_temperature_dc = int(temperatureSTC*10),
-            degradation_cpercent = int(degradation*100),
             opencircuit_voltage_mv = int(Voc*1000),
             shortcircuit_current_ma = int(Isc*1000),
         )
@@ -383,11 +390,13 @@ class MeterRegistry(database.Entity):
     r3_VArh = Required(int, size=64)
     r4_VArh = Required(int, size=64)
 
-
 class Inverter(database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
+    brand = Optional(str)
+    model = Optional(str)
+    nominal_power_w = Optional(int)
     inverterRegistries = Set('InverterRegistry', lazy=True)
 
     def insertRegistry(self,
@@ -713,14 +722,35 @@ class PlantMonthlyLegacy(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     export_energy_wh = Required(int, size=64)
 
+class PlantParameters(database.Entity):
+    plant = Required(Plant)
+    peak_power_w = Required(int)
+    nominal_power_w = Required(int)
+    connection_date = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    n_strings_plant = Optional(int)
+    n_strings_inverter = Optional(int) # TODO poden tenir diferent nombre d'strings els inversors d'una planta?
+    n_modules_string = Optional(int)
+    inverter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb l'inversor?
+    meter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb el comptador?
+
+    target_monthly_energy_wh = Required(int)
+    historic_monthly_energy_wh = Optional(int)
+    month_theoric_pr_cpercent = Optional(int)
+    year_theoric_pr_cpercent = Optional(int)
+
 class PlantModuleParameters(database.Entity):
     plant = Required(Plant)
+    brand = Optional(str)
+    model = Optional(str)
+    nominal_power_wp = Required(int)
+    efficency_cpercent = Required(int)
     n_modules = Required(int)
     degradation_cpercent = Required(int)
     max_power_current_ma = Required(int)
     max_power_voltage_mv = Required(int)
     current_temperature_coefficient_mpercent_c = Required(int)
     voltage_temperature_coefficient_mpercent_c = Required(int)
+    max_power_temperature_coefficient_mpercent_c = Required(int)
     standard_conditions_irradiation_w_m2 = Required(int)
     standard_conditions_temperature_dc = Required(int)
     opencircuit_voltage_mv = Required(int)

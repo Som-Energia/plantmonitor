@@ -113,15 +113,17 @@ class Operations_Test(unittest.TestCase):
             codename: SCSOM04
             description: la bonica planta
             moduleParameters:
+                nominalPowerMWp: 2.16
+                efficiency: 15.5
                 nModules: 4878
+                degradation: 97.5
                 Imp: 9.07
                 Vmp: 37.5
                 temperatureCoefficientI: 0.05
                 temperatureCoefficientV: -0.31
+                temperatureCoefficientPmax: -0.442
                 irradiationSTC: 1000.0
                 temperatureSTC: 25
-                nModules: 4878
-                degradation: 97.5
                 Voc: 46.1
                 Isc: 9.5
             irradiationSensors:
@@ -156,25 +158,31 @@ class Operations_Test(unittest.TestCase):
         return plantsData
 
     parametersAlcolea = dict(
+        nominalPowerMWp = 2.16,
+        efficiency = 15.5,
+        nModules = 8640, # plant parameter
+        degradation = 97.0,
         Imp = 8.27, # A, module model param
         Vmp = 30.2, # V, module model param
         temperatureCoefficientI = 0.088, # %/ºC, module model param
         temperatureCoefficientV = -0.352, # %/ºC, module model param
+        temperatureCoefficientPmax = -0.442, # %/ºC, module model param
         irradiationSTC = 1000.0, # W/m2, module model param
         temperatureSTC = 25, # ºC, module model param
-        nModules = 8640, # plant parameter
-        degradation=97.0, # %, module model param
     )
 
     parametersFlorida = dict(
+        nominalPowerMWp = 2.16, # TODO use Florida values
+        efficiency = 15.5, # TODO use Florida values
+        nModules = 4878, # plant parameter
+        degradation=97.5, # %, module model param
         Imp = 9.07, # A, module model param
         Vmp = 37.5, # V, module model param
         temperatureCoefficientI = 0.05, # %/ºC, module model param
         temperatureCoefficientV = -0.31, # %/ºC, module model param
+        temperatureCoefficientPmax = -0.442, # %/ºC, module model param
         irradiationSTC = 1000.0, # W/m2, module model param
         temperatureSTC = 25, # ºC, module model param
-        nModules = 4878, # plant parameter
-        degradation=97.5, # %, module model param
         Voc = 46.1, # V, module model param
         Isc = 9.5, # A, module model param
     )
@@ -183,14 +191,17 @@ class Operations_Test(unittest.TestCase):
         data = ns(data)
         plant = PlantModuleParameters(
             plant=plant_id,
+            nominal_power_wp=int(data.nominalPowerMWp*1000000),
+            efficency_cpercent=int(data.efficiency*100),
             n_modules = data.nModules,
+            degradation_cpercent = int(data.degradation*100),
             max_power_current_ma = int(data.Imp*1000),
             max_power_voltage_mv = int(data.Vmp*1000),
             current_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientI*1000),
             voltage_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientV*1000),
+            max_power_temperature_coefficient_mpercent_c = int(data.temperatureCoefficientPmax*1000),
             standard_conditions_irradiation_w_m2 = int(data.irradiationSTC),
             standard_conditions_temperature_dc = int(data.temperatureSTC*10),
-            degradation_cpercent = int(data.degradation*100),
             opencircuit_voltage_mv = int(data.Voc*1000),
             shortcircuit_current_ma = int(data.Isc*1000),
         )

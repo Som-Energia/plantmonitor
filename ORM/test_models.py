@@ -169,11 +169,14 @@ class Models_Test(unittest.TestCase):
             codename: SCSOM04
             description: la bonica planta
             moduleParameters:
+                nominalPowerMWp: 2.16
+                efficiency: 15.5
                 nModules: 4878
                 Imp: 9.07
                 Vmp: 37.5
                 temperatureCoefficientI: 0.05
                 temperatureCoefficientV: -0.31
+                temperatureCoefficientPmax: -0.442
                 irradiationSTC: 1000.0
                 temperatureSTC: 25
                 degradation: 97.5
