@@ -1,12 +1,10 @@
 SELECT date_trunc('month', TIME) AS TIME,
-       plant.id as plant_id,
-       plant.name as plant_name,
-       inverter.id as inverter_id,
-       inverter.name as inverter_name,
-       sum(energy_wh) as monthly_energy_wh
-FROM inverterregistry AS reg
-LEFT JOIN inverter ON inverter.id = reg.inverter
-LEFT JOIN plant ON plant.id = inverter.plant
-GROUP BY date_trunc('month', reg.time), plant.id, plant.name, inverter.id, inverter.name
-ORDER BY date_trunc('month', reg.time), plant.id, plant.name, inverter.id, inverter.name
+       plant_id,
+       plant_name,
+       inverter_id,
+       inverter_name,
+       sum(energy_wh) as energy_wh
+FROM view_inverter_energy_daily AS daily
+GROUP BY date_trunc('month', time), plant_id, plant_name, inverter_id, inverter_name
+ORDER BY date_trunc('month', time), plant_id, plant_name, inverter_id, inverter_name
 ;
