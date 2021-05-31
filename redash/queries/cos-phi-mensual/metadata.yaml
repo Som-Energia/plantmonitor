@@ -1,0 +1,30 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: cos phi mensual
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 48
+  - name: plant
+    title: plant
+    global: false
+    value: '1'
+    queryId: queries/all-plants-by-id
+    parentQueryId: 48
+    type: query
+    locals: []
+schedule: null
+tags:
+- Projectes
+- projectes-taules
+version: 1

@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 2
-    row: 15
+    row: 23
 text: ''
 visualization: queries/exportada-pr/visualizations/chart.yaml
 width: 1

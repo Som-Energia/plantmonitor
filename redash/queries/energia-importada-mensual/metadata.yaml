@@ -1,0 +1,29 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Energia importada mensual
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: '1'
+    queryId: queries/all-plants-by-id
+    parentQueryId: 54
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 54
+schedule: null
+tags:
+- projectes-taules
+version: 1

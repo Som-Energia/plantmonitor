@@ -36,5 +36,7 @@ options:
     type: datetime-range
     parentQueryId: 39
 schedule: null
-tags: []
+tags:
+- Projectes
+- projectes-taules
 version: 1

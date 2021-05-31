@@ -14,8 +14,10 @@ options:
     rangeMin: null
     title:
       text: Energia Exportada Comptadors [kWh]
-  - opposite: true
+  - rangeMax: 120
     type: linear
+    rangeMin: 0
+    opposite: true
     title:
       text: PR [%]
   series:
@@ -31,7 +33,7 @@ options:
       zIndex: 1
       index: 0
       type: scatter
-      name: PR inventat
+      name: PR
       yAxis: 1
     exported_energy_kwh:
       zIndex: 0

@@ -1,0 +1,22 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Hores equivalents mensuals i energia comptadors
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: '1'
+    queryId: queries/all-plants-by-id
+    type: query
+    locals: []
+schedule: null
+tags:
+- projectes-taules
+- Projectes
+version: 1

@@ -1,15 +1,15 @@
 options:
   parameterMappings:
+    plant:
+      type: dashboard-level
+      mapTo: plant
+      name: plant
+      value: null
+      title: ''
     interval:
       type: dashboard-level
       mapTo: interval
       name: interval
-      value: null
-      title: ''
-    granularity:
-      type: dashboard-level
-      mapTo: granularity
-      name: granularity
       value: null
       title: ''
   isHidden: false
@@ -22,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 16
+    row: 0
 text: ''
-visualization: queries/pr-amb-granularitat/visualizations/chart.yaml
+visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada-amb-rollup/visualizations/chart.yaml
 width: 1

@@ -4,9 +4,9 @@
     meterregistry.export_energy_wh AS export_energy_wh,
     hourlysensorirradiationregistry.integratedirradiation_wh_m2,
     (
-        (meterregistry.export_energy_wh)::double precision / (2160.0)::double precision
+        meterregistry.export_energy_wh / 2160000.0 -- potencia pic 2.16 MWp
     ) / (
-        NULLIF((hourlysensorirradiationregistry.integratedirradiation_wh_m2)::double precision, (0.0)::double precision) / 1000.0::double precision
+        NULLIF(hourlysensorirradiationregistry.integratedirradiation_wh_m2, 0.0) / 1000.0 -- GSTC 1000 W/m2
     ) AS pr_hourly
  FROM meterregistry
  JOIN meter

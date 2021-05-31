@@ -33,6 +33,21 @@ query:
   38: queries/metriques-mensuals-de-comptadors
   40: queries/potencia-esperada
   39: queries/energia-esperada-i-energia-perduda
+  55: queries/produccion-respecto-a-objetivos
+  54: queries/energia-importada-mensual
+  53: queries/disponibilitat-amb-granularitat
+  52: queries/new-query-3
+  51: queries/energia-mensual-inversor
+  50: queries/hores-equivalents-mensuals-i-energia-comptadors
+  49: queries/cos-phi-horari-debug
+  48: queries/cos-phi-mensual
+  47: queries/potencia-total-inversors-irradiacio-potencia-esperada
+  46: queries/potencia-total-inversors-irradiacio-potencia-esperada-amb-rollup
+  45: queries/new-query-4
+  44: queries/energia-esperada
+  43: queries/irradiancia-i-irradiacio
+  42: queries/potencia-esperada-i-energia-esperada-instantania
+  41: queries/potencia-esperada-i-energia-esperada-horaria
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -87,10 +102,33 @@ visualization:
   62: queries/potencia-esperada/visualizations/table.yaml
   61: queries/energia-esperada-i-energia-perduda/visualizations/chart.yaml
   60: queries/energia-esperada-i-energia-perduda/visualizations/table.yaml
+  85: queries/produccion-respecto-a-objetivos/visualizations/table.yaml
+  84: queries/energia-importada-mensual/visualizations/table.yaml
+  82: queries/disponibilitat-amb-granularitat/visualizations/table.yaml
+  83: queries/disponibilitat-amb-granularitat/visualizations/chart.yaml
+  81: queries/new-query-3/visualizations/table.yaml
+  80: queries/energia-mensual-inversor/visualizations/table.yaml
+  79: queries/hores-equivalents-mensuals-i-energia-comptadors/visualizations/table.yaml
+  78: queries/cos-phi-horari-debug/visualizations/table.yaml
+  77: queries/cos-phi-mensual/visualizations/table.yaml
+  75: queries/potencia-total-inversors-irradiacio-potencia-esperada/visualizations/table.yaml
+  76: queries/potencia-total-inversors-irradiacio-potencia-esperada/visualizations/chart.yaml
+  73: queries/potencia-total-inversors-irradiacio-potencia-esperada-amb-rollup/visualizations/table.yaml
+  74: queries/potencia-total-inversors-irradiacio-potencia-esperada-amb-rollup/visualizations/chart.yaml
+  72: queries/new-query-4/visualizations/table.yaml
+  70: queries/energia-esperada/visualizations/table.yaml
+  71: queries/energia-esperada/visualizations/chart.yaml
+  68: queries/irradiancia-i-irradiacio/visualizations/table.yaml
+  69: queries/irradiancia-i-irradiacio/visualizations/chart.yaml
+  67: queries/potencia-esperada-i-energia-esperada-instantania/visualizations/chart.yaml
+  66: queries/potencia-esperada-i-energia-esperada-instantania/visualizations/table.yaml
+  65: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/chart.yaml
+  64: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
   1: dashboards/grafiques-puntuals
+  7: dashboards/sandbox
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -113,3 +151,6 @@ widget:
   32: dashboards/grafiques-puntuals/widgets/widget-5.yaml
   33: dashboards/dashboard-general-de-planta/widgets/widget-5.yaml
   34: dashboards/grafiques-puntuals/widgets/widget-6.yaml
+  37: dashboards/sandbox/widgets/widget.yaml
+  35: dashboards/dashboard-general-de-planta/widgets/widget-11.yaml
+  39: dashboards/grafiques-puntuals/widgets/widget-7.yaml

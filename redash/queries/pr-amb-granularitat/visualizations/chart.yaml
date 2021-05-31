@@ -22,8 +22,13 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    Alcolea:
+    pr_avg:
       zIndex: 0
+      index: 0
+      type: column
+      yAxis: 0
+    pr_sum:
+      zIndex: 1
       index: 0
       type: column
       yAxis: 0
@@ -35,7 +40,9 @@ options:
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
     pr_avg: y
-    plant: series
+    plant: unused
+    'null': series
+    pr_sum: y
     time: x
   textFormat: ''
   customCode: |-

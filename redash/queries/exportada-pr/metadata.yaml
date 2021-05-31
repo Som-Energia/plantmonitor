@@ -19,7 +19,7 @@ options:
   - name: granularity
     title: granularity
     global: false
-    value: day
+    value: month
     enumOptions: |-
       day
       month
@@ -30,7 +30,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_last_month
+    value: d_this_year
     locals: []
     type: datetime-range
     parentQueryId: 9
