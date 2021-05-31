@@ -48,6 +48,7 @@ query:
   43: queries/irradiancia-i-irradiacio
   42: queries/potencia-esperada-i-energia-esperada-instantania
   41: queries/potencia-esperada-i-energia-esperada-horaria
+  56: queries/produccion-respecto-inversor
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -124,6 +125,7 @@ visualization:
   66: queries/potencia-esperada-i-energia-esperada-instantania/visualizations/table.yaml
   65: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/chart.yaml
   64: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/table.yaml
+  86: queries/produccion-respecto-inversor/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
