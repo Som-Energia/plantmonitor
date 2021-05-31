@@ -7,9 +7,6 @@ SELECT date_trunc('month', TIME) AS TIME,
 FROM inverterregistry AS reg
 LEFT JOIN inverter ON inverter.id = reg.inverter
 LEFT JOIN plant ON plant.id = inverter.plant
-GROUP BY date_trunc('month', reg.time),
-         plant.id,
-         plant.name,
-         inverter.id,
-         rollup(inverter.name)
-ORDER BY TIME DESC;
+GROUP BY date_trunc('month', reg.time), plant.id, plant.name, inverter.id, inverter.name
+ORDER BY date_trunc('month', reg.time), plant.id, plant.name, inverter.id, inverter.name
+;
