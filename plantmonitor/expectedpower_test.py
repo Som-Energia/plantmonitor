@@ -148,7 +148,7 @@ class ExpectedPower_Test(TestCase):
         irradiationSTC = 1000.0, # W/m2, module model param
         temperatureSTC = 25, # ºC, module model param
         nModules = 8640, # plant parameter
-        Is = 8.75, # A, module model param
+        Isc = 8.75, # A, module model param
         Voc = 37.8, # V, module model param
         degradation=97.0, # %, module model param
         correctionFactorPercent = 90., # %, plant parameter
@@ -238,9 +238,6 @@ class ExpectedPower_Test(TestCase):
 
         self.assertOutputB2B(result)
 
-
-    # TODO construir la view d'expected power i calcular l'expected energy via la integral
-    # comparar resultats amb les dades de projectes
     def test_expectedEnergy_Florida_2020_09(self):
         self.setupPlant()
         self.setPlantParameters(**dict(self.parametersFlorida,
@@ -268,3 +265,18 @@ class ExpectedPower_Test(TestCase):
         result = integrateExpectedPower(fromDate, toDate)
 
         self.assertOutputB2BNoPlant(result)
+
+    def test_expectedPower_Alcolea_2021_04_withCorrection(self):
+        self.setupPlant()
+        self.setPlantParameters(**dict(self.parametersAlcolea,
+            correctionFactorPercent=90,
+        ))
+        expected = self.importData(self.sensor,
+            'b2bdata/expectedPower-2021-04-Alcolea.csv',
+            'Potencia parque calculada con temperatura kW con degradación placas',
+        )
+        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result)
+

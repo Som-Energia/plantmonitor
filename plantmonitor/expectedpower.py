@@ -11,7 +11,7 @@ def spanishDateToISO(spanishDate, spanishHourMinutes):
 
 def readTimedDataTsv(filename, columns):
     data = Path(filename).read_text(encoding='utf8')
-    data= [
+    data = [
         line.split('\t')
         for line in data.split('\n')
         if line.strip()
