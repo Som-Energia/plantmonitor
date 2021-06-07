@@ -312,10 +312,12 @@ class DailyDownload_Test(unittest.TestCase):
 
         self.assertNotEqual(forecastMetadata, oldForecastMetadata)
         self.assertEqual(statuses['SomEnergia_Alcolea'], ForecastStatus.OK)
-        forecasts = [f for f in forecastMetadata.forecasts]
-        expectedTime = time.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(hours=1)
-        self.assertEqual(len(forecasts), 1)
-        self.assertEqual(forecasts[0].time, expectedTime)
+        forecasts = orm.select(f for f in forecastMetadata.forecasts).order_by(lambda: f.time)[:]
+        print(forecasts)
+        expectedTime = time.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(days=14, hours=1)
+        expectedNumForecasts = 14*24+1
+        self.assertEqual(len(forecasts), expectedNumForecasts)
+        self.assertEqual(forecasts[-1].time, expectedTime)
 
     def test__getMeterReadings__None(self):
 

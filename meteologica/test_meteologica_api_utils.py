@@ -33,18 +33,19 @@ class MeteologicaApiMock_Test(unittest.TestCase):
     def mainFacility(self):
         return "MyPlant"
 
-    def otherFacility(slf):
+    def otherFacility(self):
         return "OtherPlant"
 
     def test_uploadProduction_singleData(self):
         facility = self.mainFacility()
         api = self.createApi()
-        api.uploadProduction(facility, [
-            (todt("2040-01-01 00:00:00"), 10),
+        response = api.uploadProduction(facility, [
+            (todtaware("2040-01-01 00:00:00"), 10),
         ])
+        self.assertEqual(response, 'OK')
         self.assertEqual(
             api.lastDateUploaded(facility),
-            todt("2040-01-01 00:00:00")
+            todtaware("2040-01-01 00:00:00")
         )
 
     def test_uploadProduction_noData(self):

@@ -588,7 +588,7 @@ class ForecastMetadata(database.Entity):
 
     @classmethod
     def create(cls, plant, forecastdate, errorcode, variable='prod', predictor='aggregated', granularity='60'):
-        if errorcode:
+        if errorcode != 'OK':
             return ForecastMetadata(
                 plant=plant,
                 errorcode=errorcode,

@@ -65,7 +65,6 @@ def getForecast(api, facility):
     lastDownload = plant.lastForecastDownloaded()
 
     now = dt.datetime.now(dt.timezone.utc)
-    toDate = now
 
     if not lastDownload:
         fromDate = now - dt.timedelta(days=14)
@@ -74,6 +73,8 @@ def getForecast(api, facility):
         return None, ForecastStatus.UPTODATE
     else:
         fromDate = lastDownload
+
+    toDate = now + dt.timedelta(days=14)
 
     try:
         meterDataForecast = api.getForecast(facility, fromDate, toDate)
@@ -160,7 +161,6 @@ def downloadMeterForecasts(configdb, test_env=True):
     return statuses
 
 def getMeterReadings(facility, fromDate=None, toDate=None):
-    toDate = toDate or dt.datetime.now(dt.timezone.utc)
     plant = Plant.get(codename=facility)
     if not plant:
         logger.warning("Plant codename {} is unknown to db".format(facility))
@@ -172,9 +172,9 @@ def getMeterReadings(facility, fromDate=None, toDate=None):
 
     query = orm.select(r for r in MeterRegistry if r.meter == meter)
     if fromDate:
-        query.filter(lambda r: fromDate <= r.time)
+        query = query.filter(lambda r: fromDate <= r.time)
     if toDate:
-        query.filter(lambda r: r.time <= toDate)
+        query = query.filter(lambda r: r.time <= toDate)
 
     data = [(r.time, r.export_energy_wh) for r in query]
 
@@ -191,7 +191,7 @@ def getMeterReadingsFromLastUpload(api, facility):
     else:
         # TODO refactor this undo the hour shift due to api understanding start-hours instead of end-hours (see below @101)
         fromDate = lastUploadDT + dt.timedelta(hours=1)
-        meterReadings = getMeterReadings(facility, fromDate)
+        meterReadings = getMeterReadings(facility=facility, fromDate=fromDate)
 
     if not meterReadings:
         logger.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))

@@ -65,6 +65,7 @@ class MeteologicaApi_Mock(object):
         self._checkFacility(facility)
         facility_data = self._data.setdefault(facility, [])
         facility_data += data
+        return 'OK'
 
     def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
         predictorId='aggregated', granularity='60', forecastDate=None):
@@ -155,17 +156,18 @@ class MeteologicaApi:
 
     @withinSession
     def uploadProduction(self, facility, data):
+
         response = self._client.service.setObservation(dict(
             header = self._session.header,
             facilityId = facility,
             variableId = 'prod',
             measurementType ='MEAN',
             measurementTime = 60, # minutes
-            unit = 'kW',
+            unit = 'W',
             observationData = dict(item=[
                 dict(
                     startTime=startTime,
-                    data=str(value),
+                    data=value,
                 )
                 for startTime, value in data
             ]),
