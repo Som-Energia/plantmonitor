@@ -149,6 +149,7 @@ visualization:
   87: queries/produccio-respecte-previsio/visualizations/table.yaml
   95: queries/pr-amb-granularitat/visualizations/produccio-i-pr-vs-objectius.yaml
   93: queries/metriques-d-inversor-v2-una-metrica/visualizations/inversors-energia-wh.yaml
+  101: queries/pr-con-granularidad-objetivos-historicos/visualizations/produccion-i-pr-vs-objetivos-vs-historicos-vs-horas-equivalentes.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
