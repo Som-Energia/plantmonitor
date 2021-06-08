@@ -26,4 +26,5 @@ options:
 schedule: null
 tags:
 - projectes-taules
+- indicadors-propis
 version: 1

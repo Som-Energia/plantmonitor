@@ -1,0 +1,23 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: true
+is_favorite: false
+is_safe: true
+name: combine date_trunc and month from target energy
+options:
+  parameters:
+  - name: granularity
+    title: granularity
+    global: false
+    value: month
+    enumOptions: |-
+      month
+      year
+    parentQueryId: 63
+    type: enum
+    locals: []
+schedule: null
+tags: []
+version: 1

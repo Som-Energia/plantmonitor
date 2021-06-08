@@ -13,4 +13,5 @@ where plant = {{ plant }}
 GROUP BY date_trunc('month', reg.time at time zone 'Europe/Madrid'),                               
     plant.name,
     reg.meter,
-    meter.name;
+    meter.name
+order by time desc;

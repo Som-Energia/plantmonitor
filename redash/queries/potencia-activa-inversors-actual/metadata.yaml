@@ -17,5 +17,6 @@ options:
     type: query
     locals: []
 schedule: null
-tags: []
+tags:
+- Projectes
 version: 1

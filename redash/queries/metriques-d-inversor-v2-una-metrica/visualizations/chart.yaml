@@ -1,5 +1,5 @@
 description: ''
-name: Chart
+name: Potència, Energia i Temperatures d'inversors
 options:
   showDataLabels: false
   direction:
@@ -22,51 +22,31 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    inversor2_transition:
-      zIndex: 7
-      index: 0
-      type: scatter
-      yAxis: 0
-    inversor4_transition:
-      zIndex: 5
-      index: 0
-      type: scatter
-      yAxis: 0
-    Tots els inversors:
-      zIndex: 0
-      index: 0
-      type: scatter
-      yAxis: 0
     inversor1:
-      zIndex: 4
-      index: 0
-      type: scatter
-      yAxis: 0
-    inversor3:
-      zIndex: 2
-      index: 0
-      type: scatter
-      yAxis: 0
-    inversor2:
       zIndex: 3
       index: 0
       type: scatter
       yAxis: 0
-    inversor4:
+    inversor3:
       zIndex: 1
       index: 0
       type: scatter
       yAxis: 0
-    inversor3_transition:
-      zIndex: 6
+    inversor2:
+      zIndex: 2
       index: 0
       type: scatter
       yAxis: 0
-    inversor1_transition:
-      zIndex: 8
+    inversor4:
+      zIndex: 0
       index: 0
       type: scatter
       yAxis: 0
+    Tots els inversors:
+      zIndex: 4
+      index: 0
+      type: scatter
+      yAxis: 1
   valuesOptions: {}
   xAxis:
     labels:

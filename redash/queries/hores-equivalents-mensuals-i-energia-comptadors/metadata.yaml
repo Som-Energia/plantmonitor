@@ -13,6 +13,7 @@ options:
     global: false
     value: '1'
     queryId: queries/all-plants-by-id
+    parentQueryId: 50
     type: query
     locals: []
 schedule: null

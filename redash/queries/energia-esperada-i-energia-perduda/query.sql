@@ -13,4 +13,5 @@ WHERE plant.name = '{{ planta }}'
   AND reg.time >= '{{ interval.start }}'
   AND reg.time <= '{{ interval.end }}'
 GROUP BY date_trunc('{{ granularity }}', reg.time),
-         plant.name;
+         plant.name
+order by temps;

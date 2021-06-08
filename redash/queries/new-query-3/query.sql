@@ -1,7 +1,7 @@
-SELECT reg.sensor,
-       date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid') AS "time",
-       count(*) AS ht,
-       plant.name AS plant
+SELECT date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid') AS "time",
+       reg.sensor,
+       plant.name AS plant,
+       count(*) AS ht
 FROM plant
 INNER JOIN sensor ON sensor.plant = plant.id
 INNER JOIN hourlysensorirradiationregistry AS reg ON reg.sensor = sensor.id

@@ -31,7 +31,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_this_month
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 39

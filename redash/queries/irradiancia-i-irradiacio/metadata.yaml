@@ -9,5 +9,6 @@ name: Irradiància i irradiació
 options:
   parameters: []
 schedule: null
-tags: []
+tags:
+- projectes-taules
 version: 1

@@ -4,13 +4,17 @@ options:
   showDataLabels: false
   direction:
     type: counterclockwise
-  missingValuesAsZero: true
+  missingValuesAsZero: false
   error_y:
     visible: true
     type: data
   numberFormat: 0,0[.]00000
   yAxis:
-  - type: linear
+  - rangeMax: 100
+    type: linear
+    rangeMin: 0
+    title:
+      text: PR [%]
   - type: linear
     opposite: true
   series:
@@ -18,19 +22,14 @@ options:
     error_y:
       visible: true
       type: data
-  globalSeriesType: column
+  globalSeriesType: line
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    pr_avg:
+    pr:
       zIndex: 0
       index: 0
-      type: column
-      yAxis: 0
-    pr_sum:
-      zIndex: 1
-      index: 0
-      type: column
+      type: line
       yAxis: 0
   valuesOptions: {}
   xAxis:
@@ -39,10 +38,8 @@ options:
     type: '-'
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
-    pr_avg: y
+    pr: y
     plant: unused
-    'null': series
-    pr_sum: y
     time: x
   textFormat: ''
   customCode: |-

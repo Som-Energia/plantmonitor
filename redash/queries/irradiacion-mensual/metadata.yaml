@@ -1,0 +1,43 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Irradiación mensual
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 58
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_month
+    locals: []
+    type: datetime-range
+    parentQueryId: 58
+  - name: granularitat
+    title: granularitat
+    global: false
+    value: month
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+      year
+    parentQueryId: 58
+    type: enum
+    locals: []
+schedule: null
+tags:
+- projectes-taules
+- indicadors-propis
+version: 1

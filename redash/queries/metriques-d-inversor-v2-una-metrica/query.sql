@@ -1,6 +1,5 @@
-SELECT inverter_metrics.time as "time",
-       COALESCE(inverter_metrics.inverter_name, 'Tots els inversors') as inverter, 
-       {{ metric }} as metric
+SELECT inverter_metrics.time AS "time",
+       COALESCE(inverter_metrics.inverter_name, 'Tots els inversors') AS inverter, {{ metric }} AS metric
 FROM
   (SELECT reg.time,
           reg.inverter_name,
@@ -10,16 +9,16 @@ FROM
           avg(reg.avg_temperature_dc)/10.0 AS avg_temperature_c,
           sum(reg.power_w)/1000.0 AS power_kw
    FROM
-     ( SELECT date_trunc('{{ granularity }}', reg."time") AS "time",
-              reg.plant AS plant,
-              reg.plant_name,
-              reg.inverter AS inverter,
-              reg.inverter_name,
-              sum(reg.energy_wh) AS energy_wh,
-              max(reg.max_temperature_dc) AS max_temperature_dc,
-              min(reg.min_temperature_dc) AS min_temperature_dc,
-              avg(reg.avg_temperature_dc) AS avg_temperature_dc,
-              max(reg.power_w) AS power_w
+     (SELECT date_trunc('{{ granularity }}', reg."time") AS "time",
+             reg.plant AS plant,
+             reg.plant_name,
+             reg.inverter AS inverter,
+             reg.inverter_name,
+             sum(reg.energy_wh) AS energy_wh,
+             max(reg.max_temperature_dc) AS max_temperature_dc,
+             min(reg.min_temperature_dc) AS min_temperature_dc,
+             avg(reg.avg_temperature_dc) AS avg_temperature_dc,
+             max(reg.power_w) AS power_w
       FROM view_inverter_metrics_daily AS reg
       WHERE '{{ granularity }}' IN ('month',
                                     'year')
@@ -45,13 +44,11 @@ FROM
       GROUP BY (date_trunc('{{ granularity }}', inverterregistry."time")), plant.id,
                                                                            plant.name,
                                                                            inverter.id,
-                                                                           inverter.name ) AS reg
-    WHERE 
-        plant = {{ plant }}  AND
-        "time" >= '{{ interval.start }}' AND
-        "time" <= '{{ interval.end }}'
-    GROUP BY reg."time",
-            rollup(inverter_name)
-            ) AS inverter_metrics
+                                                                           inverter.name) AS reg
+   WHERE plant_name = '{{ plant }}'
+     AND "time" >= '{{ interval.start }}'
+     AND "time" <= '{{ interval.end }}'
+   GROUP BY reg."time",
+            rollup(inverter_name) ) AS inverter_metrics
 ORDER BY "time",
-         inverter_name desc;
+         inverter_name DESC;

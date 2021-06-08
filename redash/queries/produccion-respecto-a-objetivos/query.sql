@@ -1,6 +1,6 @@
-SELECT ((sum(export_energy_wh)- 221.730*1000*1000)/(221.730*1000*1000))*100 AS prod_resp_obj,
+SELECT date_trunc('month', reg.time) AS "time",
+       ((sum(export_energy_wh)- 221.730*1000*1000)/(221.730*1000*1000))*100 AS prod_resp_obj,
        sum(export_energy_wh),
-       date_trunc('month', reg.time) AS TIME,
        meter.name
 FROM meterregistry AS reg
 LEFT JOIN meter ON meter.id = reg.meter
@@ -11,5 +11,5 @@ WHERE plant.id = {{ plant }}
 GROUP BY date_trunc('month', reg.time),
          plant.name,
          reg.meter,
-         rollup(meter.name)
+         meter.name
 ORDER BY TIME DESC;

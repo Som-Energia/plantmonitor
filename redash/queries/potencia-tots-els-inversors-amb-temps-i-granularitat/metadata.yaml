@@ -9,7 +9,7 @@ name: Potència tots els inversors amb temps
 options:
   parameters:
   - name: planta
-    title: planta
+    title: plant
     global: false
     value: Alcolea
     queryId: queries/all-plants
@@ -19,10 +19,12 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_today
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 12
 schedule: null
-tags: []
+tags:
+- indicadors-propis
+- Projectes
 version: 1

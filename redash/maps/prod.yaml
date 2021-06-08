@@ -49,6 +49,15 @@ query:
   42: queries/potencia-esperada-i-energia-esperada-instantania
   41: queries/potencia-esperada-i-energia-esperada-horaria
   56: queries/produccion-respecto-inversor
+  65: queries/copy-of-23-metriques-d-inversor
+  64: queries/prediccio-meteologica
+  63: queries/combine-date-trunc-and-month-from-target-energy
+  62: queries/pr-con-granularidad-objetivos-historicos
+  61: queries/energia-objetivo-alcolea
+  60: queries/comparativa-inversores-diaria
+  59: queries/comparativa-inversores-diaria-2
+  58: queries/irradiacion-mensual
+  57: queries/produccio-respecte-previsio
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -126,11 +135,26 @@ visualization:
   65: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/chart.yaml
   64: queries/potencia-esperada-i-energia-esperada-horaria/visualizations/table.yaml
   86: queries/produccion-respecto-inversor/visualizations/table.yaml
+  99: queries/copy-of-23-metriques-d-inversor/visualizations/table.yaml
+  100: queries/copy-of-23-metriques-d-inversor/visualizations/chart.yaml
+  97: queries/prediccio-meteologica/visualizations/table.yaml
+  98: queries/prediccio-meteologica/visualizations/chart.yaml
+  96: queries/combine-date-trunc-and-month-from-target-energy/visualizations/table.yaml
+  94: queries/pr-con-granularidad-objetivos-historicos/visualizations/table.yaml
+  92: queries/energia-objetivo-alcolea/visualizations/table.yaml
+  90: queries/comparativa-inversores-diaria/visualizations/table.yaml
+  91: queries/comparativa-inversores-diaria/visualizations/chart.yaml
+  89: queries/comparativa-inversores-diaria-2/visualizations/table.yaml
+  88: queries/irradiacion-mensual/visualizations/table.yaml
+  87: queries/produccio-respecte-previsio/visualizations/table.yaml
+  95: queries/pr-amb-granularitat/visualizations/produccio-i-pr-vs-objectius.yaml
+  93: queries/metriques-d-inversor-v2-una-metrica/visualizations/inversors-energia-wh.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
   1: dashboards/grafiques-puntuals
   7: dashboards/sandbox
+  8: dashboards/dashboard-combinat
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -156,3 +180,11 @@ widget:
   37: dashboards/sandbox/widgets/widget.yaml
   35: dashboards/dashboard-general-de-planta/widgets/widget-11.yaml
   39: dashboards/grafiques-puntuals/widgets/widget-7.yaml
+  44: dashboards/dashboard-combinat/widgets/widget.yaml
+  46: dashboards/dashboard-combinat/widgets/widget-2.yaml
+  45: dashboards/dashboard-combinat/widgets/widget-3.yaml
+  41: dashboards/dashboard-combinat/widgets/widget-4.yaml
+  42: dashboards/dashboard-combinat/widgets/widget-5.yaml
+  49: dashboards/dashboard-combinat/widgets/widget-6.yaml
+  50: dashboards/dashboard-combinat/widgets/widget-7.yaml
+  40: dashboards/dashboard-dinamic-de-planta/widgets/widget-5.yaml

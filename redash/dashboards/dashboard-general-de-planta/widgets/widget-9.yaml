@@ -14,5 +14,5 @@ options:
 text: |-
   TODO: Anar a [Dashboard general](http://plantmonitor.somenergia.coop:5000/dashboard?refresh=300)
 
-  Anar a [Detall de planta](http://plantmonitor.somenergia.coop:5000/dashboard/plantmonitor-detall-de-planta?p_granularity=day&p_planta=Alcolea&p_interval=d_this_month&refresh=300)
+  Anar a [Detall de planta](http://plantmonitor.somenergia.coop:5000/dashboard/dashboard-din-mic-de-planta?&refresh=300)
 width: 1

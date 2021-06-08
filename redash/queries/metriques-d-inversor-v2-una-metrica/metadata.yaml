@@ -11,15 +11,15 @@ options:
   - name: plant
     title: plant
     global: false
-    value: '1'
-    queryId: queries/all-plants-by-id
+    value: Alcolea
+    queryId: queries/all-plants
     parentQueryId: 28
     type: query
     locals: []
   - name: interval
     title: interval
     global: false
-    value: d_this_month
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 28
@@ -45,8 +45,11 @@ options:
       max_temperature_c
       avg_temperature_c
       min_temperature_c
+    parentQueryId: 28
     type: enum
     locals: []
 schedule: null
-tags: []
+tags:
+- Projectes
+- indicadors-propis
 version: 1
