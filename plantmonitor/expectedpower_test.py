@@ -13,10 +13,11 @@ from pony import orm
 from pathlib import Path
 from .expectedpower import (
     readTimedDataTsv,
-    spanishDateToISO,
+    parseDate,
 )
 from .operations import integrateExpectedPower
 from yamlns import namespace as ns
+from yamlns.dateutils import Date
 import datetime
 # import pytz
 from ORM.orm_util import setupDatabase
@@ -104,10 +105,45 @@ class ExpectedPower_Test(TestCase):
         testfile.unlink()
 
 
-    def test_spanishDateToISO(self):
+    def test_readTimedDatTsv_spanishThousandPoint(self):
+        testfile = Path("test.tsv")
+        testfile.write_text(
+            "Juny 2020														\n"
+            "Dia	Hora	Temperatura modul	Irradiación (W/m2)	Isc en la radiación (A)	Isc a la temperatura (A)	Voc en la temperatura (V)	Imp temp (A)	Vmp temp (V)	P unitaria temp (W)	Potencia parque calculada con temperatura (kW)	Potencia instantanea inversors (kW)	Diferencia inversors vs Pcalculada	Potencia instanea a comptador	PR  %\n"
+            "1/6/2020	0:05	1.005,1	34,5	0	0	39,13056	0	31,26304	0	0	0	0,00%	0	0,00%\n"
+            "1/6/2020	0:10	1.006,1	23,4	0	0	39,13056	0	31,26304	0	0	0	0,00%	0	0,00%\n"
+        )
+
+        data = readTimedDataTsv('test.tsv', [
+            "Temperatura modul",
+            "Irradiación (W/m2)",
+            ])
+        self.assertEqual(data, [
+            ["2020-06-01T00:05:00+02:00", 1005.1, 34.5],
+            ["2020-06-01T00:10:00+02:00", 1006.1, 23.4],
+        ])
+        testfile.unlink()
+
+
+    def test_parseDate_spanishDate_localTime(self):
         self.assertEqual(
-            spanishDateToISO("1/6/2020", "0:05"),
+            parseDate("1/6/2020", "0:05"),
             "2020-06-01T00:05:00+02:00") # TODO: Check timezone!
+
+    def test_parseDate_isoDate(self):
+        self.assertEqual(
+            parseDate("2020-06-01", "0:05"),
+            "2020-06-01T00:05:00+02:00") # TODO: Check timezone!
+
+    def test_parseDate_timeZoned(self):
+        self.assertEqual(
+            parseDate("2020-06-01", "0:05+3"),
+            "2020-06-01T00:05:00+03:00") # TODO: Check timezone!
+
+    def test_parseDate_detailedTimeZone(self):
+        self.assertEqual(
+            parseDate("2020-06-01", "0:05+2:30"),
+            "2020-06-01T00:05:00+02:30") # TODO: Check timezone!
 
     def setupPlant(self):
         plantDefinition = self.samplePlantNS()
@@ -136,7 +172,7 @@ class ExpectedPower_Test(TestCase):
         database.flush()
 
         return [
-            (time, outputValue)
+            (time, self.plant, self.sensor, outputValue)
             for time, temperature_c, irradiation_w_m2, outputValue in tsvContent
         ]
 
@@ -150,7 +186,8 @@ class ExpectedPower_Test(TestCase):
         nModules = 8640, # plant parameter
         Isc = 8.75, # A, module model param
         Voc = 37.8, # V, module model param
-        degradation=97.0, # %, module model param
+        #degradation=97.0, # %, module model param
+        degradation=95*.9, # %, module model param # According the excel formula
         correctionFactorPercent = 90., # %, plant parameter
     )
 
@@ -187,8 +224,14 @@ class ExpectedPower_Test(TestCase):
         plant.flush()
 
     def assertOutputB2B(self, result):
+        def x2utcisoformat(date):
+            if not hasattr(date,'isoformat'):
+                date=datetime.datetime.fromisoformat(date)
+            date=date.astimezone(datetime.timezone.utc)
+            return date.isoformat()
+
         result = "\n".join((
-            "{}\n{:.9f}".format(time.isoformat(),value)
+            "{}\n{:.9f}".format(x2utcisoformat(time),value)
             for time, plant, sensor, value in result
         ))
         self.assertB2BEqual(result)
@@ -222,7 +265,7 @@ class ExpectedPower_Test(TestCase):
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         result = database.select(query)
 
-        self.assertOutputB2B(result)
+        self.assertOutputB2B(result) # first run with expected instead result
 
     def test_expectedPower_Florida_2020_09_withCorrection(self):
         self.setupPlant()
@@ -236,7 +279,21 @@ class ExpectedPower_Test(TestCase):
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         result = database.select(query)
 
-        self.assertOutputB2B(result)
+        self.assertOutputB2B(result) # first run with expected instead result
+
+    def test_expectedPower_Alcolea_2021_04_noCorrections(self):
+        self.setupPlant()
+        self.setPlantParameters(**dict(self.parametersAlcolea,
+            correctionFactorPercent=100,
+        ))
+        expected = self.importData(self.sensor,
+            'b2bdata/expectedPower-2021-04-Alcolea.csv',
+            'Potencia parque calculada con temperatura kW con degradación placas',
+        )
+        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result) # first run with expected instead result
 
     def test_expectedEnergy_Florida_2020_09(self):
         self.setupPlant()
@@ -265,18 +322,4 @@ class ExpectedPower_Test(TestCase):
         result = integrateExpectedPower(fromDate, toDate)
 
         self.assertOutputB2BNoPlant(result)
-
-    def test_expectedPower_Alcolea_2021_04_withCorrection(self):
-        self.setupPlant()
-        self.setPlantParameters(**dict(self.parametersAlcolea,
-            correctionFactorPercent=90,
-        ))
-        expected = self.importData(self.sensor,
-            'b2bdata/expectedPower-2021-04-Alcolea.csv',
-            'Potencia parque calculada con temperatura kW con degradación placas',
-        )
-        query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
-        result = database.select(query)
-
-        self.assertOutputB2B(result)
 
