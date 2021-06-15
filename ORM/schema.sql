@@ -111,7 +111,10 @@ ALTER TABLE "inclinometerregistry" ADD CONSTRAINT "fk_inclinometerregistry__incl
 CREATE TABLE "inverter" (
   "id" SERIAL PRIMARY KEY,
   "name" TEXT NOT NULL,
-  "plant" INTEGER NOT NULL
+  "plant" INTEGER NOT NULL,
+  "brand" TEXT NOT NULL,
+  "model" TEXT NOT NULL,
+  "nominal_power_w" INTEGER
 );
 
 CREATE INDEX "idx_inverter__plant" ON "inverter" ("plant");
@@ -236,12 +239,17 @@ ALTER TABLE "plantlocation" ADD CONSTRAINT "fk_plantlocation__plant" FOREIGN KEY
 CREATE TABLE "plantmoduleparameters" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
+  "brand" TEXT NOT NULL,
+  "model" TEXT NOT NULL,
+  "nominal_power_wp" INTEGER DEFAULT 250000 NOT NULL,
+  "efficency_cpercent" INTEGER DEFAULT 1550 NOT NULL,
   "n_modules" INTEGER NOT NULL,
   "degradation_cpercent" INTEGER NOT NULL,
   "max_power_current_ma" INTEGER NOT NULL,
   "max_power_voltage_mv" INTEGER NOT NULL,
   "current_temperature_coefficient_mpercent_c" INTEGER NOT NULL,
   "voltage_temperature_coefficient_mpercent_c" INTEGER NOT NULL,
+  "max_power_temperature_coefficient_mpercent_c" INTEGER DEFAULT -442 NOT NULL,
   "standard_conditions_irradiation_w_m2" INTEGER NOT NULL,
   "standard_conditions_temperature_dc" INTEGER NOT NULL,
   "opencircuit_voltage_mv" INTEGER NOT NULL,
@@ -263,6 +271,26 @@ CREATE TABLE "plantmonthlylegacy" (
 CREATE INDEX "idx_plantmonthlylegacy__plant" ON "plantmonthlylegacy" ("plant");
 
 ALTER TABLE "plantmonthlylegacy" ADD CONSTRAINT "fk_plantmonthlylegacy__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
+CREATE TABLE "plantparameters" (
+  "id" SERIAL PRIMARY KEY,
+  "plant" INTEGER NOT NULL,
+  "peak_power_w" INTEGER NOT NULL,
+  "nominal_power_w" INTEGER NOT NULL,
+  "connection_date" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "n_strings_plant" INTEGER,
+  "n_strings_inverter" INTEGER,
+  "n_modules_string" INTEGER,
+  "inverter_loss_mpercent" INTEGER,
+  "meter_loss_mpercent" INTEGER,
+  "target_monthly_energy_wh" INTEGER NOT NULL,
+  "historic_monthly_energy_wh" INTEGER,
+  "month_theoric_pr_cpercent" INTEGER,
+  "year_theoric_pr_cpercent" INTEGER
+);
+
+CREATE INDEX "idx_plantparameters__plant" ON "plantparameters" ("plant");
+
+ALTER TABLE "plantparameters" ADD CONSTRAINT "fk_plantparameters__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
 
 CREATE TABLE "sensor" (
   "id" SERIAL PRIMARY KEY,
