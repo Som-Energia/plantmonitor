@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from scipy import integrate
+from scipy import integrate, interpolate
 from datetime import datetime, timedelta, timezone
 
 import math
@@ -40,9 +40,43 @@ logger = logging.getLogger("plantmonitor")
 def getRegistryQuery(registry, deviceName, metric, fromDate, toDate):
     devicesRegistries = orm.select(r[metric] for r in registry if fromDate <= r.time and r.time <= toDate)
 
-def integrateHour(hourstart, query, dt=timedelta(hours=1)):
+def frontierClosestRead(hourstart, query, dt=timedelta(hours=1)):
 
     hourend = hourstart + dt
+
+    dt10min = timedelta(minutes=10)
+
+    preRead = query.filter(lambda t, v: hourstart - dt10min <= t and t <= hourstart).order_by(orm.desc(lambda t, v: t)).first()
+    postRead = query.filter(lambda t, v: hourend <= t and t <= hourend + dt10min).first()
+
+    logger.debug("pre-post {} _ {} _ {}".format(preRead[0].isoformat(), hourstart, postRead[0].isoformat()))
+
+    preRead = preRead if preRead and preRead[0] < hourstart else None
+    postRead = postRead if postRead and hourend < postRead[0] else None
+
+    return (preRead, postRead)
+
+def frontier(firstPoint, wantedTime, secondPoint):
+
+    t1, y1 = firstPoint
+    t2, y2 = secondPoint
+
+    interp = interpolate.interp1d([t1.timestamp(), t2.timestamp()], [y1, y2])
+    logger.debug("inter ({},{}) - ({},{}) - ({},{}) ".format(
+        t1.isoformat(), y1,
+        wantedTime.isoformat(), interp(wantedTime.timestamp()),
+        t2.isoformat(), y2))
+    value = float(interp(wantedTime.timestamp()))
+
+    return (wantedTime, value)
+
+def prepareTimeSeries(hourstart, query, dt):
+
+    # TODO agafar el darrer valor abans de l'hora i el primer després de l'hora
+    # si aquesta està dins dels 10 minuts
+
+    hourend = hourstart + dt
+
     # slice
     timeSeries = sorted([
         (t, v)
@@ -52,6 +86,24 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     if not timeSeries or len(timeSeries) <= 1:
         # logger.warning("No values in hour range")
         return None
+
+    preRead, postRead = frontierClosestRead(hourstart, query, dt)
+
+    firstread = frontier(preRead, hourstart, timeSeries[0])
+
+    if preRead:
+        timeSeries.insert(0, firstread)
+
+    lastread = frontier(timeSeries[-1], hourend, postRead)
+
+    if postRead:
+        timeSeries.append(lastread)
+
+    return timeSeries
+
+def integrateHour(hourstart, query, dt=timedelta(hours=1)):
+
+    timeSeries = prepareTimeSeries(hourstart, query, dt)
 
     xvalues, yvalues = list(zip(*timeSeries))
 
@@ -68,7 +120,7 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
     # round to integer with //
     integralMetricValue = integralMetricValueDateTime.days * 24 + integralMetricValueDateTime.seconds // 3600
-    logger.debug("range {}- {}\nxvalues {}\nyvalues {}\nresult {}".format(hourstart, hourend, xvalues,yvalues,integralMetricValue))
+    logger.debug("range {}- {}\nxvalues {}\nyvalues {}\nresult {}".format(hourstart, hourstart + dt, xvalues,yvalues,integralMetricValue))
     return integralMetricValue
 
 def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
