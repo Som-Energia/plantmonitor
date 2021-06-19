@@ -17,7 +17,9 @@ SELECT
 	* par.degradation_cpercent/10000.0 -- c% -> factor
 	* par.expected_power_correction_factor_cpercent/10000.0 -- c% -> factor
 	/ 1000.0   -- W -> kW
-    ) 
+    ),
+    reg.temperature_dc,
+    reg.irradiation_w_m2
     END AS expectedpower
     FROM sensorirradiationregistry AS reg
     LEFT JOIN sensor AS sensor
