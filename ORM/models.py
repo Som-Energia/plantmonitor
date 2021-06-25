@@ -338,7 +338,7 @@ class Meter(database.Entity):
 
     plant = Required(Plant)
     name = Required(unicode)
-    connection_protocol = Required(str, sql_default='ip')
+    connection_protocol = Required(str, sql_default='\'ip\'')
     meterRegistries = Set('MeterRegistry', lazy=True)
 
     def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None):
