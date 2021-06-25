@@ -8,11 +8,11 @@ __depends__ = {'20210517_01_uwtNO-expected-power-correction-factor-cpercent'}
 
 steps = [
     step('''
-        ALTER TABLE meters 
+        ALTER TABLE meter
         ADD COLUMN "connection_protocol" VARCHAR DEFAULT 'ip' NOT NULL;
         ''',
         '''
-        ALTER TABLE meters
+        ALTER TABLE meter
         DROP COLUMN "connection_protocol";
         '''
     )
