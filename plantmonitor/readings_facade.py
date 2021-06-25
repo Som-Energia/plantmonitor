@@ -152,3 +152,5 @@ class ReadingsFacade():
       plants_data = self.getNewMetersReadings()
 
       Plant.insertPlantsData(plants_data)
+
+# vim: et sw=2 ts=2

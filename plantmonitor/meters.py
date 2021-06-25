@@ -7,6 +7,19 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+def meter_connection_protocol(c, meters):
+    Meter = c.model('giscedata.registrador')
+    meter_ids = Meter.search([
+        ('name', 'in', meters),
+    ])
+    return {
+        meter['name']: meter['tm_connection']
+        for meter in Meter.read(meter_ids, [
+            'name',
+            'tm_connection',
+        ])
+    }
+
 def telemeasure_meter_names(c):
     Meter = c.model('giscedata.registrador')
     meter_ids = Meter.search([
@@ -138,3 +151,5 @@ def transfer_meter_to_plantmonitor(c, flux_client, meter, upto):
     measures = measures_from_date(c, meter, beyond=last_date, upto=upto)
     logger.debug("Uploading {} measures for meter {} older than {} from erp to influxdb".format(len(measures), meter, last_date))
     upload_measures(flux_client, meter, measures)
+
+# vim: et sw=4 ts=4

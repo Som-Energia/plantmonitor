@@ -13,6 +13,7 @@ from .meters import (
     uploaded_plantmonitor_measures,
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
+    meter_connection_protocol,
 )
 
 def assertTimeSeriesEqual(self, result, expected):
@@ -24,6 +25,25 @@ class Meters_Test(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff=None
+
+    def test__meter_connection_protocol_(self):
+        c = Client(**config.erppeek)
+        meter_ip = '88300864'
+        meter_moxa = '8814894104'
+        result = meter_connection_protocol(c, [meter_ip, meter_moxa])
+        self.assertEqual(result, {
+            meter_ip: 'ip',
+            meter_moxa: 'moxa',
+        })
+
+    def test__meter_connection_protocol__whenMeterMissing(self):
+        c = Client(**config.erppeek)
+        meter_ip = '88300864'
+        meter_missing = 'NotAMeter'
+        result = meter_connection_protocol(c, [meter_ip, meter_missing])
+        self.assertEqual(result, {
+            meter_ip: 'ip',
+        })
 
     @unittest.skipIf(True, "requires data in test erp database")
     def test__measures_from_date(self):
@@ -248,3 +268,5 @@ class MetersFlux_Test(unittest.TestCase):
             ('2019-10-02 10:00:00', 1407),
             ('2019-10-02 11:00:00', 1687),
         ])
+
+# vim: et sw=4 ts=4
