@@ -160,7 +160,8 @@ ALTER TABLE "marketrepresentativeregistry" ADD CONSTRAINT "fk_marketrepresentati
 CREATE TABLE "meter" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
-  "name" TEXT NOT NULL
+  "name" TEXT NOT NULL,
+  "connection_protocol" TEXT DEFAULT ip NOT NULL
 );
 
 CREATE INDEX "idx_meter__plant" ON "meter" ("plant");
