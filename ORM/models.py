@@ -363,6 +363,13 @@ class Meter(database.Entity):
         newestRegistry = self.meterRegistries.select().order_by(orm.desc(MeterRegistry.time)).first()
         return newestRegistry.time if newestRegistry else None
 
+    @staticmethod
+    def updateMeterProtocol(protocolsByCounterName):
+        for meter in Meter.select():
+            if meter.name not in protocolsByCounterName:
+                continue
+            meter.connection_protocol = protocolsByCounterName[meter.name]
+
 class MeterRegistry(database.Entity):
 
     meter = Required(Meter)
@@ -727,5 +734,4 @@ class PlantModuleParameters(database.Entity):
         return mp
 
 
-
-
+# vim: et sw=4 ts=4

@@ -852,3 +852,55 @@ class Models_Test(unittest.TestCase):
 
     def test__importPlants__oneplant(self):
         pass
+
+    def test__Meter_updateMeterProtocol_byDefault(self):
+        
+        alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+
+        meter = Meter.get(name='1234578')
+        self.assertEqual(meter.connection_protocol, 'ip')
+
+    def test__Meter_updateMeterProtocol_afterUpdate(self):
+        
+        alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+
+        Meter.updateMeterProtocol({
+            '1234578': 'moxa',
+        })
+        meter = Meter.get(name='1234578')
+        self.assertEqual(meter.connection_protocol, 'moxa')
+
+    def test__Meter_updateMeterProtocol_unknownMetersIgnored(self):
+        # This adds many more meters such as 9876 which we are not updating
+        plantsns = self.samplePlantsNS()
+        importPlants(plantsns)
+
+        Meter.updateMeterProtocol({
+            '1234578': 'moxa',
+        })
+        meter = Meter.get(name='1234578')
+        self.assertEqual(meter.connection_protocol, 'moxa')
+        meter = Meter.get(name='9876')
+        self.assertEqual(meter.connection_protocol, 'ip')
+
+    def test__Meter_updateMeterProtocol_deprecatedMetersIgnored(self):
+        plantsns = self.samplePlantsNS()
+        importPlants(plantsns)
+
+        # Should not fail
+        Meter.updateMeterProtocol({
+            '1234578': 'moxa',
+            'OLDMETER': 'moxa',
+        })
+        meter = Meter.get(name='OLDMETER')
+        self.assertEqual(meter, None)
+
+
+
+# vim: et sw=4 ts=4
