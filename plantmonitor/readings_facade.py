@@ -45,19 +45,9 @@ import datetime
 
 from .standardization import erp_meter_readings_to_plant_data
 
-from ORM.models import database
 from ORM.models import (
     Plant,
     Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
 )
 
 from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
