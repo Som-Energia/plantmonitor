@@ -234,7 +234,7 @@ class Operations_Test(unittest.TestCase):
 
         # Fix border error
         # self.assertEqual(integratedValue, 270)
-        self.assertEqual(integratedValue, 225)
+        self.assertEqual(integratedValue, 259)
 
     def test__integrateHour__irradiation(self):
         plantNS = self.samplePlantNS()
@@ -500,15 +500,15 @@ class Operations_Test(unittest.TestCase):
 
         expected = [
             (datetime.datetime(2020, 12, 10, 15, 0, tzinfo=datetime.timezone.utc), None),
-            (datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc), 225),
-            (datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc), 563),
-            (datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc), 893),
-            (datetime.datetime(2020, 12, 10, 19, 0, tzinfo=datetime.timezone.utc), 1223),
-            (datetime.datetime(2020, 12, 10, 20, 0, tzinfo=datetime.timezone.utc), 1553),
-            (datetime.datetime(2020, 12, 10, 21, 0, tzinfo=datetime.timezone.utc), 1883),
-            (datetime.datetime(2020, 12, 10, 22, 0, tzinfo=datetime.timezone.utc), 2213),
-            (datetime.datetime(2020, 12, 10, 23, 0, tzinfo=datetime.timezone.utc), 2543),
-            (datetime.datetime(2020, 12, 11, 0, 0, tzinfo=datetime.timezone.utc), 1010),
+            (datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc), 259),
+            (datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc), 628),
+            (datetime.datetime(2020, 12, 10, 18, 0, tzinfo=datetime.timezone.utc), 988),
+            (datetime.datetime(2020, 12, 10, 19, 0, tzinfo=datetime.timezone.utc), 1348),
+            (datetime.datetime(2020, 12, 10, 20, 0, tzinfo=datetime.timezone.utc), 1708),
+            (datetime.datetime(2020, 12, 10, 21, 0, tzinfo=datetime.timezone.utc), 2068),
+            (datetime.datetime(2020, 12, 10, 22, 0, tzinfo=datetime.timezone.utc), 2428),
+            (datetime.datetime(2020, 12, 10, 23, 0, tzinfo=datetime.timezone.utc), 2788),
+            (datetime.datetime(2020, 12, 11, 0, 0, tzinfo=datetime.timezone.utc), 1018),
             (datetime.datetime(2020, 12, 11, 1, 0, tzinfo=datetime.timezone.utc), None),
         ]
 
@@ -636,8 +636,8 @@ class Operations_Test(unittest.TestCase):
 
         expectedIntegrals = {
             'sensor1' : [None,None],
-            'sensor5' : [563,893],
-            'sensor6' : [655,985],
+            'sensor5' : [627,896],
+            'sensor6' : [727,988],
         }
 
         expectedDict = {
@@ -667,8 +667,8 @@ class Operations_Test(unittest.TestCase):
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)        ]
 
         expectedIntegrals = {
-            '12345678' : [225, 563],
-            '87654321' : [308, 655],
+            '12345678' : [259, 565],
+            '87654321' : [351, 657],
         }
 
         expectedDict = {
@@ -701,8 +701,8 @@ class Operations_Test(unittest.TestCase):
         ]
 
         expectedIntegrals = {
-            '12345678' : [225, 563],
-            '87654321' : [308, 655],
+            '12345678' : [259, 565],
+            '87654321' : [351, 657],
         }
 
         expectedDict = {
@@ -743,10 +743,10 @@ class Operations_Test(unittest.TestCase):
         expected = [
             {'sensor': 1, 'time': times[0], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
             {'sensor': 1, 'time': times[1], 'integratedIrradiation_wh_m2': None, 'expected_energy_wh': None},
-            {'sensor': 4, 'time': times[0], 'integratedIrradiation_wh_m2': 563, 'expected_energy_wh': None},
-            {'sensor': 4, 'time': times[1], 'integratedIrradiation_wh_m2': 893, 'expected_energy_wh': None},
-            {'sensor': 5, 'time': times[0], 'integratedIrradiation_wh_m2': 655, 'expected_energy_wh': None},
-            {'sensor': 5, 'time': times[1], 'integratedIrradiation_wh_m2': 985, 'expected_energy_wh': None}
+            {'sensor': 4, 'time': times[0], 'integratedIrradiation_wh_m2': 627, 'expected_energy_wh': None},
+            {'sensor': 4, 'time': times[1], 'integratedIrradiation_wh_m2': 896, 'expected_energy_wh': None},
+            {'sensor': 5, 'time': times[0], 'integratedIrradiation_wh_m2': 727, 'expected_energy_wh': None},
+            {'sensor': 5, 'time': times[1], 'integratedIrradiation_wh_m2': 988, 'expected_energy_wh': None}
         ]
 
         self.assertListEqual(result, expected)
@@ -830,13 +830,13 @@ class Operations_Test(unittest.TestCase):
         expected = {
             SensorIrradiation[4]:
             [
-                (times[0], 681000),
-                (times[1], 1045000),
+                (times[0], 758000),
+                (times[1], 1155000),
             ],
             SensorIrradiation[5]:
             [
-                (times[0], 783000),
-                (times[1], 1146000),
+                (times[0], 870000),
+                (times[1], 1266000),
             ]
         }
 
