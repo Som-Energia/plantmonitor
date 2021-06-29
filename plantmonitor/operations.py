@@ -49,14 +49,19 @@ def frontierClosestRead(hourstart, query, dt=timedelta(hours=1)):
     preRead = query.filter(lambda t, v: hourstart - dt10min <= t and t <= hourstart).order_by(orm.desc(lambda t, v: t)).first()
     postRead = query.filter(lambda t, v: hourend <= t and t <= hourend + dt10min).first()
 
-    logger.debug("pre-post {} _ {} _ {}".format(preRead[0].isoformat(), hourstart, postRead[0].isoformat()))
-
     preRead = preRead if preRead and preRead[0] < hourstart else None
     postRead = postRead if postRead and hourend < postRead[0] else None
 
+    logger.debug("pre-post {} _ {} _ {}".format(
+            preRead[0].isoformat() if preRead else None,
+            hourstart,
+            postRead[0].isoformat() if postRead else None
+        )
+    )
+
     return (preRead, postRead)
 
-def frontier(firstPoint, wantedTime, secondPoint):
+def interpolateRead(firstPoint, wantedTime, secondPoint):
 
     t1, y1 = firstPoint
     t2, y2 = secondPoint
@@ -70,7 +75,7 @@ def frontier(firstPoint, wantedTime, secondPoint):
 
     return (wantedTime, value)
 
-def prepareTimeSeries(hourstart, query, dt):
+def prepareSeriesSlice(hourstart, query, dt):
 
     # TODO agafar el darrer valor abans de l'hora i el primer després de l'hora
     # si aquesta està dins dels 10 minuts
@@ -78,34 +83,35 @@ def prepareTimeSeries(hourstart, query, dt):
     hourend = hourstart + dt
 
     # slice
-    timeSeries = sorted([
+    timeSeriesSlice = sorted([
         (t, v)
         for t,v in query.filter( lambda t,v: hourstart <= t and t <= hourend )
     ])
 
-    if not timeSeries or len(timeSeries) <= 1:
+    if not timeSeriesSlice or len(timeSeriesSlice) <= 1:
         # logger.warning("No values in hour range")
         return None
 
     preRead, postRead = frontierClosestRead(hourstart, query, dt)
 
-    firstread = frontier(preRead, hourstart, timeSeries[0])
-
     if preRead:
-        timeSeries.insert(0, firstread)
-
-    lastread = frontier(timeSeries[-1], hourend, postRead)
+        firstread = interpolateRead(preRead, hourstart, timeSeriesSlice[0])
+        timeSeriesSlice.insert(0, firstread)
 
     if postRead:
-        timeSeries.append(lastread)
+        lastread = interpolateRead(timeSeriesSlice[-1], hourend, postRead)
+        timeSeriesSlice.append(lastread)
 
-    return timeSeries
+    return timeSeriesSlice
 
 def integrateHour(hourstart, query, dt=timedelta(hours=1)):
 
-    timeSeries = prepareTimeSeries(hourstart, query, dt)
+    timeSeriesSlice = prepareSeriesSlice(hourstart, query, dt)
 
-    xvalues, yvalues = list(zip(*timeSeries))
+    if not timeSeriesSlice:
+        return None
+
+    xvalues, yvalues = list(zip(*timeSeriesSlice))
 
     # if yvalues.count(None) >= len(yvalues)-1:
     #     logger.warning("Not enough values in hour range {} - {}: {}".format(xvalues[0], xvalues[-1], yvalues))
@@ -123,9 +129,10 @@ def integrateHour(hourstart, query, dt=timedelta(hours=1)):
     logger.debug("range {}- {}\nxvalues {}\nyvalues {}\nresult {}".format(hourstart, hourstart + dt, xvalues,yvalues,integralMetricValue))
     return integralMetricValue
 
-def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
+def prepareSeriesSliceFromTimeseries(hourstart, timeseries, dt):
 
-    # for each hour within fromDate and toDate
+    # TODO agafar el darrer valor abans de l'hora i el primer després de l'hora
+    # si aquesta està dins dels 10 minuts
 
     hourend = hourstart + dt
 
@@ -136,11 +143,44 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
     ])
 
     if not timeSeriesSlice or len(timeSeriesSlice) <= 1:
-        # logger.warning("No values in hour range")
         return None
 
-    # logger.debug("hourstart {}".format(hourstart))
-    # logger.debug("timeSeriesSlice {}".format(timeSeriesSlice))
+    dt10min = timedelta(minutes=10)
+
+    preReads = sorted([
+        (t, v)
+        for t,v in timeseries if hourstart - dt10min <= t and t <= hourstart
+    ])
+
+    if preReads:
+        preRead = preReads[-1]
+        firstread = interpolateRead(preRead, hourstart, timeSeriesSlice[0])
+        if firstread:
+            timeSeriesSlice.insert(0, firstread)
+
+    postReads = sorted([
+        (t, v)
+        for t,v in timeseries if hourend <= t and t <= hourend + dt10min
+    ])
+
+    if postReads:
+        postRead = postReads[0]
+        lastread = interpolateRead(timeSeriesSlice[-1], hourend, postRead)
+        if lastread:
+            timeSeriesSlice.append(lastread)
+
+    return timeSeriesSlice
+
+def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
+
+    # for each hour within fromDate and toDate
+
+    hourend = hourstart + dt
+
+    timeSeriesSlice = prepareSeriesSliceFromTimeseries(hourstart, timeseries, dt)
+
+    if not timeSeriesSlice:
+        return None
 
     xvalues, yvalues = list(zip(*timeSeriesSlice))
 
