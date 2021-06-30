@@ -53,11 +53,6 @@ from .operations import (
     integrateHourFromTimeseries,
 )
 
-from .expectedpower import (
-    readTimedDataTsv,
-    spanishDateToISO,
-)
-
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Operations_Test(unittest.TestCase):
