@@ -232,7 +232,7 @@ class ExpectedPower_Test(TestCase):
 
         result = "\n".join((
             "{}\n{:.9f}".format(x2utcisoformat(time),value)
-            for time, plant, sensor, value in result
+            for time, plant, sensor, value, temperature, irradiance in result
         ))
         self.assertB2BEqual(result)
 
