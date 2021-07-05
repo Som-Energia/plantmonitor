@@ -44,3 +44,4 @@ pony==0.7.13
 redasher
 scipy>=1.6.0
 yoyo-migrations
+somutils
