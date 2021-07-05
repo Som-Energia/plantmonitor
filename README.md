@@ -37,6 +37,16 @@ Testing requires:
 A series of mock, modbus sensors are available under `testingtools`.
 Both client and server modbus can be simulated.
 
+## Modifying the schema
+
+Any change on the schema will modify `ORM/schema.sql` whenever
+you run the test or explicitly run `scripts/update_schema.py`.
+
+Those changes should be transfered to a new yoyo migration.
+
+yoyo new -m "Some description"
+
+Review and provide a forward and backward sql command for the step.
 
 ## Installation
 
