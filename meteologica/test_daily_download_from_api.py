@@ -96,13 +96,13 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        fromDate = todt("2020-01-01 00:00:00")
-        toDate = todt("2020-01-03 00:00:00")
+        fromDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
+        toDate = todt("{}-01-03 00:00:00".format(dt.datetime.now().year))
 
         with self.createApi() as api:
             for facility, values in data.items():
                 resultForecast = api.getForecast(facility, fromDate, toDate)
-                self.assertEqual(resultForecast[0][0], todtaware("2020-01-01 00:00:00"))
+                self.assertEqual(resultForecast[0][0], todtaware("{}-01-01 00:00:00".format(dt.datetime.now().year)))
 
     def test_downloadForecastToEmptyDB_checkResponses(self):
         configdb = self.createConfig()
@@ -139,8 +139,8 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        fromDate = todt("2020-01-01 00:00:00")
-        toDate = todt("2020-01-01 00:00:00")
+        fromDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
+        toDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
         forecasts = {}
         with self.createApi() as api:
             for facility in data.keys():
@@ -170,8 +170,8 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        fromDate = todt("2020-01-01 00:00:00")
-        toDate = todt("2020-01-01 00:00:00")
+        fromDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
+        toDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
 
         with self.createApi() as api:
             for facility in data.keys():

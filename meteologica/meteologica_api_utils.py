@@ -94,9 +94,12 @@ class MeteologicaApi_Mock(object):
             fromDate = fromDate.replace(tzinfo=timezone.utc)
         if toDate.tzinfo is None or toDate.tzinfo.utcoffset(toDate) is None:
             toDate = toDate.replace(tzinfo=timezone.utc)
-        return [
+        forecasts = [
             (date, 0) for date in self.dateRange(fromDate, toDate, timedelta(hours=1))
         ]
+        if not forecasts:
+            raise MeteologicaApiError("NO_FORECASTS")
+        return forecasts
 
 
 class MeteologicaApi:

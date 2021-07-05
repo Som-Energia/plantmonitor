@@ -10,6 +10,8 @@ from meteologica.meteologica_api_utils import (
 
 from meteologica.utils import todt, todtaware
 
+import datetime
+
 #from django.conf import settings
 from yamlns import namespace as ns
 from pathlib import Path
@@ -149,19 +151,19 @@ class MeteologicaApiMock_Test(unittest.TestCase):
         api = self.createApi()
         facility = self.mainFacility()
         api.uploadProduction(facility, [
-            (todt("2020-01-01 00:00:00"), 10),
+            (todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)), 10),
         ])
         result = api.getForecast(
                     facility,
-                    todt("2020-01-01 00:00:00"),
-                    todt("2020-01-01 00:00:00"),
+                    todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)),
+                    todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)),
                 )
 
         #expected [("2020-01-01 00:00:00", _)] since we don't know meteologica's algorithm
         logger.debug(result)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 2)
-        self.assertEqual(result[0][0], todtaware("2020-01-01 00:00:00"))
+        self.assertEqual(result[0][0], todtaware("{}-01-01 00:00:00".format(datetime.datetime.now().year)))
 
     def test_getFacilities(self):
         pass
