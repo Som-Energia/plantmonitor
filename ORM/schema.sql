@@ -253,6 +253,17 @@ CREATE INDEX "idx_plantmoduleparameters__plant" ON "plantmoduleparameters" ("pla
 
 ALTER TABLE "plantmoduleparameters" ADD CONSTRAINT "fk_plantmoduleparameters__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
 
+CREATE TABLE "plantmonthlylegacy" (
+  "id" SERIAL PRIMARY KEY,
+  "plant" INTEGER NOT NULL,
+  "time" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "export_energy_wh" BIGINT NOT NULL
+);
+
+CREATE INDEX "idx_plantmonthlylegacy__plant" ON "plantmonthlylegacy" ("plant");
+
+ALTER TABLE "plantmonthlylegacy" ADD CONSTRAINT "fk_plantmonthlylegacy__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
+
 CREATE TABLE "sensor" (
   "id" SERIAL PRIMARY KEY,
   "name" TEXT NOT NULL,

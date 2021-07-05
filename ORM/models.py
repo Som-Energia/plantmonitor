@@ -123,6 +123,7 @@ class Plant(database.Entity):
     simel = Set('Simel', lazy=True)
     nagios = Set('Nagios', lazy=True)
     moduleParameters = Optional('PlantModuleParameters')
+    plantMonthlyLegacy = Optional('PlantMonthlyLegacy')
 
     @classmethod
     def insertPlantsData(cls, plantsData):
@@ -703,6 +704,14 @@ class NagiosRegistry(database.Entity):
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     PrimaryKey(nagios, time)
     status = Optional(str)
+
+class PlantMonthlyLegacy(database.Entity):
+    """
+    Data imported from historical drive spreadshet
+    """
+    plant = Required(Plant)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    export_energy_wh = Required(int, size=64)
 
 class PlantModuleParameters(database.Entity):
     plant = Required(Plant)
