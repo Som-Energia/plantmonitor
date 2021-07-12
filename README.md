@@ -97,7 +97,7 @@ user=plantmonitor
 Upgrading
 =========
 
-
+- Obtain the latest changes with `git fetch`
 - Upgrade the repository: `git rebase master`
 - Activate env: `workon plantmonitor`
 - Install the dependencies: `pip install -r requirements.txt ; python ./setup.py develop`
