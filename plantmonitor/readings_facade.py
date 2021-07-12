@@ -13,6 +13,7 @@ from .meters import (
     uploaded_plantmonitor_measures,
     last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
+    meter_connection_protocol,
 )
 
 from meteologica.daily_upload_to_api import upload_meter_data
@@ -103,7 +104,7 @@ class ReadingsFacade():
       for plant in Plant.select().order_by(Plant.name)]
 
   def ormMeters(self):
-    return orm.select(m.name for m in Meter)[:]
+    return list(orm.select(m.name for m in Meter))
 
   def checkNewMeters(self, meterNames):
     return [m for m in meterNames if m not in self.ormMeters()]
@@ -134,8 +135,8 @@ class ReadingsFacade():
     return newMeters
 
   # TODO: Unit test me
-  def updateMetersProtocols():
-    meters_protocols = meter_connection_protocol(self.ormMeters(), self.client)
+  def updateMetersProtocols(self):
+    meters_protocols = meter_connection_protocol(self.client, self.ormMeters())
     Meter.updateMeterProtocol(meters_protocols)
 
   def transfer_ERP_readings_to_model(self, refreshERPmeters=True):

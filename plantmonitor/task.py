@@ -220,4 +220,3 @@ def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
 
-def task_update_meter_protocol()
