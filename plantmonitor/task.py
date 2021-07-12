@@ -219,3 +219,5 @@ def task_daily_download_from_api_meteologica(test_env=True):
 def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
+
+def task_update_meter_protocol()

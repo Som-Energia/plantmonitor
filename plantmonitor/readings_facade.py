@@ -102,9 +102,11 @@ class ReadingsFacade():
     return [self.getPlantNewMetersReadings(plant, upto)
       for plant in Plant.select().order_by(Plant.name)]
 
+  def ormMeters(self):
+    return orm.select(m.name for m in Meter)[:]
+
   def checkNewMeters(self, meterNames):
-    ormMeters = orm.select(m.name for m in Meter)[:]
-    return [m for m in meterNames if m not in ormMeters]
+    return [m for m in meterNames if m not in self.ormMeters()]
 
   def telemeasureMetersNames(self):
     return telemeasure_meter_names(self.client)
@@ -131,6 +133,11 @@ class ReadingsFacade():
 
     return newMeters
 
+  # TODO: Unit test me
+  def updateMetersProtocols():
+    meters_protocols = meter_connection_protocol(self.ormMeters(), self.client)
+    Meter.updateMeterProtocol(meters_protocols)
+
   def transfer_ERP_readings_to_model(self, refreshERPmeters=True):
     with orm.db_session:
 
@@ -138,6 +145,8 @@ class ReadingsFacade():
         self.refreshERPmeters()
 
       self.warnNewMeters()
+
+      self.updateMetersProtocols()
 
       plants_data = self.getNewMetersReadings()
 

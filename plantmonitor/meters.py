@@ -152,4 +152,10 @@ def transfer_meter_to_plantmonitor(c, flux_client, meter, upto):
     logger.debug("Uploading {} measures for meter {} older than {} from erp to influxdb".format(len(measures), meter, last_date))
     upload_measures(flux_client, meter, measures)
 
+def update_meters_protocols(c, meters):
+    from ORM.models import Meter
+
+    meters_protocols = meter_connection_protocol(meters, c)
+    Meter.updateMeterProtocol(meters_protocols)
+
 # vim: et sw=4 ts=4
