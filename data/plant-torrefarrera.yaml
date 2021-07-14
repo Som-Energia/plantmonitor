@@ -1,0 +1,23 @@
+municipalities:
+- municipality:
+    name: Torrefarrera
+    ineCode : '25228'
+    countryCode : ES
+    country : Spain
+    regionCode : '09'
+    region : Cataluña
+    provinceCode : '25'
+    province : Lleida
+plants:
+- plant:
+    name: Torrefarrera
+    codename: 'TOBECHANGED'
+    description: Torrefarrera
+    municipality: '25228'
+    meters:
+    - meter:
+        name: '28302095'
+    inverters: []
+    irradiationSensors: []
+    temperatureSensors: []
+    integratedSensors: []
