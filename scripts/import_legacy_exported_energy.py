@@ -9,7 +9,14 @@ from sheetfetcher import SheetFetcher
 from consolemsg import step, warn
 from dbutils import csvTable, fetchNs
 import psycopg2
+from conf import envinfo
 
+psycopgconfig = {
+    key: value
+    for key, value in envinfo.DB_CONF.items()
+    if key != 'provider'
+    and value != ''
+}
 
 months = (
     "Gener Febrer Març Abril "
@@ -338,9 +345,7 @@ def plantName2Id():
         FROM plant
         ;
     """
-    db = psycopg2.connect( # TODO: take configuration
-            database='plants',
-            )
+    db = psycopg2.connect(**psycopgconfig)
     with db.cursor() as cursor :
         cursor.execute(query)
         result = {
