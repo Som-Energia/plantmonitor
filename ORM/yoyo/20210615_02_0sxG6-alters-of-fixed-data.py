@@ -14,15 +14,15 @@ __depends__ = {'20210615_01_SbFVs-plantparameters'}
 steps = [
     step('''
         ALTER TABLE plantmoduleparameters
-        ADD COLUMN "brand" TEXT NOT NULL,
-        ADD COLUMN "model" TEXT NOT NULL,
+        ADD COLUMN "brand" TEXT,
+        ADD COLUMN "model" TEXT,
         ADD COLUMN "nominal_power_wp" INTEGER DEFAULT 250000 NOT NULL,
         ADD COLUMN "efficency_cpercent" INTEGER DEFAULT 1550 NOT NULL,
         ADD COLUMN "max_power_temperature_coefficient_mpercent_c" INTEGER DEFAULT -442 NOT NULL;
 
         ALTER TABLE inverter
-        ADD COLUMN "brand" TEXT NOT NULL,
-        ADD COLUMN "model" TEXT NOT NULL,
+        ADD COLUMN "brand" TEXT,
+        ADD COLUMN "model" TEXT,
         ADD COLUMN "nominal_power_w" INTEGER;
         ''','''
         ALTER TABLE plantmoduleparameters

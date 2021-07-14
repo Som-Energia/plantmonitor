@@ -4,7 +4,7 @@ plantparameters
 
 from yoyo import step
 
-__depends__ = {'20210625_01_ckjXc-meter-connection-protocol'}
+__depends__ = {'20210517_01_uwtNO-expected-power-correction-factor-cpercent'}
 
 steps = [
     step('''

@@ -394,8 +394,8 @@ class Inverter(database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
-    brand = Optional(str)
-    model = Optional(str)
+    brand = Optional(str, nullable=True)
+    model = Optional(str, nullable=True)
     nominal_power_w = Optional(int)
     inverterRegistries = Set('InverterRegistry', lazy=True)
 
@@ -740,8 +740,8 @@ class PlantParameters(database.Entity):
 
 class PlantModuleParameters(database.Entity):
     plant = Required(Plant)
-    brand = Optional(str)
-    model = Optional(str)
+    brand = Optional(str, nullable=True)
+    model = Optional(str, nullable=True)
     nominal_power_wp = Required(int, sql_default='250000')
     efficency_cpercent = Required(int, sql_default='1550')
     n_modules = Required(int)

@@ -112,8 +112,8 @@ CREATE TABLE "inverter" (
   "id" SERIAL PRIMARY KEY,
   "name" TEXT NOT NULL,
   "plant" INTEGER NOT NULL,
-  "brand" TEXT NOT NULL,
-  "model" TEXT NOT NULL,
+  "brand" TEXT,
+  "model" TEXT,
   "nominal_power_w" INTEGER
 );
 
@@ -239,8 +239,8 @@ ALTER TABLE "plantlocation" ADD CONSTRAINT "fk_plantlocation__plant" FOREIGN KEY
 CREATE TABLE "plantmoduleparameters" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
-  "brand" TEXT NOT NULL,
-  "model" TEXT NOT NULL,
+  "brand" TEXT,
+  "model" TEXT,
   "nominal_power_wp" INTEGER DEFAULT 250000 NOT NULL,
   "efficency_cpercent" INTEGER DEFAULT 1550 NOT NULL,
   "n_modules" INTEGER NOT NULL,
@@ -271,6 +271,7 @@ CREATE TABLE "plantmonthlylegacy" (
 CREATE INDEX "idx_plantmonthlylegacy__plant" ON "plantmonthlylegacy" ("plant");
 
 ALTER TABLE "plantmonthlylegacy" ADD CONSTRAINT "fk_plantmonthlylegacy__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
+
 CREATE TABLE "plantparameters" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
