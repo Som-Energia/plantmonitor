@@ -222,7 +222,6 @@ def plantProductionFromDrive(
     result = {}
     for block in blocks:
         parseblock(block, result)
-    print(result)
 
     table = resultAsTable(result, dates)
     if outputFile:
@@ -296,7 +295,6 @@ def plantName2Id():
 
 
 if __name__ == '__main__':
-    #plantProductionSeries(['2010-01-01'])
     plantProductionSeries([])
 
 
