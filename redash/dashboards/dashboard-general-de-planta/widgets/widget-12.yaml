@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: true
+    sizeX: 5
+    sizeY: 9
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 1
+    row: 7
+text: ''
+visualization: queries/alarmas-de-dispositivos/visualizations/table.yaml
+width: 1

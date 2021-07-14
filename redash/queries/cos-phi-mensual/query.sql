@@ -14,5 +14,5 @@ from view_cos_phi_monthly
 join meter on meter_id = meter.id
 join plant on plant_id = plant.id
 where plant_id = {{ plant }}
-  AND "time" >= '{{ interval.start }}'
-  AND "time" <= '{{ interval.end }}';
+  AND "time" at time zone 'Europe/Madrid' >= '{{ interval.start }}'
+  AND "time" at time zone 'Europe/Madrid' <= '{{ interval.end }}';

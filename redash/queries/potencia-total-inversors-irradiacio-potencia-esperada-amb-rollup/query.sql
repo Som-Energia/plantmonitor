@@ -2,7 +2,7 @@ SELECT coalesce(ireg."time", sensorirradiationregistry.time, view_expected_power
            COALESCE(inverter.name, 'Tots els inversors') as "inverter::filter",
            sum(ireg.power_w)/1000.0 AS power_kw,
            sensorirradiationregistry.irradiation_w_m2,
-           view_expected_power.expectedpower
+           view_expected_power.expectedpower as inverter_expected_power_kw
    FROM inverterregistry as ireg
    LEFT JOIN inverter ON inverter.id = ireg.inverter
    LEFT JOIN plant ON plant.id = inverter.plant

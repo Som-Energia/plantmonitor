@@ -1,5 +1,5 @@
 
-SELECT date_trunc('{{ granularity }}', meterregistry.time) at time zone 'Europe/Madrid' AS "time",
+SELECT date_trunc('{{ granularity }}', meterregistry.time at time zone 'Europe/Madrid') AS "time",
        meter.name AS meter,
        plant.name AS plant,
        sum(export_energy_wh)/1000000.0 AS export_energy_mwh,
@@ -16,7 +16,7 @@ LEFT JOIN view_target_energy ON extract('month' from meterregistry.time at time 
 WHERE plant.name = '{{ plant }}'
   and meterregistry.time >= '{{ interval.start }}'
   AND meterregistry.time <= '{{ interval.end }}'
-GROUP BY date_trunc('{{ granularity }}', meterregistry.time),
+GROUP BY date_trunc('{{ granularity }}', meterregistry.time at time zone 'Europe/Madrid'),
          meter.name,
          plant.name,
          target_energy_kwh;

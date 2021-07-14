@@ -1,4 +1,4 @@
-SELECT inverter_metrics.time AS "time",
+SELECT inverter_metrics.time at time zone 'Europe/Madrid' AS "time",
        COALESCE(inverter_metrics.inverter_name, 'Tots els inversors') AS inverter, {{ metric }} AS metric
 FROM
   (SELECT reg.time,
@@ -9,7 +9,7 @@ FROM
           avg(reg.avg_temperature_dc)/10.0 AS avg_temperature_c,
           sum(reg.power_w)/1000.0 AS power_kw
    FROM
-     (SELECT date_trunc('{{ granularity }}', reg."time") AS "time",
+     (SELECT date_trunc('{{ granularity }}', reg."time" at time zone 'Europe/Madrid') at time zone 'Europe/Madrid' AS "time",
              reg.plant AS plant,
              reg.plant_name,
              reg.inverter AS inverter,
@@ -22,11 +22,11 @@ FROM
       FROM view_inverter_metrics_daily AS reg
       WHERE '{{ granularity }}' IN ('month',
                                     'year')
-      GROUP BY (date_trunc('{{ granularity }}', reg."time")), reg.plant,
+      GROUP BY (date_trunc('{{ granularity }}', reg."time" at time zone 'Europe/Madrid')), reg.plant,
                                                               reg.plant_name,
                                                               reg.inverter,
                                                               reg.inverter_name
-      UNION SELECT date_trunc('{{ granularity }}', inverterregistry."time") AS "time",
+      UNION SELECT date_trunc('{{ granularity }}', inverterregistry."time" at time zone 'Europe/Madrid') AS "time",
                    plant.id AS plant,
                    plant.name AS plant_name,
                    inverter.id AS inverter,
@@ -41,7 +41,7 @@ FROM
       LEFT JOIN public.plant ON plant.id = inverter.plant
       WHERE '{{ granularity }}' NOT IN ('month',
                                         'year')
-      GROUP BY (date_trunc('{{ granularity }}', inverterregistry."time")), plant.id,
+      GROUP BY (date_trunc('{{ granularity }}', inverterregistry."time" at time zone 'Europe/Madrid')), plant.id,
                                                                            plant.name,
                                                                            inverter.id,
                                                                            inverter.name) AS reg

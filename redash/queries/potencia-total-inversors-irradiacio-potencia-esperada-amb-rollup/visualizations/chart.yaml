@@ -22,6 +22,11 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
+    inverter_expected_power_kw:
+      zIndex: 2
+      index: 0
+      type: line
+      yAxis: 0
     power_kw:
       zIndex: 1
       index: 0
@@ -32,11 +37,6 @@ options:
       index: 0
       type: line
       yAxis: 0
-    expectedpower:
-      zIndex: 2
-      index: 0
-      type: line
-      yAxis: 0
   valuesOptions: {}
   xAxis:
     labels:
@@ -44,12 +44,10 @@ options:
     type: '-'
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
+    inverter_expected_power_kw: y
     power_kw: y
-    name: unused
     irradiation_w_m2: y
     time: x
-    'null': series
-    expectedpower: y
   textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly

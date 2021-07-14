@@ -47,7 +47,7 @@ FROM
                                                                            inverter.id,
                                                                            inverter.name ) AS reg
     WHERE 
-        plant = {{ plant }}  AND
+        plant_name = '{{ planta }}'  AND
         "time" >= '{{ interval.start }}' AND
         "time" <= '{{ interval.end }}'
     GROUP BY reg."time",

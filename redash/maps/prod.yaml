@@ -58,6 +58,11 @@ query:
   59: queries/comparativa-inversores-diaria-2
   58: queries/irradiacion-mensual
   57: queries/produccio-respecte-previsio
+  70: queries/alarmas-de-dispositivos
+  69: queries/alarma-sondas
+  68: queries/alarma-de-inversores
+  67: queries/prediccio-energia-mensual
+  66: queries/new-query-5
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -150,6 +155,11 @@ visualization:
   95: queries/pr-amb-granularitat/visualizations/produccio-i-pr-vs-objectius.yaml
   93: queries/metriques-d-inversor-v2-una-metrica/visualizations/inversors-energia-wh.yaml
   101: queries/pr-con-granularidad-objetivos-historicos/visualizations/produccion-i-pr-vs-objetivos-vs-historicos-vs-horas-equivalentes.yaml
+  107: queries/alarmas-de-dispositivos/visualizations/table.yaml
+  106: queries/alarma-sondas/visualizations/table.yaml
+  105: queries/alarma-de-inversores/visualizations/table.yaml
+  103: queries/prediccio-energia-mensual/visualizations/table.yaml
+  102: queries/new-query-5/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -189,3 +199,7 @@ widget:
   49: dashboards/dashboard-combinat/widgets/widget-6.yaml
   50: dashboards/dashboard-combinat/widgets/widget-7.yaml
   40: dashboards/dashboard-dinamic-de-planta/widgets/widget-5.yaml
+  53: dashboards/dashboard-combinat/widgets/widget-8.yaml
+  54: dashboards/dashboard-dinamic-de-planta/widgets/widget-6.yaml
+  51: dashboards/dashboard-general-de-planta/widgets/widget-5.yaml
+  56: dashboards/dashboard-general-de-planta/widgets/widget-12.yaml

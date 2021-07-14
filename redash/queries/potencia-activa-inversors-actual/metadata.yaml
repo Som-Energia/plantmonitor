@@ -16,7 +16,11 @@ options:
     parentQueryId: 7
     type: query
     locals: []
-schedule: null
+schedule:
+  interval: 3600
+  until: null
+  day_of_week: null
+  time: null
 tags:
 - Projectes
 version: 1

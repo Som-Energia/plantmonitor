@@ -1,5 +1,5 @@
 SELECT
-    date_trunc('{{ granularity }}', htreg."time") AS "time",
+    date_trunc('{{ granularity }}', htreg."time" at time zone 'Europe/Madrid')  at time zone 'Europe/Madrid' AS "time",
     htreg.plant,
     sum(hd)::int as hd,
     sum(ht)::int as ht,
@@ -9,7 +9,7 @@ SELECT
     ON hdreg.time = htreg.time
     and hdreg.plant = htreg.plant
 where htreg.plant = '{{ plant }}' AND
-    htreg."time" >= '{{ interval.start }}' AND
-    htreg."time" <= '{{ interval.end }}'
-    group by date_trunc('{{ granularity }}', htreg."time"), htreg.plant;
+    htreg."time" at time zone 'Europe/Madrid' >= '{{ interval.start }}' AND
+    htreg."time" at time zone 'Europe/Madrid' <= '{{ interval.end }}'
+    group by date_trunc('{{ granularity }}', htreg."time" at time zone 'Europe/Madrid') at time zone 'Europe/Madrid', htreg.plant;
     

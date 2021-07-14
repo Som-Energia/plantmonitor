@@ -11,7 +11,7 @@ FROM
    FROM sensorirradiationregistry AS reg
    LEFT JOIN sensor ON sensor.id = reg.sensor
    LEFT JOIN plant ON sensor.plant = plant.id
-   WHERE plant.name='{{ planta }}'
+   WHERE plant.name = '{{ plant }}'
      AND reg.time >= '{{ interval.start }}'
      AND reg.time <= '{{ interval.end }}'
    ORDER BY reg.time DESC) AS irradiationsensor
@@ -22,12 +22,12 @@ FULL OUTER JOIN
    FROM sensortemperatureambientregistry AS ambientreg
    LEFT JOIN sensor ON sensor.id = ambientreg.sensor
    LEFT JOIN plant ON sensor.plant = plant.id
-   WHERE plant.name='{{ planta }}'
+   WHERE plant.name = '{{ plant }}'
      AND ambientreg.time >= '{{ interval.start }}'
      AND ambientreg.time <= '{{ interval.end }}'
    ORDER BY ambientreg.time DESC) AS ambientreg ON irradiationsensor.time = ambientreg.time
-WHERE irradiationsensor.plant='{{ planta }}'
-  AND coalesce(irradiationsensor.time, ambientreg.time) >= '{{ interval.start }}'
+WHERE irradiationsensor.plant = '{{ plant }}' 
+  and coalesce(irradiationsensor.time, ambientreg.time) >= '{{ interval.start }}'
   AND coalesce(irradiationsensor.time, ambientreg.time) <= '{{ interval.end }}'
 GROUP BY irradiationsensor.plant,
          date_trunc('{{ granularity }}', coalesce(irradiationsensor.time, ambientreg.time))

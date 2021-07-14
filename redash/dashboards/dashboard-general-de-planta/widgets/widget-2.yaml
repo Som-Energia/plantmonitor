@@ -3,8 +3,8 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 2
-    sizeY: 11
+    sizeX: 1
+    sizeY: 15
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1

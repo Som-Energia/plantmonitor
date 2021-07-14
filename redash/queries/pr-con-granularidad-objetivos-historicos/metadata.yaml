@@ -5,7 +5,7 @@ is_archived: false
 is_draft: false
 is_favorite: false
 is_safe: true
-name: PR con granularidad(objetivos) & historicos
+name: PR con granularidad(objetivos) & historicos & horas equivalentes
 options:
   parameters:
   - name: plant
@@ -13,26 +13,11 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 62
     type: query
     locals: []
-  - name: interval
-    title: interval
-    global: false
-    value: d_this_year
-    locals: []
-    type: date-range
-    parentQueryId: 62
-  - name: granularity
-    title: granularity
-    global: false
-    value: year
-    enumOptions: |-
-      day
-      month
-      year
-    parentQueryId: 62
-    type: enum
-    locals: []
 schedule: null
-tags: []
+tags:
+- Projectes
+- indicadors-propis
 version: 1

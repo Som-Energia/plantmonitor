@@ -9,7 +9,7 @@ name: Potència tots els inversors amb temps
 options:
   parameters:
   - name: planta
-    title: plant
+    title: planta
     global: false
     value: Alcolea
     queryId: queries/all-plants

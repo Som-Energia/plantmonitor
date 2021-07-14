@@ -12,7 +12,9 @@ options:
   isHidden: false
   parameterMappings: {}
 text: |-
-  TODO: Anar a [Dashboard general](http://plantmonitor.somenergia.coop:5000/dashboard?refresh=300)
+  TODO: Anar a [Dashboard general](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?refresh=300)
 
-  Anar a [Detall de planta](http://plantmonitor.somenergia.coop:5000/dashboard/dashboard-din-mic-de-planta?&refresh=300)
+  Anar a [Detall de planta](https://redash.somenergia.coop/dashboard/dashboard-din-mic-de-planta?&refresh=300)
+
+  Anar a [General de planta](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?&refresh=300) (Actual)
 width: 1

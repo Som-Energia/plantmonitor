@@ -13,6 +13,7 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 53
     type: query
     locals: []
   - name: granularity
@@ -23,14 +24,16 @@ options:
       day
       month
       year
+    parentQueryId: 53
     type: enum
     locals: []
   - name: interval
     title: interval
     global: false
     value: d_this_year
-    type: datetime-range
     locals: []
+    type: datetime-range
+    parentQueryId: 53
 schedule: null
 tags:
 - Projectes

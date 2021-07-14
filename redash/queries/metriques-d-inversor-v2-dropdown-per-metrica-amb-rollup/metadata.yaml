@@ -8,6 +8,34 @@ is_safe: true
 name: Mètriques d'Inversor v2 dropdown per mètrica amb rollup
 options:
   parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: hour
+    enumOptions: |
+      minute
+      hour
+      day
+      month
+    parentQueryId: 27
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value:
+      start: 2021-05-20 13:32
+      end: 2021-05-27 13:32
+    locals: []
+    type: datetime-range
+    parentQueryId: 27
   - name: metrics
     multiValuesOptions:
       prefix: ''
@@ -30,33 +58,6 @@ options:
     title: metrics
     type: enum
     locals: []
-  - name: granularity
-    title: granularity
-    global: false
-    value: day
-    enumOptions: |
-      minute
-      hour
-      day
-      month
-    parentQueryId: 27
-    type: enum
-    locals: []
-  - name: plant
-    title: plant
-    global: false
-    value: '1'
-    queryId: queries/all-plants-by-id
-    parentQueryId: 27
-    type: query
-    locals: []
-  - name: interval
-    title: interval
-    global: false
-    value: d_this_month
-    locals: []
-    type: datetime-range
-    parentQueryId: 27
 schedule: null
 tags: []
 version: 1

@@ -22,13 +22,13 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    integratedirradiation_wh_m2:
-      zIndex: 1
+    irradiance_w_m2:
+      zIndex: 0
       index: 0
       type: scatter
       yAxis: 0
-    irradiation_w_m2:
-      zIndex: 0
+    irradiation_wh_m2:
+      zIndex: 1
       index: 0
       type: scatter
       yAxis: 0
@@ -39,9 +39,9 @@ options:
     type: '-'
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
-    integratedirradiation_wh_m2: y
-    irradiation_w_m2: y
+    irradiance_w_m2: y
     time: x
+    irradiation_wh_m2: y
   textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly

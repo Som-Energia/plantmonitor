@@ -8,12 +8,11 @@ is_safe: true
 name: Sonda d'Irradiació
 options:
   parameters:
-  - name: planta
+  - name: plant
     title: plant
     global: false
     value: Alcolea
     queryId: queries/all-plants
-    parentQueryId: 4
     type: query
     locals: []
   - name: granularity
@@ -31,7 +30,9 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_this_week
+    value:
+      start: 2021-05-20 13:32
+      end: 2021-05-27 13:32
     locals: []
     type: datetime-range
     parentQueryId: 4

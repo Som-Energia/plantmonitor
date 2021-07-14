@@ -3,14 +3,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 2
+    sizeX: 1
     sizeY: 6
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1
     minSizeX: 1
     col: 0
-    row: 18
+    row: 25
 text: ''
 visualization: queries/sonda-d-irradiacio-actual/visualizations/sonda-irradiacio-details-view.yaml
 width: 1

@@ -1,11 +1,11 @@
 options:
   parameterMappings:
-    planta:
+    plant:
       type: dashboard-level
-      mapTo: planta
-      name: planta
+      mapTo: plant
+      name: plant
       value: null
-      title: planta
+      title: ''
     interval:
       type: dashboard-level
       mapTo: interval

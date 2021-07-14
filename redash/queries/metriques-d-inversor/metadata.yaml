@@ -33,9 +33,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value:
-      start: 2021-05-20 13:32
-      end: 2021-05-27 13:32
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 23

@@ -6,10 +6,10 @@ options:
       name: metrics
       value: null
       title: ''
-    plant:
+    planta:
       type: dashboard-level
       mapTo: plant
-      name: plant
+      name: planta
       value: null
       title: ''
     interval:

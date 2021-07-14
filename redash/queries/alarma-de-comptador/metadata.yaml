@@ -7,15 +7,7 @@ is_favorite: false
 is_safe: true
 name: Alarma de comptador
 options:
-  parameters:
-  - name: planta
-    title: planta
-    global: false
-    value: Alcolea
-    queryId: queries/all-plants
-    parentQueryId: 18
-    type: query
-    locals: []
+  parameters: []
 schedule: null
 tags: []
 version: 1

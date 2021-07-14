@@ -8,10 +8,18 @@ is_safe: true
 name: Mètriques de Comptador
 options:
   parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 19
+    type: query
+    locals: []
   - name: granularity
     title: granularity
     global: false
-    value: month
+    value: hour
     enumOptions: |-
       hour
       day
@@ -21,18 +29,12 @@ options:
     parentQueryId: 19
     type: enum
     locals: []
-  - name: plant
-    title: plant
-    global: false
-    value: '1'
-    queryId: queries/all-plants-by-id
-    parentQueryId: 19
-    type: query
-    locals: []
   - name: interval
     title: interval
     global: false
-    value: d_last_year
+    value:
+      start: 2021-05-20 13:32
+      end: 2021-05-27 13:32
     locals: []
     type: datetime-range
     parentQueryId: 19

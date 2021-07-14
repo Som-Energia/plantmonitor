@@ -7,7 +7,7 @@ SELECT
     min(reg.min_temperature_dc)/10.0 AS min_temperature_c,
     avg(reg.avg_temperature_dc)/10.0 AS avg_temperature_c
 FROM (
-    SELECT date_trunc('{{ granularity }}', reg."time") AS "time",
+    SELECT date_trunc('{{ granularity }}', reg."time") at time zone 'Europe/Madrid' AS "time",
           reg.plant AS plant,
           reg.plant_name,
           reg.inverter AS inverter,
@@ -24,7 +24,7 @@ FROM (
                                                            reg.inverter,
                                                            reg.inverter_name
 UNION
-SELECT date_trunc('{{ granularity }}', inverterregistry."time") AS "time",
+SELECT date_trunc('{{ granularity }}', inverterregistry."time") at time zone 'Europe/Madrid' AS "time",
            plant.id AS plant,
            plant.name AS plant_name,
            inverter.id AS inverter,

@@ -13,6 +13,7 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 46
     type: query
     locals: []
   - name: interval
@@ -23,5 +24,7 @@ options:
     type: datetime-range
     parentQueryId: 46
 schedule: null
-tags: []
+tags:
+- indicadors-propis
+- Projectes
 version: 1

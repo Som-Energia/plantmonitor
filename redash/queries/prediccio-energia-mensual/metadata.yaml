@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Predicció energia mensual
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 67
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 67
+  - name: granularitat
+    title: granularitat
+    global: false
+    value: month
+    enumOptions: |-
+      day
+      month
+      year
+    parentQueryId: 67
+    type: enum
+    locals: []
+schedule: null
+tags:
+- indicadors-propis
+- Projectes
+- projectes-taules
+version: 1

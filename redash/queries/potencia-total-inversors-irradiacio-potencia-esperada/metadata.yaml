@@ -8,8 +8,8 @@ is_safe: true
 name: Potència Total Inversors, Irradiació, Potència Esperada
 options:
   parameters:
-  - name: plant
-    title: plant
+  - name: planta
+    title: planta
     global: false
     value: Alcolea
     queryId: queries/all-plants

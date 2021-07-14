@@ -5,7 +5,7 @@ options:
       mapTo: planta
       name: planta
       value: null
-      title: planta
+      title: ''
     interval:
       type: dashboard-level
       mapTo: interval

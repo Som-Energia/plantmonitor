@@ -5,7 +5,7 @@ SELECT date_trunc('{{ granularitat }}', ireg.time at time zone 'Europe/Madrid') 
    LEFT JOIN inverter ON inverter.id = ireg.inverter
    LEFT JOIN plant ON plant.id = inverter.plant
    WHERE plant.name = '{{ plant }}'
-     AND ireg."time" >= '{{ interval.start }}'
-     AND ireg."time" <= '{{ interval.end }}'
+     AND ireg."time" at time zone 'Europe/Madrid' >= '{{ interval.start }}'
+     AND ireg."time" at time zone 'Europe/Madrid' <= '{{ interval.end }}'
    GROUP BY date_trunc('{{ granularitat }}', ireg.time at time zone 'Europe/Madrid'),
             plant.id

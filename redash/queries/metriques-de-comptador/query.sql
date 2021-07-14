@@ -15,7 +15,7 @@ left join meter
 on meter.id = reg.meter
 left join plant
 on plant.id = meter.plant
-where plant.id = {{ plant }}
+where plant.name = '{{ plant }}'
   AND reg.time >= '{{ interval.start }}'
   AND reg.time <= '{{ interval.end }}'
 GROUP BY date_trunc('{{ granularity }}', reg.time),                               

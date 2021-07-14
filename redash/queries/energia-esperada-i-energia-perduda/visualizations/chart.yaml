@@ -27,17 +27,17 @@ options:
   sortX: true
   seriesOptions:
     meter_exported_energy_kwh:
-      zIndex: 1
-      index: 0
-      type: line
-      yAxis: 0
-    expected_energy_kwh:
       zIndex: 0
       index: 0
       type: line
       yAxis: 0
-    lost_energy_kwh:
+    meter_expected_energy_kwh:
       zIndex: 2
+      index: 0
+      type: line
+      yAxis: 0
+    lost_energy_kwh:
+      zIndex: 1
       index: 0
       type: line
       yAxis: 0
@@ -50,7 +50,7 @@ options:
   columnMapping:
     temps: x
     meter_exported_energy_kwh: y
-    expected_energy_kwh: y
+    meter_expected_energy_kwh: y
     plant_name: unused
     lost_energy_kwh: y
   textFormat: ''

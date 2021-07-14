@@ -1,0 +1,20 @@
+options:
+  position:
+    autoHeight: false
+    sizeX: 1
+    sizeY: 10
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 1
+    col: 0
+    row: 0
+  isHidden: false
+  parameterMappings: {}
+text: |-
+  TODO: Anar a [Dashboard general](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?refresh=300)
+
+  Anar a [Detall de planta](https://redash.somenergia.coop/dashboard/dashboard-din-mic-de-planta?&refresh=300) (Actual)
+
+  Anar a [General de planta](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?&refresh=300)
+width: 1

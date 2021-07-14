@@ -1,4 +1,4 @@
-SELECT forecast.time as "time",
+SELECT forecast.time at time zone 'Europe/Madrid' as "time",
 plant.name as plant,
 forecast.percentil50/1000.0 as energy_kwh
 FROM forecast
