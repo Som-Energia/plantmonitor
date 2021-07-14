@@ -26,15 +26,15 @@ from ORM.models import (
 
 # yaml = ns.loads("""\
 #                 municipalities:
-#                 - muncipality:
-#                     name: 'Figueres'
-#                     countryCode : 'ES',
-#                     country : 'Spain',
-#                     regionCode : '09',
-#                     region : 'Cataluña',
-#                     provinceCode : '17',
-#                     province : 'Girona',
-#                     ineCode : '17066',
+#                 - municipality:
+#                     name: Figueres
+#                     countryCode : ES
+#                     country : Spain
+#                     regionCode : '09'
+#                     region : Cataluña
+#                     provinceCode : '17'
+#                     province : Girona
+#                     ineCode : '17066'
 #                 plants:
 #                 - plant:
 #                     name: alcolea
