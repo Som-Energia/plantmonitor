@@ -9,6 +9,7 @@ from sheetfetcher import SheetFetcher
 from consolemsg import step, warn
 from dbutils import csvTable, fetchNs
 import psycopg2
+from yamlns import namespace as ns
 from conf import envinfo
 
 psycopgconfig = {
@@ -223,12 +224,12 @@ def plantProductionFromDrive(
         parseblock(block, result)
     print(result)
 
-    exportResultAsPlantmonitorTable(result)
-
     table = resultAsTable(result, dates)
     if outputFile:
         toCsv(outputFile, table)
-    return table
+
+    rows = exportResultAsPlantmonitorTable(result)
+    return rows
 
 def plantProductionSeries(dates):
     data = plantProductionFromDrive(
@@ -240,91 +241,28 @@ def plantProductionSeries(dates):
         dates=[str(d) for d in dates],
     )
 
-    columntypes = dict(
-        name = 'VARCHAR',
-        city_code = 'VARCHAR',
-        city = 'VARCHAR',
-    )
-
-    def fieldname(field):
-        if field in columntypes:
-            return field
-        return "count_{}".format(field.replace('-','_'))
-
-    def valueformat(field, value):
-        if field in columntypes:
-            return "'{}'".format(value)
-        return str(value)
-
-    fields = ',\n'.join(fieldname(field) for field in data[0])
-
-    sumcolumns = ',\n'.join(
-        'sum({0}) as {0}'.format(fieldname(field))
-        for field in data[0]
-        if field not in columntypes
-    )
-
     values = ',\n'.join(
-        "({})".format(
-            ",".join([
-                valueformat(field,value)
-                for field,value in zip(data[0],row)
-            ])
-        )
-        for row in data[1:]
+        f"({plant}, '{time}'::date, {value})"
+        for plant, time, value in data
     )
-    return
-    query = f"""
-    SELECT
-            pais.code AS codi_pais,
-            pais.name AS pais,
-            comunitat.codi AS codi_ccaa,
-            comunitat.name AS comunitat_autonoma,
-            provincia.code AS codi_provincia,
-            provincia.name AS provincia,
-            municipi.ine AS codi_ine,
-            municipi.name AS municipi,
-            {sumcolumns} -- here go the date count columns
-    FROM (VALUES
-        {values}
-    ) item ({fields})
-    LEFT JOIN res_municipi AS municipi
-            ON item.city_code=municipi.ine
-    LEFT JOIN res_country_state AS provincia
-            ON provincia.id = municipi.state
-    LEFT JOIN res_comunitat_autonoma AS comunitat
-            ON comunitat.id = provincia.comunitat_autonoma
-    LEFT JOIN res_country AS pais
-            ON pais.id = provincia.country_id
-    GROUP BY
-            codi_pais,
-            codi_ccaa,
-            codi_provincia,
-            codi_ine,
-            pais,
-            provincia,
-            municipi,
-            comunitat.name
-    ORDER BY
-            pais ASC,
-            comunitat_autonoma ASC,
-            provincia ASC,
-            municipi ASC,
-            TRUE ASC
-    ;
-    """
-    import dbconfig as config
-    db = psycopg2.connect(**config.psycopg)
-    with db.cursor() as cursor :
+    query = (
+        "INSERT INTO  plantmonthlylegacy (plant, time, export_energy_wh)\n"
+        "VALUES \n"
+        + values +
+        ";\n"
+    )
+    db = psycopg2.connect(**psycopgconfig)
+    with db.cursor() as cursor:
         cursor.execute(query)
-        result = csvTable(cursor)
-    #print(result)
-    return result
+    db.commit()
 
 
-def exportResultAsPlantmonitorTable(result):
+
+def exportResultAsPlantmonitorTable(data):
     name2id = plantName2Id()
-    for plant in result.values():
+    result = []
+    for plant in data.values():
+        # Filter first zero measures for the plant
         plantStarted = False
         for key in sorted(plant.keys()):
             if '-' not in key: continue
@@ -333,8 +271,8 @@ def exportResultAsPlantmonitorTable(result):
             if key >= '2021-01-01': continue
             plantStarted=True
             plantid = name2id[plantCodes[plant['name']]]
-            print(f"{plantid} {key} {plant[key]}")
-
+            result.append((plantid, key, plant[key]))
+    return result
 
 
 def plantName2Id():
