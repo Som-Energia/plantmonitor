@@ -270,7 +270,9 @@ def exportResultAsPlantmonitorTable(data):
             if key >= '2021-01-01': continue
             plantStarted=True
             plantid = name2id[plantCodes[plant['name']]]
-            result.append((plantid, key, plant[key]))
+            energy_kwh = int(plant[key])
+            energy_wh = energy_kwh * 1000
+            result.append((plantid, key, energy_wh))
     return result
 
 
