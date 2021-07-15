@@ -67,10 +67,10 @@ def interpolateRead(firstPoint, wantedTime, secondPoint):
     t2, y2 = secondPoint
 
     interp = interpolate.interp1d([t1.timestamp(), t2.timestamp()], [y1, y2])
-    logger.debug("inter ({},{}) - ({},{}) - ({},{}) ".format(
-        t1.isoformat(), y1,
-        wantedTime.isoformat(), interp(wantedTime.timestamp()),
-        t2.isoformat(), y2))
+    # logger.debug("inter ({},{}) - ({},{}) - ({},{}) ".format(
+    #     t1.isoformat(), y1,
+    #     wantedTime.isoformat(), interp(wantedTime.timestamp()),
+    #     t2.isoformat(), y2))
     value = float(interp(wantedTime.timestamp()))
 
     return (wantedTime, value)
@@ -193,13 +193,16 @@ def integrateHourFromTimeseries(hourstart, timeseries, dt=timedelta(hours=1)):
         logger.warning("None values in hour range {} - {}. Skipping.".format(xvalues[0], xvalues[-1]))
         return None
 
+    # TODO expectedPower is in kW! we have to multiply by 1000. Remove as soon as expectedpower is in w
+    yvalues = [1000 * y for y in yvalues]
+
     # hourly_trapezoidal_approximation
     integralMetricValueDateTime = integrate.trapz(y=yvalues, x=xvalues)
+
     # trapz returns in x-axis type, so we need to convert the unreal datetime to the metric value
     integralMetricValue = integralMetricValueDateTime.days * 24 + integralMetricValueDateTime.seconds // 3600
 
-    # TODO expectedPower is in kWh! we have to multiply by 1000. Remove as soon as expectedpower is in wh
-    return 1000*integralMetricValue
+    return integralMetricValue
 
 def integrateMetric(registries, fromDate, toDate):
     # for each hour within fromDate and toDate
