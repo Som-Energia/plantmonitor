@@ -363,7 +363,7 @@ class Operations_Test(unittest.TestCase):
         integratedValue = integrateHour(hourstart, query)
 
         # Fix border error
-        self.assertEqual(integratedValue, 840)
+        self.assertEqual(integratedValue, 841)
 
     def test__integrateHourFromTimeSeries__OnlyOnePoint(self):
 
@@ -431,6 +431,36 @@ class Operations_Test(unittest.TestCase):
         integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
 
         self.assertTrue(integralMetricValue >= 0)
+
+    @unittest.skipIf(True, "Fix or change this test if we want to use integrals again")
+    def test__integrateHourFromTimeSeries__AverageSameResultTest(self):
+
+        readingTime = datetime.datetime(2021, 5, 21, 8, 0, 6, 766707, tzinfo=datetime.timezone.utc)
+
+        hourstart = readingTime.replace(minute=0, second=0, microsecond=0)
+
+        timeseries = [
+            (datetime.datetime(2021, 5, 21, 8, 0, 0, 0, tzinfo=datetime.timezone.utc), 142),
+            (datetime.datetime(2021, 5, 21, 8, 5, 7, 62183, tzinfo=datetime.timezone.utc), 45),
+            (datetime.datetime(2021, 5, 21, 8, 10, 6, 812438, tzinfo=datetime.timezone.utc), 51),
+            (datetime.datetime(2021, 5, 21, 8, 15, 6, 699902, tzinfo=datetime.timezone.utc), 59),
+            (datetime.datetime(2021, 5, 21, 8, 20, 6, 776351, tzinfo=datetime.timezone.utc), 67),
+            (datetime.datetime(2021, 5, 21, 8, 25, 6, 839190, tzinfo=datetime.timezone.utc), 82),
+            (datetime.datetime(2021, 5, 21, 8, 30, 6, 904319, tzinfo=datetime.timezone.utc), 90),
+            (datetime.datetime(2021, 5, 21, 8, 35, 6, 780839, tzinfo=datetime.timezone.utc), 109),
+            (datetime.datetime(2021, 5, 21, 8, 40, 6, 707526, tzinfo=datetime.timezone.utc), 136),
+            (datetime.datetime(2021, 5, 21, 8, 45, 6, 765174, tzinfo=datetime.timezone.utc), 143),
+            (datetime.datetime(2021, 5, 21, 8, 50, 6, 890866, tzinfo=datetime.timezone.utc), 173),
+            (datetime.datetime(2021, 5, 21, 8, 55, 6, 873454, tzinfo=datetime.timezone.utc), 152),
+            (datetime.datetime(2021, 5, 21, 9, 0, 0, 0, tzinfo=datetime.timezone.utc), 152),
+        ]
+
+        integralMetricValue = integrateHourFromTimeseries(hourstart, timeseries)
+
+        # TODO remove 1000* factor when expectedpower returns W instead of kW
+        powerAvg = 1000*sum([power for (t, power) in timeseries])/len(timeseries)
+
+        self.assertEqual(integralMetricValue, powerAvg)
 
     def _test__integrateHour__nulls(self):
         pass
@@ -830,13 +860,13 @@ class Operations_Test(unittest.TestCase):
         expected = {
             SensorIrradiation[4]:
             [
-                (times[0], 758000),
-                (times[1], 1155000),
+                (times[0], 758500),
+                (times[1], 1155289),
             ],
             SensorIrradiation[5]:
             [
-                (times[0], 870000),
-                (times[1], 1266000),
+                (times[0], 870270),
+                (times[1], 1266457),
             ]
         }
 
