@@ -1,0 +1,101 @@
+plants: []
+municipalities:
+- municipality:
+    ineCode : '04090'
+    name: Tahal
+    provinceCode : '04'
+    province : Almería
+    regionCode : '01'
+    region : Andalucia
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '18152'
+    name: Pedro Martínez
+    provinceCode : '18'
+    province : Granada
+    regionCode : '01'
+    region : Andalucia
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '41006'
+    name: Alcolea del Río
+    provinceCode : '41'
+    province : Sevilla
+    regionCode : '01'
+    region : Andalucia
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '41055'
+    name: Lora del Río
+    provinceCode : '41'
+    province : Sevilla
+    regionCode : '01'
+    region : Andalucia
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '05074'
+    name: Fontiveros
+    provinceCode : '05'
+    province : Ávila
+    regionCode : '07'
+    region : Castilla y León
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '47114'
+    name: Peñafiel
+    provinceCode : '47'
+    province : Valladolid
+    regionCode : '07'
+    region : Castilla y León
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '08112'
+    name: Manlleu
+    provinceCode : '08'
+    province : Barcelona
+    regionCode : '09'
+    region : Cataluña
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '17148'
+    name: Riudarenes
+    provinceCode : '17'
+    province : Girona
+    regionCode : '09'
+    region : Cataluña
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '25120'
+    name: Lleida
+    provinceCode : '25'
+    province : Lleida
+    regionCode : '09'
+    region : Cataluña
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '25230'
+    name: Torregrossa
+    provinceCode : '25'
+    province : Lleida
+    regionCode : '09'
+    region : Cataluña
+    countryCode : ES
+    country : España
+- municipality:
+    ineCode : '46193'
+    name: Picanya
+    provinceCode : '46'
+    province : Valencia/València
+    regionCode : '10'
+    region : Comunidad Valenciana
+    countryCode : ES
+    country : España
