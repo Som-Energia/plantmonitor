@@ -48,11 +48,11 @@ plantmonitor:
             start: 0
             range: 3
       protocol:
-        type:
-        ip:
-        port:
-        slave:
-        timeout:
+        type: TCP
+        ip: 10.0.0.1
+        port: 502
+        slave: 1
+        timeout: 10
     - name: wattiaSensor1
       type: wattiasensor
       description: WattiaSensor1
@@ -68,10 +68,10 @@ plantmonitor:
             start: 0
             range: 3
       protocol:
-        type:
-        ip:
-        port:
-        slave:
-        timeout:
+        type: TCP
+        ip: 10.0.0.1
+        port: 502
+        slave: 1
+        timeout: 10
 
 # vim: ts=4 sw=4 et

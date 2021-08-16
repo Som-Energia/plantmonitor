@@ -3,17 +3,19 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from yamlns import namespace as ns
 
 from pymodbus.pdu import ExceptionResponse
+from pymodbus.exceptions import ConnectionException
 
 from .resource import (
     ProductionPlant,
     ProductionDevice,
     ProductionDeviceModMap,
     ProductionProtocol,
+    ModbusException
 )
 
 class Resource_Test(unittest.TestCase):
@@ -63,11 +65,11 @@ class Resource_Test(unittest.TestCase):
                     start: 0
                     range: 3
             protocol:
-                type:
-                ip:
-                port:
-                slave:
-                timeout:
+                type: TCP
+                ip: localhost
+                port: 502
+                slave: 1
+                timeout: 10
             """)
         return devicesns
 
@@ -259,6 +261,26 @@ class Resource_Test(unittest.TestCase):
             'fields': [626],
         }
         self.assertDictEqual(metric, expectedMetric)
+
+    def test__ProductionDevice_loadInverter__WrongProtocolType(self):
+        aInverter = ProductionDevice()
+        device_data = self.inverterDeviceNS()
+        device_data.protocol.type = 'tcp_lowercase'
+
+        with self.assertRaises(ModbusException):
+            aInverter.load(device_data)
+
+    def test__ProductionDevice_getRegisters__NoConnection(self):
+
+        plant = ProductionPlant()
+        plant.load('conf/modmap_testing.yaml', self.testPlantname())
+
+        for dev in plant.devices:
+            dev.get_registers = Mock(side_effect=ConnectionException('Failed to connect'))
+
+        # No Raises
+        plant.get_registers()
+
 
     # TODO: detect error or ban
     def __test__ProductionDevice_getRegisters__connectionError(self):

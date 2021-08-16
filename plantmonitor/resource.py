@@ -112,10 +112,14 @@ class ProductionProtocol():
             new_protocoltcp.load(protocol_data)
             return new_protocoltcp
 
-        if protocol_data.type == "RS485":
+        elif protocol_data.type == "RS485":
             new_protocolRs = ProductionProtocolRs()
             new_protocolRs.load(protocol_data)
             return new_protocolRs
+        else:
+            msg = "Unknown protocol type {}, expected TCP or RS485".format(protocol_data.type)
+            logger.error(msg)
+            raise ModbusException(msg)
 
         return None
 
