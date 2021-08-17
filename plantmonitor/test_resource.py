@@ -90,11 +90,11 @@ class Resource_Test(unittest.TestCase):
                     start: 0
                     range: 3
             protocol:
-                type:
-                ip:
-                port:
-                slave:
-                timeout:
+                type: TCP
+                ip: localhost
+                port: 502
+                slave: 1
+                timeout: 10
             """)
         return devicesns
 
