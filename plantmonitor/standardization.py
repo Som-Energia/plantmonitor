@@ -95,6 +95,39 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
 
     return inverter_registers_plantdata
 
+def matallana_inverter_to_plantdata(inverter_name, inverter_registers):
+    inverter_registers_plantdata = {
+        'id': 'Inverter:{}'.format(inverter_name),
+        'readings': []
+    }
+
+    #TODO should we assume one single register instead of multiple?
+    #TODO check that registers values are watts, and not kilowatts
+    time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
+    pac_r_dw = inverter_registers['pac_r_dw']
+    pac_s_dw = inverter_registers['pac_s_dw']
+    pac_t_dw = inverter_registers['pac_t_dw']
+    power_w = 10*int(round(pac_r_dw + pac_s_dw + pac_t_dw))
+    energy_wh = 100*int(round((inverter_registers['e_total_h_hwh'] << 16) + inverter_registers['e_total_l_hwh']))
+    uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
+    temperature_dc = int(round(inverter_registers['temp_inv_dc']))
+
+    reading = {
+        'energy_wh': energy_wh,
+        'power_w': power_w,
+        'intensity_cc_mA': None,
+        'intensity_ca_mA': None,
+        'voltage_cc_mV': None,
+        'voltage_ca_mV': None,
+        'uptime_h': uptime_h,
+        'temperature_dc': temperature_dc,
+        'time': time,
+    }
+
+    inverter_registers_plantdata['readings'].append(reading)
+
+    return inverter_registers_plantdata
+
 def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
         'id': 'Inverter:{}'.format(inverter_name),
@@ -147,9 +180,9 @@ def erp_meter_readings_to_plant_data(measures):
 def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
 
     #TODO design this per-plant or per model
-    knownPlants = ['Fontivsolar', 'Alcolea', 'Florida']
+    knownPlants = ['Fontivsolar', 'Alcolea', 'Florida', 'Matallana']
     if not generic_plant and plant_name not in knownPlants:
-        logger.error("Unknown plant: {}. Known plants: 'Fontivsolar', 'Alcolea', 'Florida'.".format(plant_name))
+        logger.error("Unknown plant: {}. Known plants: 'Fontivsolar', 'Alcolea', 'Florida', 'Matallana'.".format(plant_name))
         return {}
 
     plant_data = {
@@ -186,10 +219,12 @@ def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
                 if device_register['type'] == 'inverter':
                     if plant_name == 'Fontivsolar':
                         device_readings_packets = [fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])]
+                    elif plant_name == 'Matallana':
+                        device_readings_packets = [matallana_inverter_to_plantdata(device_name, device_register['fields'])]
                     elif plant_name == 'Alcolea' or plant_name == 'Florida' or generic_plant:
                         device_readings_packets = [alcolea_inverter_to_plantdata(device_name, device_register['fields'])]
                     else:
-                        logger.error("Unknown plant: {}. Known plants: 'Fontivsolar', 'Alcolea', 'Florida'.".format(plant_name))
+                        logger.error("Unknown plant: {}. Known plants: 'Fontivsolar', 'Alcolea', 'Florida', 'Matallana'.".format(plant_name))
                         continue
                 elif device_register['type'] == 'sensorTemperature':
                     logger.error("SensorTemperature Not implemented")
