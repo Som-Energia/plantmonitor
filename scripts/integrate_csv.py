@@ -17,9 +17,27 @@ def readTimeseriesCSV(csv_filepath):
 
 def sliceTS(sensorTS):
 
+  # this groupby splits into three lists every hour, e.g. [10:00], [10:05, ..., 10:55], [11:00]
   sliced = [list(g) for k, g in groupby(sensorTS, lambda r: r[0].minute == 0)]
+
+  # for each hour, join the three lists (start, middle, end) e.g. [10:00, 10:05, ..., 10:55, 11:00]
   return [sliced[i] + sliced[i+1] + sliced[i+2] for i in range(len(sliced)-2) if i%2]
 
+def fillHoles(sensorSlice):
+  sensorSliceFilled = []
+
+  t = datetime.datetime.max - datetime.timedelta(hours=24, minutes=7)
+  t = t.replace(tzinfo=datetime.timezone.utc)
+
+  for reading in sensorSlice:
+
+    while t + datetime.timedelta(minutes=7) < reading[0]:
+      t += datetime.timedelta(minutes=5)
+      sensorSliceFilled.append((t,0))
+    sensorSliceFilled.append(reading)
+    t = reading[0]
+
+  return sensorSliceFilled
 
 def integrate(filename):
 
@@ -28,9 +46,11 @@ def integrate(filename):
   sensorSlices = sliceTS(sensorTS)
 
   irradiationTS = []
-
   for sensorSlice in sensorSlices:
     sensorSlice.reverse()
+
+    sensorSlice = fillHoles(sensorSlice)
+
     yvalues = [y for x,y in sensorSlice]
     xvalues = [x.timestamp()/3600 for x,y in sensorSlice]
 

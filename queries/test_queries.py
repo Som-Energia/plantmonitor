@@ -133,6 +133,37 @@ class Queries_Test(TestCase):
 
         self.assertOutputB2B(result)
 
-    def test_irradiation_oneDay_againstTrapezoidal(self):
+    def test_irradiation_incompleteLastDay(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = [r.irradiation_w_m2_h for r in database.select(query)
+            if todtaware('2021-07-14 9:00:00') <= r.time
+            and r.time < todtaware('2021-07-14 10:00:00')
+        ][0]
+
+        self.assertEqual(result, 551.2546302777778)
+
+    def test_irradiation_halfHourWithReadings(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = [r.irradiation_w_m2_h for r in database.select(query)
+            if todtaware('2021-07-14 8:00:00') <= r.time
+            and r.time < todtaware('2021-07-14 9:00:00')
+        ][0]
+
+        self.assertAlmostEqual(result, 415.2791252777778, places=5)
+
+    def test_irradiation_oneHour_againstTrapezoidal(self):
         # remember that you have an trapezoidal approximation script for csv at scripts/integrate_csv
-        pass
+        from scripts.integrate_csv import integrate
+
+        trapzIrradiationTS = integrate('b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv')
+
+        self.assertAlmostEqual(trapzIrradiationTS[0][1], 448.17932250650483, places=3)
+

@@ -1,4 +1,4 @@
-from integrate_csv import integrate
+from integrate_csv import integrate, fillHoles
 from unittest import TestCase
 
 import datetime
@@ -38,3 +38,20 @@ class Integrate_Test(TestCase):
 
     self.assertListEqual(result[0:12], expected)
 
+  def test_fillHoles(self):
+    timeseries = [
+      (datetime.datetime(2021, 7, 14, 7, 0, tzinfo=datetime.timezone.utc), 120),
+      (datetime.datetime(2021, 7, 14, 7, 20, tzinfo=datetime.timezone.utc), 130),
+    ]
+
+    result = fillHoles(timeseries)
+
+    expected = [
+      (datetime.datetime(2021, 7, 14, 7, 0, tzinfo=datetime.timezone.utc), 120),
+      (datetime.datetime(2021, 7, 14, 7, 5, tzinfo=datetime.timezone.utc), 0),
+      (datetime.datetime(2021, 7, 14, 7, 10, tzinfo=datetime.timezone.utc), 0),
+      (datetime.datetime(2021, 7, 14, 7, 15, tzinfo=datetime.timezone.utc), 0),
+      (datetime.datetime(2021, 7, 14, 7, 20, tzinfo=datetime.timezone.utc), 130),
+    ]
+
+    self.assertListEqual(result, expected)

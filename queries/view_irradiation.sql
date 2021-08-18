@@ -7,7 +7,7 @@ from (
 		(lead(irradiation_w_m2) over (order by time) + irradiation_w_m2)/2::float as dy,
 		(lead(irradiation_w_m2) over (order by time) + irradiation_w_m2)*extract(epoch from (lead(time) over (order by time) - time ))/3600/2 as irradiation_w_m2_h_optimist,
 		case when
-			lead(time) over (order by time) - time > '00:07' then NULL
+			lead(time) over (order by time) - time > '00:07' then irradiation_w_m2*300/3600/2
 		else (lead(irradiation_w_m2) over (order by time) + irradiation_w_m2)*extract(epoch from (lead(time) over (order by time) - time ))/3600/2
 		end as irradiation_w_m2_h
 	from sensorirradiationregistry
