@@ -71,9 +71,9 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
     time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
-    pac_r_dw = inverter_registers['pac_r_w']
-    pac_s_dw = inverter_registers['pac_s_w']
-    pac_t_dw = inverter_registers['pac_t_w']
+    pac_r_dw = inverter_registers['pac_r_dw']
+    pac_s_dw = inverter_registers['pac_s_dw']
+    pac_t_dw = inverter_registers['pac_t_dw']
     power_w = 10*int(round(pac_r_dw + pac_s_dw + pac_t_dw))
     energy_wh = 100*int(round((inverter_registers['daily_energy_h_wh'] << 16) + inverter_registers['daily_energy_l_wh']))
     uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
