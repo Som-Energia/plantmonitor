@@ -95,7 +95,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
 
     return inverter_registers_plantdata
 
-def matallana_inverter_to_plantdata(inverter_name, inverter_registers):
+def florida_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
         'id': 'Inverter:{}'.format(inverter_name),
         'readings': []
@@ -219,9 +219,9 @@ def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
                 if device_register['type'] == 'inverter':
                     if plant_name == 'Fontivsolar':
                         device_readings_packets = [fontivsolar_inverter_to_plantdata(device_name, device_register['fields'])]
-                    elif plant_name == 'Matallana' or plant_name == 'Florida':
-                        device_readings_packets = [matallana_inverter_to_plantdata(device_name, device_register['fields'])]
-                    elif plant_name == 'Alcolea' or generic_plant:
+                    elif plant_name == 'Florida':
+                        device_readings_packets = [florida_inverter_to_plantdata(device_name, device_register['fields'])]
+                    elif plant_name == 'Alcolea' or plant_name == 'Matallana' or generic_plant:
                         device_readings_packets = [alcolea_inverter_to_plantdata(device_name, device_register['fields'])]
                     else:
                         logger.error("Unknown plant: {}. Known plants: 'Fontivsolar', 'Alcolea', 'Florida', 'Matallana'.".format(plant_name))
