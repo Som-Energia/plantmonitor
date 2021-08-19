@@ -106,7 +106,7 @@ class Queries_Test(TestCase):
     def assertOutputB2B(self, result):
         result = "\n".join((
             "{}, {:.9f}".format(time.isoformat() if time else None, irradiation if irradiation is not None else float('nan'))
-            for time, irradiation in result
+            for time, sensor, irradiation in result
         ))
         self.assertB2BEqual(result)
 
@@ -129,6 +129,7 @@ class Queries_Test(TestCase):
         result = [r for r in database.select(query)
             if todtaware('2021-06-01 00:00:00') <= r.time
             and r.time < todtaware('2021-06-02 00:00:00')
+            and r.sensor == 1
         ]
 
         self.assertOutputB2B(result)
@@ -142,6 +143,7 @@ class Queries_Test(TestCase):
         result = [r.irradiation_w_m2_h for r in database.select(query)
             if todtaware('2021-07-14 9:00:00') <= r.time
             and r.time < todtaware('2021-07-14 10:00:00')
+            and r.sensor == 1
         ][0]
 
         self.assertEqual(result, 551.2546302777778)
