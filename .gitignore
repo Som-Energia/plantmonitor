@@ -88,3 +88,8 @@ lastDateFile.yaml
 # sensitive data
 conf/plants.yaml
 conf/plants_base.yaml
+conf/configlegacydb.yaml
+conf/config_meteologica.yaml
+
+# debugging data excludes
+untracked_data
