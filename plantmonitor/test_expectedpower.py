@@ -254,7 +254,7 @@ class ExpectedPower_Test(TestCase):
         self.assertOutputB2BNoPlant(result)
 
     # TODO add expectedEnergy as a view instead of a redash query
-    def _test_expectedEnergy_Alcolea_2021_04(self):
+    def test_expectedEnergy_Alcolea_2021_04(self):
         self.setupPlant()
         self.setPlantParameters(**dict(self.parametersFlorida,
             correctionFactorPercent=90,
