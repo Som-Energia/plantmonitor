@@ -168,4 +168,3 @@ class Queries_Test(TestCase):
         trapzIrradiationTS = integrate('b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv')
 
         self.assertAlmostEqual(trapzIrradiationTS[0][1], 448.17932250650483, places=3)
-
