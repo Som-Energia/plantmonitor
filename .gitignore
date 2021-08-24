@@ -92,4 +92,4 @@ conf/configlegacydb.yaml
 conf/config_meteologica.yaml
 
 # debugging data excludes
-untracked_data
+/untracked_data/
