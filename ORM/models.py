@@ -398,6 +398,7 @@ class Inverter(database.Entity):
     model = Optional(str, nullable=True)
     nominal_power_w = Optional(int)
     inverterRegistries = Set('InverterRegistry', lazy=True)
+    stringRegistries = Set('StringRegistry', lazy=True)
 
     def insertRegistry(self,
         power_w,
@@ -440,6 +441,14 @@ class InverterRegistry(database.Entity):
     voltage_ca_mV = Optional(int, size=64)
     uptime_h = Optional(int, size=64)
     temperature_dc = Optional(int, size=64)
+
+class StringRegistry(database.Entity):
+
+    inverter = Required(Inverter)
+    time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+    PrimaryKey(inverter, time)
+    intensity_cc_mA = Optional(int, size=64)
+
 
 
 class Sensor(database.Entity):

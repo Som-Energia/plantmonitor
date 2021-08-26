@@ -904,6 +904,43 @@ class Models_Test(unittest.TestCase):
         meter = Meter.get(name='OLDMETER')
         self.assertEqual(meter, None)
 
+    def test__Inverter_insertRegistry_WithStrings(self):
+        alcoleaPlantNS = self.samplePlantNS()
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+
+        stringIntensities = [400,400,300,500,2000,300,400,1000,300]
+
+        Inverter[1].insertRegistry(
+            power_w = 1,
+            energy_wh =2,
+            intensity_cc_mA = 3,
+            intensity_ca_mA = 4,
+            voltage_cc_mV = 5,
+            voltage_ca_mV = 6,
+            uptime_h = 7,
+            temperature_dc = 8,
+            stringIntensities_mA = stringIntensities,
+            time = time,
+        )
+
+        registries = Inverter[1].getRegistries()
+
+        expectedRegistries = [{
+            "power_w": 1,
+            "energy_wh": 2,
+            "intensity_cc_mA": 3,
+            "intensity_ca_mA": 4,
+            "voltage_cc_mV": 5,
+            "voltage_ca_mV": 6,
+            "uptime_h": 7,
+            "temperature_dc": 8,
+            "stringIntensities_mA": stringIntensities,
+            "time": time,
+        }]
+
+        self.assertListEqual(registries, expectedRegistries)
 
 
 # vim: et sw=4 ts=4
