@@ -77,6 +77,18 @@ class Api_Test(unittest.TestCase):
 
         importPlants(plantsns)
 
+    def inverterReading(self):
+        return {
+            'power_w': 10,
+            'energy_wh': 10,
+            'intensity_cc_mA': 10,
+            'intensity_ca_mA': 10,
+            'voltage_cc_mV': 10,
+            'voltage_ca_mV': 10,
+            'uptime_h': 10,
+            'temperature_dc': 10,
+        }
+
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import envinfo
@@ -111,17 +123,7 @@ class Api_Test(unittest.TestCase):
             "devices":
             [{
                 "id": "Inverter:inversor1",
-                "readings":
-                [{
-                    'power_w': 10,
-                    'energy_wh': 10,
-                    'intensity_cc_mA': 10,
-                    'intensity_ca_mA': 10,
-                    'voltage_cc_mV': 10,
-                    'voltage_ca_mV': 10,
-                    'uptime_h': 10,
-                    'temperature_dc': 10,
-                }]
+                "readings": [self.inverterReading()]
             }]
         }
 
@@ -145,17 +147,7 @@ class Api_Test(unittest.TestCase):
             "devices":
             [{
                 "id": "Inverter:inversor1",
-                "readings":
-                [{
-                    'power_w': 10,
-                    'energy_wh': 10,
-                    'intensity_cc_mA': 10,
-                    'intensity_ca_mA': 10,
-                    'voltage_cc_mV': 10,
-                    'voltage_ca_mV': 10,
-                    'uptime_h': 10,
-                    'temperature_dc': 10,
-                }]
+                "readings": [self.inverterReading()]
             }]
         }
 
@@ -167,21 +159,12 @@ class Api_Test(unittest.TestCase):
             # check reading content
             storage = PonyMetricStorage()
             readings = storage.inverterReadings()
-            self.assertListEqual(
-                readings,
-                [{
-                    "inverter" : 1,
-                    'power_w': 10,
-                    'energy_wh': 10,
-                    'intensity_cc_mA': 10,
-                    'intensity_ca_mA': 10,
-                    'voltage_cc_mV': 10,
-                    'voltage_ca_mV': 10,
-                    'uptime_h': 10,
-                    'temperature_dc': 10,
-                    "time": time,
-                }]
-            )
+
+            reading = self.inverterReading()
+            reading['inverter'] = 1
+            reading['time'] = time
+
+            self.assertListEqual(readings, [reading])
 
             # check inverter content
             inverter_fk = readings[0]["inverter"]

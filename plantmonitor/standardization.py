@@ -177,6 +177,9 @@ def erp_meter_readings_to_plant_data(measures):
         for measure in measures
     ]
 
+def string_inverter_registers_merge(devices_registers):
+    return devices_registers
+
 def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
 
     #TODO design this per-plant or per model

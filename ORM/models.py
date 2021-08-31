@@ -160,7 +160,10 @@ class Plant(database.Entity):
         if 'meters' in plant:
             [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
         if 'inverters' in plant:
-            [Inverter(plant=self, name=inverter['inverter'].name) for inverter in plant.inverters]
+             for inverter in plant.inverters:
+                inv = Inverter(plant=self, name=inverter['inverter'].name)
+                for string_name in inverter.inverter.get('strings', []):
+                    String(inverter=inv, name=string_name)
         if 'irradiationSensors' in plant:
             [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
         if 'temperatureAmbientSensors' in plant:
@@ -180,7 +183,9 @@ class Plant(database.Entity):
                     codename = self.codename,
                     description = self.description,
                     meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)],
-                    inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)],
+                    inverters = [ns(inverter=ns(name=inverter.name) if not inverter.strings else
+                                 ns(name=inverter.name, strings=sorted([s.name for s in inverter.strings])))
+                                 for inverter in Inverter.select(lambda inv: inv.plant == self)],
                     irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)],
                     temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)],
                     temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)],
@@ -194,7 +199,9 @@ class Plant(database.Entity):
                     description = self.description
             )
             meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)]
-            inverters = [ns(inverter=ns(name=inverter.name)) for inverter in Inverter.select(lambda inv: inv.plant == self)]
+            inverters = [ns(inverter=ns(name=inverter.name) if not inverter.strings else
+                         ns(name=inverter.name, strings=sorted([s.name for s in inverter.strings])))
+                         for inverter in Inverter.select(lambda inv: inv.plant == self)]
             irradiationSensors = [ns(irradiationSensor=ns(name=sensor.name)) for sensor in SensorIrradiation.select(lambda inv: inv.plant == self)]
             temperatureAmbientSensors = [ns(temperatureAmbientSensor=ns(name=sensor.name)) for sensor in SensorTemperatureAmbient.select(lambda inv: inv.plant == self)]
             temperatureModuleSensors = [ns(temperatureModuleSensor=ns(name=sensor.name)) for sensor in SensorTemperatureModule.select(lambda inv: inv.plant == self)]
@@ -310,6 +317,14 @@ class Plant(database.Entity):
             return SensorTemperatureAmbient(plant=plant, name=devicename)
         if classname == "SensorTemperatureModule":
             return SensorTemperatureModule(plant=plant, name=devicename)
+        # TODO refactor this to better handle child devices
+        if classname == "String":
+            invertername, stringname = devicename.split('-')
+            inverter = Inverter.get(name=invertername)
+            if not inverter:
+                logger.warning("Unknown inverter {} for string {}".format(invertername, stringname))
+                return None
+            return String(inverter=inverter, name=stringname)
         return None
 
     def insertDeviceData(self, devicedata, packettime=None):
@@ -398,7 +413,7 @@ class Inverter(database.Entity):
     model = Optional(str, nullable=True)
     nominal_power_w = Optional(int)
     inverterRegistries = Set('InverterRegistry', lazy=True)
-    stringRegistries = Set('StringRegistry', lazy=True)
+    strings = Set('String')
 
     def insertRegistry(self,
         power_w,
@@ -442,14 +457,32 @@ class InverterRegistry(database.Entity):
     uptime_h = Optional(int, size=64)
     temperature_dc = Optional(int, size=64)
 
-class StringRegistry(database.Entity):
+class String(database.Entity):
 
     inverter = Required(Inverter)
+    name = Required(str)
+    stringRegistries = Set('StringRegistry', lazy=True)
+
+    def insertRegistry(self,
+        intensity_mA,
+        time=None,
+        ):
+        return StringRegistry(
+            string=self,
+            time=time or datetime.datetime.now(datetime.timezone.utc),
+            intensity_mA=intensity_mA,
+        )
+
+    def getRegistries(self, fromdate=None, todate=None):
+        readings = getRegistries(self.stringRegistries, exclude='string', fromdate=fromdate, todate=todate)
+        return readings
+
+class StringRegistry(database.Entity):
+
+    string = Required(String)
     time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
-    PrimaryKey(inverter, time)
-    intensity_cc_mA = Optional(int, size=64)
-
-
+    PrimaryKey(string, time)
+    intensity_mA = Optional(int, size=64)
 
 class Sensor(database.Entity):
 

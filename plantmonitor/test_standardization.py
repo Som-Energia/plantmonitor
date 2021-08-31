@@ -13,6 +13,7 @@ from .standardization import (
     alcolea_inverter_to_plantdata,
     registers_to_plant_data,
     wattia_sensor_to_plantadata,
+    string_inverter_registers_merge,
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -76,6 +77,29 @@ class Standardization_Test(unittest.TestCase):
             'model': 'aros-solar',
             'register_type': 'holding_registers',
             'fields': self.inverter_registers(),
+            }]
+        }]
+
+        return registers
+
+    def alibaba_registers_inverterWithStrings(self):
+
+        registers = [{'Alibaba': [{
+            'name': 'Alice',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers(),
+            }]
+        },{'Alibaba': [{
+            'name': 'AliceStrings',
+            'type': 'inverterStrings',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': ns([
+                ('string1',100),
+                ('string2',200)
+                ]),
             }]
         }]
 
@@ -255,6 +279,45 @@ class Standardization_Test(unittest.TestCase):
 
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
+
+    # deprecated by String as device approach
+    def _test__string_inverter_registers_merge__inverterWithStrings(self):
+
+        plant_name = 'Alibaba'
+
+        plants_registers = self.alibaba_registers_inverterWithStrings()
+
+        registers_time = plants_registers[0][plant_name][0]['fields']['time']
+
+        plants_registers = string_inverter_registers_merge(plants_registers)
+        expected_plants_registers = {
+            plant_name :
+            [{
+            'name': 'Alice',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields':
+                ns([('daily_energy_h_wh', 0),
+                    ('daily_energy_l_wh', 17556),
+                    ('e_total_h_wh', 566),
+                    ('e_total_l_wh', 49213),
+                    ('h_total_h_h', 0),
+                    ('h_total_l_h', 18827),
+                    ('pac_r_dw', 10000),
+                    ('pac_s_dw', 20000),
+                    ('pac_t_dw', 30000),
+                    ('powerreactive_t_v', 0),
+                    ('powerreactive_r_v', 0),
+                    ('powerreactive_s_v', 0),
+                    ('temp_inv_dc', 320),
+                    ('time', registers_time),
+                ])
+            }]
+        }
+
+        self.maxDiff=None
+        self.assertDictEqual(expected_plants_registers, plants_registers[0])
 
     def test__registers_to_plant_data__notime(self):
 

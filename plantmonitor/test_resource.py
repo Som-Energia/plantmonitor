@@ -73,6 +73,37 @@ class Resource_Test(unittest.TestCase):
             """)
         return devicesns
 
+    def inverterDeviceWithStringsNS(self):
+        devicesns = ns.loads("""
+            name: inversor1
+            type: inverter
+            description: inversor1
+            model: aros-solar
+            enabled: True
+            modmap:
+              - type: holding_registers
+                registers:
+                    0 :  1HR0
+                    1 :  1HR1
+                    2 :  1HR2
+                    900 : string1
+                    901 : string2
+                    902 : string3
+                - scan:
+                    start: 0
+                    range: 3
+                - scan:
+                    start: 900
+                    range: 3
+            protocol:
+                type: TCP
+                ip: localhost
+                port: 502
+                slave: 1
+                timeout: 10
+            """)
+        return devicesns
+
     def sensorDeviceNS(self):
         devicesns = ns.loads("""
             name: wattiaSensor1
@@ -312,3 +343,23 @@ class Resource_Test(unittest.TestCase):
         exception = ExceptionResponse(131, 1, "IllegalAddress")
 
         self.assertEqual(result, exception)
+
+
+    #TODO we should support several scan ranges.
+    #It's not possible to scan first registers and then 900-950.
+    def _test__ProductionDevice_loadInverter__strings(self):
+        aInverter = ProductionDevice()
+        device_data = self.inverterDeviceWithStringsNS()
+
+        aInverter.load(device_data)
+        dev = aInverter.modmap['holding_registers']
+
+        dev.get_registers = MagicMock(return_value=[626])
+
+        regs = aInverter.get_registers()
+
+        print(regs)
+
+        expected = {}
+
+        self.assertDictEqual(regs, expected)

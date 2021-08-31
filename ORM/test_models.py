@@ -40,6 +40,8 @@ from .models import (
     MeterRegistry,
     Inverter,
     InverterRegistry,
+    String,
+    StringRegistry,
     Sensor,
     SensorIrradiation,
     SensorTemperatureAmbient,
@@ -160,6 +162,22 @@ class Models_Test(unittest.TestCase):
             temperatureAmbientSensors:
             - temperatureAmbientSensor:
                 name: joana
+        """)
+        return alcoleaPlantNS
+
+    def samplePlantNSWithStrings(self):
+        alcoleaPlantNS = ns.loads("""\
+            name: alcolea
+            codename: SCSOM04
+            description: la bonica planta
+            inverters:
+            - inverter:
+                name: '5555'
+                strings:
+                - string1
+                - string2
+            - inverter:
+                name: '6666'
         """)
         return alcoleaPlantNS
 
@@ -338,6 +356,24 @@ class Models_Test(unittest.TestCase):
         #TODO test the whole fixture, not just the plant data
         plantns = alcolea.exportPlant()
         self.assertNsEqual(plantns, expectedPlantNS)
+
+
+    def test__Plant_importExport__Strings(self):
+
+        alcoleaPlantNS = self.samplePlantNSWithStrings()
+
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+
+        expectedPlantNS = alcoleaPlantNS
+        # expectedPlantNS.inverters[1].inverter['strings'] = []
+
+        #TODO test the whole fixture, not just the plant data
+        plantns = alcolea.exportPlant(skipEmpty=True)
+
+        self.assertNsEqual(plantns, expectedPlantNS)
+
 
     def test_Plant_importExport_EmptyPlant(self):
         emptyPlantNS = ns.loads("""\
@@ -671,6 +707,26 @@ class Models_Test(unittest.TestCase):
 
         self.assertListEqual(registries, expectedRegistries)
 
+    def test__string_getRegistries__OneRegistry(self):
+        alcoleaPlantNS = self.samplePlantNSWithStrings()
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+
+        String[1].insertRegistry(
+            intensity_mA = 3,
+            time = time,
+        )
+
+        registries = String[1].getRegistries()
+
+        expectedRegistries = [{
+            "intensity_mA": 3,
+            "time": time,
+        }]
+
+        self.assertListEqual(registries, expectedRegistries)
+
     def __test__forecastMetadata(self):
         pass
 
@@ -904,7 +960,19 @@ class Models_Test(unittest.TestCase):
         meter = Meter.get(name='OLDMETER')
         self.assertEqual(meter, None)
 
-    def test__Inverter_insertRegistry_WithStrings(self):
+    def test__String_createDevice(self):
+        alcoleaPlantNS = self.samplePlantNS()
+        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+        dev = alcolea.createDevice(plant=alcolea, classname='String', devicename='5555-string1')
+
+        expected = {'id': 1, 'inverter': 1, 'name': 'string1'}
+        self.assertIsNotNone(dev)
+        self.assertDictEqual(expected, dev.to_dict())
+
+
+    def test__String_insertRegistry__new(self):
         alcoleaPlantNS = self.samplePlantNS()
         alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
@@ -921,7 +989,6 @@ class Models_Test(unittest.TestCase):
             voltage_ca_mV = 6,
             uptime_h = 7,
             temperature_dc = 8,
-            stringIntensities_mA = stringIntensities,
             time = time,
         )
 
@@ -936,7 +1003,6 @@ class Models_Test(unittest.TestCase):
             "voltage_ca_mV": 6,
             "uptime_h": 7,
             "temperature_dc": 8,
-            "stringIntensities_mA": stringIntensities,
             "time": time,
         }]
 
