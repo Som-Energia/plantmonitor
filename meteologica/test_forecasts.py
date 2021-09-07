@@ -282,7 +282,7 @@ class DailyDownload_Test(unittest.TestCase):
         forecastMetadata = ForecastMetadata.select().order_by(orm.desc(ForecastMetadata.forecastdate)).first()
 
         self.assertEqual(forecastMetadata, oldForecastMetadata)
-        forecasts = forecastMetadata.forecasts
+        forecasts = forecastMetadata.registries
 
         self.assertEqual(statuses['SomEnergia_Alcolea'], ForecastStatus.UPTODATE)
 
@@ -312,7 +312,7 @@ class DailyDownload_Test(unittest.TestCase):
 
         self.assertNotEqual(forecastMetadata, oldForecastMetadata)
         self.assertEqual(statuses['SomEnergia_Alcolea'], ForecastStatus.OK)
-        forecasts = orm.select(f for f in forecastMetadata.forecasts).order_by(lambda: f.time)[:]
+        forecasts = orm.select(f for f in forecastMetadata.registries).order_by(lambda: f.time)[:]
         print(forecasts)
         expectedTime = time.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(days=14, hours=1)
         expectedNumForecasts = 14*24+1

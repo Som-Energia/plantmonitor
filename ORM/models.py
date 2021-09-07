@@ -23,12 +23,15 @@ logger = logging.getLogger("plantmonitor")
 
 database = orm.Database()
 
-def getRegistries(entitySet, exclude, fromdate=None, todate=None):
-        if fromdate and todate:
-            registries = orm.select(r for r in entitySet if fromdate <= r.time and r.time <= todate)[:]
-        else:
-            registries = orm.select(r for r in entitySet)[:]
-        return [r.to_dict(exclude=exclude) for r in registries]
+class RegisterMixin:
+
+    def getRegistries(self, fromdate=None, todate=None):
+            if fromdate and todate:
+                registries = orm.select(r for r in self.registries if fromdate <= r.time and r.time <= todate)[:]
+            else:
+                registries = orm.select(r for r in self.registries)[:]
+            return [r.to_dict(exclude=self.deviceColumnName) for r in registries]
+
 
 def importPlants(nsplants):
     with orm.db_session:
@@ -357,12 +360,13 @@ class PlantLocation(database.Entity):
     def getLatLong(self):
         return (self.latitude, self.longitude)
 
-class Meter(database.Entity):
+class Meter(RegisterMixin, database.Entity):
 
     plant = Required(Plant)
     name = Required(unicode)
     connection_protocol = Required(str, sql_default='\'ip\'')
-    meterRegistries = Set('MeterRegistry', lazy=True)
+    registries = Set('MeterRegistry', lazy=True)
+    deviceColumnName = 'meter'
 
     def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None):
         logger.debug("inserting {} into {} ".format(time, self.name))
@@ -377,13 +381,8 @@ class Meter(database.Entity):
             r4_VArh = r4_VArh,
             )
 
-    # TODO: convert to a fixture this function
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.meterRegistries, exclude='meter', fromdate=fromdate, todate=todate)
-        return readings
-
     def getLastReadingDate(self):
-        newestRegistry = self.meterRegistries.select().order_by(orm.desc(MeterRegistry.time)).first()
+        newestRegistry = self.registries.select().order_by(orm.desc(MeterRegistry.time)).first()
         return newestRegistry.time if newestRegistry else None
 
     @staticmethod
@@ -405,15 +404,16 @@ class MeterRegistry(database.Entity):
     r3_VArh = Required(int, size=64)
     r4_VArh = Required(int, size=64)
 
-class Inverter(database.Entity):
+class Inverter(RegisterMixin, database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
     brand = Optional(str, nullable=True)
     model = Optional(str, nullable=True)
     nominal_power_w = Optional(int)
-    inverterRegistries = Set('InverterRegistry', lazy=True)
+    registries = Set('InverterRegistry', lazy=True)
     strings = Set('String')
+    deviceColumnName = 'inverter'
 
     def insertRegistry(self,
         power_w,
@@ -439,10 +439,6 @@ class Inverter(database.Entity):
             temperature_dc = temperature_dc,
         )
 
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.inverterRegistries, exclude='inverter', fromdate=fromdate, todate=todate)
-        return readings
-
 class InverterRegistry(database.Entity):
 
     inverter = Required(Inverter)
@@ -457,11 +453,12 @@ class InverterRegistry(database.Entity):
     uptime_h = Optional(int, size=64)
     temperature_dc = Optional(int, size=64)
 
-class String(database.Entity):
+class String(RegisterMixin, database.Entity):
 
     inverter = Required(Inverter)
     name = Required(str)
-    stringRegistries = Set('StringRegistry', lazy=True)
+    registries = Set('StringRegistry', lazy=True)
+    deviceColumnName = 'string'
 
     def insertRegistry(self,
         intensity_mA,
@@ -473,10 +470,6 @@ class String(database.Entity):
             intensity_mA=intensity_mA,
         )
 
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.stringRegistries, exclude='string', fromdate=fromdate, todate=todate)
-        return readings
-
 class StringRegistry(database.Entity):
 
     string = Required(String)
@@ -484,16 +477,17 @@ class StringRegistry(database.Entity):
     PrimaryKey(string, time)
     intensity_mA = Optional(int, size=64)
 
-class Sensor(database.Entity):
+class Sensor(RegisterMixin, database.Entity):
 
     name = Required(unicode)
     plant = Required(Plant)
     description = Optional(str)
+    deviceColumnName = 'sensor'
 
 
 class SensorIrradiation(Sensor):
 
-    sensorRegistries = Set('SensorIrradiationRegistry', lazy=True)
+    registries = Set('SensorIrradiationRegistry', lazy=True)
     hourlySensorIrradiationRegistries = Set('HourlySensorIrradiationRegistry', lazy=True)
 
     def toDict(self, fromdate=None, todate=None):
@@ -518,13 +512,10 @@ class SensorIrradiation(Sensor):
             integratedIrradiation_wh_m2=integratedIrradiation_wh_m2,
             expected_energy_wh=expected_energy_wh
         )
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
-        return readings
 
 class SensorTemperatureAmbient(Sensor):
 
-    sensorRegistries = Set('SensorTemperatureAmbientRegistry', lazy=True)
+    registries = Set('SensorTemperatureAmbientRegistry', lazy=True)
 
     def toDict(self, fromdate=None, todate=None):
         return {
@@ -539,13 +530,9 @@ class SensorTemperatureAmbient(Sensor):
             temperature_dc = temperature_dc
             )
 
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
-        return readings
-
 class SensorTemperatureModule(Sensor):
 
-    sensorRegistries = Set('SensorTemperatureModuleRegistry', lazy=True)
+    registries = Set('SensorTemperatureModuleRegistry', lazy=True)
     ambient = Optional(bool)
 
     def toDict(self, fromdate=None, todate=None):
@@ -561,9 +548,6 @@ class SensorTemperatureModule(Sensor):
             temperature_dc = temperature_dc
             )
 
-    def getRegistries(self, fromdate=None, todate=None):
-        readings = getRegistries(self.sensorRegistries, exclude='sensor', fromdate=fromdate, todate=todate)
-        return readings
 
 class SensorIrradiationRegistry(database.Entity):
 
@@ -636,7 +620,7 @@ class ForecastPredictor(database.Entity):
     forecastMetadatas = Set('ForecastMetadata')
 
 
-class ForecastMetadata(database.Entity):
+class ForecastMetadata(RegisterMixin, database.Entity):
 
     errorcode = Optional(str)
     plant     = Required(Plant)
@@ -644,7 +628,8 @@ class ForecastMetadata(database.Entity):
     predictor = Optional(ForecastPredictor)
     forecastdate = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
     granularity = Optional(int)
-    forecasts = Set('Forecast', lazy=True)
+    registries = Set('Forecast', lazy=True)
+    deviceColumnName = 'forecastmetadata'
 
     @classmethod
     def create(cls, plant, forecastdate, errorcode, variable='prod', predictor='aggregated', granularity='60'):
@@ -681,9 +666,9 @@ class ForecastMetadata(database.Entity):
             percentil90 = percentil90
             )
 
+    # TODO remove and call directly getRegistries
     def getForecast(self, fromdate=None, todate=None):
-        readings = getRegistries(self.forecasts, exclude='forecastMetadata', fromdate=fromdate, todate=todate)
-        return readings
+        return self.getRegistries(fromdate=fromdate, todate=todate)
 
 
 class Forecast(database.Entity):
