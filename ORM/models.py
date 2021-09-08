@@ -439,6 +439,18 @@ class Inverter(RegisterMixin, database.Entity):
             temperature_dc = temperature_dc,
         )
 
+    # TODO finish this tomorrow
+    def plantData(self, fromdate=None, todate=None, skipEmpty=False):
+
+        inverterPlantData = {
+            "id":"Inverter:{}".format(self.name),
+            "readings": self.getRegistries(fromdate, todate),
+            # TODO recursive pydantic model? array? separate device?
+            "devices": [s.plantData(fromdate, todate, skipEmpty) for s in self.strings]
+        }
+
+        return inverterPlantData
+
 class InverterRegistry(database.Entity):
 
     inverter = Required(Inverter)
