@@ -36,7 +36,7 @@ setup(
             'zeep',
             'b2btest',
             'uvicorn',
-            'somutils',
+            'somutils<=1.7.1',
 	],
 	include_package_data = True,
 	test_suite = 'plantmonitor',
