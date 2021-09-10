@@ -10,7 +10,7 @@ from plantmonitor.task import (
     task_daily_download_from_api_meteologica,
     task_integral,
 )
-from ORM.orm_util import connectDatabase
+from ORM.db_utils import connectDatabase
 from conf.config import env, env_active
 
 from conf.logging_configuration import LOGGING

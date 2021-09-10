@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 from pathlib import Path
 from pony import orm
 
@@ -181,3 +182,17 @@ def timescaleTables(tablesToTimescale):
 def dailyInsert():
     # TODO implement daily insert from inverter
     pass
+
+
+def str2Model(modelName):
+    supportedModels = [
+        "Meter",
+        "Inverter",
+        "SensorIrradiation",
+        "SensorTemperatureAmbient",
+        "SensorTemperatureModule"
+    ]
+
+    return getattr(sys.modules[__name__], modelName) \
+        if modelName in supportedModels \
+        else None

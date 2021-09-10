@@ -51,7 +51,7 @@ from ORM.models import (
     Meter,
 )
 
-from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
 
 class ReadingsFacade():
   def __init__(self):

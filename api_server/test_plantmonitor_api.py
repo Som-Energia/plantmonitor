@@ -31,7 +31,7 @@ from ORM.models import (
 )
 from plantmonitor.task import PonyMetricStorage
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 
 from .plantmonitor_api import api
 

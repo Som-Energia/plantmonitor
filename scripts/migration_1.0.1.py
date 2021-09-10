@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     force = '--force' in sys.argv
 
-    from ORM.orm_util import setupDatabase
+    from ORM.db_utils import setupDatabase
 
     setupDatabase(create_tables=True, timescale_tables=False, drop_tables=False)
 

@@ -20,7 +20,7 @@ from yamlns import namespace as ns
 from yamlns.dateutils import Date
 import datetime
 # import pytz
-from ORM.orm_util import setupDatabase
+from ORM.db_utils import setupDatabase
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 from decimal import Decimal
 

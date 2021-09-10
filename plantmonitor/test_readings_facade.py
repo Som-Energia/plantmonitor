@@ -23,7 +23,7 @@ from ORM.models import (
     Meter,
     MeterRegistry,
 )
-from ORM.orm_util import setupDatabase
+from ORM.db_utils import setupDatabase
 
 from meteologica.utils import todtaware
 

@@ -11,7 +11,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-from ORM.orm_util import connectDatabase
+from ORM.db_utils import connectDatabase
 
 from plantmonitor.task import PonyMetricStorage
 from yamlns import namespace as ns

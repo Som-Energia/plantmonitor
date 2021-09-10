@@ -21,7 +21,7 @@ from meteologica.meteologica_api_utils import (
 from meteologica.utils import todt, todtaware
 
 from pony import orm
-from ORM.orm_util import setupDatabase
+from ORM.db_utils import setupDatabase
 
 #from django.conf import settings
 from yamlns import namespace as ns

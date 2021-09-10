@@ -69,7 +69,7 @@ from ORM.models import (
     SensorTemperatureModuleRegistry,
 )
 
-from ORM.orm_util import connectDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
 
 def client_db(db):
     try:

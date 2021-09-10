@@ -15,7 +15,7 @@ logger = logging.getLogger("plantmonitor")
 
 from ORM.models import database
 
-from ORM.orm_util import setupDatabase, dropTables
+from ORM.db_utils import setupDatabase, dropTables
 
 from ORM.migrations import migrateLegacyToPony
 from pony import orm

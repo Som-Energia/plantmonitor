@@ -29,7 +29,7 @@ from ORM.models import (
 )
 from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 import datetime
 

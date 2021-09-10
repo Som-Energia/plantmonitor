@@ -51,7 +51,7 @@ from .models import (
     Forecast,
 )
 
-from .orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from .db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 

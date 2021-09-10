@@ -45,7 +45,7 @@ from ORM.models import (
     Forecast,
 )
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 
 from addPlant import importPlantCLI, importPlantsFromFile
 

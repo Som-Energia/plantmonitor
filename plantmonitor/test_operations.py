@@ -36,7 +36,7 @@ from ORM.models import (
 )
 from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
-from ORM.orm_util import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 import datetime
 
@@ -576,7 +576,7 @@ class Operations_Test(unittest.TestCase):
         # otherwise you get fixedoffset everytime you read
         # TIMESTAMP WITH TIMEZONE from a postgres with a non-UTC default timezone db
         # database.execute("set timezone to 'UTC';")
-        # we're currently setting PGTZ at setupDatabase@orm_util:85
+        # we're currently setting PGTZ at setupDatabase@db_utils:85
 
         dbTime = orm.select(r.time for r in SensorIrradiationRegistry).order_by(orm.desc(1)).first()
 

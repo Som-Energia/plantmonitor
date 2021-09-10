@@ -16,7 +16,7 @@ from yamlns import namespace as ns
 import datetime
 
 from meteologica.utils import todtaware
-from ORM.orm_util import setupDatabase
+from ORM.db_utils import setupDatabase
 setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Queries_Test(TestCase):
