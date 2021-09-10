@@ -30,6 +30,16 @@ plant -> devices <|- Sensor <|- Sensor2
 						"temperature_mc": 12,
 						"time": datetime.datetime.now(datetime.timezone.utc),
 				}]
+		},{
+				"id": "Inverter:inverter1",
+				"readings":
+				[{
+						"power_w": 1200,
+						...
+						"String:string1:intensity_mA": 100,
+						"String:string2:intensity_mA": 200,
+						"time": datetime.datetime.now(datetime.timezone.utc),
+				}]
 		}]
 }
 

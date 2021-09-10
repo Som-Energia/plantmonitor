@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+import sys
+
 import datetime
 
 from yamlns import namespace as ns
 
 from meteologica.utils import todt
+
+from .orm_utils import str2model
 
 from pony import orm
 from pony.orm import (
@@ -26,11 +30,15 @@ database = orm.Database()
 class RegisterMixin:
 
     def getRegistries(self, fromdate=None, todate=None):
-            if fromdate and todate:
-                registries = orm.select(r for r in self.registries if fromdate <= r.time and r.time <= todate)[:]
-            else:
-                registries = orm.select(r for r in self.registries)[:]
-            return [r.to_dict(exclude=self.deviceColumnName) for r in registries]
+        if fromdate and todate:
+            registries = orm.select(r for r in self.registries if fromdate <= r.time and r.time <= todate)[:]
+        else:
+            registries = orm.select(r for r in self.registries)[:]
+        return [r.to_dict(exclude=self.deviceColumnName) for r in registries]
+
+    def insertDeviceData(self, devicedata, packettime=None):
+
+        return [self.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
 
 
 def importPlants(nsplants):
@@ -245,6 +253,7 @@ class Plant(database.Entity):
         inverterList = [{
             "id":"Inverter:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
             } for i in orm.select(ic for ic in self.inverters) if not skipEmpty or i.getRegistries(fromdate, todate)]
+        # inverterList = [inverter.plantData() for inverter in self.inverters]
         sensorList = [i.toDict(fromdate, todate) for i in orm.select(ic for ic in self.sensors) if not skipEmpty or i.getRegistries(fromdate, todate)]
         forecastMetadatasList = [{
             "id":"ForecastMetadatas:{}".format(i.name), "readings": i.getRegistries(fromdate, todate)
@@ -288,59 +297,54 @@ class Plant(database.Entity):
             shortcircuit_current_ma = int(Isc*1000),
         )
 
-    def str2model(self, classname, devicename):
+    @staticmethod
+    def str2device(plant, classname, devicename):
         #TODO generalize this
         #TODO distinguish between failure due to missing name and unknown class
-        if classname == "Meter":
-            return Meter.get(name=devicename, plant=self)
-        if classname == "Inverter":
-            return Inverter.get(name=devicename, plant=self)
-        if classname == "ForecastMetadata":
-            logger.info("ForecastMetadata is always created")
+        model = str2model(classname)
+        if not model:
+            logger.error("Model {} not found".format(classname))
             return None
-        if classname == "SensorIrradiation":
-            return SensorIrradiation.get(name=devicename, plant=self)
-        if classname == "SensorTemperatureAmbient":
-            return SensorTemperatureAmbient.get(name=devicename, plant=self)
-        if classname == "SensorTemperatureModule":
-            return SensorTemperatureModule.get(name=devicename, plant=self)
-        logger.error("Device {} {} not found".format(classname, devicename))
-        return None
+        device = model.get(plant=plant, name=devicename)
+        if not device:
+            logger.error("Device {} {} not found".format(classname, devicename))
+            return None
+        return device
 
-    def createDevice(self, plant, classname, devicename):
+    def createDevice(self, classname, devicename):
+        # TODO handle this better, String is in the list of supported_models,
+        # but we don't do creation as a device but as an inverter registry
+
+        if classname == 'String':
+            logger.error("String creation is not supported")
+            return None
+
         #TODO generalize this
         #TODO distinguish between failure due to missing name and unknown class
-        if classname == "Meter":
-            return Meter(plant=plant, name=devicename)
-        if classname == "Inverter":
-            return Inverter(plant=plant, name=devicename)
-        if classname == "SensorIrradiation":
-            return SensorIrradiation(plant=plant, name=devicename)
-        if classname == "SensorTemperatureAmbient":
-            return SensorTemperatureAmbient(plant=plant, name=devicename)
-        if classname == "SensorTemperatureModule":
-            return SensorTemperatureModule(plant=plant, name=devicename)
-        # TODO refactor this to better handle child devices
-        if classname == "String":
-            invertername, stringname = devicename.split('-')
-            inverter = Inverter.get(name=invertername)
-            if not inverter:
-                logger.warning("Unknown inverter {} for string {}".format(invertername, stringname))
-                return None
-            return String(inverter=inverter, name=stringname)
-        return None
+        Model = str2model(classname)
+
+        if not Model:
+            logger.error("Model {} not found".format(classname))
+            return None
+
+        logger.debug("Create device from model {}".format(classname))
+
+        return Model(plant=self, name=devicename)
 
     def insertDeviceData(self, devicedata, packettime=None):
         devicetype, devicename = devicedata["id"].split(":")
-        device = self.str2model(classname=devicetype, devicename=devicename)
+        device = self.str2device(plant=self, classname=devicetype, devicename=devicename)
+
         if not device:
             logger.warning("New device {}:{}".format(devicetype, devicename))
             logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
-            device = self.createDevice(self, classname=devicetype, devicename=devicename)
+            device = self.createDevice(classname=devicetype, devicename=devicename)
+
         if not device:
             logger.warning("Unknown device type {}".format(devicetype))
             return None
-        return [device.insertRegistry(**{**{"time":packettime}, **r}) for r in devicedata["readings"]]
+
+        return device.insertDeviceData(devicedata, packettime)
 
     def insertPlantData(self, plantdata):
         if self.name != plantdata["plant"]:
@@ -415,6 +419,22 @@ class Inverter(RegisterMixin, database.Entity):
     strings = Set('String')
     deviceColumnName = 'inverter'
 
+
+    # inverter Strings are created via modmap the first time
+    # and via parsing in registry insert
+
+    # def __init__(self, plant, name):
+    #     super().__init__(plant=plant, name=name)
+
+        # if classname == "String":
+        #     invertername, stringname = devicename.split('-')
+        #     inverter = Inverter.get(name=invertername)
+        #     if not inverter:
+        #         logger.warning("Unknown inverter {} for string {}".format(invertername, stringname))
+        #         return None
+        #     return String(inverter=inverter, name=stringname)
+
+
     def insertRegistry(self,
         power_w,
         energy_wh,
@@ -439,14 +459,79 @@ class Inverter(RegisterMixin, database.Entity):
             temperature_dc = temperature_dc,
         )
 
-    # TODO finish this tomorrow
+    # [{
+    #     'energy_wh': 100,
+    #     'intensity_ca_mA': 1,
+    #     'intensity_cc_mA': 1,
+    #     'power_w': 100,
+    #     'temperature_dc': 1,
+    #     'time': time,
+    #     'uptime_h': 1,
+    #     'voltage_ca_mV': 1,
+    #     'voltage_cc_mV': 1,
+    #     'String_intensity_mA:string1': 100,
+    #     'String_intensity_mA:string2': 200
+    # }]
+
+    def insertDeviceData(self, devicedata, packettime=None):
+
+        readings = devicedata['readings']
+
+        regs = []
+        for rg in readings:
+            rg.setdefault('time', packettime)
+            # TODO this modifies the entry dictionary, do we want to?
+            # string_readings = {k:rg.pop(k) for k in list(rg) if k.startswith('String')}
+            string_readings = {k:d for k,d in rg.items() if k.startswith('String')}
+            inverter_readings = {k:d for k,d in rg.items() if not k.startswith('String')}
+            inv_reg = self.insertRegistry(**inverter_readings)
+
+            reg = [inv_reg]
+
+            for sr, value in string_readings.items():
+                #TODO polymorfize this with sth like String.insertDeviceData(sr)
+                devicetype, devicename, magnitude = sr.split(":")
+                device = String.get(inverter=self, name=devicename)
+
+                if not device:
+                    logger.warning("New device {}:{}".format(devicetype, devicename))
+                    logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
+                    device = self.createDevice(self, classname=devicetype, devicename=devicename)
+
+                if not device:
+                    logger.warning("Unknown device type {}".format(devicetype))
+                    return None
+
+                str_reg = device.insertRegistry(time=rg['time'], intensity_mA=value)
+
+                reg.append(str_reg)
+
+            regs.append(reg)
+
+        return regs
+
+
     def plantData(self, fromdate=None, todate=None, skipEmpty=False):
+
+        # TODO add strings' registries in inverter registries
+
+        # select * from stringregistry where time = inverterregistry.time and stringregistry.string in self.inverter.strings
+
+        # [sr for sr in StringRegistry.select()]
+
+        # StringRegistry.select())
+
+        # [{**ir,**sr} for sr in StringRegistry.select() if sr.time = ir.time and sr.string in self.strings for ir in InverterRegistry.select()]
+
+        # for r in self.registries:
+        #     for s in self.strings:
+        #         r.time == s.registries.time
+        #         {**r, "String_{}:{}".format(s)}
+        # self.strings
 
         inverterPlantData = {
             "id":"Inverter:{}".format(self.name),
             "readings": self.getRegistries(fromdate, todate),
-            # TODO recursive pydantic model? array? separate device?
-            "devices": [s.plantData(fromdate, todate, skipEmpty) for s in self.strings]
         }
 
         return inverterPlantData
