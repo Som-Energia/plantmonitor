@@ -313,7 +313,7 @@ class Plant(database.Entity):
 
     def createDevice(self, classname, devicename):
         # TODO handle this better, String is in the list of supported_models,
-        # but we don't do creation as a device but as an inverter registry
+        # but we don't do creation as a device but as part of an inverter registry
 
         if classname == 'String':
             logger.error("String creation is not supported")
@@ -490,19 +490,15 @@ class Inverter(RegisterMixin, database.Entity):
 
             for sr, value in string_readings.items():
                 #TODO polymorfize this with sth like String.insertDeviceData(sr)
-                devicetype, devicename, magnitude = sr.split(":")
-                device = String.get(inverter=self, name=devicename)
+                devicetype, stringname, magnitude = sr.split(":")
+                string = String.get(inverter=self, name=stringname)
 
-                if not device:
-                    logger.warning("New device {}:{}".format(devicetype, devicename))
-                    logger.warning("Creating {} named {} for {}".format(devicetype, devicename, self.name))
-                    device = self.createDevice(self, classname=devicetype, devicename=devicename)
+                if not string:
+                    logger.warning("New device {}:{}".format(devicetype, stringname))
+                    logger.warning("Creating {} named {} for {}".format(devicetype, stringname, self.name))
+                    string = String(inverter=self, name=stringname)
 
-                if not device:
-                    logger.warning("Unknown device type {}".format(devicetype))
-                    return None
-
-                str_reg = device.insertRegistry(time=rg['time'], intensity_mA=value)
+                str_reg = string.insertRegistry(time=rg['time'], intensity_mA=value)
 
                 reg.append(str_reg)
 

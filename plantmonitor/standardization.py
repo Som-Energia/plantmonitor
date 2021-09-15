@@ -177,8 +177,29 @@ def erp_meter_readings_to_plant_data(measures):
         for measure in measures
     ]
 
+# TODO improve this dictionaries merge
 def string_inverter_registers_merge(devices_registers):
-    return devices_registers
+    '''
+    for each inverter, look for their String readings and add them
+    discard the Strings devices
+
+    You can assume one inverter will have one or None Strings device
+    '''
+    merged_devices_registers = []
+
+    for dev1 in devices_registers['Alibaba']:
+        if dev1['type'] == 'inverter':
+            for dev2 in devices_registers['Alibaba']:
+                if dev2['type'] == 'inverterStrings' and dev2['name'] == '{}Strings'.format(dev1['name']):
+                    dev1['fields'].update(dev2['fields'])
+            merged_devices_registers.append(dev1)
+        elif dev1['type'] == 'inverterStrings':
+            # filter out strings devices since we've merged them
+            continue
+        else:
+            merged_devices_registers.append(dev1)
+
+    return merged_devices_registers
 
 def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
 
@@ -194,6 +215,15 @@ def registers_to_plant_data(plant_name, devices_registers, generic_plant=False):
         'time': datetime.datetime.now(datetime.timezone.utc),
         'devices': []
     }
+
+    # TODO refactor so that plant_register matches the expected format: a list of devices
+    # instead of {plant_name: Device} for each device
+    for plant_register in devices_registers:
+        if not plant_name in plant_register:
+           logger.error("Plant {} not in plant_register {}".format(plant_name, plant_register))
+        else:
+            plant_register = string_inverter_registers_merge(plant_register)
+
 
     for plant_register in devices_registers:
         if not plant_name in plant_register:
