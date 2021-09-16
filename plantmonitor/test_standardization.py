@@ -11,8 +11,10 @@ from yamlns import namespace as ns
 from .standardization import (
     registers_to_plant_data,
     alcolea_inverter_to_plantdata,
+    florida_inverter_to_plantdata,
+    fontivsolar_inverter_to_plantdata,
     registers_to_plant_data,
-    wattia_sensor_to_plantadata,
+    wattia_sensor_to_plantdata,
     string_inverter_registers_merge,
 )
 
@@ -44,48 +46,46 @@ class Standardization_Test(unittest.TestCase):
 
     def alibaba_registers(self):
 
-        registers = [{'Alibaba': [{
+        registers = {'Alibaba': [{
             'name': 'Alice',
             'type': 'inverter',
             'model': 'aros-solar',
             'register_type': 'holding_registers',
             'fields': self.inverter_registers(),
             }]
-        }]
+        }
 
         return registers
 
     # TODO refactor how many devices are in seperate dictionaries instead of in the same list
     def alibaba_registers_manyInverters(self):
 
-        registers = [{'Alibaba': [{
+        registers = {'Alibaba': [{
             'name': 'Alice',
             'type': 'inverter',
             'model': 'aros-solar',
             'register_type': 'holding_registers',
             'fields': self.inverter_registers(),
-            }]
-        },{'Alibaba': [{
+            },{
             'name': 'Bob',
             'type': 'inverter',
             'model': 'aros-solar',
             'register_type': 'holding_registers',
             'fields': self.inverter_registers(),
-            }]
-        },{'Alibaba': [{
+            },{
             'name': 'Charlie',
             'type': 'inverter',
             'model': 'aros-solar',
             'register_type': 'holding_registers',
             'fields': self.inverter_registers(),
             }]
-        }]
+        }
 
         return registers
 
     def alibaba_registers_inverterWithStrings(self):
 
-        registers = [{'Alibaba': [{
+        registers = {'Alibaba': [{
                 'name': 'Alice',
                 'type': 'inverter',
                 'model': 'aros-solar',
@@ -97,17 +97,17 @@ class Standardization_Test(unittest.TestCase):
                 'model': 'aros-solar',
                 'register_type': 'holding_registers',
                 'fields': ns([
-                        ('string1',100),
-                        ('string2',200)
+                        ('string1:intensity_mA',100),
+                        ('string2:intensity_mA',200)
                 ])
             }]
-        }]
+        }
 
         return registers
 
     def alibaba_register_invertersWithStrings(self):
 
-        registers = [{'Alibaba': [{
+        registers = {'Alibaba': [{
                 'name': 'Alice',
                 'type': 'inverter',
                 'model': 'aros-solar',
@@ -119,8 +119,8 @@ class Standardization_Test(unittest.TestCase):
                 'model': 'aros-solar',
                 'register_type': 'holding_registers',
                 'fields': ns([
-                        ('string1',100),
-                        ('string2',200)
+                        ('string1:intensity_mA',100),
+                        ('string2:intensity_mA',200)
                 ])
             },{
                 'name': 'Bob',
@@ -135,11 +135,11 @@ class Standardization_Test(unittest.TestCase):
                 'model': 'aros-solar',
                 'register_type': 'holding_registers',
                 'fields': ns([
-                        ('string1',300),
-                        ('string2',400)
+                        ('string1:intensity_mA',300),
+                        ('string2:intensity_mA',400)
                 ])
             }]
-        }]
+        }
 
         return registers
 
@@ -177,14 +177,14 @@ class Standardization_Test(unittest.TestCase):
 
     def alibaba_registers_WattiaSensor(self):
 
-        registers = [{'Alibaba': [{
+        registers = {'Alibaba': [{
             'name': 'Alice',
             'type': 'wattiasensor',
             'model': 'aros-solar',
             'register_type': 'input_registers',
             'fields': self.sensorWattia_registers(),
             }]
-        }]
+        }
 
         return registers
 
@@ -254,7 +254,7 @@ class Standardization_Test(unittest.TestCase):
 
         plants_registers = self.alibaba_registers()
 
-        registers_time = plants_registers[0][plant_name][0]['fields']['time']
+        registers_time = plants_registers[plant_name][0]['fields']['time']
 
         plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
 
@@ -291,7 +291,7 @@ class Standardization_Test(unittest.TestCase):
 
         plants_registers = self.alibaba_registers_manyInverters()
 
-        registers_time = plants_registers[0][plant_name][0]['fields']['time']
+        registers_time = plants_registers[plant_name][0]['fields']['time']
 
         plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
 
@@ -352,8 +352,8 @@ class Standardization_Test(unittest.TestCase):
 
     def test__string_inverter_registers_merge__inverterWithStrings(self):
 
-        plants_registers = self.alibaba_registers_inverterWithStrings()
-        devices_registers = plants_registers[0]
+        plant_registers = self.alibaba_registers_inverterWithStrings()
+        devices_registers = plant_registers['Alibaba']
 
         merged_devices_registers = string_inverter_registers_merge(devices_registers)
         expected_merged_devices_registers = [{
@@ -363,8 +363,8 @@ class Standardization_Test(unittest.TestCase):
             'register_type': 'holding_registers',
             'fields': ns(**self.inverter_registers(), **ns(
                         [
-                            ('string1', 100),
-                            ('string2', 200)
+                            ('string1:intensity_mA', 100),
+                            ('string2:intensity_mA', 200)
                         ])
                 )
         }]
@@ -377,9 +377,10 @@ class Standardization_Test(unittest.TestCase):
     def test__string_inverter_registers_merge__invertersWithStrings(self):
 
         plants_registers = self.alibaba_register_invertersWithStrings()
-        devices_registers = plants_registers[0]
+        devices_registers = plants_registers['Alibaba']
 
         merged_devices_registers = string_inverter_registers_merge(devices_registers)
+
         expected_merged_devices_registers = [{
             'name': 'Alice',
             'type': 'inverter',
@@ -387,8 +388,8 @@ class Standardization_Test(unittest.TestCase):
             'register_type': 'holding_registers',
             'fields': ns(**self.inverter_registers(), **ns(
                         [
-                            ('string1', 100),
-                            ('string2', 200)
+                            ('string1:intensity_mA', 100),
+                            ('string2:intensity_mA', 200)
                         ])
                 )
         },{
@@ -399,8 +400,8 @@ class Standardization_Test(unittest.TestCase):
             'fields':
                 ns(**self.inverter_registers(), **ns(
                         [
-                            ('string1', 300),
-                            ('string2', 400)
+                            ('string1:intensity_mA', 300),
+                            ('string2:intensity_mA', 400)
                         ])
                 )
         }]
@@ -410,13 +411,44 @@ class Standardization_Test(unittest.TestCase):
         self.assertListEqual(expected_merged_devices_registers, merged_devices_registers)
 
 
+    def test__string_inverter_registers_merge__inverter_inverterWithStrings(self):
+
+        plants_registers = self.alibaba_register_invertersWithStrings()
+        devices_registers = plants_registers['Alibaba']
+        del devices_registers[3]
+
+        merged_devices_registers = string_inverter_registers_merge(devices_registers)
+
+        expected_merged_devices_registers = [{
+            'name': 'Alice',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': ns(**self.inverter_registers(), **ns(
+                        [
+                            ('string1:intensity_mA', 100),
+                            ('string2:intensity_mA', 200)
+                        ])
+                )
+        },{
+            'name': 'Bob',
+            'type': 'inverter',
+            'model': 'aros-solar',
+            'register_type': 'holding_registers',
+            'fields': self.inverter_registers()
+        }]
+
+        self.maxDiff=None
+        self.assertEqual(len(expected_merged_devices_registers), 2)
+        self.assertListEqual(expected_merged_devices_registers, merged_devices_registers)
+
     def test__registers_to_plant_data__notime(self):
 
         plant_name = 'Alibaba'
 
         plants_registers = self.alibaba_registers()
 
-        del plants_registers[0][plant_name][0]['fields']['time']
+        del plants_registers[plant_name][0]['fields']['time']
 
         plant_data = registers_to_plant_data(plant_name, plants_registers, generic_plant=True)
         packet_time = plant_data['time']
@@ -472,24 +504,36 @@ class Standardization_Test(unittest.TestCase):
 
         plant_registers = self.alibaba_registers()
 
-        inverter_name = plant_registers[0][plant_name][0]['name']
+        inverter_name = plant_registers[plant_name][0]['name']
+        register_time = plant_registers[plant_name][0]['fields']['time']
 
-        #TODO: refactor this so we don't have to use the "Alcolea" if
-        plant_data = registers_to_plant_data("Alcolea", plant_registers)
+        plant_data = registers_to_plant_data(plant_name, plant_registers, generic_plant=True)
 
         packet_time = plant_data['time']
 
         expected_plant_data = {
-            'plant': 'Alcolea',
+            'plant': plant_name,
             'version': '1.0',
             'time': packet_time,
-            'devices': []
+            'devices': [{
+                'id': 'Inverter:Alice',
+                'readings': [{'energy_wh': 1755600,
+                    'intensity_ca_mA': None,
+                    'intensity_cc_mA': None,
+                    'power_w': 600000,
+                    'temperature_dc': 320,
+                    'time': register_time,
+                    'uptime_h': 18827,
+                    'voltage_ca_mV': None,
+                    'voltage_cc_mV': None
+                }]
+            }]
         }
 
         self.maxDiff=None
         self.assertDictEqual(expected_plant_data, plant_data)
 
-    def test__wattia_sensor_to_plantadata(self):
+    def test__wattia_sensor_to_plantdata(self):
 
         sensor_name = "WattMan"
 
@@ -497,7 +541,7 @@ class Standardization_Test(unittest.TestCase):
 
         time = sensor_registers['time']
 
-        sensor_packets = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
+        sensor_packets = wattia_sensor_to_plantdata(sensor_name, sensor_registers)
 
         expected_sensor_registries = [{
             'id': 'SensorIrradiation:{}'.format(sensor_name),
@@ -527,13 +571,13 @@ class Standardization_Test(unittest.TestCase):
         for packet, expected_packet in zip(sensor_packets, expected_sensor_registries):
             self.assertDictEqual(expected_packet, packet)
 
-    def test__wattia_sensor_to_plantadata__notime(self):
+    def test__wattia_sensor_to_plantdata__notime(self):
 
         sensor_name = "WattMan"
 
         sensor_registers = self.sensorWattia_registers()
 
-        sensor_packets = wattia_sensor_to_plantadata(sensor_name, sensor_registers)
+        sensor_packets = wattia_sensor_to_plantdata(sensor_name, sensor_registers)
         time = sensor_packets[0]['readings'][0]['time']
 
         expected_sensor_registries = [{
@@ -566,7 +610,7 @@ class Standardization_Test(unittest.TestCase):
 
     def test__registers_to_plantdata__sensorWattia(self):
 
-        sensor_name = "Alice"
+        sensor_name = 'Alice'
         plant_name = 'Alibaba'
 
         plant_registers = self.alibaba_registers_WattiaSensor()
@@ -609,3 +653,68 @@ class Standardization_Test(unittest.TestCase):
 
     def test__registers_to_plantdata__sensorWattia_inverter(self):
         pass
+
+    def expected_inverter_plantdata(self, inverter_time):
+        return {'energy_wh': 1755600,
+            'intensity_ca_mA': None,
+            'intensity_cc_mA': None,
+            'power_w': 600000,
+            'temperature_dc': 320,
+            'time': inverter_time,
+            'uptime_h': 18827,
+            'voltage_ca_mV': None,
+            'voltage_cc_mV': None,
+            'String:string1:intensity_mA': 100,
+            'String:string2:intensity_mA': 200
+        }
+
+    def test__alcolea_inverter_to_plantdata__strings(self):
+
+        self.maxDiff=None
+        inverter_registers = self.inverter_registers()
+        inverter_time = inverter_registers['time']
+        inverter_registers['string1:intensity_mA'] = 100
+        inverter_registers['string2:intensity_mA'] = 200
+        inverter_name = 'Alice'
+
+        inverter_registers_plantdata = alcolea_inverter_to_plantdata(inverter_name, inverter_registers)
+
+        expected_inverter_registers_plantdata = {
+            'id': 'Inverter:Alice',
+            'readings': [self.expected_inverter_plantdata(inverter_time)]
+        }
+        self.assertDictEqual(inverter_registers_plantdata, expected_inverter_registers_plantdata)
+
+    # TODO inverter_registers from fontivsolar
+    def _test__fontivsolar_inverter_to_plantdata__strings(self):
+
+        inverter_registers = self.fontivsolar_inverter_registers()
+        inverter_time = inverter_registers['time']
+        inverter_registers['string1:intensity_mA'] = 100
+        inverter_registers['string2:intensity_mA'] = 200
+        inverter_name = 'Alice'
+
+        inverter_registers_plantdata = alcolea_inverter_to_plantdata(inverter_name, inverter_registers)
+
+        expected_inverter_registers_plantdata = {
+            'id': 'Inverter:Alice',
+            'readings': [self.expected_inverter_plantdata(inverter_time)]
+        }
+        self.assertDictEqual(inverter_registers_plantdata, expected_inverter_registers_plantdata)
+
+    # TODO inverter_registers from florida
+    def _test__florida_inverter_to_plantdata__strings(self):
+
+        inverter_registers = self.florida_inverter_registers()
+        inverter_time = inverter_registers['time']
+        inverter_registers['string1:intensity_mA'] = 100
+        inverter_registers['string2:intensity_mA'] = 200
+        inverter_name = 'Alice'
+
+        inverter_registers_plantdata = florida_inverter_to_plantdata(inverter_name, inverter_registers)
+
+        expected_inverter_registers_plantdata = {
+            'id': 'Inverter:Alice',
+            'readings': [self.expected_inverter_plantdata(inverter_time)]
+        }
+        self.assertDictEqual(inverter_registers_plantdata, expected_inverter_registers_plantdata)

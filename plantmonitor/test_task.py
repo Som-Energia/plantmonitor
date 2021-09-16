@@ -10,6 +10,10 @@ from plantmonitor.resource import ProductionPlant
 
 from conf import envinfo
 
+from .task import get_plant_reading
+
+from unittest.mock import MagicMock, Mock
+
 
 class Task_Test(unittest.TestCase):
 
@@ -27,8 +31,20 @@ class Task_Test(unittest.TestCase):
         expected_apiconfig = {"api_url":"http://localhost:5000","version":"1.0"}
         self.assertDictEqual(apiconfig, expected_apiconfig)
 
-        result = plant.load('conf/modmap_testing.yaml', plantname)
+        result = plant.load('test_data/modmap_testing.yaml', plantname)
 
         self.assertTrue(result)
 
 
+    def test__task__get_plant_reading(self):
+
+        plantname = 'Alibaba'
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing.yaml', plantname)
+
+        plant.get_registers = MagicMock(return_value={plantname: []})
+
+        plant_data = get_plant_reading(plant)
+
+        self.assertIsNone(plant_data)

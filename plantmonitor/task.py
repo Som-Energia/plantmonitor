@@ -133,6 +133,27 @@ def legacyInfluxUpload():
     time.sleep(5)
     logger.info("Done influx upload")
 
+def get_plant_reading(plant):
+
+    plants_registers = plant.get_registers()
+
+    logger.debug("plants Registers: {}".format(plants_registers))
+
+    if len(plants_registers) > 0:
+        logger.error("plants Registers: {}".format(plants_registers))
+
+    if plant.name not in plants_registers:
+        logger.error("plant {} is not in registers {}. Check the plant modmap.".format(plant.name, plants_registers.keys()))
+        return None
+
+    plant_data = registers_to_plant_data(plant.name, plants_registers)
+
+    if not plant_data:
+        logger.error("Registers to plant data returned {}".format(plant_data))
+        return None
+
+    return plant_data
+
 def task():
     try:
 
@@ -150,21 +171,10 @@ def task():
             logger.error('Error loading yaml definition file...')
             sys.exit(-1)
 
-        plants_registers = plant.get_registers()
-
-        logger.debug("plants Registers: {}".format(plants_registers))
-
-        if len(plants_registers) > 0:
-            logger.error("plants Registers: {}".format(plants_registers))
-
-        if plantname not in plants_registers[0]:
-            logger.error("plant {} is not in registers {}. Check the plant modmap.".format(plantname, plants_registers[0].keys()))
-            return
-
-        plant_data = registers_to_plant_data(plantname, plants_registers)
+        plant_data = get_plant_reading(plant)
 
         if not plant_data:
-            logger.error("Registers to plant data returned {}".format(plant_data))
+            logger.error("Getting reading from {} failed. Aborting.".format(plantname))
             return
 
         ponyStorage = PonyMetricStorage()

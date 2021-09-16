@@ -129,9 +129,6 @@ class Resource_Test(unittest.TestCase):
             """)
         return devicesns
 
-    def modmapNS(self):
-        return ns.load('conf/modmap.yaml')
-
     def inverter_registers(self):
         return ns([
                     ('daily_energy_h_wh', 0),
@@ -204,7 +201,7 @@ class Resource_Test(unittest.TestCase):
         expected_plant_ns = self.plant_registers()
 
         plant = ProductionPlant()
-        result = plant.load('conf/modmap_testing.yaml', self.testPlantname())
+        result = plant.load('test_data/modmap_testing.yaml', self.testPlantname())
         self.assertTrue(result)
         plant = plant.todict()
         expected_plant = dict(expected_plant_ns)
@@ -270,6 +267,136 @@ class Resource_Test(unittest.TestCase):
         }
         self.assertDictEqual(metric, expectedMetric)
 
+    def test__ProductionPlant_getRegisters__oneInverter(self):
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing_inverter.yaml', self.testPlantname())
+
+        for d in plant.devices:
+            for v in d.modmap.values():
+                v.get_registers = MagicMock(return_value=[ns([('power', 626)])])
+
+        plant_registers = plant.get_registers()
+
+        # list not empty
+        self.assertTrue(plant_registers != [])
+
+        expectedPlantRegisters = {'Alibaba': [{
+                'name': 'inversor1',
+                'type': 'inverter',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('power', 626)])]
+            }]
+        }
+        self.maxDiff=None
+        self.assertDictEqual(plant_registers, expectedPlantRegisters)
+
+    def test__ProductionPlant_getRegisters__mock_test(self):
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing.yaml', self.testPlantname())
+
+        for d in plant.devices:
+            for v in d.modmap.values():
+                v.get_registers = MagicMock(return_value=[ns([('power', 626)])])
+
+        plant_registers = plant.get_registers()
+
+        # list not empty
+        self.assertTrue(plant_registers != [])
+
+    def test__ProductionPlant_getRegisters__oneInverter_oneString(self):
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing_inverter_strings.yaml', self.testPlantname())
+
+        plant.devices[0].modmap['holding_registers'].get_registers = MagicMock(return_value=[ns([('power', 626)])])
+        plant.devices[1].modmap['holding_registers'].get_registers = MagicMock(return_value=[ns([('string1:intensity_mA', 100)])])
+
+        plant_registers = plant.get_registers()
+
+        expected = {'Alibaba': [{
+                'name': 'inversor1',
+                'type': 'inverter',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('power', 626)])]
+            },{
+                'name': 'inversor1Strings',
+                'type': 'inverterStrings',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('string1:intensity_mA', 100)])]
+            }]
+        }
+        self.maxDiff=None
+        self.assertDictEqual(plant_registers, expected)
+
+    def test__ProductionPlant_getRegisters__oneInverter_manyStrings(self):
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing_inverter_strings.yaml', self.testPlantname())
+
+        plant.devices[0].modmap['holding_registers'].get_registers = MagicMock(return_value=[ns([('power', 626)])])
+        plant.devices[1].modmap['holding_registers'].get_registers = MagicMock(return_value=[
+            ns([('string1:intensity_mA', 100),('string2:intensity_mA', 200)])
+        ])
+
+        plant_registers = plant.get_registers()
+
+        expected = {'Alibaba': [{
+                'name': 'inversor1',
+                'type': 'inverter',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('power', 626)])]
+            },{
+                'name': 'inversor1Strings',
+                'type': 'inverterStrings',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('string1:intensity_mA', 100),
+                               ('string2:intensity_mA', 200)])]
+            }]
+        }
+        self.maxDiff=None
+        self.assertDictEqual(plant_registers, expected)
+
+    def test__ProductionPlant_getRegisters__oneInverter_oneString_twoRegisterTypes(self):
+
+        plant = ProductionPlant()
+        plant.load('test_data/modmap_testing_inverter_strings_two_register_types.yaml', self.testPlantname())
+
+        plant.devices[0].modmap['holding_registers'].get_registers = MagicMock(return_value=[ns([('power', 626)])])
+        plant.devices[0].modmap['input_registers'].get_registers = MagicMock(return_value=[ns([('uptime', 300)])])
+        plant.devices[1].modmap['holding_registers'].get_registers = MagicMock(return_value=[ns([('string1:intensity_mA', 100)])])
+
+        plant_registers = plant.get_registers()
+
+        expected = {'Alibaba': [{
+                'name': 'inversor1',
+                'type': 'inverter',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('power', 626)])]
+            },{
+                'name': 'inversor1',
+                'type': 'inverter',
+                'model': 'aros-solar',
+                'register_type': 'input_registers',
+                'fields': [ns([('uptime', 300)])]
+            },{
+                'name': 'inversor1Strings',
+                'type': 'inverterStrings',
+                'model': 'aros-solar',
+                'register_type': 'holding_registers',
+                'fields': [ns([('string1:intensity_mA', 100)])]
+            }]
+        }
+        self.maxDiff=None
+        self.assertDictEqual(plant_registers, expected)
+
     def test__ProductionDevice_getRegisters__oneSensor(self):
         aSensor = ProductionDevice()
         device_data = self.sensorDeviceNS()
@@ -304,7 +431,7 @@ class Resource_Test(unittest.TestCase):
     def test__ProductionDevice_getRegisters__NoConnection(self):
 
         plant = ProductionPlant()
-        plant.load('conf/modmap_testing.yaml', self.testPlantname())
+        plant.load('test_data/modmap_testing.yaml', self.testPlantname())
 
         for dev in plant.devices:
             dev.get_registers = Mock(side_effect=ConnectionException('Failed to connect'))

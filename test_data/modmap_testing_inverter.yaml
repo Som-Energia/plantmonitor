@@ -1,0 +1,25 @@
+plantmonitor:
+- name: Alibaba
+  description: Alibaba
+  enabled: True
+  devices:
+    - name: inversor1
+      type: inverter
+      description: inversor1
+      model: aros-solar
+      enabled: True
+      modmap:
+        - type: holding_registers
+          registers:
+            0 :  power_w
+          scan:
+            start: 0
+            range: 1
+      protocol:
+        type: TCP
+        ip: 10.0.0.1
+        port: 502
+        slave: 1
+        timeout: 10
+
+# vim: ts=4 sw=4 et

@@ -34,13 +34,11 @@ class ProductionPlant():
         return True
 
     def get_registers(self):
-        all_metrics = []
+        all_metrics = {self.name: []}
         for device in self.devices:
             try:
-                data = {}
                 metrics = device.get_registers()
-                data[self.name] = metrics
-                all_metrics.append(data)
+                all_metrics[self.name] = all_metrics[self.name] + metrics
             except Exception as e:
                 msg = "An error ocurred getting registers from inverter: %s"
                 logger.exception(msg, e)
