@@ -367,4 +367,23 @@ CREATE TABLE "simelregistry" (
   PRIMARY KEY ("simel", "time")
 );
 
-ALTER TABLE "simelregistry" ADD CONSTRAINT "fk_simelregistry__simel" FOREIGN KEY ("simel") REFERENCES "simel" ("id") ON DELETE CASCADE
+ALTER TABLE "simelregistry" ADD CONSTRAINT "fk_simelregistry__simel" FOREIGN KEY ("simel") REFERENCES "simel" ("id") ON DELETE CASCADE;
+
+CREATE TABLE "string" (
+  "id" SERIAL PRIMARY KEY,
+  "inverter" INTEGER NOT NULL,
+  "name" TEXT NOT NULL
+);
+
+CREATE INDEX "idx_string__inverter" ON "string" ("inverter");
+
+ALTER TABLE "string" ADD CONSTRAINT "fk_string__inverter" FOREIGN KEY ("inverter") REFERENCES "inverter" ("id") ON DELETE CASCADE;
+
+CREATE TABLE "stringregistry" (
+  "string" INTEGER NOT NULL,
+  "time" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "intensity_ma" BIGINT,
+  PRIMARY KEY ("string", "time")
+);
+
+ALTER TABLE "stringregistry" ADD CONSTRAINT "fk_stringregistry__string" FOREIGN KEY ("string") REFERENCES "string" ("id") ON DELETE CASCADE
