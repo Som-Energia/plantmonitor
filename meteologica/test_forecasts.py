@@ -506,6 +506,50 @@ class DailyDownload_Test(unittest.TestCase):
         expectedResponse = 'OK'
         self.assertEqual(responses[plant.codename], expectedResponse)
 
+    def test__lastForecastDownloaded__checkLastDateAdded(self):
+
+        alcolea = Plant(
+            name=self.mainFacility(),
+            codename='SomEnergia_{}'.format(self.mainFacility()),
+        )
+
+        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        time2 = datetime.datetime(2020, 12, 10, 16, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+
+        data = {
+            self.mainFacility(): [
+                (todt("2040-01-02 00:00:00"), 10),
+                (todt("2040-01-02 01:00:00"), 20),
+            ],
+        }
+
+        data2 = {
+            self.mainFacility(): [
+                (todt("2040-01-02 02:00:00"), 30),
+                (todt("2040-01-02 03:00:00"), 40),
+            ],
+        }
+
+        status = 'OK'
+        forecastDate = time
+        forecastDate2 = time2
+
+        forecastMetadata = ForecastMetadata.create(
+            plant=alcolea, forecastdate=forecastDate, errorcode=status)
+        forecastMetadata = ForecastMetadata.create(
+            plant=alcolea, forecastdate=forecastDate2, errorcode=status)
+
+        forecastMetadata.addForecasts(data[self.mainFacility()])
+        forecastMetadata.addForecasts(data2[self.mainFacility()])
+
+        orm.flush()
+
+        forecastDate = alcolea.lastForecastDownloaded()
+
+        expectedForecastDate = time2
+
+        self.assertEqual(forecastDate, expectedForecastDate)
+
     def __test_downloadForecast_setup(self):
 
         forecastMeta = self.sampleForecastMeta(self.mainFacility(), time)
