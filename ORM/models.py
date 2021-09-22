@@ -154,7 +154,7 @@ class Plant(database.Entity):
     def lastForecastDownloaded(self):
         # TODO when the forecast was made doesn't represent the forecast dates,
         # we might prefer checking all forecasts and get the latest
-        return orm.select(f.forecastdate for f in self.forecastMetadatas).order_by(1).first()
+        return orm.select(f.forecastdate for f in self.forecastMetadatas).order_by(-1).first()
 
     def importPlant(self, nsplant):
         plant = nsplant
