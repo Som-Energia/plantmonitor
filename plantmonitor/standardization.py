@@ -79,7 +79,7 @@ def alcolea_inverter_to_plantdata(inverter_name, inverter_registers):
     uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
     temperature_dc = int(round(inverter_registers['temp_inv_dc']))
     strings = {
-        'String:{}'.format(r) : v
+        'String:{}:intensity_mA'.format(r.split(':')[0]) : v*100
         for r,v in inverter_registers.items() if r.startswith('string')
     }
 
@@ -116,6 +116,10 @@ def florida_inverter_to_plantdata(inverter_name, inverter_registers):
     energy_wh = 100*int(round((inverter_registers['e_total_h_hwh'] << 16) + inverter_registers['e_total_l_hwh']))
     uptime_h = int(round((inverter_registers['h_total_h_h'] << 16) + inverter_registers['h_total_l_h']))
     temperature_dc = int(round(inverter_registers['temp_inv_dc']))
+    strings = {
+        'String:{}:intensity_mA'.format(r.split(':')[0]) : v*100
+        for r,v in inverter_registers.items() if r.startswith('string')
+    }
 
     reading = {
         'energy_wh': energy_wh,
@@ -127,6 +131,7 @@ def florida_inverter_to_plantdata(inverter_name, inverter_registers):
         'uptime_h': uptime_h,
         'temperature_dc': temperature_dc,
         'time': time,
+        **strings
     }
 
     inverter_registers_plantdata['readings'].append(reading)
@@ -139,27 +144,31 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
         'readings': []
     }
 
-    #TODO should we assume one single register instead of multiple?
     #TODO check that registers values are watts, and not kilowatts
-    for register in inverter_registers:
-        time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
-        #TODO meld toghether Uint16 _h _l into Uint32
-        energy_wh = 10*int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))
-        power_w = int(round(inverter_registers['ActivePower_dW']/10))
-        uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
-        temperature_dc = None
+    time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
+    #TODO meld toghether Uint16 _h _l into Uint32
+    energy_wh = 10*int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))
+    power_w = int(round(inverter_registers['ActivePower_dW']/10))
+    uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
+    temperature_dc = None
+    # TODO consider using sscanf to match string%d:intensity_dA
+    strings = {
+        'String:{}:intensity_mA'.format(r.split(':')[0]) : v*100
+        for r,v in inverter_registers.items() if r.startswith('string')
+    }
 
-        reading = {
-            'energy_wh': energy_wh,
-            'power_w': power_w,
-            'intensity_cc_mA': None,
-            'intensity_ca_mA': None,
-            'voltage_cc_mV': None,
-            'voltage_ca_mV': None,
-            'uptime_h': uptime_h,
-            'temperature_dc': temperature_dc,
-            'time': time,
-        }
+    reading = {
+        'energy_wh': energy_wh,
+        'power_w': power_w,
+        'intensity_cc_mA': None,
+        'intensity_ca_mA': None,
+        'voltage_cc_mV': None,
+        'voltage_ca_mV': None,
+        'uptime_h': uptime_h,
+        'temperature_dc': temperature_dc,
+        'time': time,
+        **strings
+    }
 
     inverter_registers_plantdata['readings'].append(reading)
 

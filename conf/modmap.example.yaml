@@ -50,12 +50,12 @@ plantmonitor:
       modmap:
         - type: holding_registers
           registers:
-            900 :  string1:intensity_mA
-            901 :  string2:intensity_mA
-            902 :  string3:intensity_mA
-            903 :  string4:intensity_mA
-            904 :  string5:intensity_mA
-            905 :  string6:intensity_mA
+            900 :  string1:intensity_dA
+            901 :  string2:intensity_dA
+            902 :  string3:intensity_dA
+            903 :  string4:intensity_dA
+            904 :  string5:intensity_dA
+            905 :  string6:intensity_dA
           scan:
             start: 0
             range: 6

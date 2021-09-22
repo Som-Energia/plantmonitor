@@ -664,8 +664,8 @@ class Standardization_Test(unittest.TestCase):
             'uptime_h': 18827,
             'voltage_ca_mV': None,
             'voltage_cc_mV': None,
-            'String:string1:intensity_mA': 100,
-            'String:string2:intensity_mA': 200
+            'String:string1:intensity_mA': 1000,
+            'String:string2:intensity_mA': 2000
         }
 
     def test__alcolea_inverter_to_plantdata__strings(self):
@@ -673,8 +673,8 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         inverter_registers = self.inverter_registers()
         inverter_time = inverter_registers['time']
-        inverter_registers['string1:intensity_mA'] = 100
-        inverter_registers['string2:intensity_mA'] = 200
+        inverter_registers['string1:intensity_dA'] = 10
+        inverter_registers['string2:intensity_dA'] = 20
         inverter_name = 'Alice'
 
         inverter_registers_plantdata = alcolea_inverter_to_plantdata(inverter_name, inverter_registers)
@@ -690,8 +690,8 @@ class Standardization_Test(unittest.TestCase):
 
         inverter_registers = self.fontivsolar_inverter_registers()
         inverter_time = inverter_registers['time']
-        inverter_registers['string1:intensity_mA'] = 100
-        inverter_registers['string2:intensity_mA'] = 200
+        inverter_registers['string1:intensity_dA'] = 10
+        inverter_registers['string2:intensity_dA'] = 20
         inverter_name = 'Alice'
 
         inverter_registers_plantdata = alcolea_inverter_to_plantdata(inverter_name, inverter_registers)
@@ -707,8 +707,8 @@ class Standardization_Test(unittest.TestCase):
 
         inverter_registers = self.florida_inverter_registers()
         inverter_time = inverter_registers['time']
-        inverter_registers['string1:intensity_mA'] = 100
-        inverter_registers['string2:intensity_mA'] = 200
+        inverter_registers['string1:intensity_dA'] = 10
+        inverter_registers['string2:intensity_dA'] = 20
         inverter_name = 'Alice'
 
         inverter_registers_plantdata = florida_inverter_to_plantdata(inverter_name, inverter_registers)
