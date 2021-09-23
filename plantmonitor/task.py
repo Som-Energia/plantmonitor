@@ -139,8 +139,9 @@ def get_plant_reading(plant):
 
     logger.debug("plants Registers: {}".format(plants_registers))
 
-    if len(plants_registers) > 0:
-        logger.error("plants Registers: {}".format(plants_registers))
+    if len(plants_registers) == 0:
+        logger.error("plant Registers is empty: {}".format(plants_registers))
+        return None
 
     if plant.name not in plants_registers:
         logger.error("plant {} is not in registers {}. Check the plant modmap.".format(plant.name, plants_registers.keys()))
