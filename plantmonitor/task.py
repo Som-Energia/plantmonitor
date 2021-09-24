@@ -152,8 +152,8 @@ def task():
         plantname = envinfo.ACTIVEPLANT_CONF['activeplant']
 
         # TODO remove legacy
-        if plantname == 'Alcolea':
-            legacyInfluxUpload()
+        #if plantname == 'Alcolea':
+        #    legacyInfluxUpload()
 
         plant = ProductionPlant()
 
@@ -239,8 +239,9 @@ def task_daily_download_from_api_meteologica(test_env=True):
 
 
 def task_integral():
-    with orm.db_session:
-        computeIntegralMetrics()
+    pass
+    # with orm.db_session:
+    #     computeIntegralMetrics()
 
 def task_daily_download_from_api_solargis():
     from external_api.api_solargis import ApiSolargis
