@@ -513,42 +513,37 @@ class DailyDownload_Test(unittest.TestCase):
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
-        time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
-        time2 = datetime.datetime(2020, 12, 10, 16, 5, 10, 588861, tzinfo=datetime.timezone.utc)
-
-        data = {
-            self.mainFacility(): [
-                (todt("2040-01-02 00:00:00"), 10),
-                (todt("2040-01-02 01:00:00"), 20),
-            ],
-        }
-
-        data2 = {
-            self.mainFacility(): [
-                (todt("2040-01-02 02:00:00"), 30),
-                (todt("2040-01-02 03:00:00"), 40),
-            ],
-        }
+        oldForecastDate = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
+        newForecastDate = oldForecastDate + datetime.timedelta(hours=1)
 
         status = 'OK'
-        forecastDate = time
-        forecastDate2 = time2
 
-        forecastMetadata = ForecastMetadata.create(
-            plant=alcolea, forecastdate=forecastDate, errorcode=status)
-        forecastMetadata = ForecastMetadata.create(
-            plant=alcolea, forecastdate=forecastDate2, errorcode=status)
+        oldForecastMetadata = ForecastMetadata.create(
+            plant=alcolea, forecastdate=oldForecastDate, errorcode=status)
+        newForecastMetadata = ForecastMetadata.create(
+            plant=alcolea, forecastdate=newForecastDate, errorcode=status)
 
-        forecastMetadata.addForecasts(data[self.mainFacility()])
-        forecastMetadata.addForecasts(data2[self.mainFacility()])
+        oldForecast = [
+            (todt("2040-01-02 00:00:00"), 10),
+            (todt("2040-01-02 01:00:00"), 20),
+        ]
+
+        newForecast = [
+                (todt("2040-01-02 02:00:00"), 30),
+                (todt("2040-01-02 03:00:00"), 40),
+        ]
+
+
+        oldForecastMetadata.addForecasts(oldForecast)
+        newForecastMetadata.addForecasts(newForecast)
 
         orm.flush()
 
-        forecastDate = alcolea.lastForecastDownloaded()
+        lastForecastDate = alcolea.lastForecastDownloaded()
 
-        expectedForecastDate = time2
+        expectedForecastDate = newForecastDate
 
-        self.assertEqual(forecastDate, expectedForecastDate)
+        self.assertEqual(lastForecastDate, expectedForecastDate)
 
     def __test_downloadForecast_setup(self):
 
