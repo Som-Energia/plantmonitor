@@ -8,11 +8,12 @@ is_safe: true
 name: Energia Exportada Comptadors i PR
 options:
   parameters:
-  - name: planta
-    title: planta
+  - name: plant
+    title: plant
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 9
     type: query
     locals: []
   - name: granularity

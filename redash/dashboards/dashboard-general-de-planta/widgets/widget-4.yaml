@@ -1,9 +1,9 @@
 options:
   parameterMappings:
-    planta:
+    plant:
       type: dashboard-level
       mapTo: planta
-      name: planta
+      name: plant
       value: null
       title: ''
     interval:
@@ -22,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 1
-    row: 16
+    row: 14
 text: ''
 visualization: queries/potencia-tots-els-inversors-amb-temps-i-granularitat/visualizations/chart.yaml
 width: 1

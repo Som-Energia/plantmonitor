@@ -1,6 +1,8 @@
 datasource:
   1: datasources/plantmonitor.yaml
   2: datasources/redash-query-results.yaml
+  5: datasources/energes.yaml
+  4: datasources/exiom.yaml
 query:
   28: queries/metriques-d-inversor-v2-una-metrica
   27: queries/metriques-d-inversor-v2-dropdown-per-metrica-amb-rollup
@@ -63,6 +65,46 @@ query:
   68: queries/alarma-de-inversores
   67: queries/prediccio-energia-mensual
   66: queries/new-query-5
+  114: queries/intensitat-d-inversors-pivotada
+  113: queries/irradiation-and-inverter-power-timeseries-merge
+  112: queries/asof-with-join
+  111: queries/asof-lateral-test-version-2
+  110: queries/asof-timeseries-lateral-test
+  109: queries/potencia-del-inversor-e-irradiancia-de-planta
+  108: queries/copy-of-105-intensitat-dels-strings-d-inversor-energes
+  107: queries/intensitat-dels-inversors-energes
+  106: queries/intensitat-dels-inversors-exiom
+  105: queries/intensitat-dels-strings-d-inversor-energes
+  104: queries/intensitat-dels-strings-d-inversor-exiom
+  103: queries/intensitat-d-inversors
+  101: queries/intensitat-dels-strings-d-inversor
+  100: queries/strings-d-inversor-amb-granularitat-i-grouping
+  97: queries/strings-d-inversor-amb-granularitat
+  96: queries/energia-exportada-comptadors-amb-granularitat-mensual
+  95: queries/irradiacion-y-temperatura-modulo-energes
+  94: queries/test-inverter-daily-energy-florida
+  93: queries/test-energy-diaria-exiom
+  92: queries/test-dades-inversor-exiom
+  91: queries/test-energy-florida
+  90: queries/enegia-mensual-inversores-energes-alcolea-2
+  89: queries/energia-inversor-florida-incremental
+  88: queries/energia-mensual-inversores-florida-energes
+  87: queries/energia-mensual-inversores-energes-alcolea
+  86: queries/temperatura-media-inversores-energes
+  85: queries/plant-list-energes
+  84: queries/potencia-inversor-energes
+  83: queries/temperatura-inversor-exiom
+  82: queries/energia-inversor-mensual-exiom
+  81: queries/potencia-inversor-exiom
+  80: queries/plant-list-exiom
+  79: queries/energia-exportada-comptadors-amb-granularitat
+  77: queries/irradiancia-i-irradiacio-amb-mitja-ponderada
+  76: queries/numero-de-lectures-de-sonda-al-dia
+  75: queries/totes-les-alarmes
+  74: queries/estat-de-totes-les-plantes
+  73: queries/energia-total-diaria-de-totes-les-plantes
+  72: queries/potencia-de-totes-les-plantes
+  71: queries/energia-esperada-i-perduda-despres-del-comptador
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -160,12 +202,89 @@ visualization:
   105: queries/alarma-de-inversores/visualizations/table.yaml
   103: queries/prediccio-energia-mensual/visualizations/table.yaml
   102: queries/new-query-5/visualizations/table.yaml
+  187: queries/intensitat-d-inversors-pivotada/visualizations/table.yaml
+  188: queries/intensitat-d-inversors-pivotada/visualizations/chart.yaml
+  189: queries/intensitat-d-inversors-pivotada/visualizations/pivot-table.yaml
+  186: queries/irradiation-and-inverter-power-timeseries-merge/visualizations/table.yaml
+  185: queries/asof-with-join/visualizations/table.yaml
+  184: queries/asof-lateral-test-version-2/visualizations/table.yaml
+  183: queries/asof-timeseries-lateral-test/visualizations/table.yaml
+  182: queries/potencia-del-inversor-e-irradiancia-de-planta/visualizations/table.yaml
+  180: queries/copy-of-105-intensitat-dels-strings-d-inversor-energes/visualizations/table.yaml
+  181: queries/copy-of-105-intensitat-dels-strings-d-inversor-energes/visualizations/chart.yaml
+  178: queries/intensitat-dels-inversors-energes/visualizations/table.yaml
+  179: queries/intensitat-dels-inversors-energes/visualizations/chart.yaml
+  176: queries/intensitat-dels-inversors-exiom/visualizations/table.yaml
+  177: queries/intensitat-dels-inversors-exiom/visualizations/chart.yaml
+  174: queries/intensitat-dels-strings-d-inversor-energes/visualizations/table.yaml
+  175: queries/intensitat-dels-strings-d-inversor-energes/visualizations/chart.yaml
+  172: queries/intensitat-dels-strings-d-inversor-exiom/visualizations/table.yaml
+  173: queries/intensitat-dels-strings-d-inversor-exiom/visualizations/chart.yaml
+  170: queries/intensitat-d-inversors/visualizations/table.yaml
+  171: queries/intensitat-d-inversors/visualizations/chart.yaml
+  166: queries/intensitat-dels-strings-d-inversor/visualizations/table.yaml
+  167: queries/intensitat-dels-strings-d-inversor/visualizations/chart.yaml
+  165: queries/strings-d-inversor-amb-granularitat-i-grouping/visualizations/chart.yaml
+  164: queries/strings-d-inversor-amb-granularitat-i-grouping/visualizations/table.yaml
+  159: queries/strings-d-inversor-amb-granularitat/visualizations/chart.yaml
+  158: queries/strings-d-inversor-amb-granularitat/visualizations/table.yaml
+  156: queries/energia-exportada-comptadors-amb-granularitat-mensual/visualizations/table.yaml
+  157: queries/energia-exportada-comptadors-amb-granularitat-mensual/visualizations/chart.yaml
+  153: queries/irradiacion-y-temperatura-modulo-energes/visualizations/table.yaml
+  154: queries/irradiacion-y-temperatura-modulo-energes/visualizations/chart.yaml
+  151: queries/test-inverter-daily-energy-florida/visualizations/table.yaml
+  152: queries/test-inverter-daily-energy-florida/visualizations/chart.yaml
+  149: queries/test-energy-diaria-exiom/visualizations/table.yaml
+  150: queries/test-energy-diaria-exiom/visualizations/chart.yaml
+  147: queries/test-dades-inversor-exiom/visualizations/table.yaml
+  148: queries/test-dades-inversor-exiom/visualizations/chart.yaml
+  145: queries/test-energy-florida/visualizations/table.yaml
+  146: queries/test-energy-florida/visualizations/chart.yaml
+  143: queries/enegia-mensual-inversores-energes-alcolea-2/visualizations/table.yaml
+  144: queries/enegia-mensual-inversores-energes-alcolea-2/visualizations/chart.yaml
+  142: queries/energia-inversor-florida-incremental/visualizations/chart.yaml
+  141: queries/energia-inversor-florida-incremental/visualizations/table.yaml
+  139: queries/energia-mensual-inversores-florida-energes/visualizations/table.yaml
+  140: queries/energia-mensual-inversores-florida-energes/visualizations/chart.yaml
+  138: queries/energia-mensual-inversores-energes-alcolea/visualizations/chart.yaml
+  137: queries/energia-mensual-inversores-energes-alcolea/visualizations/table.yaml
+  136: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
+  135: queries/temperatura-media-inversores-energes/visualizations/table.yaml
+  133: queries/plant-list-energes/visualizations/table.yaml
+  132: queries/potencia-inversor-energes/visualizations/table.yaml
+  134: queries/potencia-inversor-energes/visualizations/chart.yaml
+  130: queries/temperatura-inversor-exiom/visualizations/table.yaml
+  131: queries/temperatura-inversor-exiom/visualizations/chart.yaml
+  128: queries/energia-inversor-mensual-exiom/visualizations/table.yaml
+  129: queries/energia-inversor-mensual-exiom/visualizations/chart.yaml
+  126: queries/potencia-inversor-exiom/visualizations/table.yaml
+  127: queries/potencia-inversor-exiom/visualizations/chart.yaml
+  125: queries/plant-list-exiom/visualizations/table.yaml
+  124: queries/energia-exportada-comptadors-amb-granularitat/visualizations/table.yaml
+  155: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
+  121: queries/irradiancia-i-irradiacio-amb-mitja-ponderada/visualizations/table.yaml
+  122: queries/irradiancia-i-irradiacio-amb-mitja-ponderada/visualizations/chart.yaml
+  120: queries/numero-de-lectures-de-sonda-al-dia/visualizations/chart.yaml
+  118: queries/numero-de-lectures-de-sonda-al-dia/visualizations/table.yaml
+  116: queries/totes-les-alarmes/visualizations/table.yaml
+  114: queries/estat-de-totes-les-plantes/visualizations/table.yaml
+  115: queries/estat-de-totes-les-plantes/visualizations/chart.yaml
+  112: queries/energia-total-diaria-de-totes-les-plantes/visualizations/table.yaml
+  113: queries/energia-total-diaria-de-totes-les-plantes/visualizations/energia.yaml
+  110: queries/potencia-de-totes-les-plantes/visualizations/table.yaml
+  111: queries/potencia-de-totes-les-plantes/visualizations/potencia.yaml
+  109: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/chart.yaml
+  108: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
   1: dashboards/grafiques-puntuals
   7: dashboards/sandbox
   8: dashboards/dashboard-combinat
+  12: dashboards/dashboard-comptadors
+  11: dashboards/dashboard-energes
+  10: dashboards/dashboard-exiom-matallana
+  9: dashboards/dashboard-global
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -203,3 +322,85 @@ widget:
   54: dashboards/dashboard-dinamic-de-planta/widgets/widget-6.yaml
   51: dashboards/dashboard-general-de-planta/widgets/widget-5.yaml
   56: dashboards/dashboard-general-de-planta/widgets/widget-12.yaml
+  93: dashboards/dashboard-comptadors/widgets/widget.yaml
+  159: dashboards/dashboard-comptadors/widgets/widget-2.yaml
+  108: dashboards/dashboard-comptadors/widgets/widget-3.yaml
+  117: dashboards/dashboard-comptadors/widgets/widget-4.yaml
+  96: dashboards/dashboard-comptadors/widgets/widget-5.yaml
+  107: dashboards/dashboard-comptadors/widgets/widget-6.yaml
+  106: dashboards/dashboard-comptadors/widgets/widget-7.yaml
+  113: dashboards/dashboard-comptadors/widgets/widget-8.yaml
+  105: dashboards/dashboard-comptadors/widgets/widget-9.yaml
+  121: dashboards/dashboard-comptadors/widgets/widget-10.yaml
+  97: dashboards/dashboard-comptadors/widgets/widget-11.yaml
+  100: dashboards/dashboard-comptadors/widgets/widget-12.yaml
+  92: dashboards/dashboard-comptadors/widgets/widget-13.yaml
+  115: dashboards/dashboard-comptadors/widgets/widget-14.yaml
+  102: dashboards/dashboard-comptadors/widgets/widget-15.yaml
+  118: dashboards/dashboard-comptadors/widgets/widget-16.yaml
+  110: dashboards/dashboard-comptadors/widgets/widget-17.yaml
+  98: dashboards/dashboard-comptadors/widgets/widget-18.yaml
+  114: dashboards/dashboard-comptadors/widgets/widget-19.yaml
+  111: dashboards/dashboard-comptadors/widgets/widget-20.yaml
+  104: dashboards/dashboard-comptadors/widgets/widget-21.yaml
+  101: dashboards/dashboard-comptadors/widgets/widget-22.yaml
+  150: dashboards/dashboard-comptadors/widgets/widget-23.yaml
+  140: dashboards/dashboard-comptadors/widgets/widget-24.yaml
+  135: dashboards/dashboard-comptadors/widgets/widget-25.yaml
+  116: dashboards/dashboard-comptadors/widgets/widget-26.yaml
+  120: dashboards/dashboard-comptadors/widgets/widget-27.yaml
+  122: dashboards/dashboard-comptadors/widgets/widget-28.yaml
+  123: dashboards/dashboard-comptadors/widgets/widget-29.yaml
+  137: dashboards/dashboard-comptadors/widgets/widget-30.yaml
+  147: dashboards/dashboard-comptadors/widgets/widget-31.yaml
+  141: dashboards/dashboard-comptadors/widgets/widget-32.yaml
+  143: dashboards/dashboard-comptadors/widgets/widget-33.yaml
+  153: dashboards/dashboard-comptadors/widgets/widget-34.yaml
+  152: dashboards/dashboard-comptadors/widgets/widget-35.yaml
+  149: dashboards/dashboard-comptadors/widgets/widget-36.yaml
+  145: dashboards/dashboard-comptadors/widgets/widget-37.yaml
+  148: dashboards/dashboard-comptadors/widgets/widget-38.yaml
+  136: dashboards/dashboard-comptadors/widgets/widget-39.yaml
+  119: dashboards/dashboard-comptadors/widgets/widget-40.yaml
+  146: dashboards/dashboard-comptadors/widgets/widget-41.yaml
+  156: dashboards/dashboard-comptadors/widgets/widget-42.yaml
+  155: dashboards/dashboard-comptadors/widgets/widget-43.yaml
+  154: dashboards/dashboard-comptadors/widgets/widget-44.yaml
+  157: dashboards/dashboard-comptadors/widgets/widget-45.yaml
+  165: dashboards/dashboard-comptadors/widgets/widget-46.yaml
+  158: dashboards/dashboard-comptadors/widgets/widget-47.yaml
+  163: dashboards/dashboard-comptadors/widgets/widget-48.yaml
+  162: dashboards/dashboard-comptadors/widgets/widget-49.yaml
+  160: dashboards/dashboard-comptadors/widgets/widget-50.yaml
+  166: dashboards/dashboard-comptadors/widgets/widget-51.yaml
+  164: dashboards/dashboard-comptadors/widgets/widget-52.yaml
+  84: dashboards/dashboard-energes/widgets/widget.yaml
+  85: dashboards/dashboard-energes/widgets/widget-2.yaml
+  89: dashboards/dashboard-energes/widgets/widget-3.yaml
+  86: dashboards/dashboard-energes/widgets/widget-4.yaml
+  87: dashboards/dashboard-energes/widgets/widget-5.yaml
+  81: dashboards/dashboard-energes/widgets/widget-6.yaml
+  77: dashboards/dashboard-energes/widgets/widget-7.yaml
+  79: dashboards/dashboard-energes/widgets/widget-8.yaml
+  133: dashboards/dashboard-energes/widgets/widget-9.yaml
+  83: dashboards/dashboard-energes/widgets/widget-10.yaml
+  138: dashboards/dashboard-energes/widgets/widget-11.yaml
+  130: dashboards/dashboard-energes/widgets/widget-12.yaml
+  139: dashboards/dashboard-energes/widgets/widget-13.yaml
+  74: dashboards/dashboard-exiom-matallana/widgets/widget.yaml
+  76: dashboards/dashboard-exiom-matallana/widgets/widget-2.yaml
+  72: dashboards/dashboard-exiom-matallana/widgets/widget-3.yaml
+  128: dashboards/dashboard-exiom-matallana/widgets/widget-4.yaml
+  134: dashboards/dashboard-exiom-matallana/widgets/widget-5.yaml
+  60: dashboards/dashboard-global/widgets/widget.yaml
+  63: dashboards/dashboard-global/widgets/widget-2.yaml
+  58: dashboards/dashboard-global/widgets/widget-3.yaml
+  59: dashboards/dashboard-global/widgets/widget-4.yaml
+  62: dashboards/dashboard-global/widgets/widget-5.yaml
+  66: dashboards/sandbox/widgets/widget-2.yaml
+  65: dashboards/sandbox/widgets/widget-3.yaml
+  68: dashboards/sandbox/widgets/widget-4.yaml
+  125: dashboards/dashboard-dinamic-de-planta/widgets/widget-7.yaml
+  127: dashboards/dashboard-dinamic-de-planta/widgets/widget-8.yaml
+  57: dashboards/grafiques-puntuals/widgets/widget-5.yaml
+  124: dashboards/grafiques-puntuals/widgets/widget-8.yaml

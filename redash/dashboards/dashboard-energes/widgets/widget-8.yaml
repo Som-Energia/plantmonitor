@@ -1,0 +1,34 @@
+options:
+  parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Florida
+      title: ''
+    interval:
+      type: widget-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    granularity:
+      type: widget-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 47
+text: ''
+visualization: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
+width: 1

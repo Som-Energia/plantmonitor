@@ -1,0 +1,30 @@
+can_edit: true
+data_source_id: datasources/energes.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Potencia inversor Energes
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Florida
+    queryId: queries/plant-list-energes
+    parentQueryId: 84
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: datetime-range
+    parentQueryId: 84
+schedule: null
+tags:
+- energes
+- tecnics
+version: 1

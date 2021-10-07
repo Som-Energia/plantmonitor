@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 2
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 8
+text: ''
+visualization: queries/estat-de-totes-les-plantes/visualizations/chart.yaml
+width: 1

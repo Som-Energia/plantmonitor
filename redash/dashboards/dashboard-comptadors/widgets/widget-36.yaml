@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: '3'
+      title: ''
+    interval:
+      type: static-value
+      mapTo: interval
+      name: interval
+      value: d_this_year
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 2
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 4
+    row: 133
+text: ''
+visualization: queries/energia-importada-mensual/visualizations/table.yaml
+width: 1

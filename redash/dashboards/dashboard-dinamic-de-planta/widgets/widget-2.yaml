@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 10
+    row: 13
 text: ''
 visualization: queries/metriques-de-comptador/visualizations/chart.yaml
 width: 1

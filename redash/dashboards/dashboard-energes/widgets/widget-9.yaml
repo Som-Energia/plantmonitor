@@ -1,0 +1,34 @@
+options:
+  parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Alcolea
+      title: ''
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 9
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 3
+    row: 19
+text: ''
+visualization: queries/intensitat-dels-strings-d-inversor-energes/visualizations/chart.yaml
+width: 1

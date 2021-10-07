@@ -1,15 +1,15 @@
-SELECT sum(reg.import_energy_wh) AS import_energy_wh,
-       date_trunc('month'::text, reg."time") AS "time",
+SELECT date_trunc('month', reg."time" at time zone 'Europe/Madrid') AS "time",
+       sum(reg.import_energy_wh) AS import_energy_wh,
        plant.name AS plant_name,
        meter.name AS "meter_name::filter"
 FROM meterregistry AS reg
 LEFT JOIN meter ON meter.id = reg.meter
 LEFT JOIN plant ON plant.id = meter.plant
 WHERE plant.id = {{ plant }}
-  AND reg.time >= '{{ interval.start }}'
-  AND reg.time <= '{{ interval.end }}'
+  AND reg.time at time zone 'Europe/Madrid'>= '{{ interval.start }}'
+  AND reg.time at time zone 'Europe/Madrid'<= '{{ interval.end }}'
 GROUP BY plant.name,
          reg.meter,
          meter.name,
-         date_trunc('month'::text, reg.time)
-ORDER BY date_trunc('month'::text, reg.time)
+         date_trunc('month', reg."time" at time zone 'Europe/Madrid')
+ORDER BY date_trunc('month', reg."time" at time zone 'Europe/Madrid')

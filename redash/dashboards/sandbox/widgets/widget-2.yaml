@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    planta:
+      type: dashboard-level
+      mapTo: planta
+      name: planta
+      value: null
+      title: ''
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 10
+text: ''
+visualization: queries/irradiancia-i-irradiacio/visualizations/chart.yaml
+width: 1

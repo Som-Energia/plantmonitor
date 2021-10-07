@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/exiom.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Intensitat dels strings d'inversor exiom
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Matallana
+    queryId: queries/all-plants
+    parentQueryId: 104
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: datetime-range
+    parentQueryId: 104
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+    parentQueryId: 104
+    type: enum
+    locals: []
+schedule: null
+tags:
+- exiom
+- tecnics
+version: 1

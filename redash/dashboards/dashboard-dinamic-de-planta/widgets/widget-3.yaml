@@ -34,7 +34,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 18
+    row: 21
 text: ''
 visualization: queries/metriques-d-inversor-v2-dropdown-per-metrica-amb-rollup/visualizations/chart.yaml
 width: 1

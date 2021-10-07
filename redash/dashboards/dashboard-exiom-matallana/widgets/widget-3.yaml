@@ -1,0 +1,22 @@
+options:
+  parameterMappings:
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 0
+text: ''
+visualization: queries/potencia-inversor-exiom/visualizations/chart.yaml
+width: 1

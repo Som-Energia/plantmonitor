@@ -9,5 +9,6 @@ name: Potència esperada i energia esperada instantania
 options:
   parameters: []
 schedule: null
-tags: []
+tags:
+- paperera
 version: 1

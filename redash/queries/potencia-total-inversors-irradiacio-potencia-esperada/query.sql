@@ -9,17 +9,16 @@ SELECT coalesce(inv_power."time"  at time zone 'Europe/Madrid', sensorirradiatio
    FROM inverterregistry AS ireg
    LEFT JOIN inverter ON inverter.id = ireg.inverter
    LEFT JOIN plant ON plant.id = inverter.plant
-   WHERE plant.name = '{{ planta }}'
+   WHERE plant.name = '{{ plant }}'
      AND ireg."time" at time zone 'Europe/Madrid' >= '{{ interval.start }}'
      AND ireg."time" at time zone 'Europe/Madrid' <= '{{ interval.end }}'
    GROUP BY ireg.time,
             plant.id) AS inv_power
-join sensor on sensor.plant = inv_power.plant
-join sensorirradiationregistry on sensorirradiationregistry.sensor = sensor and sensorirradiationregistry.time = inv_power.time
-join view_expected_power on view_expected_power.plant = inv_power.plant and view_expected_power.time = inv_power.time
-join plant on plant.id = inv_power.plant
-   WHERE sensor.classtype = 'SensorIrradiation' and plant.name = '{{ planta }}'
+left join sensor on sensor.plant = inv_power.plant and sensor.classtype = 'SensorIrradiation'
+left join sensorirradiationregistry on sensorirradiationregistry.sensor = sensor and sensorirradiationregistry.time = inv_power.time
+left join view_expected_power on view_expected_power.plant = inv_power.plant and view_expected_power.time = inv_power.time
+left join plant on plant.id = inv_power.plant
+   WHERE plant.name = '{{ plant }}'
      AND inv_power."time" at time zone 'Europe/Madrid' >= '{{ interval.start }}'
      AND inv_power."time" at time zone 'Europe/Madrid' <= '{{ interval.end }}'
-ORDER BY temps
-LIMIT 10000;
+ORDER BY temps;

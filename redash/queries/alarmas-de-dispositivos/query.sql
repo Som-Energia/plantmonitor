@@ -9,4 +9,4 @@ FROM
    FROM query_68
    UNION SELECT *
    FROM query_69) AS alarms
-WHERE plant_name='Alcolea'
+WHERE plant_name='{{ plant }}'

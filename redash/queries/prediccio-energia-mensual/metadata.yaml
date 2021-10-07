@@ -5,7 +5,7 @@ is_archived: false
 is_draft: false
 is_favorite: false
 is_safe: true
-name: Predicció energia mensual
+name: Predicció energia meteologica amb granularitat
 options:
   parameters:
   - name: plant

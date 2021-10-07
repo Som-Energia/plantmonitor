@@ -1,4 +1,4 @@
-SELECT coalesce(irradiationsensor.time, ambientreg.time) as temps,
+SELECT coalesce(irradiationsensor.time, ambientreg.time) at time zone 'Europe/Madrid' as temps,
        irradiationsensor.irradiation_w_m2 as irradiation_w_m2,
        irradiationsensor.temperature_dc/10.0 as irradiation_temp_c,
        ambientreg.temperature_dc/10.0 as temperature_modul_c

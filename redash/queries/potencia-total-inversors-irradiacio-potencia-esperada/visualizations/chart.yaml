@@ -12,7 +12,7 @@ options:
   yAxis:
   - type: linear
     title:
-      text: Energia [kW]
+      text: Potència [kW]
   - opposite: true
     type: linear
     title:

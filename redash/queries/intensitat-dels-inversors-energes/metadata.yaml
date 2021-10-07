@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/energes.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Intensitat dels inversors energes
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Florida
+    queryId: queries/all-plants
+    parentQueryId: 107
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: datetime-range
+    parentQueryId: 107
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+    parentQueryId: 107
+    type: enum
+    locals: []
+schedule: null
+tags:
+- tecnics
+- energes
+version: 1

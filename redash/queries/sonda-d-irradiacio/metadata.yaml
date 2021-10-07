@@ -13,12 +13,13 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 4
     type: query
     locals: []
   - name: granularity
     title: granularity
     global: false
-    value: hour
+    value: minute
     enumOptions: |-
       minute
       hour
@@ -30,9 +31,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value:
-      start: 2021-05-20 13:32
-      end: 2021-05-27 13:32
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 4

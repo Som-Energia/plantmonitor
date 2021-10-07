@@ -1,0 +1,14 @@
+can_edit: true
+data_source_id: datasources/redash-query-results.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Estat de totes les plantes
+options:
+  parameters: []
+schedule: null
+tags:
+- Projectes
+version: 1

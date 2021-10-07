@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Intensitat d'inversors
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Matallana
+    queryId: queries/all-plants
+    parentQueryId: 103
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+    parentQueryId: 103
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: datetime-range
+    parentQueryId: 103
+schedule: null
+tags:
+- Projectes
+- indicadors-propis
+version: 1

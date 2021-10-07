@@ -34,7 +34,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 3
-    row: 10
+    row: 13
 text: ''
 visualization: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
 width: 1

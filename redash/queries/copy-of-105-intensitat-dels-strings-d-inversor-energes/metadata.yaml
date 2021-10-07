@@ -1,0 +1,40 @@
+can_edit: true
+data_source_id: datasources/energes.yaml
+description: null
+is_archived: false
+is_draft: true
+is_favorite: false
+is_safe: true
+name: Copy of (#105) Intensitat dels strings d'inversor energes
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Florida
+    queryId: queries/all-plants
+    locals: []
+    type: query
+    parentQueryId: 105
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    parentQueryId: 105
+    type: datetime-range
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+    locals: []
+    type: enum
+    parentQueryId: 105
+schedule: null
+tags: []
+version: 1

@@ -1,6 +1,6 @@
 SELECT coalesce(reg.time, view_expected_power.time) AS "time",
        reg.expected_energy_wh,
-       view_expected_power.expected_power_hourly_sum
+       view_expected_power.expected_power_w_hourly_sum
 FROM hourlysensorirradiationregistry AS reg
 LEFT JOIN
   (SELECT date_trunc('hour', view_expected_power.time) AS "time",

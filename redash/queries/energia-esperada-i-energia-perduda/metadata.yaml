@@ -5,7 +5,7 @@ is_archived: false
 is_draft: false
 is_favorite: false
 is_safe: true
-name: Energia esperada i energia perduda
+name: Energia esperada i energia perduda (antiga, errònia)
 options:
   parameters:
   - name: planta
@@ -37,6 +37,6 @@ options:
     parentQueryId: 39
 schedule: null
 tags:
-- Projectes
-- projectes-taules
+- revisar-IT
+- paperera
 version: 1

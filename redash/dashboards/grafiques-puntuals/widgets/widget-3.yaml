@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 8
+    row: 16
 text: ''
 visualization: queries/numero-de-lectures-d-inversor/visualizations/chart.yaml
 width: 1

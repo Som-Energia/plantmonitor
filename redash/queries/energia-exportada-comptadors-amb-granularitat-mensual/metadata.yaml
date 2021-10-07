@@ -1,0 +1,40 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Energia exportada Comptadors amb granularitat mensual
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Riudarenes_ZE
+    queryId: queries/all-plants
+    parentQueryId: 96
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: month
+    enumOptions: |-
+      day
+      month
+      year
+    parentQueryId: 96
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 96
+schedule: null
+tags:
+- Projectes
+version: 1

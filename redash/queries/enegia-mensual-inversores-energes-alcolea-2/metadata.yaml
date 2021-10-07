@@ -1,0 +1,27 @@
+can_edit: true
+data_source_id: datasources/energes.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: false
+name: Enegia mensual inversores Energes Alcolea 2
+options:
+  parameters:
+  - name: granularity
+    title: granularity
+    global: false
+    value: day
+    locals: []
+    type: text
+    parentQueryId: 90
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: datetime-range
+    parentQueryId: 90
+schedule: null
+tags: []
+version: 1

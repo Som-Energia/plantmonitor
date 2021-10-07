@@ -1,9 +1,9 @@
 options:
   parameterMappings:
-    planta:
+    plant:
       type: dashboard-level
       mapTo: planta
-      name: planta
+      name: plant
       value: null
       title: ''
     interval:
@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 4
-    row: 16
+    row: 14
 text: ''
 visualization: queries/exportada-pr/visualizations/chart.yaml
 width: 1

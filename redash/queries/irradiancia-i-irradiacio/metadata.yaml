@@ -13,12 +13,13 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 43
     type: query
     locals: []
   - name: interval
     title: interval
     global: false
-    value: d_last_month
+    value: d_this_month
     locals: []
     type: datetime-range
     parentQueryId: 43

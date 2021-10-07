@@ -9,5 +9,6 @@ name: Energia esperada
 options:
   parameters: []
 schedule: null
-tags: []
+tags:
+- paperera
 version: 1

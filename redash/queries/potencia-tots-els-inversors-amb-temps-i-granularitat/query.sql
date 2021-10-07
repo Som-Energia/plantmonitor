@@ -5,7 +5,7 @@ SELECT reg.time at time zone 'Europe/Madrid' AS temps,
 FROM inverterregistry AS reg
 LEFT JOIN inverter ON inverter.id=reg.inverter
 LEFT JOIN plant ON plant.id=inverter.plant
-WHERE plant.name='{{ planta }}'
+WHERE plant.name='{{ plant }}'
   AND reg.time >= '{{ interval.start }}'
   AND reg.time <= '{{ interval.end }}'
 GROUP BY reg.time at time zone 'Europe/Madrid',
