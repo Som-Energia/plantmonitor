@@ -16,6 +16,7 @@ from .standardization import (
     registers_to_plant_data,
     wattia_sensor_to_plantdata,
     string_inverter_registers_merge,
+    getFVstrings,
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -441,6 +442,49 @@ class Standardization_Test(unittest.TestCase):
         self.maxDiff=None
         self.assertEqual(len(expected_merged_devices_registers), 2)
         self.assertListEqual(expected_merged_devices_registers, merged_devices_registers)
+
+    def test__getFVstrings__inverter_one_string_per_registry(self):
+
+        inverter_registers = {
+            'string1:intensity_dA': 62,
+            'string2:intensity_dA': 61,
+            'string3:intensity_dA': 0
+        }
+
+        inverter_strings = getFVstrings(inverter_registers)
+
+        expected_strings = {
+            'String:string1:intensity_mA': 6200,
+            'String:string2:intensity_mA': 6100,
+            'String:string3:intensity_mA': 0,
+        }
+
+        self.maxDiff = None
+        self.assertEqual(len(inverter_strings), len(expected_strings))
+        self.assertDictEqual(expected_strings, inverter_strings)
+
+    def test__getFVstrings__inverter_two_strings_per_registry(self):
+
+        inverter_registers = {
+            'string1_string2:intensity_dA': 15933,
+            'string3_string4:intensity_dA': 61,
+            'string5_string6:intensity_dA': 0
+        }
+
+        inverter_strings = getFVstrings(inverter_registers)
+
+        expected_strings = {
+            'String:string1:intensity_mA': 6100,
+            'String:string2:intensity_mA': 6200,
+            'String:string3:intensity_mA': 6100,
+            'String:string4:intensity_mA': 0,
+            'String:string5:intensity_mA': 0,
+            'String:string6:intensity_mA': 0,
+        }
+
+        self.maxDiff = None
+        self.assertEqual(len(inverter_strings), len(expected_strings))
+        self.assertDictEqual(expected_strings, inverter_strings)
 
     def test__registers_to_plant_data__notime(self):
 

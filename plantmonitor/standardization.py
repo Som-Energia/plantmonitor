@@ -138,6 +138,18 @@ def florida_inverter_to_plantdata(inverter_name, inverter_registers):
 
     return inverter_registers_plantdata
 
+def getFVstrings(inverter_registers):
+    # TODO consider using sscanf to match string%d:intensity_dA
+    strings = {}
+    for r,v in inverter_registers.items():
+        if r.startswith('string'):
+            regname = r.split(':')[0]
+            for i,sname in enumerate(regname.split('_')):
+                intensity_dA = int((v >> 8*i) & 0xFF )
+                fullsname = 'String:{}:intensity_mA'.format(sname)
+                strings[fullsname] = intensity_dA*100
+    return strings
+
 def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     inverter_registers_plantdata = {
         'id': 'Inverter:{}'.format(inverter_name),
@@ -151,11 +163,13 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     power_w = int(round(inverter_registers['ActivePower_dW']/10))
     uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
     temperature_dc = None
-    # TODO consider using sscanf to match string%d:intensity_dA
-    strings = {
-        'String:{}:intensity_mA'.format(r.split(':')[0]) : v*100
-        for r,v in inverter_registers.items() if r.startswith('string')
-    }
+
+    strings = getFVstrings(inverter_registers)
+
+    # we're filtering in the modmap, should we filter here instead?
+    # disconnected_strings = ['string11', 'string12', 'string22', 'string23', 'string24']
+    # connected_strings = {k:v for k,v in strings.items() if k not in disconnected_strings}
+    # strings = connected_strings
 
     reading = {
         'energy_wh': energy_wh,
