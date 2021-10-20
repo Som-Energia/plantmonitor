@@ -552,6 +552,8 @@ class String(RegisterMixin, database.Entity):
     name = Required(str)
     registries = Set('StringRegistry', lazy=True)
     deviceColumnName = 'string'
+    # used as displayname, might be CCP box name + plug slot or string name
+    stringbox_name = Optional(str, nullable=True)
 
     def insertRegistry(self,
         intensity_mA,

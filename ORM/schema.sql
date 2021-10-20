@@ -372,7 +372,8 @@ ALTER TABLE "simelregistry" ADD CONSTRAINT "fk_simelregistry__simel" FOREIGN KEY
 CREATE TABLE "string" (
   "id" SERIAL PRIMARY KEY,
   "inverter" INTEGER NOT NULL,
-  "name" TEXT NOT NULL
+  "name" TEXT NOT NULL,
+  "stringbox_name" TEXT
 );
 
 CREATE INDEX "idx_string__inverter" ON "string" ("inverter");
