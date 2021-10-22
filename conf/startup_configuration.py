@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import conf.logging_configuration
-from influxdb import InfluxDBClient
 from apscheduler.schedulers.blocking import BlockingScheduler
 from plantmonitor.task import (
     task,
@@ -40,7 +39,6 @@ def add_jobs(app):
     if env_active == env['in_plant']:
         app.add_job(task, 'cron', minute='*/5')
     elif env_active == env['plantmonitor_server']:
-        app.add_job(task_counter_erp, 'interval', minutes=20)
         app.add_job(task_meters_erp_to_orm, 'interval', minutes=20)
         app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=17, minute=30)
         app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':False}, hour=18, minute=30)

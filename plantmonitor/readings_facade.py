@@ -2,17 +2,12 @@
 import requests
 
 from pymodbus.client.sync import ModbusTcpClient
-from influxdb import InfluxDBClient
 from plantmonitor.resource import ProductionPlant
 from yamlns import namespace as ns
 from erppeek import Client
 from .meters import (
     telemeasure_meter_names,
     measures_from_date,
-    upload_measures,
-    uploaded_plantmonitor_measures,
-    last_uploaded_plantmonitor_measures,
-    transfer_meter_to_plantmonitor,
     meter_connection_protocol,
 )
 
@@ -38,7 +33,6 @@ import os
 from plantmonitor.storage import (
     PonyMetricStorage,
     ApiMetricStorage,
-    InfluxMetricStorage,
     TimeScaleMetricStorage,
 )
 

@@ -2,26 +2,7 @@
 import json
 import requests
 
-from pymodbus.client.sync import ModbusTcpClient
-from influxdb import InfluxDBClient
-from plantmonitor.resource import ProductionPlant
-from yamlns import namespace as ns
-from erppeek import Client
-from .meters import (
-    telemeasure_meter_names,
-    measures_from_date,
-    upload_measures,
-    uploaded_plantmonitor_measures,
-    last_uploaded_plantmonitor_measures,
-    transfer_meter_to_plantmonitor,
-)
-
-from meteologica.daily_upload_to_api import upload_meter_data
-from meteologica.daily_download_from_api import download_meter_data
-
-import sys
 import psycopg2
-import time
 import datetime
 import conf.config as config
 
@@ -31,29 +12,12 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-import os
 
 from pony import orm
 
 import datetime
 
 from ORM.pony_manager import PonyManager
-
-def client_db(db):
-    try:
-        logger.info("Connecting to Influxdb")
-        flux_client = InfluxDBClient(db['influxdb_ip'],
-                                db['influxdb_port'],
-                                db['influxdb_user'],
-                                db['influxdb_password'],
-                                db['influxdb_database'],
-                                ssl=db['influxdb_ssl'],
-                                verify_ssl=db['influxdb_verify_ssl'])
-    except Exception as e:
-        logger.warning("Failed to connect to influx client: {}".format(repr(e)))
-        flux_client = None
-
-    return flux_client
 
 class PonyMetricStorage:
 
@@ -209,25 +173,6 @@ class ApiMetricStorage:
                 logger.error("Error {} putting plant data".format(r.status_code))
 
             return r.status_code == 200
-
-class InfluxMetricStorage:
-    def __init__(self, config):
-        self._flux = client_db(config)
-
-    def storeInverterMeasures(self, plant_name, inverter_name, metrics):
-        if self._flux is None:
-            return
-        point = dict(
-            measurement = 'sistema_inversor',
-            tags = dict(
-                location = plant_name,
-                inverter_name = inverter_name,
-            ),
-            fields = metrics,
-        )
-
-        self._flux.write_points([point] )
-        logger.info("[INFO] Sent to InfluxDB")
 
 class TimeScaleMetricStorage:
 

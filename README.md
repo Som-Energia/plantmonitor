@@ -18,7 +18,7 @@ The Inverter must be accessible on the network using TCP.
 This script should work on most Inverters that talk Modbus TCP. You can
 customise your own modbus register file.
 
-Install the required Python libraries for pymodbus:
+Install the required Python libraries for pymodbus
 
 ```
 pip install -r requirements.txt
@@ -69,7 +69,7 @@ CREATE database plants;
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 ```
 
-To apply migrations the database
+To apply migrations to the database
 
 ```bash
 yoyo apply -d postgres://postgres:mypassword@localhost/plants ORM/yoyo
