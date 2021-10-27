@@ -11,7 +11,7 @@ options:
   - name: plant
     title: plant
     global: false
-    value: Florida
+    value: Alcolea
     queryId: queries/all-plants
     parentQueryId: 105
     type: query

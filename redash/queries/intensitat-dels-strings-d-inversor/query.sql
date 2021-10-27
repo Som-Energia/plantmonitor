@@ -2,7 +2,8 @@ SELECT date_trunc('{{ granularity }}', reg.time at time zone 'Europe/Madrid') AS
        plant.name AS plant,
        inverter.name as "inverter::filter",
        string.name as string,
-       avg(intensity_mA)/1000.0 as intensity_A
+       coalesce(string.stringbox_name, string.name) as stringbox,
+       sum(intensity_mA)/1000.0 as intensity_A
 FROM stringregistry AS reg
 LEFT JOIN string on string.id = reg.string
 LEFT JOIN inverter ON inverter.id=string.inverter
@@ -13,6 +14,7 @@ WHERE plant.name='{{ plant }}'
 GROUP BY date_trunc('{{ granularity }}', reg.time at time zone 'Europe/Madrid'),
          plant.name,
          "inverter::filter",
-         string.name
+         string.name,
+         string.stringbox_name
 order by temps, plant, "inverter::filter", string desc;
 

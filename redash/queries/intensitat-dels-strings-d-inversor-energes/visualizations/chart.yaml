@@ -25,43 +25,118 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    string8:
-      zIndex: 0
+    E6_CC3.7:
+      zIndex: 11
       index: 0
       type: line
       yAxis: 0
-    string6:
-      zIndex: 2
+    E5_CC4.4:
+      zIndex: 19
       index: 0
       type: line
       yAxis: 0
-    string7:
-      zIndex: 1
+    E5_CC3.4:
+      zIndex: 12
       index: 0
       type: line
       yAxis: 0
-    string4:
-      zIndex: 4
+    E6_CC4.3:
+      zIndex: 18
       index: 0
       type: line
       yAxis: 0
-    string5:
-      zIndex: 3
+    E3_CC4.6:
+      zIndex: 21
       index: 0
       type: line
       yAxis: 0
-    string2:
+    E2_CC1.3:
       zIndex: 6
       index: 0
       type: line
       yAxis: 0
-    string3:
+    E7_CC4.2:
+      zIndex: 17
+      index: 0
+      type: line
+      yAxis: 0
+    E8_CC1.1:
+      zIndex: 0
+      index: 0
+      type: line
+      yAxis: 0
+    E2_CC1.7:
+      zIndex: 8
+      index: 0
+      type: line
+      yAxis: 0
+    E3_CC3.6:
+      zIndex: 14
+      index: 0
+      type: line
+      yAxis: 0
+    E4_CC1.5:
+      zIndex: 4
+      index: 0
+      type: line
+      yAxis: 0
+    E8_CC3.1:
+      zIndex: 9
+      index: 0
+      type: line
+      yAxis: 0
+    E3_CC1.6:
       zIndex: 5
       index: 0
       type: line
       yAxis: 0
-    string1:
+    E7_CC3.2:
+      zIndex: 10
+      index: 0
+      type: line
+      yAxis: 0
+    E4_CC3.5:
+      zIndex: 13
+      index: 0
+      type: line
+      yAxis: 0
+    E7_CC1.2:
+      zIndex: 1
+      index: 0
+      type: line
+      yAxis: 0
+    E2_CC4.7:
+      zIndex: 22
+      index: 0
+      type: line
+      yAxis: 0
+    E8_CC4.1:
+      zIndex: 16
+      index: 0
+      type: line
+      yAxis: 0
+    E6_CC1.7:
+      zIndex: 2
+      index: 0
+      type: line
+      yAxis: 0
+    E4_CC4.5:
+      zIndex: 20
+      index: 0
+      type: line
+      yAxis: 0
+    E6_CC1.3:
       zIndex: 7
+      index: 0
+      type: line
+      yAxis: 0
+    E2_CC3.3:
+      zIndex: 15
+      index: 0
+      type: line
+      yAxis: 0
+    E5_CC1.4:
+      zIndex: 3
       index: 0
       type: line
       yAxis: 0
@@ -74,7 +149,8 @@ options:
   columnMapping:
     temps: x
     intensity_a: y
-    string: series
+    stringbox: series
+    string: unused
   textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly

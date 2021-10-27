@@ -11,7 +11,7 @@ options:
   - name: plant
     title: plant
     global: false
-    value: Matallana
+    value: Fontivsolar
     queryId: queries/all-plants
     parentQueryId: 103
     type: query
@@ -31,7 +31,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_last_7_days
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 103

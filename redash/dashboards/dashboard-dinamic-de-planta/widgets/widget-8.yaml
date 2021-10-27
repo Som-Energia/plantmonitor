@@ -7,13 +7,13 @@ options:
       value: null
       title: ''
     interval:
-      type: dashboard-level
+      type: widget-level
       mapTo: interval
       name: interval
       value: null
       title: ''
     granularity:
-      type: dashboard-level
+      type: widget-level
       mapTo: granularity
       name: granularity
       value: null
@@ -22,7 +22,7 @@ options:
   position:
     autoHeight: false
     sizeX: 3
-    sizeY: 8
+    sizeY: 10
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5

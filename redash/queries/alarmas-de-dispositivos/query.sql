@@ -10,3 +10,4 @@ FROM
    UNION SELECT *
    FROM query_69) AS alarms
 WHERE plant_name='{{ plant }}'
+order by alarm_status_int asc

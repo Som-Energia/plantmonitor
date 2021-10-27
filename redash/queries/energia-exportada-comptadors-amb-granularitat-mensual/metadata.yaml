@@ -32,7 +32,7 @@ options:
     global: false
     value: d_this_year
     locals: []
-    type: datetime-range
+    type: datetime-range-with-seconds
     parentQueryId: 96
 schedule: null
 tags:

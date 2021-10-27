@@ -74,7 +74,8 @@ options:
   columnMapping:
     temps: x
     intensity_a: y
-    string: series
+    stringbox: series
+    string: unused
   textFormat: ''
   customCode: |-
     // Available variables are x, ys, element, and Plotly

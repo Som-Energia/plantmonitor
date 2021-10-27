@@ -105,6 +105,25 @@ query:
   73: queries/energia-total-diaria-de-totes-les-plantes
   72: queries/potencia-de-totes-les-plantes
   71: queries/energia-esperada-i-perduda-despres-del-comptador
+  135: queries/alarma-d-inversors-temperatura-anomala-respecte-minim
+  134: queries/alarma-d-inversors-temperatura-versus-altres-inversors
+  133: queries/alarma-d-inversors-temperatura-anomala-respecte-min-max-v2
+  132: queries/alarma-d-inversors-temperatura-anomala-respecte-min-max-amb-having
+  131: queries/alarma-d-inversors-temperatura-anomala-amb-rank
+  129: queries/alarma-d-strings-intensitat-nula-amb-radiacio
+  128: queries/alarma-potencia-nula-amb-radiacio-tots-els-inversors
+  127: queries/alarm-test
+  126: queries/alarma-d-inversors-temperatura-anomala-respecte-mitja
+  124: queries/alarma-potencia-nula-amb-radiacio-amb-time-bucket
+  123: queries/energia-exportada-comptadors-amb-granularitat-diaria-amb-time-bucket
+  122: queries/energia-exportada-comptadors-amb-granularitat-mensual-amb-time-bucket-ng
+  121: queries/alarma-potencia-nula-amb-radiacio-amb-union
+  120: queries/inversors-i-irradiacio-instantania-ultima-lectura
+  119: queries/inversors-i-irradiacio-amb-granularitat
+  118: queries/inversors-i-irradiacio
+  117: queries/inversors-i-irradiacio-comencant-per-la-sonda
+  116: queries/irradiation-and-inverter-power-timeseries-union
+  115: queries/produccio-respecto-a-prediccio-meteologica
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -275,6 +294,28 @@ visualization:
   111: queries/potencia-de-totes-les-plantes/visualizations/potencia.yaml
   109: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/chart.yaml
   108: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/table.yaml
+  214: queries/alarma-d-inversors-temperatura-anomala-respecte-minim/visualizations/table.yaml
+  213: queries/alarma-d-inversors-temperatura-versus-altres-inversors/visualizations/table.yaml
+  212: queries/alarma-d-inversors-temperatura-anomala-respecte-min-max-v2/visualizations/table.yaml
+  211: queries/alarma-d-inversors-temperatura-anomala-respecte-min-max-amb-having/visualizations/table.yaml
+  210: queries/alarma-d-inversors-temperatura-anomala-amb-rank/visualizations/table.yaml
+  207: queries/alarma-d-strings-intensitat-nula-amb-radiacio/visualizations/table.yaml
+  206: queries/alarma-potencia-nula-amb-radiacio-tots-els-inversors/visualizations/table.yaml
+  205: queries/alarm-test/visualizations/table.yaml
+  204: queries/alarma-d-inversors-temperatura-anomala-respecte-mitja/visualizations/table.yaml
+  202: queries/alarma-potencia-nula-amb-radiacio-amb-time-bucket/visualizations/table.yaml
+  200: queries/energia-exportada-comptadors-amb-granularitat-diaria-amb-time-bucket/visualizations/table.yaml
+  201: queries/energia-exportada-comptadors-amb-granularitat-diaria-amb-time-bucket/visualizations/chart.yaml
+  198: queries/energia-exportada-comptadors-amb-granularitat-mensual-amb-time-bucket-ng/visualizations/table.yaml
+  199: queries/energia-exportada-comptadors-amb-granularitat-mensual-amb-time-bucket-ng/visualizations/chart.yaml
+  196: queries/alarma-potencia-nula-amb-radiacio-amb-union/visualizations/table.yaml
+  195: queries/inversors-i-irradiacio-instantania-ultima-lectura/visualizations/table.yaml
+  194: queries/inversors-i-irradiacio-amb-granularitat/visualizations/table.yaml
+  193: queries/inversors-i-irradiacio/visualizations/table.yaml
+  192: queries/inversors-i-irradiacio-comencant-per-la-sonda/visualizations/table.yaml
+  191: queries/irradiation-and-inverter-power-timeseries-union/visualizations/table.yaml
+  190: queries/produccio-respecto-a-prediccio-meteologica/visualizations/table.yaml
+  197: queries/produccio-respecto-a-prediccio-meteologica/visualizations/chart.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -285,6 +326,7 @@ dashboard:
   11: dashboards/dashboard-energes
   10: dashboards/dashboard-exiom-matallana
   9: dashboards/dashboard-global
+  13: dashboards/dashboard-somrenovables
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -404,3 +446,5 @@ widget:
   127: dashboards/dashboard-dinamic-de-planta/widgets/widget-8.yaml
   57: dashboards/grafiques-puntuals/widgets/widget-5.yaml
   124: dashboards/grafiques-puntuals/widgets/widget-8.yaml
+  168: dashboards/dashboard-somrenovables/widgets/widget.yaml
+  167: dashboards/dashboard-somrenovables/widgets/widget-2.yaml

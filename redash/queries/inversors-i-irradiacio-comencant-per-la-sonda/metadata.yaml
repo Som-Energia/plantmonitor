@@ -1,0 +1,27 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Inversors i irradiació (començant per la sonda)
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_week
+    type: datetime-range
+    locals: []
+schedule: null
+tags:
+- Proves-IT
+version: 1

@@ -13,6 +13,7 @@ options:
     global: false
     value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 70
     type: query
     locals: []
 schedule:

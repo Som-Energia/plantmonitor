@@ -11,14 +11,15 @@ options:
   - name: plant
     title: plant
     global: false
-    value: Matallana
+    value: Alcolea
     queryId: queries/all-plants
+    parentQueryId: 101
     type: query
     locals: []
   - name: interval
     title: interval
     global: false
-    value: d_last_7_days
+    value: d_this_week
     locals: []
     type: datetime-range
     parentQueryId: 101
@@ -31,6 +32,7 @@ options:
       hour
       day
       month
+    parentQueryId: 101
     type: enum
     locals: []
 schedule: null

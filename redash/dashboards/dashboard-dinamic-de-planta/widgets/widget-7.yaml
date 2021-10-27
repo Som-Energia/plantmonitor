@@ -13,7 +13,7 @@ options:
       value: null
       title: ''
     granularity:
-      type: dashboard-level
+      type: widget-level
       mapTo: granularity
       name: granularity
       value: null

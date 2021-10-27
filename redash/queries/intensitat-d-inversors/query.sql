@@ -1,7 +1,7 @@
 SELECT date_trunc('{{ granularity }}', reg.time at time zone 'Europe/Madrid') AS temps,
        plant.name AS plant,
        inverter.name as inverter,
-       avg(intensity_mA)/1000.0 as intensity_A
+       sum(intensity_mA)/1000.0 as intensity_A
 FROM stringregistry AS reg
 LEFT JOIN string on string.id = reg.string
 LEFT JOIN inverter ON inverter.id=string.inverter

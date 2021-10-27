@@ -1,0 +1,40 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: timeseries merge amb lateral basat en la idea asof
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Inversors i irradiació amb granularitat
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    parentQueryId: 119
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    locals: []
+    type: datetime-range
+    parentQueryId: 119
+  - name: granularity
+    title: granularity
+    global: false
+    value: hour
+    enumOptions: |-
+      minute
+      hour
+      day
+      month
+      year
+    type: enum
+    locals: []
+schedule: null
+tags: []
+version: 1
