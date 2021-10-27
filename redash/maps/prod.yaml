@@ -124,6 +124,7 @@ query:
   117: queries/inversors-i-irradiacio-comencant-per-la-sonda
   116: queries/irradiation-and-inverter-power-timeseries-union
   115: queries/produccio-respecto-a-prediccio-meteologica
+  136: queries/sonda-d-irradiacio-actual-historics
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -316,6 +317,8 @@ visualization:
   191: queries/irradiation-and-inverter-power-timeseries-union/visualizations/table.yaml
   190: queries/produccio-respecto-a-prediccio-meteologica/visualizations/table.yaml
   197: queries/produccio-respecto-a-prediccio-meteologica/visualizations/chart.yaml
+  217: queries/sonda-d-irradiacio-actual-historics/visualizations/chart.yaml
+  215: queries/sonda-d-irradiacio-actual-historics/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
