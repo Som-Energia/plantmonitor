@@ -128,6 +128,8 @@ query:
   139: queries/alarma-3-inversors-temperatura-anomala-via-lag
   138: queries/alarma-3-inversors-temperatura-anomala-scatter
   137: queries/alarma-3-inversors-temperatura-anomala-historic
+  141: queries/orto-i-ocaso-sensor-irradiacio
+  140: queries/alarma-estacio-meteologica
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -328,6 +330,9 @@ visualization:
   221: queries/alarma-3-inversors-temperatura-anomala-scatter/visualizations/chart.yaml
   218: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/table.yaml
   219: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/chart.yaml
+  225: queries/orto-i-ocaso-sensor-irradiacio/visualizations/table.yaml
+  224: queries/alarma-estacio-meteologica/visualizations/table.yaml
+  226: queries/alarma-estacio-meteologica/visualizations/chart.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta

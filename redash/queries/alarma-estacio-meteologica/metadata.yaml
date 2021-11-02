@@ -1,0 +1,22 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alarma estació meteologica
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_last_7_days
+    locals: []
+    type: date-range
+    parentQueryId: 140
+schedule: null
+tags:
+- Projectes
+- Alarma
+version: 1
