@@ -1,0 +1,20 @@
+can_edit: true
+data_source_id: datasources/plantmonitor.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Orto i Ocaso sensor irradiació
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    locals: []
+    type: date-range
+    parentQueryId: 141
+schedule: null
+tags: []
+version: 1
