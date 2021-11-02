@@ -125,6 +125,9 @@ query:
   116: queries/irradiation-and-inverter-power-timeseries-union
   115: queries/produccio-respecto-a-prediccio-meteologica
   136: queries/sonda-d-irradiacio-actual-historics
+  139: queries/alarma-3-inversors-temperatura-anomala-via-lag
+  138: queries/alarma-3-inversors-temperatura-anomala-scatter
+  137: queries/alarma-3-inversors-temperatura-anomala-historic
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -319,6 +322,12 @@ visualization:
   197: queries/produccio-respecto-a-prediccio-meteologica/visualizations/chart.yaml
   217: queries/sonda-d-irradiacio-actual-historics/visualizations/chart.yaml
   215: queries/sonda-d-irradiacio-actual-historics/visualizations/table.yaml
+  222: queries/alarma-3-inversors-temperatura-anomala-via-lag/visualizations/table.yaml
+  223: queries/alarma-3-inversors-temperatura-anomala-via-lag/visualizations/chart.yaml
+  220: queries/alarma-3-inversors-temperatura-anomala-scatter/visualizations/table.yaml
+  221: queries/alarma-3-inversors-temperatura-anomala-scatter/visualizations/chart.yaml
+  218: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/table.yaml
+  219: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/chart.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
