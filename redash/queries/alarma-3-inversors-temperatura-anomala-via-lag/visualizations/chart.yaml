@@ -1,0 +1,62 @@
+description: ''
+name: Chart
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: true
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0[.]00000
+  yAxis:
+  - type: category
+    rangeMin: null
+  - type: linear
+    opposite: true
+  series:
+    stacking: null
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: scatter
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    Alcolea:
+      zIndex: 1
+      index: 0
+      type: scatter
+      yAxis: 0
+    Florida:
+      zIndex: 0
+      index: 0
+      type: scatter
+      yAxis: 0
+    Matallana:
+      zIndex: 2
+      index: 0
+      type: scatter
+      yAxis: 0
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: datetime
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    plant: unused
+    device_name: y
+    plant_name: series
+    time: x
+    inverter_name: unused
+    inverter: unused
+  textFormat: '{{inverter_name}} {{time}}'
+  customCode: |-
+    // Available variables are x, ys, element, and Plotly
+    // Type console.log(x, ys); for more info about x and ys
+    // To plot your graph call Plotly.plot(element, ...)
+    // Plotly examples and docs: https://plot.ly/javascript/
+  legend:
+    enabled: true
+type: CHART
