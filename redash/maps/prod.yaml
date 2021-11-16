@@ -3,6 +3,7 @@ datasource:
   2: datasources/redash-query-results.yaml
   5: datasources/energes.yaml
   4: datasources/exiom.yaml
+  6: datasources/sunrise-sunset.yaml
 query:
   28: queries/metriques-d-inversor-v2-una-metrica
   27: queries/metriques-d-inversor-v2-dropdown-per-metrica-amb-rollup
@@ -130,6 +131,8 @@ query:
   137: queries/alarma-3-inversors-temperatura-anomala-historic
   141: queries/orto-i-ocaso-sensor-irradiacio
   140: queries/alarma-estacio-meteologica
+  143: queries/alba-i-posta-via-met-no-api
+  142: queries/alba-i-posta-via-s-s-api
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -333,6 +336,8 @@ visualization:
   225: queries/orto-i-ocaso-sensor-irradiacio/visualizations/table.yaml
   224: queries/alarma-estacio-meteologica/visualizations/table.yaml
   226: queries/alarma-estacio-meteologica/visualizations/chart.yaml
+  228: queries/alba-i-posta-via-met-no-api/visualizations/table.yaml
+  227: queries/alba-i-posta-via-s-s-api/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta

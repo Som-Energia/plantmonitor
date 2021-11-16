@@ -1,0 +1,20 @@
+can_edit: true
+data_source_id: datasources/sunrise-sunset.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alba i posta via s-s API
+options:
+  parameters:
+  - name: date
+    title: date
+    global: false
+    value: d_now
+    locals: []
+    type: date
+    parentQueryId: 142
+schedule: null
+tags: []
+version: 1

@@ -22,11 +22,10 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    Riudarenes_SM:
+    Llanillos:
       zIndex: 0
       index: 0
       type: column
-      name: ''
       yAxis: 0
   valuesOptions: {}
   xAxis:

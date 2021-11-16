@@ -10,7 +10,8 @@ options:
     type: data
   numberFormat: 0,0[.]00000
   yAxis:
-  - type: linear
+  - type: category
+    rangeMin: null
   - type: linear
     opposite: true
   series:
@@ -22,23 +23,52 @@ options:
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
-    Alcolea:
+    alarm_12_equal:
+      zIndex: 3
+      index: 0
+      type: scatter
+      color: '#FB8D3D'
+      yAxis: 0
+    current_ok:
       zIndex: 0
       index: 0
       type: scatter
+      color: '#3BD973'
+      yAxis: 0
+    alarm_massa_irradiacio:
+      zIndex: 2
+      index: 0
+      type: scatter
+      color: '#002FB4'
+      yAxis: 0
+    current_alarm:
+      zIndex: 1
+      index: 0
+      type: scatter
+      color: '#E92828'
+      yAxis: 0
+    alarm_zero:
+      zIndex: 4
+      index: 0
+      type: scatter
+      color: '#A58AFF'
       yAxis: 0
   valuesOptions: {}
   xAxis:
     labels:
       enabled: true
     type: '-'
+  reverseY: false
   dateTimeFormat: DD/MM/YY HH:mm
   columnMapping:
-    sonda_zero: y
-    sensor: unused
-    sonda_massa_irradiacio: y
-    plant_name: series
-  textFormat: ''
+    current_ok: y
+    alarm_massa_irradiacio: y
+    temps: x
+    plant_name: unused
+    alarm_zero: y
+    alarm_12_equal: y
+    current_alarm: y
+  textFormat: '{{ plant_name }}'
   customCode: |-
     // Available variables are x, ys, element, and Plotly
     // Type console.log(x, ys); for more info about x and ys
