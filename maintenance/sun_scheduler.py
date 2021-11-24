@@ -23,20 +23,27 @@ class SunGenerator:
     def next_sunrise(self, start):
         next_rise = self.obs.next_rising(ephem.Sun(), start=start, use_center=False)
         next_rise_dt = ephem.localtime(next_rise)
-        print(next_rise)
+        print(next_rise_dt)
         return next_rise_dt
+
+    def next_sunset(self, start):
+        next_set = self.obs.next_rising(ephem.Sun(), start=start, use_center=False)
+        next_set_dt = ephem.localtime(next_set)
+        print(next_set_dt)
+        return next_set_dt
 
     def generate_sunevents(self, start=None, end=None):
         start = datetime.now(datetime.timezone.utc)
-        step = timedelta(hours='1h')
 
         time_cursor = start
         sunevents = []
 
         while time_cursor < end:
-            next_rise = self.next_sunrise(start)
-            sunevents.append(next_rise)
-            time_cursor = next_rise + step
+            next_rise = self.next_sunrise(time_cursor)
+            time_cursor = next_rise
+            next_set = self.next_sunset(time_cursor)
+            time_cursor = next_set
+            sunevents.append((next_rise,next_set))
 
         return sunevents
 
