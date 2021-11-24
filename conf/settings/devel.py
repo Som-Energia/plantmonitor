@@ -9,3 +9,6 @@ DB_CONF = devel_env.json('DATABASE_CONF')
 ACTIVEPLANT_CONF = devel_env.json('PLANT_CONF')
 
 API_CONFIG = devel_env.json('API_CONFIG')
+
+MONSOL = devel_env.json('MONSOL')
+MONSOL_CREDENTIALS = devel_env.json('MONSOL_CREDENTIALS')
