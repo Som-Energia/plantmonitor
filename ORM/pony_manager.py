@@ -146,3 +146,9 @@ class PonyManager:
                         logger.warning("Plant {} is unknown to database".format(plant_name))
                     else:
                         self.db.SolarEvent(plant=p, sunrise=sunrise, sunset=sunset)
+
+            @classmethod
+            def insertPlantSolarEvents(cls, plant, solarevents):
+                for se in solarevents:
+                    sunrise, sunset = se
+                    self.db.SolarEvent(plant=plant, sunrise=sunrise, sunset=sunset)
