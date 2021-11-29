@@ -5,12 +5,12 @@ from datetime import datetime, timedelta
 
 import ephem
 
-class SunGenerator:
+class SunEventsGenerator:
 
-    def __init__(self):
+    def __init__(self, latitude, longitude):
         self.obs = ephem.Observer()
-        self.obs.lat = '41.967599'
-        self.obs.long = '2.837782'
+        self.obs.lat = latitude
+        self.obs.lon = longitude
         self.obs.elev = 0
         self.obs.pressure = 0
         # The United States Naval Observatory, rather than computing refraction dynamically,
@@ -33,7 +33,8 @@ class SunGenerator:
         return next_set_dt
 
     def generate_sunevents(self, start=None, end=None):
-        start = datetime.now(datetime.timezone.utc)
+        start = start or datetime.now(datetime.timezone.utc).replace(hour=00, minute=00, second=00)
+        end = end or datetime.now(datetime.timezone.utc).replace(hour=23, minute=59, second=00)
 
         time_cursor = start
         sunevents = []
