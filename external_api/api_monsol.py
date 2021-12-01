@@ -47,7 +47,7 @@ class ApiMonsol:
         # TODO doesn't handle the expiration of token
 
         if self.token:
-            return self.token
+            return 200, self.token
 
         return self.get_token()
 
@@ -58,7 +58,30 @@ class ApiMonsol:
 
         return fecha, hora
 
-    def get_meter(self, date_from=None, date_to=None, granularity=None, device=None):
+    def get_meter_readings(self, date_from=None, date_to=None, granularity=None, device=None):
+        status, readings = self.get_monsol_meter_readings(date_from=None, date_to=None, granularity=None, device=None)
+
+        return self.standarize_monsol_readings(readings)
+
+    def get_current_monsol_meter_readings(self, device=None):
+
+        url = '{}/{}'.format(self.api_url,'obtenerDatosActual/3')
+
+        headers = {'Authorization' : 'Bearer {}'.format(self.token)}
+        # TODO add device as optional value
+        payload = {
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code != 200:
+            logger.error(response.json())
+            return response.status_code, None
+
+        readings = response.json()
+
+        return response.status_code, readings
+
+    def get_monsol_meter_readings(self, date_from=None, date_to=None, granularity=None, device=None):
 
         # TODO handle None for date_from and date_to
         rgranularity = granularity or 60
@@ -66,7 +89,7 @@ class ApiMonsol:
         fecha_ini, hora_ini = self.split_date(date_from)
         fecha_fin, hora_fin = self.split_date(date_to)
 
-        url = '{}/{}'.format(self.api_url,'obtenerDatosActual/3')
+        url = '{}/{}'.format(self.api_url,'obtenerDatosRegistrados/3')
 
         headers = {'Authorization' : 'Bearer {}'.format(self.token)}
         # TODO add device as optional value
@@ -86,3 +109,7 @@ class ApiMonsol:
         readings = response.json()
 
         return response.status_code, readings
+
+    # TODO standarize the readings so we can insert them
+    def standarize_monsol_readings(self, readings):
+        pass

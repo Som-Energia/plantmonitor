@@ -13,6 +13,23 @@ logger = logging.getLogger("plantmonitor")
 
 import os
 
+def monsol_meter_to_plantdata(monsol_meter_readings):
+    labels = ('time', 'export_energy_wh', 'import_energy_wh','r1_VArh','r2_VArh', 'r3_VArh','r4_VArh')
+    return [
+        {
+            'time': datetime.datetime.strptime(
+                    reading['timestamp'], "%d-%m-%Y %H:%M:%S"
+                ).replace(tzinfo=datetime.timezone.utc),
+            'export_energy_wh': 1000*measure[1],
+            'import_energy_wh': 1000*measure[2],
+            'r1_VArh': 1000*measure[3],
+            'r2_VArh': 1000*measure[4],
+            'r3_VArh': 1000*measure[5],
+            'r4_VArh': 1000*measure[6],
+        }
+        for reading in monsol_meter_readings
+    ]
+
 def alcolea_sensorTemperature_to_plantadata(alcolea_sensorTemperature_registers):
     logger.error("Not implemented yet")
 
