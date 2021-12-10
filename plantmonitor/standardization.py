@@ -13,22 +13,25 @@ logger = logging.getLogger("plantmonitor")
 
 import os
 
-def monsol_meter_to_plantdata(monsol_meter_readings):
-    labels = ('time', 'export_energy_wh', 'import_energy_wh','r1_VArh','r2_VArh', 'r3_VArh','r4_VArh')
-    return [
+def monsol_meter_to_plantdata(meter_name, monsol_meter_readings):
+    import pytz
+    meter_plantdata = {'id': 'Meter:{}'.format(meter_name)}
+    meter_plantdata['readings'] = [
         {
-            'time': datetime.datetime.strptime(
-                    reading['timestamp'], "%d-%m-%Y %H:%M:%S"
-                ).replace(tzinfo=datetime.timezone.utc),
-            'export_energy_wh': 1000*measure[1],
-            'import_energy_wh': 1000*measure[2],
-            'r1_VArh': 1000*measure[3],
-            'r2_VArh': 1000*measure[4],
-            'r3_VArh': 1000*measure[5],
-            'r4_VArh': 1000*measure[6],
+            'time':
+                datetime.datetime.strptime(
+                    reading['fecha_completa'], "%Y-%m-%d %H:%M:%S"
+                ).replace(tzinfo=pytz.timezone('Europe/Madrid')).astimezone(datetime.timezone.utc),
+            'export_energy_wh': 1000*reading['eedia'],
+            'import_energy_wh': 1000*reading['eidia'],
+            'r1_VArh': 1000*reading['er1'],
+            'r2_VArh': 1000*reading['er2'],
+            'r3_VArh': 1000*reading['er3'],
+            'r4_VArh': 1000*reading['er4'],
         }
         for reading in monsol_meter_readings
     ]
+    return meter_plantdata
 
 def alcolea_sensorTemperature_to_plantadata(alcolea_sensorTemperature_registers):
     logger.error("Not implemented yet")

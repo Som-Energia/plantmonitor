@@ -806,11 +806,23 @@ class Standardization_Test(unittest.TestCase):
 
     def test__standarize_monsol_meter_readings(self):
 
+        meter_name = '1234578'
         sample = self.sample_historic_reading()
 
-        plant_data = monsol_meter_to_plantdata(sample)
+        plant_data = monsol_meter_to_plantdata(meter_name, sample['data'])
 
-        expected = {}
+        expected = {
+            'id' : 'Meter:{}'.format(meter_name),
+            'readings': [{
+                'time' : dt.datetime(2021, 11, 1, 0, 20, tzinfo=dt.timezone.utc),
+                'export_energy_wh': 0,
+                'import_energy_wh': 3000,
+                'r1_VArh': 274000,
+                'r2_VArh': 1670501000,
+                'r3_VArh': 4885000,
+                'r4_VArh': 107377000,
+            }]
+        }
 
         self.assertDictEqual(plant_data, expected)
 

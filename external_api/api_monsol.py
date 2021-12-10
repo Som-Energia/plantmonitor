@@ -72,7 +72,7 @@ class ApiMonsol:
         payload = {
         }
 
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers)
         if response.status_code != 200:
             logger.error(response.json())
             return response.status_code, None
