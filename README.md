@@ -66,7 +66,7 @@ CREATE database plants;
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 ```
 
-To apply migrations the database 
+To apply migrations the database
 
 ```bash
 yoyo apply -d postgres://postgres:mypassword@localhost/plants ORM/yoyo
@@ -74,6 +74,20 @@ yoyo apply -d postgres://postgres:mypassword@localhost/plants ORM/yoyo
 
 
 4. Run the project.
+
+Scripts
+=======
+
+To write all solar events for a plant run:
+
+```
+$ python scripts/sun_events.py -p Alibaba
+```
+
+you can know the options running
+```
+$ python scripts/sun_events.py --help
+```
 
 Api
 ===
@@ -90,7 +104,7 @@ Supervisor configuration
 ```
 [fcgi-program:plantmonitor_api]
 socket=tcp://localhost:8000
-command=/home/plantmonitor/Envs/plantmonitor/bin/uvicorn --fd 0 api_server.plantmonitor_api:api 
+command=/home/plantmonitor/Envs/plantmonitor/bin/uvicorn --fd 0 api_server.plantmonitor_api:api
 numprocs=4
 process_name=uvicorn-%(process_num)d
 environment=PATH="/home/plantmonitor/Envs/plantmonitor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -121,6 +135,14 @@ Upgrading
 
 Troubleshooting
 ===============
+
+* psycopg2 vs psycopg2-binary
+
+At the moment we are using psycopg2-binary to simplify the installation process.
+However at some point we will switch and you will need to install libpq-dev via apt. Changing between
+psycopg2 and psycopg2-binary requires force reinstalling psycopg2. Also be certain
+that the postgresql installation works with the timescale extension and its postgres
+configuration.
 
 * psycopg Python.h error
 
