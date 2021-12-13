@@ -146,7 +146,7 @@ class Queries_Test(TestCase):
             and r.sensor == 1
         ][0]
 
-        self.assertEqual(result, 551.2546302777778)
+        self.assertEqual(result, 551.254630277778)
 
     def test_irradiation_halfHourWithReadings(self):
         self.setupPlant()
