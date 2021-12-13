@@ -197,21 +197,22 @@ class PlantmonitorDB:
 
     @staticmethod
     def demoDBsetup(configdb):
-        with psycopg2.connect(
-            dbname='postgres',
+        conn = psycopg2.connect(
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
             port=configdb['psql_port']
-        ) as conn:
-            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "DROP DATABASE IF EXISTS {}".format(configdb['psql_db'])
-                )
-                cursor.execute(
-                    "CREATE DATABASE {};".format(configdb['psql_db'])
-                )
+        )
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = conn.cursor()
+        cursor.execute(
+            "DROP DATABASE IF EXISTS {}".format(configdb['psql_db'])
+        )
+        cursor.execute(
+            "CREATE DATABASE {};".format(configdb['psql_db'])
+        )
+        conn.commit()
+        conn.close()
         with psycopg2.connect(
             user=configdb['psql_user'],
             password=configdb['psql_password'],
@@ -259,16 +260,19 @@ class PlantmonitorDB:
 
     @staticmethod
     def dropDatabase(configdb):
-        with psycopg2.connect(
+        conn = psycopg2.connect(
             dbname='postgres',
             user=configdb['psql_user'],
             password=configdb['psql_password'],
             host=configdb['psql_host'],
             port=configdb['psql_port']
-        ) as conn:
-            conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            with conn.cursor() as cursor:
-                cursor.execute("DROP DATABASE {}".format(configdb['psql_db']))
+        )
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = conn.cursor()
+        cursor.execute("DROP DATABASE {}".format(configdb['psql_db']))
+        conn.commit()
+        conn.close()
+
 
     def login(self):
         try:
