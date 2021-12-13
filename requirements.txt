@@ -45,4 +45,4 @@ redasher
 scipy>=1.6.0
 yoyo-migrations
 somutils>=1.7.1
-ephem>=4.1
+ephem ==4.1.2
