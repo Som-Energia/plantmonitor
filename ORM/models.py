@@ -137,6 +137,7 @@ class Plant(database.Entity):
     moduleParameters = Optional('PlantModuleParameters')
     plantMonthlyLegacy = Optional('PlantMonthlyLegacy')
 
+
     @classmethod
     def insertPlantsData(cls, plantsData):
         for plantData in plantsData:
