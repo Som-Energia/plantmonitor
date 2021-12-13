@@ -161,7 +161,7 @@ class ExpectedPower_Test(TestCase):
             return date.isoformat()
 
         result = "\n".join((
-            "{}\n{:.7f}".format(x2utcisoformat(time),value)
+            "{}\n{:.6f}".format(x2utcisoformat(time),value)
             for time, plant, sensor, value, temperature, irradiance in result
         ))
         self.assertB2BEqual(result)
