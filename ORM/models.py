@@ -133,9 +133,11 @@ class Plant(database.Entity):
     marketRepresentative = Set('MarketRepresentative', lazy=True)
     simel = Set('Simel', lazy=True)
     nagios = Set('Nagios', lazy=True)
+    solarEvents = Set('SolarEvent')
     plantParameters = Optional('PlantParameters')
     moduleParameters = Optional('PlantModuleParameters')
     plantMonthlyLegacy = Optional('PlantMonthlyLegacy')
+
 
     @classmethod
     def insertPlantsData(cls, plantsData):
@@ -893,6 +895,31 @@ class PlantModuleParameters(database.Entity):
             'Isc': self.shortcircuit_current_ma,
         }
         return mp
+
+
+class SolarEvent(database.Entity):
+
+    plant = Required(Plant)
+
+    sunrise = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE')
+    sunset =  Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE')
+
+    @classmethod
+    def insertSolarEvents(cls, solarevents):
+        for se in solarevents:
+            #self.db.SolarEvent(se)
+            plant_name, sunrise, sunset = se
+            p = Plant.get(name=plant_name)
+            if not p:
+                logger.warning("Plant {} is unknown to database".format(plant_name))
+            else:
+                SolarEvent(plant=p, sunrise=sunrise, sunset=sunset)
+
+    @classmethod
+    def insertPlantSolarEvents(cls, plant, solarevents):
+        for se in solarevents:
+            sunrise, sunset = se
+            SolarEvent(plant=plant, sunrise=sunrise, sunset=sunset)
 
 
 # vim: et sw=4 ts=4
