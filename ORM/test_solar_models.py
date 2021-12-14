@@ -82,3 +82,9 @@ class SolarModels_Test(unittest.TestCase):
 
     #     devices = orm.select((p.name, p.location.latitude, p.location.longitude) for p in self.pony.db.Plant)[:].to_list()
     #     self.assertListEqual(devices, [('roger', 41.967599, 2.837782)])
+
+
+    # TODO test that production database continues to generate_mapping without errors
+    # TODO make solar migration on general models
+    def test__db_integrity(self):
+        pass
