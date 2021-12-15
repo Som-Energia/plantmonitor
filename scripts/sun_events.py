@@ -64,8 +64,8 @@ class SunEvents():
 
 
 @click.command()
-@click.option('-s', '--start', default=None, help='start date in UTC')
-@click.option('-e', '--end', default=None, help='end date in UTC')
+@click.option('-s', '--start', default=None, help='start date in UTC. Example: 2020-10-04')
+@click.option('-e', '--end', default=None, help='end date in UTC. Example: 2021-10-04')
 @click.option('-p', '--plant', multiple=True, help='Plant (name) to update sunevents (accepts multiple)')
 @click.option('-d', '--database', default=None, is_flag=True, help='Print database info and quit')
 @click.option('-l', '--plantlist', default=None, is_flag=True, help='Print plants names and locations and quit')

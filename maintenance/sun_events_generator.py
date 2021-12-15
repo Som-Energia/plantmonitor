@@ -18,7 +18,7 @@ class SunEventsGenerator:
         # rather than attempting to jury-rig values for temp and pressure that yield the magic 34’,
         # we turn off PyEphem refraction entirely and define the horizon itself as being at 34’
         # altitude instead.
-        self.obs.horizon = '-0:34' # sunrise based on U.S. Naval Astronomical Almanac values
+        self.obs.horizon = '4:00' # sunrise based on U.S. Naval Astronomical Almanac values
 
     def next_sunrise(self, start):
         next_rise = self.obs.next_rising(ephem.Sun(), start=start, use_center=False)
