@@ -120,8 +120,8 @@ class SunEvents_Test(unittest.TestCase):
         with orm.db_session:
             result = orm.select((s.plant.name, s.sunrise, s.sunset) for s in self.pony.db.SolarEvent)[:].to_list()
 
-        expected_sunrise = datetime.datetime(2021, 11, 29, 6, 54, 52, 296461, tzinfo=datetime.timezone.utc)
-        expected_sunset = datetime.datetime(2021, 11, 29, 16, 18, 49, 595215, tzinfo=datetime.timezone.utc)
+        expected_sunrise = datetime.datetime(2021, 11, 29, 7, 23, 36, 140813, tzinfo=datetime.timezone.utc)
+        expected_sunset = datetime.datetime(2021, 11, 29, 15, 50, 5, 924495, tzinfo=datetime.timezone.utc)
 
         expected = [('roger', expected_sunrise, expected_sunset)]
 

@@ -91,7 +91,7 @@ class Queries_Test(TestCase):
         irradianceTimeSeries = self.readTimeseriesCSV(filename)
         for time, irradiation_w_m2 in irradianceTimeSeries:
             SensorIrradiationRegistry(
-                sensor=self.sensor,
+                sensor=sensor,
                 time=time,
                 irradiation_w_m2=int(round(irradiation_w_m2)),
                 temperature_dc=0,
@@ -99,13 +99,13 @@ class Queries_Test(TestCase):
         database.flush()
 
         return [
-            (time, self.plant, self.sensor, irradiation_w_m2)
+            (time, self.plant, sensor, irradiation_w_m2)
             for time, irradiation_w_m2 in irradianceTimeSeries
         ]
 
     def assertOutputB2B(self, result):
         result = "\n".join((
-            "{}, {:.9f}".format(time.isoformat() if time else None, irradiation if irradiation is not None else float('nan'))
+            "{}, {}, {:.9f}".format(time.isoformat() if time else None, sensor or int('nan'), irradiation or float('nan'))
             for time, sensor, irradiation in result
         ))
         self.assertB2BEqual(result)
@@ -160,6 +160,50 @@ class Queries_Test(TestCase):
         ][0]
 
         self.assertAlmostEqual(result, 415.2791252777778, places=5)
+
+    def test_irradiation_second_sensors(self):
+        self.setupPlant()
+        plant = self.plant
+        sensor_florida = SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result)
+
+    def test_irradiation_multiple_sensors(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea.csv'
+        )
+        plant = self.plant
+        sensor_florida = SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result)
+
+    # TODO test output of one sensor equal to two sensors for the one sensor
+    def _test_irradiation_multiple_sensors_same_as_one(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea.csv'
+        )
+        plant = self.plant
+        sensor_florida = SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = database.select(query)
+
+        self.assertOutputB2B(result)
+
 
     def test_irradiation_oneHour_againstTrapezoidal(self):
         # remember that you have an trapezoidal approximation script for csv at scripts/integrate_csv
