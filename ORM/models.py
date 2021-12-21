@@ -879,7 +879,7 @@ class PlantModuleParameters(database.Entity):
     standard_conditions_temperature_dc = Required(int)
     opencircuit_voltage_mv = Required(int)
     shortcircuit_current_ma = Required(int)
-    expected_power_correction_factor_cpercent = Required(int, sql_default='10000')
+    expected_power_correction_factor_cpercent = Required(int, sql_default='10000') # % losses up to inverter
 
     def export(self):
         mp = {
