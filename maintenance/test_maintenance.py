@@ -75,6 +75,6 @@ class IrradiationMaintenanceTests(TestCase):
 
     def _test__duplicate_minutes(self):
 
-        df = pd.read_csv('test_data/df_test_round_minutes_duplicateds.csv')
+        df = pd.read_csv('test_data/df_test_round_minutes_duplicates.csv')
 
         round_dt_to_5minutes()
