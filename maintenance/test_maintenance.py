@@ -13,7 +13,7 @@ from .db_manager import DBManager
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from datetime import datetime
+import datetime
 
 
 class IrradiationDBConnectionTest(TestCase):
@@ -23,8 +23,12 @@ class IrradiationDBConnectionTest(TestCase):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
+        db_info = database_info
+        db_info['dbname'] = database_info['database']
+        del db_info['provider']
+        del db_info['database']
 
-        cls.dbmanager = DBManager(**database_info)
+        cls.dbmanager = DBManager(**db_info, echo=True)
         cls.dbmanager.__enter__()
 
     @classmethod
@@ -32,19 +36,18 @@ class IrradiationDBConnectionTest(TestCase):
         cls.dbmanager.__exit__()
 
     def setUp(self):
-        self.session = self.dbmanager.create_session()
+        self.session = self.dbmanager.db_con.begin()
 
     def tearDown(self):
         self.session.rollback()
         self.session.close()
 
-    def _test_readirradiance(self):
+    def test_write_table(self):
 
-        # add values
+        sometime = datetime.datetime(2021,1,1,tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame({'time' : sometime, 'value': 100}, index=[0])
 
-        irradiation_maintenance = IrradiationMaintenance(self.db)
-
-        irradiation_maintenance.irradiation()
+        df.to_sql('test_table', self.dbmanager.db_con)
 
 
 class IrradiationMaintenanceTests(TestCase):
@@ -55,20 +58,22 @@ class IrradiationMaintenanceTests(TestCase):
     def tearDown(self):
         pass
 
+    # FYI reading data with mixed time shifts
+    # https://stackoverflow.com/questions/21269399/datetime-dtypes-in-pandas-read-csv
+
     def test__round_minutes(self):
 
-        dtypes = [int, datetime, int, int]
-        df = pd.read_csv('test_data/df_test_round_minutes.csv', sep = ';', dtype=dtypes)
+        df = pd.read_csv('test_data/df_test_round_minutes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = df.copy()
+        basetime = datetime.datetime(2021,3,26,23,15,0,tzinfo=datetime.timezone.utc)
+        dt = datetime.timedelta(minutes=5)
+        expected['time'] = [basetime, basetime + dt, basetime + 2*dt, basetime + 3*dt]
 
-        round_dt_to_5minutes(df,colname='time')
+        result = round_dt_to_5minutes(df, colname='time')
 
-        result = df
+        assert_frame_equal(result, expected, check_datetimelike_compat=True)
 
-        expected = pd.DataFrame()
-
-        assert_frame_equal(result, expected)
-
-    def test__duplicate_minutes(self):
+    def _test__duplicate_minutes(self):
 
         df = pd.read_csv('test_data/df_test_round_minutes_duplicateds.csv')
 

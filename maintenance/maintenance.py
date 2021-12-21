@@ -17,7 +17,9 @@ import numpy as np
 
 def irradiation_maintenance(df):
     column_name = 'irradiation_w_m2'
-    df[column_name].dt.round('5min')
+    df[column_name] = df[column_name].dt.round('5min')
 
 def round_dt_to_5minutes(df, colname):
-    df[colname].dt.round('5min', inplace=True)
+    df[colname] = df[colname].dt.round('5min')
+    return df
+
