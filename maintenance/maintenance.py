@@ -16,10 +16,43 @@ import numpy as np
 #         self.df = pd.read_table()
 
 def irradiation_maintenance(df):
-    column_name = 'irradiation_w_m2'
-    df[column_name] = df[column_name].dt.round('5min')
+    return df\
+        .pipe(round_dt_to_5minutes)\
+        .pipe(fill_holes)
 
-def round_dt_to_5minutes(df, colname):
-    df[colname] = df[colname].dt.round('5min')
+def round_dt_to_5minutes(df):
+
+    return df\
+        .assign(time = lambda d: d['time'].dt.round('5min'))\
+        .groupby(['sensor', 'time'], as_index=False)\
+        .mean(numeric_only=True)\
+        .round({
+            'irradiation_w_m2':0,
+            'temperature_dc':0
+        })\
+        .astype({'irradiation_w_m2':int, 'temperature_dc':int})
+
+def fill_holes(df):
+
+    import pdb; pdb.set_trace()
+    # df_complete = pd.date_range(min(df['time']), max(df['time']), freq="5min", tz='UTC').to_frame(name='time')
+    # df = pd.merge(df, df_complete, how='right', on = {'time':0})
+
+    df = df\
+        .set_index(['time'], drop=False)\
+        .groupby(['sensor'])\
+        .resample('5min')\
+        .mean()\
+        .interpolate()
+
     return df
 
+def resample(df):
+    df = df\
+        .set_index(['time'], drop=False)\
+        .groupby(['sensor'])\
+        .resample('5min')\
+        .mean()\
+        .interpolate()
+
+    return df
