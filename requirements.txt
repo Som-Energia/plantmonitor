@@ -47,3 +47,4 @@ yoyo-migrations
 somutils>=1.7.1
 ephem==4.1.2
 pytest
+b2btest
