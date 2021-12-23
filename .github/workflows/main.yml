@@ -37,7 +37,9 @@ jobs:
 
       # queries database with postgres client
       - name: Query database
-        run: psql -h 127.0.0.1 -d $POSTGRES_DB -U postgres -c 'SELECT 1;'
+        run: |
+          psql -h 127.0.0.1 -d $POSTGRES_DB -U postgres -c 'SELECT 1;'
+          psql -h 127.0.0.1 -U postgres -c "ALTER DATABASE $POSTGRES_DB SET timezone TO 'UTC';"
         env:
           # postgress password is required; alternatively, you can run:
           # `PGPASSWORD=postgres_password psql ...`

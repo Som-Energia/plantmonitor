@@ -110,6 +110,32 @@ class Queries_Test(TestCase):
         ))
         self.assertB2BEqual(result)
 
+    def test__readTimeseriesCSV(self):
+        foo = datetime.datetime.fromisoformat("2021-06-01T00:00:06.773")
+        boo = foo.astimezone(datetime.timezone.utc)
+        print(foo)
+        print(boo)
+        ts = self.readTimeseriesCSV('b2bdata/irradiance-2021-07-21-Alcolea-one-registry.csv')
+        print(ts)
+        time = "2021-05-31T22:00:06.773000+00:00"
+        self.assertEqual(ts[0][0].isoformat(), time)
+
+    def test__irradiance__write_read_one_registry(self):
+        self.setupPlant()
+        ts = self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea-one-registry.csv'
+        )
+        result = database.select('select time, sensor, irradiation_w_m2 from sensorirradiationregistry limit 1;')
+
+        print(ts)
+        print(result)
+        print(result[0][0])
+        print(result[0][0].isoformat())
+        print(datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo)
+
+        self.assertOutputB2B(result)
+
+
     def test_irradiation(self):
         self.setupPlant()
         self.importData(self.sensor,
