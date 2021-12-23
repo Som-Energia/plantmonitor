@@ -1,0 +1,12 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: "Tests plantmonitor"
+    steps:
+      - uses: actions/checkout@v1
+      - name: Hello plants!
+        run: echo "Hello!!!"
