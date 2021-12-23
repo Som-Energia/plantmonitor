@@ -6,6 +6,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: "Tests plantmonitor"
+    # Service containers to run with `container-job`
+    # services:
+    #   # Label used to access the service container
+    #   postgres:
+    #     # Docker Hub image
+    #     image: postgres
+    #     # Provide the password for postgres
+    #     env:
+    #       POSTGRES_PASSWORD: postgres
+    #     # Set health checks to wait until postgres has started
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Hello plants!
@@ -16,10 +31,13 @@ jobs:
         run: |
           echo "Job Context: $JOB_CONTEXT"
           echo "Done!"
-
+      - name: config files
+        run: touch conf/config.py
       - name: Install dependencies
         working-directory: ./
         run: pip install -r requirements.txt
       - name: Run the tests
+        env:
+          PLANTMONITOR_MODULE_SETTINGS: conf.settings.testing_public
         working-directory: ./
         run: pytest
