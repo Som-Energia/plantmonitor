@@ -69,6 +69,8 @@ class Queries_Test(TestCase):
           content = csv_file.read()
           timeseries = [
             (
+            # TODO this is wrong! astimezone converts the naive to system timezone before going utc
+            # use pytz cettz.localize instead
               datetime.datetime.fromisoformat(l[0]).astimezone(datetime.timezone.utc),
               int(l[1])
             ) for l in (r.split(',') for r in content.split('\n') if r)
@@ -110,11 +112,41 @@ class Queries_Test(TestCase):
         ))
         self.assertB2BEqual(result)
 
-    def test__readTimeseriesCSV(self):
+    # TODO which timezone is the csv data we have there? We're assuming Europe Madrid
+    def test__naive_timezone_conversion(self):
+
+        # The correct way of setting a timezone to a naive datetime
         foo = datetime.datetime.fromisoformat("2021-06-01T00:00:06.773")
-        boo = foo.astimezone(datetime.timezone.utc)
+        import pytz
+        cettz = pytz.timezone("Europe/Madrid")
+        boo = cettz.localize(foo) # naive to aware CET
+        goo = boo.astimezone(datetime.timezone.utc) # aware CET to utc
+        time = "2021-05-31T22:00:06.773000+00:00"
         print(foo)
         print(boo)
+        print(goo)
+        self.assertEqual(goo.isoformat(), time)
+
+        # foo = datetime.datetime.fromisoformat("2021-06-01T00:00:06.773")
+        # print(foo)
+        # import pytz
+        # cettz = pytz.timezone("Europe/Madrid")
+        # goo = foo.astimezone(cettz)
+        # print(goo)
+        # gooUTC = goo.astimezone(datetime.timezone.utc)
+        # CETtime = "2021-05-31T22:00:06.773000+00:00"
+        # self.assertEqual(gooUTC.isoformat(), CETtime)
+        # boo = foo.astimezone(datetime.timezone.utc)
+        # print(boo)
+        # ts = self.readTimeseriesCSV('b2bdata/irradiance-2021-07-21-Alcolea-one-registry.csv')
+        # print(ts)
+        # time = "2021-05-31T22:00:06.773000+00:00"
+        # self.assertEqual(ts[0][0].isoformat(), time)
+        self.assertTrue(False)
+
+    # TODO which timezone is the csv data we have there? We're assuming Europe Madrid
+    # TODO this test fails if system timezone is not CET
+    def test__readTimeseriesCSV(self):
         ts = self.readTimeseriesCSV('b2bdata/irradiance-2021-07-21-Alcolea-one-registry.csv')
         print(ts)
         time = "2021-05-31T22:00:06.773000+00:00"
