@@ -56,7 +56,9 @@ jobs:
           echo "Job Context: $JOB_CONTEXT"
           echo "Done!"
       - name: config files
-        run: touch conf/config.py
+        run: |
+          touch conf/config.py
+          touch conf/configdb_test.yaml
       - name: Install dependencies
         working-directory: ./
         run: pip install -r requirements.txt
