@@ -17,7 +17,7 @@ class SunEvents_Test(unittest.TestCase):
     def setUp(self):
 
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
         os.environ['PGTZ'] = 'UTC'
 
@@ -51,7 +51,7 @@ class SunEvents_Test(unittest.TestCase):
     def test__checkEnvironment(self):
 
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
     def test__sunevents_click(self):
 

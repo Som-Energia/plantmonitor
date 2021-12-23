@@ -13,7 +13,7 @@ class SolarModels_Test(unittest.TestCase):
     def setUp(self):
 
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
         os.environ['PGTZ'] = 'UTC'
 

@@ -42,7 +42,7 @@ class Api_Test(unittest.TestCase):
     def setUp(self):
 
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
@@ -92,7 +92,7 @@ class Api_Test(unittest.TestCase):
     def test_Environment(self):
         #TODO will it be too late if the config is misconfigured?
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
     def test_connection(self):
         with orm.db_session:

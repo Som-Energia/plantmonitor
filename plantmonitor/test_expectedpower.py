@@ -35,7 +35,7 @@ class ExpectedPower_Test(TestCase):
         self.maxDiff=None
         self.b2bdatapath='b2bdata'
         from conf import envinfo
-        self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
+        self.assertIn(envinfo.SETTINGS_MODULE, ['conf.settings.testing','conf.settings.testing_public'])
 
         orm.rollback()
         database.drop_all_tables(with_all_data=True)
