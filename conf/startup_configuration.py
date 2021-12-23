@@ -11,7 +11,7 @@ from plantmonitor.task import (
     task_integral,
 )
 from ORM.db_utils import connectDatabase
-from conf.config import env, env_active
+from conf.config_active_env import env, env_active
 
 from conf.logging_configuration import LOGGING
 

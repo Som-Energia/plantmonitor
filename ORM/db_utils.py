@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from pony import orm
 
-from conf.config import env, env_active
+from conf.config_active_env import env, env_active
 
 from .models import database
 
