@@ -7,24 +7,48 @@ jobs:
     runs-on: ubuntu-latest
     name: "Tests plantmonitor"
     # Service containers to run with `container-job`
-    # services:
-    #   # Label used to access the service container
-    #   postgres:
-    #     # Docker Hub image
-    #     image: postgres
-    #     # Provide the password for postgres
-    #     env:
-    #       POSTGRES_PASSWORD: postgres
-    #     # Set health checks to wait until postgres has started
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: plants_public_test
+        # might not be necessary
+        ports:
+          # maps tcp port 5432 on service container to the host
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Hello plants!
         run: echo "Hello!!!"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      # queries database with postgres client
+      - name: Query database
+        run: psql -h 127.0.0.1 -d $POSTGRES_DB -U postgres -c 'SELECT 1;'
+        env:
+          # postgress password is required; alternatively, you can run:
+          # `PGPASSWORD=postgres_password psql ...`
+          PGPASSWORD: postgres
+          POSTGRES_DB: plants_public_test
+      - name: Setup database
+        run: |
+          psql -h 127.0.0.1 -d $POSTGRES_DB -U postgres -c 'CREATE DATABASE "postgres_db";'
+        env:
+          PGPASSWORD: postgres
+          POSTGRES_DB: plants_public_test
       - name: more, env vars etc
         env:
           JOB_CONTEXT: ${{ toJson(job) }}
