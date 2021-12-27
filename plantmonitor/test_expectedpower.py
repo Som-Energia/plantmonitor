@@ -2,14 +2,8 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from unittest import TestCase
-from ORM.models import (
-    database,
-    Plant,
-    SensorIrradiation,
-    SensorIrradiationRegistry,
-    PlantModuleParameters,
-)
 from pony import orm
+from ORM.pony_manager import PonyManager
 from pathlib import Path
 from .testing_utils import (
     readTimedDataTsv,
@@ -20,8 +14,6 @@ from yamlns import namespace as ns
 from yamlns.dateutils import Date
 import datetime
 # import pytz
-from ORM.db_utils import setupDatabase
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 from decimal import Decimal
 
 class ExpectedPower_Test(TestCase):
@@ -38,19 +30,23 @@ class ExpectedPower_Test(TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
 
-        #orm.set_sql_debug(True)
-        database.create_tables()
+        self.pony = PonyManager(envinfo.DB_CONF)
 
+        self.pony.define_all_models()
+        self.pony.binddb()
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
 
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantNS(self): # Copied from test_models.py:samplePlantNS
         alcoleaPlantNS = ns.loads("""\
@@ -68,14 +64,14 @@ class ExpectedPower_Test(TestCase):
 
     def setupPlant(self):
         plantDefinition = self.samplePlantNS()
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=plantDefinition.name,
             codename=plantDefinition.codename,
         )
         plant.importPlant(plantDefinition)
         plant.flush()
         self.plant = plant.id
-        self.sensor = SensorIrradiation.select().first().id
+        self.sensor = self.pony.db.SensorIrradiation.select().first().id
 
     def importData(self, sensor, filename, outputColumn):
         tsvContent = readTimedDataTsv(filename, [
@@ -84,13 +80,13 @@ class ExpectedPower_Test(TestCase):
             outputColumn or 'Potencia parque calculada con temperatura kW con degradación placas',
         ])
         for time, temperature_c, irradiation_w_m2, outputValue in tsvContent:
-            SensorIrradiationRegistry(
+            self.pony.db.SensorIrradiationRegistry(
                 sensor=self.sensor,
                 time=datetime.datetime.fromisoformat(time),
                 irradiation_w_m2=int(round(irradiation_w_m2)),
                 temperature_dc=int(round(temperature_c*10)),
             )
-        database.flush()
+        orm.flush()
 
         return [
             (time, self.plant, self.sensor, outputValue)
@@ -134,7 +130,7 @@ class ExpectedPower_Test(TestCase):
 
     def setPlantParameters(self, **data):
         data = ns(data)
-        plant = PlantModuleParameters(
+        plant = self.pony.db.PlantModuleParameters(
             plant=self.plant,
             nominal_power_wp=int(data.nominalPowerMWp*1000000),
             efficency_cpercent=int(data.efficiency*100),
@@ -193,7 +189,7 @@ class ExpectedPower_Test(TestCase):
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
-        result = database.select(query)
+        result = self.pony.db.select(query)
 
         self.assertOutputB2B(result) # first run with expected instead result
 
@@ -207,7 +203,7 @@ class ExpectedPower_Test(TestCase):
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
-        result = database.select(query)
+        result = self.pony.db.select(query)
 
         self.assertOutputB2B(result) # first run with expected instead result
 
@@ -221,7 +217,7 @@ class ExpectedPower_Test(TestCase):
             'Potencia parque calculada con temperatura kW con degradación placas',
         )
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
-        result = database.select(query)
+        result = self.pony.db.select(query)
 
         self.assertOutputB2B(result) # first run with expected instead result
 
@@ -245,11 +241,11 @@ class ExpectedPower_Test(TestCase):
         toDate = fromDate + datetime.timedelta(days=30)
 
         query = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
-        expectedPowerQuery = database.select(query)
+        expectedPowerQuery = self.pony.db.select(query)
 
         # end of setup
 
-        result = integrateExpectedPower(fromDate, toDate)
+        result = integrateExpectedPower(self.pony.db, fromDate, toDate)
 
         self.assertOutputB2BNoPlant(result)
 

@@ -15,19 +15,13 @@ from pony import orm
 
 from unittest.mock import patch, MagicMock
 
-from ORM.models import database
+from ORM.pony_manager import PonyManager
 from ORM.models import (
     importPlants,
-    exportPlants,
-    Plant,
-    Meter,
-    MeterRegistry,
 )
 from ORM.db_utils import setupDatabase
 
 from meteologica.utils import todtaware
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class ReadingsFacade_Test(unittest.TestCase):
 
@@ -36,21 +30,22 @@ class ReadingsFacade_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony.define_all_models()
+        self.pony.binddb()
 
-        database.create_tables()
+        self.pony.db.drop_all_tables(with_all_data=True)
 
-        # database.generate_mapping(create_tables=True)
+        self.pony.db.create_tables()
+
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantsNS(self, altMeter="12345678"):
         alcoleaPlantsNS = ns.loads("""\
@@ -235,9 +230,9 @@ class ReadingsFacade_Test(unittest.TestCase):
     def setupPlants(self, time, alternativeMeter="12345678", plantsData = None):
         delta = dt.timedelta(minutes=30)
         plantsns = self.samplePlantsNS(altMeter=alternativeMeter)
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
         plantsData = plantsData or self.samplePlantsData(time, delta, altMeter=alternativeMeter)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
     def test_getNewMetersReadings__noMeterInERP(self):
@@ -247,7 +242,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(db = self.pony.db)
             r.erpMeters = []
             plantsData = r.getNewMetersReadings()
 
@@ -273,7 +268,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         erpMeter = "88300864" # removed meter
         self.setupPlants(lastReadingTime, erpMeter)
 
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
 
         plantsData = r.getNewMetersReadings()
 
@@ -302,7 +297,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         erpMeter = "88300864"
         self.setupPlants(lastReadingTime, erpMeter)
 
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
 
         upto = dt.datetime(2019, 10, 1, 17, 5, 10, 588861, tzinfo=dt.timezone.utc)
         plantsData = r.getNewMetersReadings(upto)
@@ -345,7 +340,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         self.assertListEqual(expectedPlantsData, plantsData)
 
     def _test_transfer_ERP_readings_to_model(self):
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
         r.erpMeters = ['12345678']
 
         # TODO mock measures or fake meters
@@ -355,7 +350,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         erpMeter = "88300864"
         self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
 
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
         r.erpMeters = ['3141519']
         newMeters = r.warnNewMeters()
         expectedNewMeters = ['3141519']
@@ -369,7 +364,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         meterNames = [erpMeter, newMeter]
 
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
         newMeters = r.checkNewMeters(meterNames)
 
         self.assertListEqual(newMeters, [newMeter])
@@ -382,7 +377,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         erpMeters = ['12345678', '87654321']
 
         # mock telemeasure_meters_name
-        r = ReadingsFacade()
+        r = ReadingsFacade(self.pony.db)
         r.telemeasureMetersNames = MagicMock(return_value=['12345678', '87654321'])
         r.refreshERPmeters()
         newMeters = r.erpMeters
@@ -398,18 +393,18 @@ class ReadingsFacade_Test(unittest.TestCase):
         self.setupPlants(dt.datetime.now(), erpMeter)
 
         with self.assertRaises(orm.core.UnrepeatableReadError):
-            MeterRegistry.select().show()
+            self.pony.db.MeterRegistry.select().show()
 
     def _test__getDeviceReadings__differentLastDates(self):
 
         erpMeter = '88300864'
         self.setupPlants(dt.datetime.now(tz=dt.timezone.utc), erpMeter)
 
-        plant = Plant.get(name='alcolea')
-        meter = Meter.get(plant=plant, name=erpMeter)
+        plant = self.pony.db.Plant.get(name='alcolea')
+        meter = self.pony.db.Meter.get(plant=plant, name=erpMeter)
         print(meter.to_dict())
         self.assertIsNotNone(meter)
-        MeterRegistry.select().show()
+        self.pony.db.MeterRegistry.select().show()
 
         lastDate = meter.getLastReadingDate()
         # mock telemeasure_meters_name
@@ -430,7 +425,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         # ]
         mock = MagicMock(return_value=['12345678', '87654321'])
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             newMeters = r.getDeviceReadings(meterName=erpMeter, lastDate=lastDate, upto=None)
 
         self.assertListEqual(newMeters, erp_meters)
@@ -553,7 +548,7 @@ class ReadingsFacade_Test(unittest.TestCase):
         time = dt.datetime.now(tz=dt.timezone.utc)
         self.setupPlants(time, erpMeter)
 
-        lastDates = [meter.getLastReadingDate() for meter in Meter.select()]
+        lastDates = [meter.getLastReadingDate() for meter in self.pony.db.Meter.select()]
 
         self.assertListEqual(lastDates, [time]*len(lastDates))
 
@@ -569,7 +564,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             r.erpMeters = erpMeters
             plantsData = r.getNewMetersReadings()
 
@@ -590,7 +585,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             r.erpMeters = erpMeters
             plants_data = r.getNewMetersReadings()
 
@@ -610,7 +605,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             r.erpMeters = erpMeters
             plants_data = r.getNewMetersReadings()
 
@@ -631,7 +626,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(side_effect=self.mockMeterReadingsSideEffects)
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             r.erpMeters = erpMeters
             plants_data = r.getNewMetersReadings()
 
@@ -663,7 +658,7 @@ class ReadingsFacade_Test(unittest.TestCase):
 
         mock = MagicMock(return_value=['12345678', '87654321'])
         with patch('plantmonitor.readings_facade.ReadingsFacade.measuresFromDate', mock):
-            r = ReadingsFacade()
+            r = ReadingsFacade(self.pony.db)
             r.erpMeters = erpMeters
             newMeters = r.transfer_ERP_readings_to_model(refreshERPmeters=False)
 

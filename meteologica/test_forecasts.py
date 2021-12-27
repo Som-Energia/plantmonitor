@@ -30,16 +30,7 @@ from unittest.mock import patch, ANY
 import unittest
 import datetime
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
 
 from meteologica.plantmonitor_db import (
     PlantmonitorDB,
@@ -52,8 +43,6 @@ import logging
 import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("test")
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class DailyDownload_Test(unittest.TestCase):
 
@@ -85,27 +74,26 @@ class DailyDownload_Test(unittest.TestCase):
         if f.exists(): f.unlink()
 
     def setUp(self):
-        config = self.createConfig()
-
         from conf import envinfo
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony.define_all_models()
+        self.pony.binddb()
 
-        database.create_tables()
+        self.pony.db.drop_all_tables(with_all_data=True)
 
-        # database.generate_mapping(create_tables=True)
+        self.pony.db.create_tables()
+
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
         # comment this if you want to check the date format
         self.cleanLastDateFile()
 
@@ -146,7 +134,7 @@ class DailyDownload_Test(unittest.TestCase):
         return PlantmonitorDB(configdb)
 
     def test__createForecast__OnePlant(self):
-        alcolea = Plant(
+        alcolea = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
@@ -168,7 +156,7 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        forecastMetadata = ForecastMetadata.create(plant=alcolea, **forecastMeta)
+        forecastMetadata = self.pony.db.ForecastMetadata.create(plant=alcolea, **forecastMeta)
 
         self.assertIsNotNone(forecastMetadata)
 
@@ -196,12 +184,12 @@ class DailyDownload_Test(unittest.TestCase):
                 'time': datetime.datetime(2040, 1, 2, 1, 0, tzinfo=datetime.timezone.utc)
             }
         ]
-        forecasts = [f.to_dict() for f in Forecast.select()]
+        forecasts = [f.to_dict() for f in self.pony.db.Forecast.select()]
         self.assertListEqual(forecasts, expected)
 
     def test__lastForecastDownloadDate__NoData(self):
 
-        alibaba = Plant(
+        alibaba = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
@@ -212,7 +200,7 @@ class DailyDownload_Test(unittest.TestCase):
 
     def test__lastForecastDownloadDate__SomeData(self):
 
-        alcolea = Plant(
+        alcolea = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
@@ -231,7 +219,7 @@ class DailyDownload_Test(unittest.TestCase):
         status = 'OK'
         forecastDate = time
 
-        forecastMetadata = ForecastMetadata.create(plant=alcolea, forecastdate=forecastDate, errorcode=status)
+        forecastMetadata = self.pony.db.ForecastMetadata.create(plant=alcolea, forecastdate=forecastDate, errorcode=status)
         forecastMetadata.addForecasts(data[self.mainFacility()])
 
         orm.flush()
@@ -260,13 +248,13 @@ class DailyDownload_Test(unittest.TestCase):
 
     def test__downloadMeterForecasts__uptodate(self):
 
-        alcolea = Plant(
+        alcolea = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         forecastDate = datetime.datetime.now(datetime.timezone.utc)
-        oldForecastMetadata = ForecastMetadata.create(
+        oldForecastMetadata = self.pony.db.ForecastMetadata.create(
             plant=alcolea,
             forecastdate=forecastDate,
             errorcode='OK'
@@ -277,9 +265,9 @@ class DailyDownload_Test(unittest.TestCase):
         oldForecastMetadata.insertForecast(percentil10=None, percentil50=p50, percentil90=None, time=time)
         orm.flush()
 
-        statuses = downloadMeterForecasts(self.createConfig())
+        statuses = downloadMeterForecasts(self.pony.db, self.createConfig())
 
-        forecastMetadata = ForecastMetadata.select().order_by(orm.desc(ForecastMetadata.forecastdate)).first()
+        forecastMetadata = self.pony.db.ForecastMetadata.select().order_by(orm.desc(self.pony.db.ForecastMetadata.forecastdate)).first()
 
         self.assertEqual(forecastMetadata, oldForecastMetadata)
         forecasts = forecastMetadata.registries
@@ -288,14 +276,14 @@ class DailyDownload_Test(unittest.TestCase):
 
     def test__downloadMeterForecasts__newForecasts(self):
 
-        alcolea = Plant(
+        alcolea = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = datetime.datetime.now(datetime.timezone.utc)
         forecastDate = time - datetime.timedelta(hours=1)
-        oldForecastMetadata = ForecastMetadata.create(
+        oldForecastMetadata = self.pony.db.ForecastMetadata.create(
             plant=alcolea,
             forecastdate=forecastDate,
             errorcode='OK'
@@ -306,9 +294,9 @@ class DailyDownload_Test(unittest.TestCase):
         oldForecastMetadata.insertForecast(percentil10=None, percentil50=p50, percentil90=None, time=time)
         orm.flush()
 
-        statuses = downloadMeterForecasts(self.createConfig())
+        statuses = downloadMeterForecasts(self.pony.db, self.createConfig())
 
-        forecastMetadata = ForecastMetadata.select().order_by(orm.desc(ForecastMetadata.forecastdate)).first()
+        forecastMetadata = self.pony.db.ForecastMetadata.select().order_by(orm.desc(self.pony.db.ForecastMetadata.forecastdate)).first()
 
         self.assertNotEqual(forecastMetadata, oldForecastMetadata)
         self.assertEqual(statuses['SomEnergia_Alcolea'], ForecastStatus.OK)
@@ -321,37 +309,37 @@ class DailyDownload_Test(unittest.TestCase):
 
     def test__getMeterReadings__None(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
-        Meter(plant=plant, name="1234")
+        self.pony.db.Meter(plant=plant, name="1234")
 
         orm.flush()
 
         with orm.db_session:
-            data = getMeterReadings(plant.codename)
+            data = getMeterReadings(self.pony.db, plant.codename)
 
         self.assertEqual(data, [])
 
     def test__getMeterReadings__UnexistingFacility(self):
         with orm.db_session:
-            data = getMeterReadings(facility="fake")
+            data = getMeterReadings(self.pony.db, facility="fake")
 
         # TODO return None or [] ?
         self.assertEqual(data, None)
 
     def test__getMeterReadings(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = todtaware('2020-01-01 00:00:00')
 
-        meter = Meter(plant=plant, name='1234')
+        meter = self.pony.db.Meter(plant=plant, name='1234')
 
         export_energy_wh = 210
 
@@ -372,13 +360,13 @@ class DailyDownload_Test(unittest.TestCase):
         ]
 
         with orm.db_session:
-            result = getMeterReadings(plant.codename)
+            result = getMeterReadings(self.pony.db, plant.codename)
 
         self.assertEqual(expected, result)
 
     def test__getMeterReadingsFromLastUpload__noMeter(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
@@ -388,38 +376,38 @@ class DailyDownload_Test(unittest.TestCase):
         orm.flush()
 
         with orm.db_session:
-            result = getMeterReadings(plant.codename)
+            result = getMeterReadings(self.pony.db, plant.codename)
 
         self.assertIsNone(result)
 
     def test__getMeterReadingsFromLastUpload__None(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = todtaware('2020-01-01 00:00:00')
 
-        meter = Meter(plant=plant, name='1234')
+        meter = self.pony.db.Meter(plant=plant, name='1234')
 
         orm.flush()
 
         with orm.db_session:
-            result = getMeterReadings(plant.codename)
+            result = getMeterReadings(self.pony.db, plant.codename)
 
         self.assertEqual([], result)
 
     def test__getMeterReadingsFromLastUpload__OneReading(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = todtaware('2020-01-01 00:00:00')
 
-        meter = Meter(plant=plant, name='1234')
+        meter = self.pony.db.Meter(plant=plant, name='1234')
 
         export_energy_wh = 210
 
@@ -440,20 +428,20 @@ class DailyDownload_Test(unittest.TestCase):
         ]
 
         with orm.db_session:
-            result = getMeterReadings(plant.codename)
+            result = getMeterReadings(self.pony.db, plant.codename)
 
         self.assertEqual(expected, result)
 
     def test__uploadFacilityMeterReadings__checkResponses(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = todtaware('2020-01-01 00:00:00')
 
-        meter = Meter(plant=plant, name='1234')
+        meter = self.pony.db.Meter(plant=plant, name='1234')
 
         export_energy_wh = 210
 
@@ -470,21 +458,21 @@ class DailyDownload_Test(unittest.TestCase):
         orm.flush()
 
         with self.createApi() as api:
-            response = uploadFacilityMeterReadings(api, plant.codename)
+            response = uploadFacilityMeterReadings(self.pony.db, api, plant.codename)
 
         expectedResponse = 'OK'
         self.assertEqual(response, expectedResponse)
 
     def test__uploadMeterReadings__checkResponses(self):
 
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
 
         time = todtaware('2020-01-01 00:00:00')
 
-        meter = Meter(plant=plant, name='1234')
+        meter = self.pony.db.Meter(plant=plant, name='1234')
 
         export_energy_wh = 210
 
@@ -501,14 +489,14 @@ class DailyDownload_Test(unittest.TestCase):
         orm.flush()
 
         with self.createApi() as api:
-            responses = uploadMeterReadings(self.createConfig())
+            responses = uploadMeterReadings(self.pony.db, self.createConfig())
 
         expectedResponse = 'OK'
         self.assertEqual(responses[plant.codename], expectedResponse)
 
     def test__lastForecastDownloaded__checkLastDateAdded(self):
 
-        alcolea = Plant(
+        alcolea = self.pony.db.Plant(
             name=self.mainFacility(),
             codename='SomEnergia_{}'.format(self.mainFacility()),
         )
@@ -518,9 +506,9 @@ class DailyDownload_Test(unittest.TestCase):
 
         status = 'OK'
 
-        oldForecastMetadata = ForecastMetadata.create(
+        oldForecastMetadata = self.pony.db.ForecastMetadata.create(
             plant=alcolea, forecastdate=oldForecastDate, errorcode=status)
-        newForecastMetadata = ForecastMetadata.create(
+        newForecastMetadata = self.pony.db.ForecastMetadata.create(
             plant=alcolea, forecastdate=newForecastDate, errorcode=status)
 
         oldForecast = [
@@ -552,7 +540,7 @@ class DailyDownload_Test(unittest.TestCase):
         status = 'OK'
         forecastDate = time
 
-        forecastMetadata = ForecastMetadata.create(plant=alcolea, forecastdate=forecastDate, errorcode=status)
+        forecastMetadata = self.pony.db.ForecastMetadata.create(plant=alcolea, forecastdate=forecastDate, errorcode=status)
         forecastMetadata.addForecasts(data[self.mainFacility()])
 
         orm.flush()
@@ -576,8 +564,8 @@ class DailyDownload_Test(unittest.TestCase):
         with self.createPlantmonitorDB() as db:
             forecastDB = db.getForecast()
 
-        now = dt.datetime.now(dt.timezone.utc)
-        fromDate = now - dt.timedelta(days=14)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        fromDate = now - datetime.timedelta(days=14)
         toDate = now
         forecast = []
         with self.createApi() as api:

@@ -21,7 +21,7 @@ class SunEvents():
 
         solar_db = PonyManager(database_info)
         solar_db.define_solar_models()
-        solar_db.binddb(createTables=False)
+        solar_db.binddb(create_tables=False)
         with orm.db_session:
             plant_info = orm.select((p.name, p.location.latitude, p.location.longitude) for p in solar_db.db.Plant)[:]
 
@@ -35,7 +35,7 @@ class SunEvents():
 
         solar_db = PonyManager(database_info)
         solar_db.define_solar_models()
-        solar_db.binddb(createTables=True)
+        solar_db.binddb(create_tables=True)
 
         with orm.db_session:
             if not plants:

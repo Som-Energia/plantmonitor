@@ -8,34 +8,12 @@ from pony import orm
 import unittest
 import json
 
-from ORM.models import database
-from ORM.models import (
-    importPlants,
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
+from ORM.models import importPlants
+
 from plantmonitor.task import PonyMetricStorage
 
-from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
-
 from .plantmonitor_api import api
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Api_Test(unittest.TestCase):
 
@@ -45,23 +23,24 @@ class Api_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony.define_all_models()
+        self.pony.binddb()
 
-        database.create_tables()
+        self.pony.db.drop_all_tables(with_all_data=True)
 
-        # database.generate_mapping(create_tables=True)
-        # orm.db_session.__enter__()
+        self.pony.db.create_tables()
+
+        self.storage = PonyMetricStorage(self.pony.db)
 
         self.client = TestClient(api)
 
     def tearDown(self):
         orm.rollback()
         # orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def setUpPlant(self):
         plantsns = ns.loads("""\
@@ -75,7 +54,7 @@ class Api_Test(unittest.TestCase):
                     name: 'inversor1'
             """)
 
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
     def inverterReading(self):
         return {
@@ -96,7 +75,7 @@ class Api_Test(unittest.TestCase):
 
     def test_connection(self):
         with orm.db_session:
-            self.assertEqual(database.get_connection().status, 1)
+            self.assertEqual(self.pony.db.get_connection().status, 1)
 
     def test__api_version(self):
 
@@ -130,11 +109,11 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
 
-            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+        response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
 
-            # data["devices"][0]["readings"][0]["time"] = time.isoformat()
-            self.assertDictEqual(response.json(), data)
-            self.assertEqual(response.status_code, 200)
+        # data["devices"][0]["readings"][0]["time"] = time.isoformat()
+        self.assertDictEqual(response.json(), data)
+        self.assertEqual(response.status_code, 200)
 
     def test__api_putPlantReadings__database_insert(self):
 
@@ -154,11 +133,13 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
 
-            response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
-            self.assertEqual(response.status_code, 200)
+        response = self.client.put('/plant/{}/readings'.format(data['plant']), json=data)
+        self.assertEqual(response.status_code, 200)
+
+        with orm.db_session:
+
             # check reading content
-            storage = PonyMetricStorage()
-            readings = storage.inverterReadings()
+            readings = self.storage.inverterReadings()
 
             reading = self.inverterReading()
             reading['inverter'] = 1
@@ -168,7 +149,7 @@ class Api_Test(unittest.TestCase):
 
             # check inverter content
             inverter_fk = readings[0]["inverter"]
-            inverter = storage.inverter(inverter_fk)
+            inverter = self.storage.inverter(inverter_fk)
 
             _,device_name = data["devices"][0]["id"].split(":")
             self.assertEqual(inverter["name"], device_name)
@@ -212,13 +193,14 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
             plant_name = data['plant']
-            SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
+            self.pony.db.SensorTemperatureAmbient(plant=self.pony.db.Plant.get(name=plant_name), name=thermoname)
 
-            response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
+        response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
 
+
+        with orm.db_session:
             # check reading content
-            storage = PonyMetricStorage()
-            plantdata = storage.plantData(plant_name)
+            plantdata = self.storage.plantData(plant_name)
 
             self.assertDictEqual(
                 plantdata,
@@ -265,14 +247,15 @@ class Api_Test(unittest.TestCase):
         with orm.db_session:
             self.setUpPlant()
             plant_name = data['plant']
-            SensorTemperatureAmbient(plant=Plant.get(name=plant_name), name=thermoname)
+            self.pony.db.SensorTemperatureAmbient(plant=self.pony.db.Plant.get(name=plant_name), name=thermoname)
 
-            response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
-            print(response.text)
+        response = self.client.put('/plant/{}/readings'.format(plant_name), json=data)
+        print(response.text)
+
+        with orm.db_session:
 
             # check reading content
-            storage = PonyMetricStorage()
-            plantdata = storage.plantData(plant_name)
+            plantdata = self.storage.plantData(plant_name)
 
             self.assertDictEqual(
                 plantdata,

@@ -28,37 +28,9 @@ from meteologica.utils import todt
 from pathlib import Path
 
 from pony import orm
+from ORM.pony_manager import PonyManager
+from ORM.models import importPlants, exportPlants
 
-from .models import database
-from .models import (
-    importPlants,
-    exportPlants,
-    Plant,
-    Municipality,
-    PlantLocation,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    String,
-    StringRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
-
-from .db_utils import setupDatabase, getTablesToTimescale, timescaleTables
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Models_Test(unittest.TestCase):
 
@@ -70,21 +42,23 @@ class Models_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        database.create_tables()
+        self.pony.define_all_models()
+        self.pony.binddb()
 
-        # database.generate_mapping(create_tables=True)
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
+
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantsNS(self):
         alcoleaPlantsNS = ns.loads("""\
@@ -286,7 +260,7 @@ class Models_Test(unittest.TestCase):
 
         alcoleaPlantNS = self.samplePlantNS()
 
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
@@ -306,7 +280,7 @@ class Models_Test(unittest.TestCase):
 
         alcoleaPlantNS['extraSensors'] = [extraSensor, extraSensor2]
 
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
@@ -320,7 +294,7 @@ class Models_Test(unittest.TestCase):
 
         del alcoleaPlantNS['temperatureAmbientSensors']
 
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
@@ -335,7 +309,7 @@ class Models_Test(unittest.TestCase):
 
         alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
 
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
@@ -362,7 +336,7 @@ class Models_Test(unittest.TestCase):
 
         alcoleaPlantNS = self.samplePlantNSWithStrings()
 
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
@@ -393,7 +367,7 @@ class Models_Test(unittest.TestCase):
             temperatureModuleSensors: []
             """)
 
-        empty = Plant(name=emptyPlantNS.name, codename=emptyPlantNS.codename)
+        empty = self.pony.db.Plant(name=emptyPlantNS.name, codename=emptyPlantNS.codename)
         empty = empty.importPlant(emptyPlantNS)
 
         #TODO test the whole fixture, not just the plant data
@@ -403,17 +377,17 @@ class Models_Test(unittest.TestCase):
     def test_Plant_importPlants__manyPlants(self):
         plantsns = self.samplePlantsNS()
 
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
-        resultPlantns = exportPlants(skipEmpty=True)
+        resultPlantns = exportPlants(self.pony.db, skipEmpty=True)
 
         self.assertNsEqual(plantsns, resultPlantns)
 
     def test__Plant__getMeter(self):
         plantName = 'alibaba'
-        alibaba = Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
+        alibaba = self.pony.db.Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
         meterName = '1234'
-        meter = Meter(plant=alibaba, name=meterName)
+        meter = self.pony.db.Meter(plant=alibaba, name=meterName)
         orm.flush()
 
         resultMeter = alibaba.getMeter()
@@ -422,9 +396,9 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant__getMeter__ManyGivesNewest(self):
         plantName = 'alibaba'
-        alibaba = Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
-        oldmeter = Meter(plant=alibaba, name='oldmeter')
-        newmeter = Meter(plant=alibaba, name='newmeter')
+        alibaba = self.pony.db.Plant(name=plantName, codename='SomEnergia_{}'.format(plantName))
+        oldmeter = self.pony.db.Meter(plant=alibaba, name='oldmeter')
+        newmeter = self.pony.db.Meter(plant=alibaba, name='newmeter')
         orm.flush()
 
         resultMeter = alibaba.getMeter()
@@ -448,9 +422,9 @@ class Models_Test(unittest.TestCase):
 
         plantsns['municipalities'] = municipalitiesns
 
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
-        storedMunicipalitiesns = exportPlants()
+        storedMunicipalitiesns = exportPlants(self.pony.db)
         plantsns['plants'] = []
         self.assertNsEqual(plantsns, storedMunicipalitiesns)
 
@@ -468,9 +442,9 @@ class Models_Test(unittest.TestCase):
 
         plantsns['municipalities'] = municipalitiesns
 
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
-        storedMunicipalitiesns = exportPlants()
+        storedMunicipalitiesns = exportPlants(self.pony.db)
         plantsns['plants'] = []
         self.assertNsEqual(plantsns, storedMunicipalitiesns)
 
@@ -489,40 +463,40 @@ class Models_Test(unittest.TestCase):
 
         # plantsns['municipalities'] = municipalitiesns
 
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
         # orm.flush()
 
-        resultPlantns = exportPlants(skipEmpty=True)
+        resultPlantns = exportPlants(self.pony.db, skipEmpty=True)
         self.assertNsEqual(plantsns, resultPlantns)
 
     def test__Plant_importPlantsData__many(self):
         plantsns = self.samplePlantsNS()
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
         delta = dt.timedelta(minutes=30)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         # orm.flush()
 
         for plantData in plantsData:
-            self.assertDictEqual(dict(plantData), Plant.get(name=plantData['plant']).plantData(skipEmpty=True))
+            self.assertDictEqual(dict(plantData), self.pony.db.Plant.get(name=plantData['plant']).plantData(skipEmpty=True))
 
     def test__Plant_str2model__sameNameDifferentPlant(self):
         plantsns = self.samplePlantsNS()
         plantsns.plants[0].plant.inverters[0].inverter.name = '4444'
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
         orm.flush()
 
-        plant = Plant.get(name='alcolea')
+        plant = self.pony.db.Plant.get(name='alcolea')
 
-        alcoleainverter = Plant.str2device(plant, 'Inverter', '4444')
+        alcoleainverter = self.pony.db.Plant.str2device(plant, 'Inverter', '4444')
 
         self.assertNotEqual(alcoleainverter, None)
 
-        plant = Plant.get(name='figuerea')
+        plant = self.pony.db.Plant.get(name='figuerea')
 
-        figuereainverter = Plant.str2device(plant, 'Inverter', '4444')
+        figuereainverter = self.pony.db.Plant.str2device(plant, 'Inverter', '4444')
 
         self.assertNotEqual(figuereainverter, None)
 
@@ -531,10 +505,10 @@ class Models_Test(unittest.TestCase):
 
     def test__Meter_getRegistries__emptyRegistries(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
-        registries = Meter[1].getRegistries()
+        registries = self.pony.db.Meter[1].getRegistries()
 
         expectedRegistries = []
 
@@ -542,10 +516,10 @@ class Models_Test(unittest.TestCase):
 
     def test__Meter_getRegistries__OneRegistry(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        Meter[1].insertRegistry(
+        self.pony.db.Meter[1].insertRegistry(
             time = time,
             export_energy_wh = 10,
             import_energy_wh = 5,
@@ -555,7 +529,7 @@ class Models_Test(unittest.TestCase):
             r4_VArh = 1,
         )
 
-        registries = Meter[1].getRegistries()
+        registries = self.pony.db.Meter[1].getRegistries()
 
         expectedRegistries = [{
             'time': time,
@@ -571,11 +545,11 @@ class Models_Test(unittest.TestCase):
 
     def test__Meter_getRegistries__OneRegistry_two_meters(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
-        Meter(plant=alcolea, name="Albertinho")
+        self.pony.db.Meter(plant=alcolea, name="Albertinho")
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        Meter[1].insertRegistry(
+        self.pony.db.Meter[1].insertRegistry(
             time = time,
             export_energy_wh = 10,
             import_energy_wh = 5,
@@ -584,7 +558,7 @@ class Models_Test(unittest.TestCase):
             r3_VArh = 4,
             r4_VArh = 1,
         )
-        Meter[2].insertRegistry(
+        self.pony.db.Meter[2].insertRegistry(
             time = time,
             export_energy_wh = 110,
             import_energy_wh = 15,
@@ -593,7 +567,7 @@ class Models_Test(unittest.TestCase):
             r3_VArh = 14,
             r4_VArh = 11,
         )
-        registries = Meter[1].getRegistries()
+        registries = self.pony.db.Meter[1].getRegistries()
 
         expectedRegistries = [{
             'time': time,
@@ -611,11 +585,11 @@ class Models_Test(unittest.TestCase):
     def test__Meter_getRegistries__OneRegistry_filter_date(self):
         with orm.db_session:
             alcoleaPlantNS = self.samplePlantNS()
-            alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+            alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
             alcolea = alcolea.importPlant(alcoleaPlantNS)
             time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
             delta = dt.timedelta(minutes=30)
-            Meter[1].insertRegistry(
+            self.pony.db.Meter[1].insertRegistry(
                 time = time,
                 export_energy_wh = 10,
                 import_energy_wh = 5,
@@ -627,7 +601,7 @@ class Models_Test(unittest.TestCase):
             fromdate = time - delta
             todate = time + delta
 
-            registries = Meter[1].getRegistries(fromdate=fromdate, todate=todate)
+            registries = self.pony.db.Meter[1].getRegistries(fromdate=fromdate, todate=todate)
 
             expectedRegistries = [{
                 'time': time,
@@ -643,21 +617,21 @@ class Models_Test(unittest.TestCase):
 
     def test__Meter_getLastReadingsDate__oneMeterOnePlantEmptyReadings(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
-        result = Meter[1].getLastReadingDate()
+        result = self.pony.db.Meter[1].getLastReadingDate()
 
         self.assertIsNone(result)
 
 
     def test__Meter_getLastReadingsDate__oneMeterOnePlantOneReading(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
         delta = dt.timedelta(minutes=30)
-        meter = Meter[1]
+        meter = self.pony.db.Meter[1]
         meter.insertRegistry(
             time = time,
             export_energy_wh = 10,
@@ -676,10 +650,10 @@ class Models_Test(unittest.TestCase):
 
     def test__inverter_getRegistries__OneRegistry(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
-        Inverter[1].insertRegistry(
+        self.pony.db.Inverter[1].insertRegistry(
             power_w = 1,
             energy_wh =2,
             intensity_cc_mA = 3,
@@ -691,7 +665,7 @@ class Models_Test(unittest.TestCase):
             time = time,
         )
 
-        registries = Inverter[1].getRegistries()
+        registries = self.pony.db.Inverter[1].getRegistries()
 
         expectedRegistries = [{
             "power_w": 1,
@@ -709,16 +683,16 @@ class Models_Test(unittest.TestCase):
 
     def test__string_getRegistries__OneRegistry(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
-        String[1].insertRegistry(
+        self.pony.db.String[1].insertRegistry(
             intensity_mA = 3,
             time = time,
         )
 
-        registries = String[1].getRegistries()
+        registries = self.pony.db.String[1].getRegistries()
 
         expectedRegistries = [{
             "intensity_mA": 3,
@@ -731,7 +705,7 @@ class Models_Test(unittest.TestCase):
         pass
 
     def test__createDevice(self):
-        oneplant = Plant(name="Alice", codename="LaSuisse")
+        oneplant = self.pony.db.Plant(name="Alice", codename="LaSuisse")
         oneplant.createDevice("Inverter", "Bob")
 
         plantData = oneplant.exportPlant()
@@ -752,7 +726,7 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant__plantData__InverterWithStrings(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -769,7 +743,7 @@ class Models_Test(unittest.TestCase):
             'voltage_cc_mV': 1
         }
 
-        Inverter[1].insertRegistry(**registry)
+        self.pony.db.Inverter[1].insertRegistry(**registry)
 
         plantdata = alcolea.plantData()
 
@@ -793,7 +767,7 @@ class Models_Test(unittest.TestCase):
     # TODO fix plantData construction of an inverter with strings
     def _test__Inverter__plantData__withStrings(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -812,11 +786,11 @@ class Models_Test(unittest.TestCase):
 
         stringsRegistry = [100,200]
 
-        Inverter[1].insertRegistry(**inverterRegistry)
-        String[1].insertRegistry(intensity_mA=stringsRegistry[0], time=time)
-        String[2].insertRegistry(intensity_mA=stringsRegistry[1], time=time)
+        self.pony.db.Inverter[1].insertRegistry(**inverterRegistry)
+        self.pony.db.String[1].insertRegistry(intensity_mA=stringsRegistry[0], time=time)
+        self.pony.db.String[2].insertRegistry(intensity_mA=stringsRegistry[1], time=time)
 
-        inverterPlantdata = Inverter[1].plantData()
+        inverterPlantdata = self.pony.db.Inverter[1].plantData()
 
         expected = {
                 'id': 'Inverter:5555',
@@ -831,7 +805,7 @@ class Models_Test(unittest.TestCase):
 
     def _test__String__plantData(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
 
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -850,9 +824,9 @@ class Models_Test(unittest.TestCase):
 
         stringsRegistry = [100,200]
 
-        Inverter[1].insertRegistry(**inverterRegistry)
-        String[1].insertRegistry(intensity_mA=stringsRegistry[0], time=time)
-        String[2].insertRegistry(intensity_mA=stringsRegistry[1], time=time)
+        self.pony.db.Inverter[1].insertRegistry(**inverterRegistry)
+        self.pony.db.String[1].insertRegistry(intensity_mA=stringsRegistry[0], time=time)
+        self.pony.db.String[2].insertRegistry(intensity_mA=stringsRegistry[1], time=time)
 
         plantdata = alcolea.plantData()
 
@@ -880,7 +854,7 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant__plantData(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
@@ -894,9 +868,9 @@ class Models_Test(unittest.TestCase):
             "time": time,
         }
 
-        Meter[1].insertRegistry(**mRegistry)
+        self.pony.db.Meter[1].insertRegistry(**mRegistry)
 
-        SensorIrradiation[1].insertRegistry(
+        self.pony.db.SensorIrradiation[1].insertRegistry(
             time = time,
             irradiation_w_m2 = 15,
             temperature_dc = 250,
@@ -945,7 +919,7 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant_insertPlantData(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -1001,7 +975,7 @@ class Models_Test(unittest.TestCase):
 
     def _test__Plant_insertPlantData__Strings__Empty(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -1027,7 +1001,7 @@ class Models_Test(unittest.TestCase):
 
     def test__Plant_insertPlantData__NewStrings__OneInverter(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
@@ -1070,12 +1044,12 @@ class Models_Test(unittest.TestCase):
 
         expected_strings = [{'time': time, 'intensity_mA': 100}, {'time': time, 'intensity_mA': 200}]
 
-        string_readings = [{'time': r.time, 'intensity_mA': r.intensity_mA} for r in StringRegistry.select()]
+        string_readings = [{'time': r.time, 'intensity_mA': r.intensity_mA} for r in self.pony.db.StringRegistry.select()]
 
         self.assertListEqual(string_readings, expected_strings)
 
     def test__municipality_insert(self):
-        figueres = Municipality(
+        figueres = self.pony.db.Municipality(
             countryCode = "ES",
             country = "Spain",
             regionCode = "09",
@@ -1086,23 +1060,23 @@ class Models_Test(unittest.TestCase):
             name = "Figueres",
         )
 
-        alcolea = Plant(name="Alcolea", codename="Som_Alcolea", municipality=figueres)
+        alcolea = self.pony.db.Plant(name="Alcolea", codename="Som_Alcolea", municipality=figueres)
 
-        municipality = Plant.get(name="Alcolea").municipality
+        municipality = self.pony.db.Plant.get(name="Alcolea").municipality
 
         self.assertDictEqual(figueres.to_dict(), municipality.to_dict())
 
     def test__location_insert(self):
-        alcolea = Plant(name="Alcolea", codename="Som_Alcolea")
+        alcolea = self.pony.db.Plant(name="Alcolea", codename="Som_Alcolea")
         alcoleaLatLong = (42.26610810248693, 2.958334450785599)
-        alcoleaLocation = PlantLocation(
+        alcoleaLocation = self.pony.db.PlantLocation(
             plant=alcolea,
             latitude=alcoleaLatLong[0],
             longitude=alcoleaLatLong[1]
         )
         alcolea.location = alcoleaLocation
 
-        location = Plant.get(name="Alcolea").location
+        location = self.pony.db.Plant.get(name="Alcolea").location
 
         self.assertEqual(alcoleaLatLong, location.getLatLong())
 
@@ -1112,55 +1086,55 @@ class Models_Test(unittest.TestCase):
     def test__Meter_updateMeterProtocol_byDefault(self):
 
         alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
-        meter = Meter.get(name='1234578')
+        meter = self.pony.db.Meter.get(name='1234578')
         self.assertEqual(meter.connection_protocol, 'ip')
 
     def test__Meter_updateMeterProtocol_afterUpdate(self):
 
         alcoleaPlantNS = self.samplePlantNSWithModuleParameters()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         orm.flush()
 
-        Meter.updateMeterProtocol({
+        self.pony.db.Meter.updateMeterProtocol({
             '1234578': 'moxa',
         })
-        meter = Meter.get(name='1234578')
+        meter = self.pony.db.Meter.get(name='1234578')
         self.assertEqual(meter.connection_protocol, 'moxa')
 
     def test__Meter_updateMeterProtocol_unknownMetersIgnored(self):
         # This adds many more meters such as 9876 which we are not updating
         plantsns = self.samplePlantsNS()
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
-        Meter.updateMeterProtocol({
+        self.pony.db.Meter.updateMeterProtocol({
             '1234578': 'moxa',
         })
-        meter = Meter.get(name='1234578')
+        meter = self.pony.db.Meter.get(name='1234578')
         self.assertEqual(meter.connection_protocol, 'moxa')
-        meter = Meter.get(name='9876')
+        meter = self.pony.db.Meter.get(name='9876')
         self.assertEqual(meter.connection_protocol, 'ip')
 
     def test__Meter_updateMeterProtocol_deprecatedMetersIgnored(self):
         plantsns = self.samplePlantsNS()
-        importPlants(plantsns)
+        importPlants(self.pony.db, plantsns)
 
         # Should not fail
-        Meter.updateMeterProtocol({
+        self.pony.db.Meter.updateMeterProtocol({
             '1234578': 'moxa',
             'OLDMETER': 'moxa',
         })
-        meter = Meter.get(name='OLDMETER')
+        meter = self.pony.db.Meter.get(name='OLDMETER')
         self.assertEqual(meter, None)
 
     @unittest.skipIf(True, "we don't support String creation directly, only as inverter registry")
     def test__String_createDevice(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
         dev = alcolea.createDevice(classname='String', devicename='5555-string1')
@@ -1172,13 +1146,13 @@ class Models_Test(unittest.TestCase):
 
     def test__String_insertRegistry__new(self):
         alcoleaPlantNS = self.samplePlantNS()
-        alcolea = Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)
         time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
 
         stringIntensities = [400,400,300,500,2000,300,400,1000,300]
 
-        Inverter[1].insertRegistry(
+        self.pony.db.Inverter[1].insertRegistry(
             power_w = 1,
             energy_wh =2,
             intensity_cc_mA = 3,
@@ -1190,7 +1164,7 @@ class Models_Test(unittest.TestCase):
             time = time,
         )
 
-        registries = Inverter[1].getRegistries()
+        registries = self.pony.db.Inverter[1].getRegistries()
 
         expectedRegistries = [{
             "power_w": 1,

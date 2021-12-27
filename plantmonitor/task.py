@@ -44,7 +44,6 @@ from plantmonitor.storage import (
     PonyMetricStorage,
     ApiMetricStorage,
     InfluxMetricStorage,
-    TimeScaleMetricStorage,
 )
 
 from pony import orm
@@ -54,22 +53,7 @@ import datetime
 from .standardization import registers_to_plant_data
 from .readings_facade import ReadingsFacade
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-)
-
-from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
+from ORM.pony_manager import PonyManager
 
 def client_db(db):
     try:
@@ -178,7 +162,11 @@ def task():
             logger.error("Getting reading from {} failed. Aborting.".format(plantname))
             return
 
-        ponyStorage = PonyMetricStorage()
+        pony_manager = PonyManager(envinfo.DB_CONF)
+
+        pony_manager.define_all_models()
+        pony_manager.binddb()
+        ponyStorage = PonyMetricStorage(pony_manager.db)
         apiStorage = ApiMetricStorage(apiconfig)
 
         logger.info("**** Saving data in database ****")

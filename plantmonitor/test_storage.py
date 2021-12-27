@@ -7,29 +7,10 @@ from pony import orm
 
 import datetime
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
+
 from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
-from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
 import datetime
 
@@ -41,8 +22,6 @@ import time
 import requests
 
 
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
-
 class ApiClient_Test(unittest.TestCase):
 
     def setUp(self):
@@ -51,14 +30,15 @@ class ApiClient_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony.define_all_models()
+        self.pony.binddb()
 
-        database.create_tables()
+        self.pony.db.drop_all_tables(with_all_data=True)
 
-        # database.generate_mapping(create_tables=True)
+        self.pony.db.create_tables()
+
         orm.db_session.__enter__()
 
         # log_level = "debug"
@@ -78,8 +58,8 @@ class ApiClient_Test(unittest.TestCase):
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
         self.proc.terminate()
 
     def apiPort(self):
@@ -114,32 +94,6 @@ class ApiClient_Test(unittest.TestCase):
         ])
 
         return plant_name, inverter_name, metrics
-
-    def createPlantLegacy(self):
-        plant_name = 'SomEnergia_Alibaba'
-        inverter_name = 'Mary'
-        with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name=inverter_name, plant=alcolea)
-            metrics = ns([
-                    ('daily_energy_h_wh', 0),
-                    ('daily_energy_l_wh', 17556),
-                    ('e_total_h_wh', 566),
-                    ('e_total_l_wh', 49213),
-                    ('h_total_h_h', 0),
-                    ('h_total_l_h', 18827),
-                    ('pac_r_w', 0),
-                    ('pac_s_w', 0),
-                    ('pac_t_w', 0),
-                    ('powerreactive_t_v', 0),
-                    ('powerreactive_r_v', 0),
-                    ('powerreactive_s_v', 0),
-                    ('temp_inv_dc', 320),
-                    ('time', datetime.datetime.now(datetime.timezone.utc)),
-                    ])
-
-            storage = PonyMetricStorage()
-            storage.storeInverterMeasures(plant_name, inverter_name, metrics)
 
     def samplePlantNS(self):
         plantNS = ns.loads("""\
@@ -183,7 +137,7 @@ class ApiClient_Test(unittest.TestCase):
     def createPlant(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename, description=plantNS.description)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename, description=plantNS.description)
         alibaba = alibaba.importPlant(plantNS)
         orm.flush()
         # do we need to add some data?
@@ -262,12 +216,19 @@ class Storage_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
+
+        self.pony.define_all_models()
+        self.pony.binddb()
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.storage = PonyMetricStorage(self.pony.db)
 
         self.maxDiff=None
         # orm.set_sql_debug(True)
 
-        database.create_tables()
+        self.pony.db.create_tables()
 
         # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
@@ -275,8 +236,8 @@ class Storage_Test(unittest.TestCase):
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantData(self, time):
         plantData = {
@@ -311,7 +272,7 @@ class Storage_Test(unittest.TestCase):
 
     def test_connection(self):
         with orm.db_session:
-            self.assertEqual(database.get_connection().status, 1)
+            self.assertEqual(self.pony.db.get_connection().status, 1)
 
     def test__datetimeToStr(self):
         time = datetime.datetime.now(datetime.timezone.utc)
@@ -327,8 +288,8 @@ class Storage_Test(unittest.TestCase):
         plant_name = 'SomEnergia_Alibaba'
         inverter_name = 'Mary'
         with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name=inverter_name, plant=alcolea)
+            alcolea = self.pony.db.Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = self.pony.db.Inverter(name=inverter_name, plant=alcolea)
             metrics = ns([
                     ('daily_energy_h_wh', 0),
                     ('daily_energy_l_wh', 17556),
@@ -351,8 +312,7 @@ class Storage_Test(unittest.TestCase):
                     ('probe4value', 0),
                     ])
 
-            storage = PonyMetricStorage()
-            storage.storeInverterMeasures(
+            self.storage.storeInverterMeasures(
                 plant_name, inverter_name, metrics)
 
             metrics.pop('probe1value')
@@ -363,15 +323,15 @@ class Storage_Test(unittest.TestCase):
             expectedRegistry = dict(metrics)
             expectedRegistry['inverter'] = inverter.id
 
-            inverterReadings = storage.inverterReadings()
+            inverterReadings = self.storage.inverterReadings()
             self.assertEqual(inverterReadings, [expectedRegistry])
 
     def __test_PublishOrmIfInverterNotExist(self):
         inverter_name = 'Alice'
         plant_name = 'SomEnergia_Alibaba'
         with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name=inverter_name, plant=alcolea)
+            alcolea = self.pony.db.Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = self.pony.db.Inverter(name=inverter_name, plant=alcolea)
             metrics = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
@@ -393,18 +353,17 @@ class Storage_Test(unittest.TestCase):
                 ('probe3value', 0),
                 ('probe4value', 0),
                 ])
-            storage = PonyMetricStorage()
-            storage.storeInverterMeasures(
+            self.storage.storeInverterMeasures(
                 plant_name, "UnknownInverter", metrics)
 
-            self.assertListEqual(storage.inverterReadings(), [])
+            self.assertListEqual(self.storage.inverterReadings(), [])
 
     def __test_PublishOrmIfPlantNotExist(self):
         inverter_name = 'Alice'
         plant_name = 'SomEnergia_Alibaba'
         with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name=inverter_name, plant=alcolea)
+            alcolea = self.pony.db.Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            inverter = self.pony.db.Inverter(name=inverter_name, plant=alcolea)
             metrics = ns([
                 ('daily_energy_h_wh', 0),
                 ('daily_energy_l_wh', 17556),
@@ -426,11 +385,10 @@ class Storage_Test(unittest.TestCase):
                 ('probe3value', 0),
                 ('probe4value', 0),
                 ])
-            storage = PonyMetricStorage()
-            storage.storeInverterMeasures(
+            self.storage.storeInverterMeasures(
                 'UnknownPlant', inverter_name, metrics)
 
-            self.assertListEqual(storage.inverterReadings(), [])
+            self.assertListEqual(self.storage.inverterReadings(), [])
 
     def test__PonyMetricStorage_insertPlantData__storeTemperatureSensor(self):
         sensor_name = 'Alice'
@@ -438,8 +396,9 @@ class Storage_Test(unittest.TestCase):
         time = datetime.datetime.now(datetime.timezone.utc)
 
         with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
+            alcolea = self.pony.db.Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            sensor = self.pony.db.SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
+            orm.flush()
             plant_data = {
                 "plant": plant_name,
                 "version": "1.0",
@@ -454,8 +413,8 @@ class Storage_Test(unittest.TestCase):
                     }]
                 }]
             }
-            storage = PonyMetricStorage()
-            storage.insertPlantData(plant_data)
+            self.storage.insertPlantData(plant_data)
+            orm.flush()
 
             expected_plant_data = {
                 'plant': plant_name,
@@ -469,7 +428,7 @@ class Storage_Test(unittest.TestCase):
                     }]
                 }],
             }
-            self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
+            self.assertDictEqual(self.storage.plantData(plant_name), expected_plant_data)
 
     def test__PonyMetricStorage_insertPlantData__storeTemperatureSensorWithoutTemperature(self):
         sensor_name = 'Alice'
@@ -477,8 +436,9 @@ class Storage_Test(unittest.TestCase):
         time = datetime.datetime.now(datetime.timezone.utc)
 
         with orm.db_session:
-            alcolea = Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
+            alcolea = self.pony.db.Plant(name=plant_name,  codename='SOMSC01', description='descripción de planta')
+            sensor = self.pony.db.SensorTemperatureAmbient(name=sensor_name, plant=alcolea)
+            orm.flush()
             plant_data = {
                 "plant": plant_name,
                 "version": "1.0",
@@ -493,8 +453,8 @@ class Storage_Test(unittest.TestCase):
                     }]
                 }]
             }
-            storage = PonyMetricStorage()
-            storage.insertPlantData(plant_data)
+            self.storage.insertPlantData(plant_data)
+            orm.flush()
 
             expected_plant_data = {
                 'plant': plant_name,
@@ -506,7 +466,7 @@ class Storage_Test(unittest.TestCase):
                 }],
             }
 
-            self.assertDictEqual(storage.plantData(plant_name), expected_plant_data)
+            self.assertDictEqual(self.storage.plantData(plant_name), expected_plant_data)
 
 
 

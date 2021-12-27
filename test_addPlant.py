@@ -22,34 +22,15 @@ from pathlib import Path
 
 from pony import orm
 
-from ORM.models import database
+from ORM.pony_manager import PonyManager
 from ORM.models import (
     importPlants,
     exportPlants,
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
 )
 
 from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 
 from addPlant import importPlantCLI, importPlantsFromFile
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class ImportPlant_Test(unittest.TestCase):
 
@@ -61,12 +42,17 @@ class ImportPlant_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        database.create_tables()
+        self.pony.define_all_models()
+        self.pony.binddb()
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        #orm.set_sql_debug(True)
+        self.pony.db.create_tables()
+
 
         # database.generate_mapping(create_tables=True)
         # orm.db_session.__enter__()
@@ -74,8 +60,8 @@ class ImportPlant_Test(unittest.TestCase):
     def tearDownORM(self):
         orm.rollback()
         # orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def setUp(self):
         self.setUpORM()
@@ -86,7 +72,7 @@ class ImportPlant_Test(unittest.TestCase):
     def test_importExportPlant(self):
         with orm.db_session:
 
-            plantsns = ns.loads("""\
+            nsplants = ns.loads("""\
                 plants:
                 - plant:
                     name: alcolea
@@ -110,11 +96,11 @@ class ImportPlant_Test(unittest.TestCase):
                     - temperatureModuleSensor:
                         name: pol""")
 
-            importPlants(plantsns)
+            importPlants(self.pony.db, nsplants)
 
             #TODO test the whole fixture, not just the plant data
-            expectedPlantsNS = exportPlants()
-            self.assertNsEqual(expectedPlantsNS, plantsns)
+            expectedPlantsNS = exportPlants(self.pony.db)
+            self.assertNsEqual(expectedPlantsNS, nsplants)
 
     def test__importPlantCLI_NoFile(self):
         runner = CliRunner()
@@ -154,12 +140,13 @@ class ImportPlant_Test(unittest.TestCase):
 
         runner = CliRunner()
         result = runner.invoke(importPlantCLI, [fakePlantYaml])
+        print(result)
         self.assertEqual(0, result.exit_code)
 
         p.unlink()
 
         with orm.db_session:
-            plantns = exportPlants()
+            plantns = exportPlants(self.pony.db)
 
         self.assertNsEqual(plantns, content)
 
@@ -195,12 +182,12 @@ class ImportPlant_Test(unittest.TestCase):
         with p.open("w", encoding="utf-8") as f:
             f.write(content)
 
-        importPlantsFromFile(fakePlantsYaml)
+        importPlantsFromFile(self.pony.db, fakePlantsYaml)
 
         p.unlink()
 
         with orm.db_session:
-            plantns = exportPlants()
+            plantns = exportPlants(self.pony.db)
 
         self.assertNsEqual(plantns, content)
 
@@ -245,11 +232,11 @@ class ImportPlant_Test(unittest.TestCase):
         with p.open("w", encoding="utf-8") as f:
             f.write(content)
 
-        importPlantsFromFile(fakePlantsYaml)
+        importPlantsFromFile(self.pony.db, fakePlantsYaml)
 
         p.unlink()
 
         with orm.db_session:
-            plantns = exportPlants()
+            plantns = exportPlants(self.pony.db)
 
         self.assertNsEqual(plantns, content)

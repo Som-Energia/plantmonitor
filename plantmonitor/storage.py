@@ -37,21 +37,7 @@ from pony import orm
 
 import datetime
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-)
-
-from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
+from ORM.pony_manager import PonyManager
 
 def client_db(db):
     try:
@@ -71,36 +57,39 @@ def client_db(db):
 
 class PonyMetricStorage:
 
+    def __init__(self, db):
+        self.db = db
+
     def sensor(self, sensor_fk):
-        device = Sensor[sensor_fk]
+        device = self.db.Sensor[sensor_fk]
         return device.to_dict()
 
     def sensorTemperatureAmbientReadings(self):
-        sensorReadings = orm.select(c for c in SensorTemperatureAmbientRegistry)
+        sensorReadings = orm.select(c for c in self.db.SensorTemperatureAmbientRegistry)
         return list(x.to_dict() for x in sensorReadings)
 
     #TODO return all data (or filter by date)
     def plantData(self, plant_name):
-        plant = Plant.get(name=plant_name)
+        plant = self.db.Plant.get(name=plant_name)
         if plant:
             return plant.plantData()
         return {}
 
     def inverter(self, inverter_fk):
-        device = Inverter[inverter_fk]
+        device = self.db.Inverter[inverter_fk]
         return device.to_dict()
 
     def inverterReadings(self):
-        inverterReadings = orm.select(c for c in InverterRegistry)
+        inverterReadings = orm.select(c for c in self.db.InverterRegistry)
         return list(x.to_dict() for x in inverterReadings)
 
     def storeInverterMeasures(self, plant_name, inverter_name, metrics):
         with orm.db_session:
-            plant = Plant.get(name=plant_name)
+            plant = self.db.Plant.get(name=plant_name)
             if not plant:
                 logger.debug("No plant named {}".format(plant_name))
                 return
-            inverter = Inverter.get(name=inverter_name, plant=plant)
+            inverter = self.db.Inverter.get(name=inverter_name, plant=plant)
             if not inverter:
                 logger.debug("No inverter named {}".format(inverter_name))
                 return
@@ -118,7 +107,7 @@ class PonyMetricStorage:
     def insertPlantData(self, plant_data):
         with orm.db_session:
             plant_name = plant_data["plant"]
-            plant = Plant.get(name=plant_name)
+            plant = self.db.Plant.get(name=plant_name)
             if not plant:
                 logger.warning("No plant named {}".format(plant_name))
                 return

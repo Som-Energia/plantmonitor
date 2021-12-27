@@ -11,8 +11,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-from ORM.db_utils import connectDatabase
-
+from ORM.pony_manager import PonyManager
 from plantmonitor.task import PonyMetricStorage
 from yamlns import namespace as ns
 
@@ -34,7 +33,12 @@ class PlantReading(BaseModel):
     devices: List[Device]
 
 api = FastAPI()
-connectDatabase()
+
+from conf import envinfo
+pony_manager = PonyManager(envinfo.DB_CONF)
+pony_manager.define_all_models()
+pony_manager.binddb()
+storage = PonyMetricStorage(pony_manager.db)
 
 @api.get('/version')
 def api_version():
@@ -47,7 +51,6 @@ def api_version():
 async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
     logger.info("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
     with orm.db_session:
-        storage = PonyMetricStorage()
         storage.insertPlantData(plant_reading.dict())
     return plant_reading
 

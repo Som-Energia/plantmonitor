@@ -25,6 +25,8 @@ import time
 import datetime
 import conf.config as config
 
+from ORM.pony_manager import PonyManager
+
 from conf.logging_configuration import LOGGING
 import logging
 import logging.config
@@ -46,17 +48,11 @@ import datetime
 
 from .standardization import erp_meter_readings_to_plant_data
 
-from ORM.models import (
-    Plant,
-    Meter,
-)
-
-from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
-
 class ReadingsFacade():
-  def __init__(self):
+  def __init__(self, db):
     self.client = Client(**config.erppeek)
     self.erpMeters = []
+    self.db = db
 
   def getNewErpReadings(self, meterName, lastDate=None, upto=None):
     upto = upto or datetime.datetime.now(datetime.timezone.utc)
@@ -101,10 +97,10 @@ class ReadingsFacade():
   def getNewMetersReadings(self, upto=None):
     upto = upto or datetime.datetime.now(datetime.timezone.utc)
     return [self.getPlantNewMetersReadings(plant, upto)
-      for plant in Plant.select().order_by(Plant.name)]
+      for plant in self.db.Plant.select().order_by(self.db.Plant.name)]
 
   def ormMeters(self):
-    return list(orm.select(m.name for m in Meter))
+    return list(orm.select(m.name for m in self.db.Meter))
 
   def checkNewMeters(self, meterNames):
     return [m for m in meterNames if m not in self.ormMeters()]
@@ -137,7 +133,7 @@ class ReadingsFacade():
   # TODO: Unit test me
   def updateMetersProtocols(self):
     meters_protocols = meter_connection_protocol(self.client, self.ormMeters())
-    Meter.updateMeterProtocol(meters_protocols)
+    self.db.Meter.updateMeterProtocol(meters_protocols)
 
   def transfer_ERP_readings_to_model(self, refreshERPmeters=True):
     with orm.db_session:
@@ -151,6 +147,6 @@ class ReadingsFacade():
 
       plants_data = self.getNewMetersReadings()
 
-      Plant.insertPlantsData(plants_data)
+      self.db.Plant.insertPlantsData(plants_data)
 
 # vim: et sw=2 ts=2
