@@ -57,11 +57,11 @@ class PonyManager_bind_Test(unittest.TestCase):
         return alcoleaPlantNS
 
     def test__emptyDB(self):
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
     def test__create_entity(self):
         self.pony.define_all_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
         with orm.db_session:
             alcolea_ns = self.samplePlantNS()
 
@@ -97,7 +97,7 @@ class PonyManager_bind_Test(unittest.TestCase):
     def test__create_solar_entity(self):
 
         self.pony.define_solar_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
         with orm.db_session:
             plant = self.pony.db.Plant(name='roger', codename='Som_Roger')
@@ -127,7 +127,7 @@ class PonyManager_Test(unittest.TestCase):
         self.pony = PonyManager(database_info)
 
         self.pony.define_all_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
         orm.db_session.__enter__()
 
@@ -182,7 +182,7 @@ class PonyManagerReadonly_Test(unittest.TestCase):
         self.pony = PonyManager(database_info)
 
         self.pony.define_solar_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
         orm.db_session.__enter__()
 

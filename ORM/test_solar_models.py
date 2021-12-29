@@ -22,7 +22,7 @@ class SolarModels_Test(unittest.TestCase):
         self.pony = PonyManager(database_info)
 
         self.pony.define_solar_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
         orm.db_session.__enter__()
 

@@ -30,7 +30,7 @@ class PonyManager:
         self.timescaled_tables = []
 
     ''' creates tables '''
-    def binddb(self, create_tables=True, check_tables=True):
+    def binddb(self, create_tables=False, check_tables=True):
         self.db.bind(**self.database_info)
         self.db.generate_mapping(create_tables=create_tables, check_tables=check_tables)
 

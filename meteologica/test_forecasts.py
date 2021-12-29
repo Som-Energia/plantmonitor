@@ -81,7 +81,7 @@ class DailyDownload_Test(unittest.TestCase):
         self.pony = PonyManager(envinfo.DB_CONF)
 
         self.pony.define_all_models()
-        self.pony.binddb()
+        self.pony.binddb(create_tables=True)
 
         self.pony.db.drop_all_tables(with_all_data=True)
 

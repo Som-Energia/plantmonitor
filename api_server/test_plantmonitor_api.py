@@ -13,20 +13,31 @@ from ORM.models import importPlants
 
 from plantmonitor.task import PonyMetricStorage
 
-from .plantmonitor_api import api
-
 class Api_Test(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        from conf import envinfo
+        assert envinfo.SETTINGS_MODULE == 'conf.settings.testing'
+
+        cls.pony = PonyManager(envinfo.DB_CONF)
+
+        cls.pony.define_all_models()
+        cls.pony.binddb(create_tables=True)
+
+        from api_server.plantmonitor_api import api
+
+        cls.api = api
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.pony.db.drop_all_tables(with_all_data=True)
+        cls.pony.db.disconnect()
 
     def setUp(self):
 
         from conf import envinfo
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
-
-        orm.rollback()
-        self.pony = PonyManager(envinfo.DB_CONF)
-
-        self.pony.define_all_models()
-        self.pony.binddb()
 
         self.pony.db.drop_all_tables(with_all_data=True)
 
@@ -34,13 +45,11 @@ class Api_Test(unittest.TestCase):
 
         self.storage = PonyMetricStorage(self.pony.db)
 
-        self.client = TestClient(api)
+        self.client = TestClient(self.api)
 
     def tearDown(self):
         orm.rollback()
         # orm.db_session.__exit__()
-        self.pony.db.drop_all_tables(with_all_data=True)
-        self.pony.db.disconnect()
 
     def setUpPlant(self):
         plantsns = ns.loads("""\

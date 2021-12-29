@@ -69,7 +69,7 @@ def importPlantCLI(yaml):
     pony = PonyManager(envinfo.DB_CONF)
 
     pony.define_all_models()
-    pony.binddb()
+    pony.binddb(create_tables=False)
 
     importPlantsFromFile(pony.db, yamlFilename)
 
