@@ -163,7 +163,6 @@ def task():
             return
 
         pony_manager = PonyManager(envinfo.DB_CONF)
-
         pony_manager.define_all_models()
         pony_manager.binddb()
         ponyStorage = PonyMetricStorage(pony_manager.db)
@@ -194,7 +193,12 @@ def task_counter_erp():
         raise
 
 def task_meters_erp_to_orm():
-    r = ReadingsFacade()
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+    r = ReadingsFacade(pony.db)
 
     try:
         # TODO mock measures or fake meters
@@ -204,15 +208,27 @@ def task_meters_erp_to_orm():
         raise
 
 def task_daily_upload_to_api_meteologica(test_env=True):
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+
     configdb = ns.load('conf/config_meteologica.yaml')
     with orm.db_session:
-        uploadMeterReadings(configdb, test_env=test_env)
+        uploadMeterReadings(pony.db, configdb, test_env=test_env)
 
 
 def task_daily_download_from_api_meteologica(test_env=True):
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+
     configdb = ns.load('conf/config_meteologica.yaml')
     with orm.db_session:
-        downloadMeterForecasts(configdb, test_env=test_env)
+        downloadMeterForecasts(pony.db, configdb, test_env=test_env)
 
 
 def task_integral():
