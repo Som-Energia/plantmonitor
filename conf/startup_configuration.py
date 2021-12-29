@@ -10,7 +10,6 @@ from plantmonitor.task import (
     task_daily_download_from_api_meteologica,
     task_integral,
 )
-from ORM.db_utils import connectDatabase
 from conf.config import env, env_active
 
 from conf.logging_configuration import LOGGING
@@ -22,7 +21,6 @@ logger = logging.getLogger("plantmonitor")
 
 def build_app():
     try:
-        connectDatabase()
         scheduler = BlockingScheduler(
             timezone='Europe/Madrid'
         )
