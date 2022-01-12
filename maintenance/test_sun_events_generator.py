@@ -61,7 +61,20 @@ class Sun_events_generator_Test(unittest.TestCase):
             2022, 1, 12, 16, 38, 52, 449657, tzinfo=timezone.utc)
         self.assertEqual(nextSunsetDt, nextSunsetDtExpected)
 
-    def test_generateSunEvents(self):
+    def test_generateOneSunEvents(self):
+        start = datetime(2022, 1, 12, 00, 00, 00, 0, tzinfo=timezone.utc)
+        end = datetime(2022, 1, 12, 23, 59, 00, 0, tzinfo=timezone.utc)
+        latitude = '41.9818'
+        longitude = '2.8237'
+        sunevent = SunEventsGenerator(latitude, longitude)
+        sunevents = sunevent.generate_sunevents(start, end)
+        expectedSunEvents = [
+            (datetime(2022, 1, 12, 7, 15, 23, 823969, tzinfo=timezone.utc),
+             datetime(2022, 1, 12, 16, 38, 52, 465178, tzinfo=timezone.utc))]
+
+        self.assertListEqual(sunevents, expectedSunEvents)
+
+    def test_generateMultipleSunEvents(self):
         start = datetime(2022, 1, 12, 00, 00, 00, 0, tzinfo=timezone.utc)
         end = datetime(2022, 1, 14, 23, 59, 00, 0, tzinfo=timezone.utc)
         latitude = '41.9818'
