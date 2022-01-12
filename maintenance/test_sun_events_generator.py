@@ -40,3 +40,13 @@ class Sun_events_generator_Test(unittest.TestCase):
         sunevents = SunEventsGenerator(latitude, longitude)
 
         self.assertEqual(sunevents.obs.lon, suneventsExpect.lon)
+
+    def test_nextSunrise(self):
+        start = datetime(2022, 1, 12, 00, 00, 00, 0, tzinfo=timezone.utc)
+        latitude = '41.9818'
+        longitude = '2.8237'
+        sunevents = SunEventsGenerator(latitude, longitude)
+        nextRiseDt = sunevents.next_sunrise(start)
+        nextRiseDtExpected = datetime(
+            2022, 1, 12, 7, 15, 23, 823969, tzinfo=timezone.utc)
+        self.assertEqual(nextRiseDt, nextRiseDtExpected)
