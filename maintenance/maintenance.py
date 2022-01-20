@@ -56,3 +56,10 @@ def resample(df):
         .interpolate()
 
     return df
+
+# idea use a simple periodic sql query that adds rows to the derivate table
+def alarm_maintenance_via_sql():
+    pass
+
+def alarm_maintenance():
+    pass

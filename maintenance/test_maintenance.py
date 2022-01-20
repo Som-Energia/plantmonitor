@@ -8,7 +8,8 @@ from unittest import TestCase
 from .maintenance import (
     round_dt_to_5minutes,
     fill_holes,
-    resample
+    resample,
+    alarm_maintenance_via_sql
 )
 from .db_manager import DBManager
 
@@ -44,12 +45,17 @@ class IrradiationDBConnectionTest(TestCase):
         self.session.rollback()
         self.session.close()
 
-    def test_write_table(self):
+    def test__write_table(self):
 
         sometime = datetime.datetime(2021,1,1,tzinfo=datetime.timezone.utc)
         df = pd.DataFrame({'time' : sometime, 'value': 100}, index=[0])
 
         df.to_sql('test_table', self.dbmanager.db_con)
+
+    def test__alarm_maintenance_via_sql(self):
+        result = alarm_maintenance_via_sql()
+
+
 
 
 class IrradiationMaintenanceTests(TestCase):
