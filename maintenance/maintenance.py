@@ -58,8 +58,11 @@ def resample(df):
     return df
 
 # idea use a simple periodic sql query that adds rows to the derivate table
-def alarm_maintenance_via_sql():
-    pass
+# TODO assumes table exists
+def alarm_maintenance_via_sql(db_con, query):
+    result = db_con.execute(query)
+
+    return result
 
 def alarm_maintenance():
     pass

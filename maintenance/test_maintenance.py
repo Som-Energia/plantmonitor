@@ -3,6 +3,7 @@
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
+from pathlib import Path
 from unittest import TestCase
 
 from .maintenance import (
@@ -31,7 +32,9 @@ class IrradiationDBConnectionTest(TestCase):
         del db_info['provider']
         del db_info['database']
 
-        cls.dbmanager = DBManager(**db_info, echo=True)
+        debug = False
+
+        cls.dbmanager = DBManager(**db_info, echo=debug)
         cls.dbmanager.__enter__()
 
     @classmethod
@@ -52,8 +55,75 @@ class IrradiationDBConnectionTest(TestCase):
 
         df.to_sql('test_table', self.dbmanager.db_con)
 
+    def _test__alarm_maintenance_via_pandas(self):
+
+        sometime = datetime.datetime(2021,1,1,tzinfo=datetime.timezone.utc)
+        df = pd.DataFrame({'time' : sometime, 'value': 100}, index=[0])
+        src_table_name = 'test_alarm_source'
+
+        df.to_sql(src_table_name, self.dbmanager.db_con, if_exists='replace')
+
     def test__alarm_maintenance_via_sql(self):
-        result = alarm_maintenance_via_sql()
+
+        # setup
+        # create source table
+        readingtime = datetime.datetime(2021,1,1,tzinfo=datetime.timezone.utc)
+        src_table_name = 'test_alarm_source'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, value integer)'.format(src_table_name))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, value) values ('{}', {}), ('{}', {})".format(
+                src_table_name,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
+            )
+        )
+
+        # create destination table
+        dst_table_name = 'test_alarm_destination'
+        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, src_table_name))
+
+        # execute
+        # load query and run maintenance
+        query = 'insert into {} select *, TRUE as alarm from {} where value = 0'.format(dst_table_name, src_table_name)
+        result = alarm_maintenance_via_sql(self.dbmanager.db_con, query)
+
+        results = self.dbmanager.db_con.execute('select * from {}'.format(dst_table_name)).fetchall()
+
+        # check
+        expected = [(readingtime, 0, True)]
+        # check inserted results
+        self.assertListEqual(results, expected)
+
+    def _test__alarm_maintenance_via_sql__from_file(self):
+
+        # setup
+        # create source table
+        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
+        src_table_name = 'test_alarm_source'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(src_table_name))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, value) values ('{}', {}), ('{}', {})".format(
+                src_table_name,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
+            )
+        )
+
+        # create destination table
+        dst_table_name = 'test_alarm_destination'
+        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, src_table_name))
+
+        # execute
+        # load query and run maintenance
+        query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
+        result = alarm_maintenance_via_sql(self.dbmanager.db_con, query)
+
+        results = self.dbmanager.db_con.execute('select * from {}'.format(dst_table_name)).fetchall()
+
+        # check
+        expected = [(readingtime, 0, True)]
+        # check inserted results
+        self.assertListEqual(results, expected)
 
 
 
