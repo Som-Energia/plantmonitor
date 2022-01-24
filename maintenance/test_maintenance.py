@@ -7,10 +7,11 @@ from pathlib import Path
 from unittest import TestCase
 
 from .maintenance import (
+    get_latest_reading,
     round_dt_to_5minutes,
     fill_holes,
     resample,
-    alarm_maintenance_via_sql
+    update_alarm_inverter_maintenance_via_sql
 )
 from .db_manager import DBManager
 
@@ -27,7 +28,7 @@ class IrradiationDBConnectionTest(TestCase):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
-        db_info = database_info
+        db_info = database_info.copy()
         db_info['dbname'] = database_info['database']
         del db_info['provider']
         del db_info['database']
@@ -63,7 +64,7 @@ class IrradiationDBConnectionTest(TestCase):
 
         df.to_sql(src_table_name, self.dbmanager.db_con, if_exists='replace')
 
-    def test__alarm_maintenance_via_sql(self):
+    def test__execute_sql(self):
 
         # setup
         # create source table
@@ -85,7 +86,7 @@ class IrradiationDBConnectionTest(TestCase):
         # execute
         # load query and run maintenance
         query = 'insert into {} select *, TRUE as alarm from {} where value = 0'.format(dst_table_name, src_table_name)
-        result = alarm_maintenance_via_sql(self.dbmanager.db_con, query)
+        self.dbmanager.db_con.execute(query)
 
         results = self.dbmanager.db_con.execute('select * from {}'.format(dst_table_name)).fetchall()
 
@@ -94,38 +95,109 @@ class IrradiationDBConnectionTest(TestCase):
         # check inserted results
         self.assertListEqual(results, expected)
 
-    def _test__alarm_maintenance_via_sql__from_file(self):
-
-        # setup
-        # create source table
+    def test__get_latest_reading(self):
         readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
-        src_table_name = 'test_alarm_source'
-        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(src_table_name))
+        table_name = 'test_alarm_source'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(table_name))
         self.dbmanager.db_con.execute(
-            "insert into {}(time, value) values ('{}', {}), ('{}', {})".format(
-                src_table_name,
+            "insert into {}(time, power_w) values ('{}', {}), ('{}', {})".format(
+                table_name,
                 readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
                 (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
             )
         )
 
+        result = get_latest_reading(self.dbmanager.db_con, table_name)
+
+        self.assertEqual(result, (readingtime+datetime.timedelta(minutes=5), 10))
+
+    def create_plant(self, sunrise, sunset):
+        # TODO tables already exist, why?
+        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
+        self.dbmanager.db_con.execute(
+            "insert into plant(id, name, codename, description) values ({}, '{}', '{}', '{}')".format(
+                1, 'Alibaba', 'SomEnergia_Alibaba', ''
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists inverter (id serial primary key, name text, plant integer)')
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                1, 'Alibaba_inverter', 1
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
+        self.dbmanager.db_con.execute(
+            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
+                1, 1,
+                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
+            )
+        )
+
+
+    def test__alarm_maintenance_via_sql__from_file(self):
+
+        # setup
+        # create source table
+        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
+        inverter_5m_table_name = 'inverterregistry_5min_avg'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, inverter SERIAL PRIMARY KEY, power_w integer)'.format(inverter_5m_table_name))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, power_w) values ('{}', {}), ('{}', {})".format(
+                inverter_5m_table_name,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
+            )
+        )
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+
+        self.create_plant(sunrise, sunset)
+
         # create destination table
         dst_table_name = 'test_alarm_destination'
-        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, src_table_name))
+        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, inverter_5m_table_name))
 
         # execute
         # load query and run maintenance
         query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
-        result = alarm_maintenance_via_sql(self.dbmanager.db_con, query)
-
-        results = self.dbmanager.db_con.execute('select * from {}'.format(dst_table_name)).fetchall()
+        # modify where clause
+        query = query.format((readingtime-datetime.timedelta(minutes=5)).strftime("'%Y-%m-%d %H:%M:%S%z'"))
+        results =  self.dbmanager.db_con.execute(query).fetchall()
 
         # check
-        expected = [(readingtime, 0, True)]
+        expected = [(readingtime, 1,1, 0, sunrise, sunset)]
         # check inserted results
         self.assertListEqual(results, expected)
 
+    def test__update_alarm_inverter_maintenance_via_sql(self):
 
+        # setup
+        # create source table
+        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
+        inverter_5m_table_name = 'inverterregistry_5min_avg'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, inverter SERIAL PRIMARY KEY, power_w integer)'.format(inverter_5m_table_name))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, power_w) values ('{}', {}), ('{}', {})".format(
+                inverter_5m_table_name,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
+            )
+        )
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+
+        self.create_plant(sunrise, sunset)
+
+        # create destination table
+        dst_table_name = 'zero_inverter_power_at_daylight'
+        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, inverter_5m_table_name))
+
+        new_records = update_alarm_inverter_maintenance_via_sql(self.dbmanager.db_con)
+
+        expected = [(readingtime, 1,1, 0, sunrise, sunset)]
+        self.assertListEqual(new_records, expected)
 
 
 class IrradiationMaintenanceTests(TestCase):
@@ -174,7 +246,7 @@ class IrradiationMaintenanceTests(TestCase):
     def _test__duplicate_minutes__many_sensors(self):
         pass
 
-    def test__fill_holes(self):
+    def _test__fill_holes(self):
 
         df = pd.read_csv('test_data/df_test_fill_holes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = pd.DataFrame({
@@ -198,7 +270,7 @@ class IrradiationMaintenanceTests(TestCase):
 
         assert_frame_equal(result, expected, check_datetimelike_compat=True)
 
-    def test__resample(self):
+    def _test__resample(self):
 
         df = pd.read_csv('test_data/df_test_round_minutes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = df.copy()

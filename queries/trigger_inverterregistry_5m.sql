@@ -4,7 +4,7 @@ BEGIN
    INSERT INTO inverterregistry_5min_avg
          SELECT
                sir.sensor,
-               time_bucket('5 minutes', sir.time::timestamptz) as time5min,
+               time_bucket('5 minutes', sir.time::timestamptz) as time,
                avg(sir.power_w)::int as power_w,
                max(sir.energy_wh)::int as energy_wh
             FROM inverterregistry as sir

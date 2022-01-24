@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from pathlib import Path
 import pandas as pd
 import numpy as np
 
@@ -34,7 +34,6 @@ def round_dt_to_5minutes(df):
 
 def fill_holes(df):
 
-    import pdb; pdb.set_trace()
     # df_complete = pd.date_range(min(df['time']), max(df['time']), freq="5min", tz='UTC').to_frame(name='time')
     # df = pd.merge(df, df_complete, how='right', on = {'time':0})
 
@@ -57,12 +56,28 @@ def resample(df):
 
     return df
 
-# idea use a simple periodic sql query that adds rows to the derivate table
-# TODO assumes table exists
-def alarm_maintenance_via_sql(db_con, query):
-    result = db_con.execute(query)
+def get_latest_reading(db_con, table):
+    table_exists = db_con.execute("SELECT to_regclass('{}');".format(table)).fetchone()
+    if not table_exists:
+        return None
+    return db_con.execute('select * from {} order by time desc limit 1;'.format(table)).fetchone()
 
-    return result
+# idea use a simple cron sql query that adds rows to the derivate table
+def update_alarm_inverter_maintenance_via_sql(db_con):
+    table_name = 'zero_inverter_power_at_daylight'
+    latest_reading = get_latest_reading(db_con, table_name)
+    latest_reading = "'{}'".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
+    query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading)
 
-def alarm_maintenance():
-    pass
+    new_records = db_con.execute(query).fetchall()
+    new_records_strs = ','.join(["('{}', {}, {})".format(r[0].strftime('%Y-%m-%d %H:%M:%S%z'),r[2],r[3]) for r in new_records])
+    insert_query = 'insert into {}(time, inverter, power_w) VALUES {}'.format(table_name, new_records_strs)
+
+    db_con.execute(insert_query)
+
+    return new_records
+
+
+def alarm_maintenance(db_con):
+    update_alarm_inverter_maintenance_via_sql(db_con)
