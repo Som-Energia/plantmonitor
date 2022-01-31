@@ -78,6 +78,8 @@ def update_alarm_inverter_maintenance_via_sql(db_con):
 
     return new_records
 
+def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
+    pass
 
 def alarm_maintenance(db_con):
     update_alarm_inverter_maintenance_via_sql(db_con)

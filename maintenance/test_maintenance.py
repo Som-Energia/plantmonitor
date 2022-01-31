@@ -125,6 +125,13 @@ class IrradiationDBConnectionTest(TestCase):
                 1, 'Alibaba_inverter', 1
             )
         )
+        self.dbmanager.db_con.execute('create table if not exists sensor (id serial primary key, name text, plant integer not null, description text, deviceColumname text)')
+        self.dbmanager.db_con.execute(
+            "insert into sensor(id, name, plant, description, deviceColumname) values ({}, '{}', {}, '{}', '{}')".format(
+                2, 'SensorIrradiation1', 1, '', 'sensor'
+            )
+        )
+
         self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
         self.dbmanager.db_con.execute(
             "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
@@ -199,6 +206,26 @@ class IrradiationDBConnectionTest(TestCase):
         expected = [(readingtime, 1,1, 0, sunrise, sunset)]
         self.assertListEqual(new_records, expected)
 
+    def test__update_alarm_meteorologic_station_maintenance_via_sql(self):
+
+        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
+        sensor_irraditation_5m_table_name = 'sensorirradiationregistry_5min_avg'
+        self.dbmanager.db_con.execute('create table {} (sensor SERIAL, time timestamptz, irradiation_w_m2 integer, temperature_dc integer, PRIMARY KEY (sensor, time))'. format(sensor_irraditation_5m_table_name))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, irradiation_w_m2, temperature_dc) values('{}', {}, {}), ('{}', {}, {})".format(
+                sensor_irraditation_5m_table_name,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0, 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10, 15
+            )
+        )
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+        records = self.dbmanager.db_con.execute('select * from {} limit 1'.format(sensor_irraditation_5m_table_name))
+        records = [row for row in records]
+        expected = [(1, datetime.datetime(2021, 1, 1, 13, 0, tzinfo=datetime.timezone(datetime.timedelta(seconds=3600))), 0, 0)]
+        self.assertListEqual(records,expected)
 
 class IrradiationMaintenanceTests(TestCase):
 
