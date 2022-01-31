@@ -79,7 +79,17 @@ def update_alarm_inverter_maintenance_via_sql(db_con):
     return new_records
 
 def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
-    pass
+    table_name = 'zero_sonda_irradiation_at_daylight'
+    latest_reading = get_latest_reading(db_con, table_name)
+    latest_reading = "'{}'".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
+    query = Path('queries/zero_sonda_irradiation_at_daylight.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading)
+    new_records = db_con.execute(query).fetchall()
+    new_records_strs = ','.join(["({}, '{}', {}, {})".format(r[0],r[1].strftime('%Y-%m-%d %H:%M:%S%z'),r[3],r[4]) for r in new_records])
+    insert_query = 'insert into {}(sensor, time, irradiation_w_m2, temperature_dc) VALUES {}'.format(table_name, new_records_strs)
+    db_con.execute(insert_query)
+    return new_records
 
 def alarm_maintenance(db_con):
     update_alarm_inverter_maintenance_via_sql(db_con)
+    update_alarm_meteorologic_station_maintenance_via_sql(db_con)
