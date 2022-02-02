@@ -37,7 +37,7 @@ class Sun_events_generator_Test(unittest.TestCase):
         sunevent = SunEventsGenerator(latitude, longitude)
         nextRiseDt = sunevent.next_sunrise(start)
         nextRiseDtExpected = datetime(
-            2022, 1, 12, 7, 15, 23, 823969, tzinfo=timezone.utc)
+            2022, 1, 12, 7, 44, 9, 306857, tzinfo=timezone.utc)
         self.assertEqual(nextRiseDt, nextRiseDtExpected)
 
     def test_nextSunset(self):
@@ -47,7 +47,7 @@ class Sun_events_generator_Test(unittest.TestCase):
         sunevent = SunEventsGenerator(latitude, longitude)
         nextSunsetDt = sunevent.next_sunset(start)
         nextSunsetDtExpected = datetime(
-            2022, 1, 12, 16, 38, 52, 449657, tzinfo=timezone.utc)
+            2022, 1, 12, 16, 10, 6, 787575, tzinfo=timezone.utc)
         self.assertEqual(nextSunsetDt, nextSunsetDtExpected)
 
     def test_generateOneSunEvents(self):
@@ -58,8 +58,8 @@ class Sun_events_generator_Test(unittest.TestCase):
         sunevent = SunEventsGenerator(latitude, longitude)
         sunevents = sunevent.generate_sunevents(start, end)
         expectedSunEvents = [
-            (datetime(2022, 1, 12, 7, 15, 23, 823969, tzinfo=timezone.utc),
-             datetime(2022, 1, 12, 16, 38, 52, 465178, tzinfo=timezone.utc))]
+            (datetime(2022, 1, 12, 7, 44, 9, 306857, tzinfo=timezone.utc),
+             datetime(2022, 1, 12, 16, 10, 6, 806238,tzinfo=timezone.utc))]
 
         self.assertListEqual(sunevents, expectedSunEvents)
 
@@ -68,15 +68,16 @@ class Sun_events_generator_Test(unittest.TestCase):
         end = datetime(2022, 1, 14, 23, 59, 00, 0, tzinfo=timezone.utc)
         latitude = '41.9818'
         longitude = '2.8237'
+        self.maxDiff = None
         sunevent = SunEventsGenerator(latitude, longitude)
         sunevents = sunevent.generate_sunevents(start, end)
         expectedSunEvents = [
-            (datetime(2022, 1, 12, 7, 15, 23, 823969, tzinfo=timezone.utc),
-             datetime(2022, 1, 12, 16, 38, 52, 465178, tzinfo=timezone.utc)),
-            (datetime(2022, 1, 13, 7, 15, 2, 635578, tzinfo=timezone.utc),
-             datetime(2022, 1, 13, 16, 39, 59, 562688, tzinfo=timezone.utc)),
-            (datetime(2022, 1, 14, 7, 14, 39, 150562, tzinfo=timezone.utc),
-             datetime(2022, 1, 14, 16, 41, 7, 649381, tzinfo=timezone.utc))
+            (datetime(2022, 1, 12, 7, 44, 9, 306857, tzinfo=timezone.utc),
+             datetime(2022, 1, 12, 16, 10, 6, 806238, tzinfo=timezone.utc)),
+            (datetime(2022, 1, 13, 7, 43, 43, 609709, tzinfo=timezone.utc),
+             datetime(2022, 1, 13, 16, 11, 18, 397711, tzinfo=timezone.utc)),
+            (datetime(2022, 1, 14, 7, 43, 15, 498317,  tzinfo=timezone.utc),
+             datetime(2022, 1, 14, 16, 12, 31, 96118, tzinfo=timezone.utc))
              ]
 
         self.assertListEqual(sunevents, expectedSunEvents)
