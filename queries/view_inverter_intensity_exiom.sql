@@ -8,4 +8,4 @@ FROM stringregistry AS reg
 LEFT JOIN string on string.id = reg.string
 LEFT JOIN inverter ON inverter.id=string.inverter
 LEFT JOIN plant ON plant.id=inverter.plant
-WHERE plant.name = 'Matallana';
+WHERE plant.name = 'Llanillos';
