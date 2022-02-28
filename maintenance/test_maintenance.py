@@ -3,29 +3,31 @@
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
-from pathlib import Path
+# from pathlib import Path
 from unittest import TestCase
 
-from .maintenance import (
-    get_latest_reading,
-    round_dt_to_5minutes,
-    fill_holes,
-    resample,
-    update_alarm_inverter_maintenance_via_sql,
-    update_alarm_meteorologic_station_maintenance_via_sql
-)
-from .db_manager import DBManager
+# from .maintenance import (
+#     get_latest_reading,
+#     round_dt_to_5minutes,
+#     fill_holes,
+#     resample,
+#     update_alarm_inverter_maintenance_via_sql,
+#     update_alarm_meteorologic_station_maintenance_via_sql
+# )
+# from .db_manager import DBManager
 
-import pandas as pd
-from pandas.testing import assert_frame_equal
+# import pandas as pd
+# from pandas.testing import assert_frame_equal
 
-import datetime
+# import datetime
 
 
 class IrradiationDBConnectionTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        import pdb; pdb.set_trace()
+
         from conf import envinfo
 
         database_info = envinfo.DB_CONF

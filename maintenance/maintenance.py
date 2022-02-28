@@ -93,3 +93,15 @@ def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
 def alarm_maintenance(db_con):
     update_alarm_inverter_maintenance_via_sql(db_con)
     update_alarm_meteorologic_station_maintenance_via_sql(db_con)
+
+
+# Alarms:
+# Taula comuna actual:
+# device_name,alarm,last_reading
+# inversor1,OK,23/02/22 10:05
+
+
+# Nova taula comuna
+# device_table,device_id,device_name,alarm,description,started,ended
+# Devices: Qualsevol cosa, sonda, inversor, planta, temps meteorlògic
+# Si ended is null  es current alarm
