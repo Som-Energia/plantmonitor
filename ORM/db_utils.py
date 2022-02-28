@@ -6,27 +6,6 @@ from pony import orm
 
 from conf.config import env, env_active
 
-from .models import database
-
-from .models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureModule,
-    SensorTemperatureAmbient,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
 
 from conf.logging_configuration import LOGGING
 
@@ -36,7 +15,7 @@ logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
 
-def dropTables():
+def dropTables(database):
 
     from conf import envinfo
 
@@ -49,7 +28,7 @@ def dropTables():
     database.drop_all_tables(with_all_data=True)
     database.disconnect()
 
-def connectDatabase():
+def connectDatabase(database):
     from conf import envinfo
 
     databaseInfo = envinfo.DB_CONF
@@ -80,7 +59,7 @@ def connectDatabase():
     else:
         database.generate_mapping(create_tables=False, check_tables=False)
 
-def setupDatabase(create_tables=True, timescale_tables=True, drop_tables=False):
+def setupDatabase(database, create_tables=True, timescale_tables=True, drop_tables=False):
 
     from conf import envinfo
     os.environ['PGTZ'] = 'UTC'
@@ -170,7 +149,7 @@ def getTablesToTimescale():
     return tablesToTimescale
 
 
-def timescaleTables(tablesToTimescale):
+def timescaleTables(database, tablesToTimescale):
 
     #foo = database.execute("CREATE INDEX ON meterregistry (meter, id, time DESC);")
     #boo = database.execute("SELECT create_hypertable('meterregistry', 'time', 'meter', 10);")
@@ -178,10 +157,6 @@ def timescaleTables(tablesToTimescale):
     for t in tablesToTimescale:
           database.execute("SELECT create_hypertable('{}', 'time');".format(t.lower()))
 
-
-def dailyInsert():
-    # TODO implement daily insert from inverter
-    pass
 
 
 def str2Model(modelName):

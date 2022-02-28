@@ -1,4 +1,7 @@
 import datetime
+import os
+import sys
+from pathlib import Path
 
 from pony import orm
 from pony.orm import (
@@ -15,6 +18,8 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
+from ORM.models import define_models
+
 # TODO definir una Base Class i heredarla per fer un manager per usecase e.g. PlantmonitorManager, SolarManager...
 
 class PonyManager:
@@ -25,9 +30,9 @@ class PonyManager:
         self.timescaled_tables = []
 
     ''' creates tables '''
-    def binddb(self, createTables=True):
+    def binddb(self, create_tables=False, check_tables=True):
         self.db.bind(**self.database_info)
-        self.db.generate_mapping(create_tables=createTables, check_tables=True)
+        self.db.generate_mapping(create_tables=create_tables, check_tables=check_tables)
 
     def get_db(self):
         return self.db
@@ -46,6 +51,9 @@ class PonyManager:
             table = 'view_device'
             name = Required(str)
             filtered = Required(bool)
+
+    def define_all_models(self):
+        define_models(self.db)
 
     def define_solar_models(self):
 
@@ -152,3 +160,147 @@ class PonyManager:
                 for se in solarevents:
                     sunrise, sunset = se
                     self.db.SolarEvent(plant=plant, sunrise=sunrise, sunset=sunset)
+
+    # old setup database code
+
+    def dropTables(self):
+
+        from conf import envinfo
+
+        databaseInfo = envinfo.DB_CONF
+
+        print("dropping tables in {}".format(databaseInfo))
+
+        self.db.bind(**databaseInfo)
+        self.db.generate_mapping(check_tables=False, create_tables=False)
+        self.db.drop_all_tables(with_all_data=True)
+        self.db.disconnect()
+
+    def connectDatabase(self):
+        from conf import envinfo
+
+        databaseInfo = envinfo.DB_CONF
+
+        # TODO find a better way to avoid BindingError if database was bound from another test file
+        try:
+            # unbind necessary when mixing databases
+            self.db.bind(**databaseInfo)
+        except orm.core.BindingError as e:
+            # TODO: capturing this exception is pontentially dangerous if databaseInfo changed
+            # let's be sure
+            with orm.db_session:
+                dsn = self.db.get_connection().dsn
+                dsnDict = {
+                    key: value if value!="''" else ""
+                    for key, value in (
+                        pair.split('=')
+                        for pair in dsn.split()
+                    )
+                }
+                dsnDict['provider'] = self.db.provider_name
+                dsnDict['database'] = dsnDict.pop('dbname')
+                if 'password' in databaseInfo:
+                    dsnDict['password'] = databaseInfo['password']
+                if not databaseInfo == dsnDict:
+                    logger.debug("Database was already bound to a different database.")
+                    raise
+        else:
+            self.db.generate_mapping(create_tables=False, check_tables=False)
+
+
+    def old_setup_database(self, create_tables=True, timescale_tables=True, drop_tables=False):
+
+        from conf import envinfo
+        os.environ['PGTZ'] = 'UTC'
+
+        databaseInfo = envinfo.DB_CONF
+
+        # print(databaseInfo)
+
+        try:
+            # unbind necessary when mixing databases
+            self.db.bind(**databaseInfo)
+        except orm.core.BindingError as e:
+            # TODO: capturing this exception is pontentially dangerous if databaseInfo changed
+            # let's be sure
+            with orm.db_session:
+                dsn = self.db.get_connection().dsn
+                dsnDict = {
+                    key: value if value!="''" else ""
+                    for key, value in (
+                        pair.split('=')
+                        for pair in dsn.split()
+                    )
+                }
+                dsnDict['provider'] = self.db.provider_name
+                dsnDict['database'] = dsnDict.pop('dbname')
+                if 'password' in databaseInfo:
+                    dsnDict['password'] = databaseInfo['password']
+                if not databaseInfo == dsnDict:
+                    logger.debug("Database was already bound to a different database.")
+                    raise
+        else:
+            #this `else` will not run if the database was already connected
+            # (necessary for test multiple SetUps until we fix this)
+
+            # requires superuser privileges
+            # with orm.db_session:
+            #     database.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
+
+            # this only needs to be done once
+            # with orm.db_session():
+            #     database.execute("ALTER DATABASE {} SET timezone = 'UTC'".format(databaseInfo['database']))
+
+            #orm.set_sql_debug(True)
+            self.db.generate_mapping(create_tables=False, check_tables=False)
+            currentschema = (
+                "-- Before commit changes in this file, create the corresponding migration\n\n{}"
+                .format(self.db.schema.generate_create_script()))
+            schemafile = Path(__file__).parent/"schema.sql"
+            if not schemafile.exists() or schemafile.read_text(encoding='utf8'):
+                logger.info("Database models modified, updated schema at {}".format(schemafile))
+                schemafile.write_text(currentschema, encoding='utf8')
+
+            if drop_tables:
+                print("Dropping all tables")
+                self.db.drop_all_tables(with_all_data=True)
+            # database.disconnect()
+
+            # map the models to the database
+            # and create the tables, if they don't exist
+            if create_tables:
+                self.db.create_tables()
+                logger.info("Database {} generated".format(databaseInfo['database']))
+
+            if env_active == env['plantmonitor_server'] or env_active == env['test']:
+                if timescale_tables:
+                    tablesToTimescale = getTablesToTimescale()
+                    logger.info("Timescaling the tables {}".format(tablesToTimescale))
+                    with orm.db_session:
+                        timescaleTables(tablesToTimescale)
+
+    def getTablesToTimescale(self):
+        tablesToTimescale = [
+            "MeterRegistry",
+            "InverterRegistry",
+            "SensorIrradiationRegistry",
+            "SensorTemperatureAmbientRegistry",
+            "SensorTemperatureModuleRegistry",
+            "HourlySensorIrradiationRegistry",
+            "InclinometerRegistry",
+            "AnemometerRegistry",
+            "OmieRegistry",
+            "MarketRepresentativeRegistry",
+            "SimelRegistry",
+            "NagiosRegistry",
+        ]
+        return tablesToTimescale
+
+
+    def timescaleTables(self, tablesToTimescale):
+
+        #foo = database.execute("CREATE INDEX ON meterregistry (meter, id, time DESC);")
+        #boo = database.execute("SELECT create_hypertable('meterregistry', 'time', 'meter', 10);")
+
+        for t in tablesToTimescale:
+            self.db.execute("SELECT create_hypertable('{}', 'time');".format(t.lower()))

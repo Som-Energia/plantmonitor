@@ -13,27 +13,7 @@ from pony import orm
 
 import datetime
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-    PlantModuleParameters,
-)
+from ORM.pony_manager import PonyManager
 from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
 
 from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
@@ -53,8 +33,6 @@ from .operations import (
     integrateHourFromTimeseries,
 )
 
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
-
 class Operations_Test(unittest.TestCase):
 
     def setUp(self):
@@ -63,22 +41,23 @@ class Operations_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
 
-        self.maxDiff=None
-        # orm.set_sql_debug(True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
-        database.create_tables()
+        self.pony.define_all_models()
+        self.pony.binddb(create_tables=True)
 
-        # database.generate_mapping(create_tables=True)
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
+
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
-
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantNS(self):
         plantNS = ns.loads("""\
@@ -189,7 +168,7 @@ class Operations_Test(unittest.TestCase):
 
     def createPlantParameters(self, plant_id, **data):
         data = ns(data)
-        plant = PlantModuleParameters(
+        plant = self.pony.db.PlantModuleParameters(
             plant=plant_id,
             nominal_power_wp=int(data.nominalPowerMWp*1000000),
             efficency_cpercent=int(data.efficiency*100),
@@ -210,18 +189,18 @@ class Operations_Test(unittest.TestCase):
     def test__integrateHour(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         query = orm.select(
             (r.time, getattr(r, metricName))
@@ -239,7 +218,7 @@ class Operations_Test(unittest.TestCase):
     def test__integrateHour__irradiation(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2021, 5, 25, 10, 0, 0, 0, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
@@ -258,13 +237,13 @@ class Operations_Test(unittest.TestCase):
                 }],
               }
             ]
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         query = orm.select(
             (r.time, getattr(r, metricName))
@@ -281,7 +260,7 @@ class Operations_Test(unittest.TestCase):
     def test__integrateHour__irradiation2(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2021, 5, 25, 16, 0, 6, 926371, tzinfo=datetime.timezone.utc)
         time = time.replace(minute=0, second=0, microsecond=0)
@@ -301,13 +280,13 @@ class Operations_Test(unittest.TestCase):
                 }],
               }
             ]
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         query = orm.select(
             (r.time, getattr(r, metricName))
@@ -324,7 +303,7 @@ class Operations_Test(unittest.TestCase):
     def test__integrateHour__irradiation_border(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2021, 5, 25, 16, 0, 6, 926371, tzinfo=datetime.timezone.utc)
         hourstart = time.replace(minute=0, second=0, microsecond=0)
@@ -345,14 +324,14 @@ class Operations_Test(unittest.TestCase):
                 }],
               }
             ]
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
 
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         query = orm.select(
             (r.time, getattr(r, metricName))
@@ -471,18 +450,18 @@ class Operations_Test(unittest.TestCase):
     def _test__integrateHour__testBorder(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         query = orm.select(
             (r.time, getattr(r, metricName))
@@ -506,12 +485,12 @@ class Operations_Test(unittest.TestCase):
     def test__integrateMetric(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)
@@ -519,7 +498,7 @@ class Operations_Test(unittest.TestCase):
         metricName = 'irradiation_w_m2'
 
         sensorName = '12345678'
-        registry = SensorIrradiationRegistry
+        registry = self.pony.db.SensorIrradiationRegistry
 
         registries = orm.select(
             (r.time, getattr(r, metricName))
@@ -548,14 +527,14 @@ class Operations_Test(unittest.TestCase):
     def test__getTimeRange__None(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         sensor = alibaba.sensors.select().first()
 
         metricFromDate, metricToDate = getTimeRange(
             sensor,
-            SensorIrradiationRegistry,
-            HourlySensorIrradiationRegistry,
+            self.pony.db.SensorIrradiationRegistry,
+            self.pony.db.HourlySensorIrradiationRegistry,
             'irradiation_w_m2',
             'integratedIrradiation_wh_m2',
         )
@@ -566,10 +545,10 @@ class Operations_Test(unittest.TestCase):
     def test__dbTimezoneCoherence__getOneReading(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
-        SensorIrradiation.get(name='alberto').insertRegistry(0,0,time)
+        self.pony.db.SensorIrradiation.get(name='alberto').insertRegistry(0,0,time)
         orm.flush()
 
         # setting the timezone required everywhere
@@ -578,7 +557,7 @@ class Operations_Test(unittest.TestCase):
         # database.execute("set timezone to 'UTC';")
         # we're currently setting PGTZ at setupDatabase@db_utils:85
 
-        dbTime = orm.select(r.time for r in SensorIrradiationRegistry).order_by(orm.desc(1)).first()
+        dbTime = orm.select(r.time for r in self.pony.db.SensorIrradiationRegistry).order_by(orm.desc(1)).first()
 
         self.assertEqual(time, dbTime)
         print(time.__repr__())
@@ -589,28 +568,28 @@ class Operations_Test(unittest.TestCase):
 
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         expectedFromDate = time
         expectedToDate   = time + 99*delta
 
         metricFromDate, metricToDate = getTimeRange(
-            SensorIrradiation.get(name='12345678'),
-            SensorIrradiationRegistry,
-            HourlySensorIrradiationRegistry,
+            self.pony.db.SensorIrradiation.get(name='12345678'),
+            self.pony.db.SensorIrradiationRegistry,
+            self.pony.db.HourlySensorIrradiationRegistry,
             'irradiation_w_m2',
             'integratedIrradiation_wh_m2',
         )
 
-        print(SensorIrradiation.get(name='12345678').to_dict())
+        print(self.pony.db.SensorIrradiation.get(name='12345678').to_dict())
 
-        q = orm.select(r.time for r in SensorIrradiationRegistry if r.sensor == SensorIrradiation.get(name='12345678') and getattr(r, 'irradiation_w_m2')).order_by(1)
+        q = orm.select(r.time for r in self.pony.db.SensorIrradiationRegistry if r.sensor == self.pony.db.SensorIrradiation.get(name='12345678') and getattr(r, 'irradiation_w_m2')).order_by(1)
         print(list(q)[0].isoformat())
         print(list(q)[-1].isoformat())
         # assert metricFromDate.isoformat() == expectedFromDate.isoformat()
@@ -619,21 +598,21 @@ class Operations_Test(unittest.TestCase):
     def test__getTimeRange__SomeMany_FromTo(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(hours=2)
 
         metricFromDate, metricToDate = getTimeRange(
-            SensorIrradiation[1],
-            SensorIrradiationRegistry,
-            HourlySensorIrradiationRegistry,
+            self.pony.db.SensorIrradiation[1],
+            self.pony.db.SensorIrradiationRegistry,
+            self.pony.db.HourlySensorIrradiationRegistry,
             'irradiation_w_m2',
             'integratedIrradiation_wh_m2',
             fromDate,
@@ -646,18 +625,18 @@ class Operations_Test(unittest.TestCase):
     def test__integrateIrradiance(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(hours=2)
 
-        integratedMetrics = integrateIrradiance(fromDate, toDate)
+        integratedMetrics = integrateIrradiance(self.pony.db, fromDate, toDate)
 
         times = [
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
@@ -671,9 +650,9 @@ class Operations_Test(unittest.TestCase):
         }
 
         expectedDict = {
-            SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
-            SensorIrradiation[4] : list(zip(times, expectedIntegrals['sensor5'])),
-            SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor6'])),
+            self.pony.db.SensorIrradiation[1] : list(zip(times, expectedIntegrals['sensor1'])),
+            self.pony.db.SensorIrradiation[4] : list(zip(times, expectedIntegrals['sensor5'])),
+            self.pony.db.SensorIrradiation[5] : list(zip(times, expectedIntegrals['sensor6'])),
         }
 
         self.assertDictEqual(integratedMetrics, expectedDict)
@@ -682,15 +661,15 @@ class Operations_Test(unittest.TestCase):
         plantNS = self.samplePlantNS()
         del plantNS['irradiationSensors']
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, 25)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
-        integratedMetrics = integrateIrradiance()
+        integratedMetrics = integrateIrradiance(self.pony.db)
 
         times = [
             datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
@@ -702,8 +681,8 @@ class Operations_Test(unittest.TestCase):
         }
 
         expectedDict = {
-            SensorIrradiation.get(name='12345678') : list(zip(times, expectedIntegrals['12345678'])),
-            SensorIrradiation.get(name='87654321') : list(zip(times, expectedIntegrals['87654321'])),
+            self.pony.db.SensorIrradiation.get(name='12345678') : list(zip(times, expectedIntegrals['12345678'])),
+            self.pony.db.SensorIrradiation.get(name='87654321') : list(zip(times, expectedIntegrals['87654321'])),
         }
 
         self.assertListEqual(list(integratedMetrics.values())[0], list(zip(times, expectedIntegrals['12345678'])))
@@ -715,15 +694,15 @@ class Operations_Test(unittest.TestCase):
     def test__integrateIrradiance__OneEmptySensorNoTimeRange(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, 25)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
-        integratedMetrics = integrateIrradiance()
+        integratedMetrics = integrateIrradiance(self.pony.db)
 
         times = [
             datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
@@ -736,8 +715,8 @@ class Operations_Test(unittest.TestCase):
         }
 
         expectedDict = {
-            SensorIrradiation.get(name='12345678') : list(zip(times, expectedIntegrals['12345678'])),
-            SensorIrradiation.get(name='87654321') : list(zip(times, expectedIntegrals['87654321'])),
+            self.pony.db.SensorIrradiation.get(name='12345678') : list(zip(times, expectedIntegrals['12345678'])),
+            self.pony.db.SensorIrradiation.get(name='87654321') : list(zip(times, expectedIntegrals['87654321'])),
         }
 
         self.assertDictEqual(integratedMetrics, expectedDict)
@@ -746,24 +725,24 @@ class Operations_Test(unittest.TestCase):
     def test__integrateIrradiance__withInsert(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(hours=2)
 
 
-        irradiance = integrateIrradiance(fromDate, toDate)
-        insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
+        irradiance = integrateIrradiance(self.pony.db, fromDate, toDate)
+        insertHourlySensorIrradiationMetrics(self.pony.db, irradiance, 'integratedIrradiation_wh_m2')
 
 
         orm.flush()
-        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select()]
+        result = [r.to_dict() for r in self.pony.db.HourlySensorIrradiationRegistry.select()]
 
         times = [
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
@@ -785,13 +764,13 @@ class Operations_Test(unittest.TestCase):
     # or activate if getOldestTime suports python lists instead of pony queries
     def _test__getOldestTime__WithAQueryObject(self):
 
-        plant = Plant(name='alibaba', codename='alibaba')
-        sensor = SensorIrradiation(name='Alice', plant=plant)
+        plant = self.pony.db.Plant(name='alibaba', codename='alibaba')
+        sensor = self.pony.db.SensorIrradiation(name='Alice', plant=plant)
 
         expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
         metric = 'expected_energy_wh'
 
-        dummy = database.select(expectedPowerViewQuery)
+        dummy = self.pony.db.select(expectedPowerViewQuery)
         print(dummy)
         # TODO fix this How to convert a raw query to a pony query
         print(type(dummy))
@@ -827,30 +806,30 @@ class Operations_Test(unittest.TestCase):
     def test__integrateExpectedPower__NoReadings(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         orm.flush()
 
-        integratedMetric = integrateExpectedPower()
+        integratedMetric = integrateExpectedPower(self.pony.db)
 
         self.assertDictEqual(integratedMetric, {})
 
     def test__integrateExpectedPower__SomeReadings(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
         self.createPlantParameters(alibaba.id, **self.parametersFlorida)
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
         toDate = fromDate + datetime.timedelta(hours=2)
 
-        result = integrateExpectedPower(fromDate, toDate)
+        result = integrateExpectedPower(self.pony.db, fromDate, toDate)
 
         times = [
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
@@ -858,12 +837,12 @@ class Operations_Test(unittest.TestCase):
         ]
 
         expected = {
-            SensorIrradiation[4]:
+            self.pony.db.SensorIrradiation[4]:
             [
                 (times[0], 758500),
                 (times[1], 1155289),
             ],
-            SensorIrradiation[5]:
+            self.pony.db.SensorIrradiation[5]:
             [
                 (times[0], 870270),
                 (times[1], 1266457),
@@ -875,12 +854,12 @@ class Operations_Test(unittest.TestCase):
     def test__insertHourlySensorIrradiationMetrics__updateRows(self):
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, numreadings=20)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
@@ -893,16 +872,16 @@ class Operations_Test(unittest.TestCase):
             datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc),
         ]
 
-        sensor = Sensor.select().first()
+        sensor = self.pony.db.Sensor.select().first()
         irradiance = {sensor: [(times[0], 10), (times[1], 20)]}
 
-        insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
+        insertHourlySensorIrradiationMetrics(self.pony.db, irradiance, 'integratedIrradiation_wh_m2')
 
         expectedEnergy = {sensor: [(times[0], 30), (times[1], 40)]}
 
-        insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
+        insertHourlySensorIrradiationMetrics(self.pony.db, expectedEnergy, 'expected_energy_wh')
 
-        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select().order_by(1)]
+        result = [r.to_dict() for r in self.pony.db.HourlySensorIrradiationRegistry.select().order_by(1)]
 
         expected = [
             {'sensor': 1, 'time': times[0], 'integratedIrradiation_wh_m2': 10, 'expected_energy_wh': 30},
@@ -919,27 +898,27 @@ class Operations_Test(unittest.TestCase):
     def test__plantParametersInsert(self):
         plantNS = self.samplePlantNSWithModuleParameters()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, numreadings=20)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
-        numpp = PlantModuleParameters.select().count()
+        numpp = self.pony.db.PlantModuleParameters.select().count()
 
         self.assertEqual(numpp, 1)
 
     def test__selectPowerViaQuery(self):
         plantNS = self.samplePlantNSWithModuleParameters()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, numreadings=20)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
@@ -949,7 +928,7 @@ class Operations_Test(unittest.TestCase):
 
         expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
 
-        result = database.select(expectedPowerViewQuery)
+        result = self.pony.db.select(expectedPowerViewQuery)
 
         self.assertFalse(all(r.expectedpower is None for r in result))
 
@@ -957,12 +936,12 @@ class Operations_Test(unittest.TestCase):
     def test__computeIntegralMetrics(self):
         plantNS = self.samplePlantNSWithModuleParameters()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta, numreadings=20)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=16, minute=0, second=0, microsecond=0)
@@ -972,7 +951,7 @@ class Operations_Test(unittest.TestCase):
 
         computeIntegralMetrics()
 
-        result = [r.to_dict() for r in HourlySensorIrradiationRegistry.select().order_by(1)]
+        result = [r.to_dict() for r in self.pony.db.HourlySensorIrradiationRegistry.select().order_by(1)]
 
         times = [
             datetime.datetime(2020, 12, 10, 16, 0, tzinfo=datetime.timezone.utc),
@@ -991,10 +970,10 @@ class Operations_Test(unittest.TestCase):
 
     def test__getNewestTime__None(self):
 
-        plant = Plant(name='alibaba', codename='alibaba')
-        sensor = SensorIrradiation(name='Alice', plant=plant)
+        plant = self.pony.db.Plant(name='alibaba', codename='alibaba')
+        sensor = self.pony.db.SensorIrradiation(name='Alice', plant=plant)
 
-        time = getNewestTime(sensor, SensorIrradiationRegistry, 'irradiation_w_m2')
+        time = getNewestTime(sensor, self.pony.db.SensorIrradiationRegistry, 'irradiation_w_m2')
 
         self.assertIsNone(time)
 
@@ -1002,14 +981,14 @@ class Operations_Test(unittest.TestCase):
 
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         integralHour = datetime.datetime(2020, 12, 10, 17, 0, tzinfo=datetime.timezone.utc)
 
-        sensor = SensorIrradiation[1]
-        HourlySensorIrradiationRegistry(sensor=sensor, time=integralHour, integratedIrradiation_wh_m2=100)
+        sensor = self.pony.db.SensorIrradiation[1]
+        self.pony.db.HourlySensorIrradiationRegistry(sensor=sensor, time=integralHour, integratedIrradiation_wh_m2=100)
 
-        time = getNewestTime(sensor, HourlySensorIrradiationRegistry, 'integratedIrradiation_wh_m2')
+        time = getNewestTime(sensor, self.pony.db.HourlySensorIrradiationRegistry, 'integratedIrradiation_wh_m2')
 
         self.assertEqual(time, integralHour)
 
@@ -1017,12 +996,12 @@ class Operations_Test(unittest.TestCase):
 
         plantNS = self.samplePlantNS()
 
-        alibaba = Plant(name=plantNS.name, codename=plantNS.codename)
+        alibaba = self.pony.db.Plant(name=plantNS.name, codename=plantNS.codename)
         alibaba = alibaba.importPlant(plantNS)
         time = datetime.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=datetime.timezone.utc)
         delta = datetime.timedelta(minutes=5)
         plantsData = self.samplePlantsData(time, delta)
-        Plant.insertPlantsData(plantsData)
+        self.pony.db.Plant.insertPlantsData(plantsData)
         orm.flush()
 
         fromDate = time.replace(hour=14, minute=0, second=0, microsecond=0)

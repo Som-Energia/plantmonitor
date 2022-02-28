@@ -13,7 +13,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-from ORM.models import database
+from ORM.pony_manager import PonyManager
 
 from ORM.db_utils import setupDatabase, dropTables
 

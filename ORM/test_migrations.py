@@ -30,30 +30,8 @@ from pathlib import Path
 
 from pony import orm
 
-from .models import database
-from .models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
 
-from .db_utils import setupDatabase, getTablesToTimescale, timescaleTables
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 @unittest.skipIf(True, "requires legacy database")
 class Migrations_Test(unittest.TestCase):
@@ -72,12 +50,15 @@ class Migrations_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
+        self.pony.define_all_models()
+        self.pony.binddb(create_tables=True)
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
         self.maxDiff=None
-        # orm.set_sql_debug(True)
-
-        database.create_tables()
 
         # database.generate_mapping(create_tables=True)
         # orm.db_session.__enter__()
@@ -85,8 +66,8 @@ class Migrations_Test(unittest.TestCase):
     def tearDownORM(self):
         orm.rollback()
         # orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def setUp(self):
         # configdb = self.createConfig()
@@ -130,7 +111,7 @@ class Migrations_Test(unittest.TestCase):
     def test_insertInverterRegistrySignature(self):
         #if the insertInvertRegistrySignature changes, the migration code has to
         # change as well, given that it relies on column order
-        signature = Inverter.insertRegistry.__code__.co_varnames
+        signature = self.pony.db.Inverter.insertRegistry.__code__.co_varnames
         expectedSignature = (
             "self",
             "power_w",
@@ -201,7 +182,7 @@ class Migrations_Test(unittest.TestCase):
                         name: voki""")
 
             alcoleaPlant = alcoleaPlantYAML.plants[0].plant
-            alcolea = Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
+            alcolea = self.pony.db.Plant(name=alcoleaPlant.name, codename=alcoleaPlant.codename)
             alcolea = alcolea.importPlant(alcoleaPlant)
             orm.flush()
 
@@ -249,7 +230,7 @@ class Migrations_Test(unittest.TestCase):
             values = [0, 0, 492, 29998, 0, 16166, 0, 0, 0, 0, 0, 0]
             inverter.insertRegistry(*values, temp_inv_dc=temp_inv, time=time)
 
-            orm.select(r for r in InverterRegistry).show()
+            orm.select(r for r in self.pony.db.InverterRegistry).show()
 
     def __test_migrateLegacyTableToPony_meter(self):
         tableName = 'sistema_contador'
@@ -292,7 +273,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedIrrValue, expectedTempValue]
 
         with orm.db_session:
-            query = SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
+            query = self.pony.db.SensorIrradiationRegistry.select().order_by(SensorIrradiationRegistry.time)
             migratedRegistry = query.first()
             id, time, irrValue, tempValue = list(migratedRegistry.to_dict().values())
             migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, irrValue, tempValue]
@@ -328,7 +309,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, plantName, deviceName, expectedValue]
 
         with orm.db_session:
-            query = HourlySensorIrradiationRegistry.select().order_by(HourlySensorIrradiationRegistry.time)
+            query = self.pony.db.HourlySensorIrradiationRegistry.select().order_by(HourlySensorIrradiationRegistry.time)
             migratedRegistry = query.first()
             id, time, migratedValue = list(migratedRegistry.to_dict().values())
             migratedRegistryList = [time, migratedRegistry.sensor.plant.name, migratedRegistry.sensor.name, migratedValue]
@@ -377,7 +358,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, plantName, expectedMeterName] + expectedValuesList
 
         with orm.db_session:
-            query = MeterRegistry.select().order_by(MeterRegistry.time)
+            query = self.pony.db.MeterRegistry.select().order_by(self.pony.db.MeterRegistry.time)
             migratedRegistry = query.first()
 
             id, time, *migratedRegistrylist = list(migratedRegistry.to_dict().values())
@@ -419,9 +400,9 @@ class Migrations_Test(unittest.TestCase):
             expectedFirstRegistry = list(curr.fetchone())
 
         with orm.db_session:
-            numplants     = orm.count(p for p in Plant)
-            numinverters  = orm.count(i for i in Inverter)
-            numregistries = orm.count(r for r in InverterRegistry)
+            numplants     = orm.count(p for p in self.pony.db.Plant)
+            numinverters  = orm.count(i for i in self.pony.db.Inverter)
+            numregistries = orm.count(r for r in self.pony.db.InverterRegistry)
             self.assertEqual(numinverters*numrecords, numregistries)
 
         expectedTime = expectedFirstRegistry[0].replace(tzinfo=dt.timezone.utc)
@@ -432,7 +413,7 @@ class Migrations_Test(unittest.TestCase):
         expectedMigrateRegistryList = [expectedTime, expectedPlant, expectedInverter,expectedEnergy,expectedTempInv]
 
         with orm.db_session:
-            query = orm.select(r for r in InverterRegistry if r.inverter.name == expectedInverter and r.inverter.plant.name == expectedPlant).order_by(InverterRegistry.time)
+            query = orm.select(r for r in self.pony.db.InverterRegistry if r.inverter.name == expectedInverter and r.inverter.plant.name == expectedPlant).order_by(InverterRegistry.time)
 
             migratedRegistry = query.first()
             id, time, power, energy, *migratedRegistryList, temperature_dc = list(migratedRegistry.to_dict().values())
@@ -454,7 +435,7 @@ class Migrations_Test(unittest.TestCase):
         ]
 
         with orm.db_session:
-            plants = list(orm.select(p.name for p in Plant))
+            plants = list(orm.select(p.name for p in self.pony.db.Plant))
 
         self.assertCountEqual(plants, expectedPlants)
 
@@ -462,7 +443,7 @@ class Migrations_Test(unittest.TestCase):
         migrateLegacyToPony(self.createConfig(), excerpt=True)
 
         with orm.db_session:
-            plants = list(orm.select(p.name for p in Plant if p.name == "La Florida"))
+            plants = list(orm.select(p.name for p in self.pony.db.Plant if p.name == "La Florida"))
 
         self.assertListEqual(plants, [])
 
@@ -482,7 +463,7 @@ class Migrations_Test(unittest.TestCase):
             expectednumregistries = curr.fetchone()[0]
 
         with orm.db_session:
-            numregistries = orm.count(r for r in InverterRegistry)
+            numregistries = orm.count(r for r in self.pony.db.InverterRegistry)
 
         self.assertEqual(numregistries, expectednumregistries)
 
@@ -498,7 +479,7 @@ class Migrations_Test(unittest.TestCase):
             curr.execute("select count(distinct (time, name)) from sistema_contador")
             expectednumregistries = curr.fetchone()[0]
 
-        numregistries = orm.count(r for r in MeterRegistry)
+        numregistries = orm.count(r for r in self.pony.db.MeterRegistry)
         self.assertEqual(numregistries, expectednumregistries)
 
     def __test_fullMigration_noexcerpt(self):
@@ -514,9 +495,9 @@ class Migrations_Test(unittest.TestCase):
             expectednumMeterRegistries = curr.fetchone()[0]
 
         with orm.db_session:
-            numInverterRegistries = orm.count(r for r in InverterRegistry)
+            numInverterRegistries = orm.count(r for r in self.pony.db.InverterRegistry)
             self.assertEqual(numInverterRegistries, expectednumInverterRegistries)
-            numMeterRegistries = orm.count(r for r in MeterRegistry)
+            numMeterRegistries = orm.count(r for r in self.pony.db.MeterRegistry)
             self.assertEqual(numMeterRegistries, expectednumMeterRegistries)
 
     def test_fullMigration_excerpt(self):
@@ -525,7 +506,7 @@ class Migrations_Test(unittest.TestCase):
         migrateLegacyToPony(self.createConfig(), excerpt=True)
 
         with orm.db_session:
-            numInverterRegistries = orm.count(r for r in InverterRegistry)
+            numInverterRegistries = orm.count(r for r in self.pony.db.InverterRegistry)
             self.assertEqual(numInverterRegistries, expectednumInverterRegistries)
-            numMeterRegistries = orm.count(r for r in MeterRegistry)
+            numMeterRegistries = orm.count(r for r in self.pony.db.MeterRegistry)
             self.assertEqual(numMeterRegistries, expectednumMeterRegistries)

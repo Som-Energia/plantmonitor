@@ -10,34 +10,10 @@ from pony import orm
 
 import datetime
 
-from .models import database
-from .models import (
-    importPlants,
-    exportPlants,
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
+from ORM.models import importPlants, exportPlants
 
-from .db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 from yamlns import namespace as ns
-
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
-
 
 class ORMSetup_Test(unittest.TestCase):
 
@@ -49,31 +25,33 @@ class ORMSetup_Test(unittest.TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
+        self.pony = PonyManager(envinfo.DB_CONF)
 
+        self.pony.define_all_models()
+        self.pony.binddb(create_tables=True)
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
         self.maxDiff=None
-        # orm.set_sql_debug(True)
 
-        database.create_tables()
-
-        # database.generate_mapping(create_tables=True)
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def fillPlantRegistries(self, plant):
 
         timeStart = datetime.datetime(2020, 7, 28, 9, 21, 7, 881064, tzinfo=datetime.timezone.utc)
 
-        sensorsIrr = list(SensorIrradiation.select(lambda p: p.plant==plant))
+        sensorsIrr = list(self.pony.db.SensorIrradiation.select(lambda p: p.plant==plant))
         #TODO assert not empty
         sensorIrr = sensorsIrr[0]
 
-        sensorTemp = list(SensorTemperatureAmbient.select(lambda p: p.plant==plant))[0]
+        sensorTemp = list(self.pony.db.SensorTemperatureAmbient.select(lambda p: p.plant==plant))[0]
 
         dt = datetime.timedelta(minutes=5)
         value = 60
@@ -111,22 +89,22 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_connection(self):
         with orm.db_session:
-            self.assertEqual(database.get_connection().status, 1)
+            self.assertEqual(self.pony.db.get_connection().status, 1)
 
     def __test_timescaleTables(self):
         with orm.db_session:
             # orm.set_sql_debug(True)
 
-            tablesToTimescale = getTablesToTimescale()
+            tablesToTimescale = self.pony.getTablesToTimescale()
 
             #no raises
-            timescaleTables(tablesToTimescale)
+            self.pony.timescaleTables(tablesToTimescale)
 
             numColumnsTimescaleMetadata = 11
             timescaleStringColumn = 3
             hypertableName = 2
 
-            cur = database.execute("select * from _timescaledb_catalog.hypertable")
+            cur = self.pony.db.execute("select * from _timescaledb_catalog.hypertable")
             hypertables = cur.fetchall()
 
             hypertablesNames = [t[hypertableName] for t in hypertables if len(t) == numColumnsTimescaleMetadata and t[timescaleStringColumn] == '_timescaledb_internal']
@@ -138,7 +116,7 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_meters_whenNone(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
 
             self.assertMeterListEqual("""\
                 data: []
@@ -146,8 +124,8 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_InsertOnePlantOneMeter(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            meter = Meter(name='Mary', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            meter = self.pony.db.Meter(name='Mary', plant=alcolea)
 
             self.assertMeterListEqual("""\
                 data:
@@ -171,11 +149,11 @@ class ORMSetup_Test(unittest.TestCase):
                 meter.plant.codename,
                 meter.plant.description,
             )
-            for meter in Meter)]), expected)
+            for meter in self.pony.db.Meter)]), expected)
 
     def assertMeterRegistryEqual(self, plantCode, meterName, expected):
-        plant = Plant.get(codename=plantCode)
-        meter = Meter.get(plant=plant, name=meterName)
+        plant = self.pony.db.Plant.get(codename=plantCode)
+        meter = self.pony.db.Meter.get(plant=plant, name=meterName)
         registry = [
             ns(
                 # yamlns reads datetimes just as date, compare the string
@@ -188,7 +166,7 @@ class ORMSetup_Test(unittest.TestCase):
                 r4_VArh = line.r4_VArh,
             )
             for line in orm.select(
-                l for l in MeterRegistry
+                l for l in self.pony.db.MeterRegistry
                 if l.meter == meter
             )
         ]
@@ -196,16 +174,16 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_registry_whenEmpty(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            meter = Meter(name='Mary', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            meter = self.pony.db.Meter(name='Mary', plant=alcolea)
             self.assertMeterRegistryEqual('SOMSC01', 'Mary', """\
                 registry: []
                 """)
 
     def test_registry_singleEntry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            meter = Meter(name='Mary', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            meter = self.pony.db.Meter(name='Mary', plant=alcolea)
             meter.insertRegistry(
                 time = datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
                 export_energy_wh = 10,
@@ -228,8 +206,8 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_InverterRegistry_singleEntry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            inverter = Inverter(name='Mary', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            inverter = self.pony.db.Inverter(name='Mary', plant=alcolea)
             inverterDataDict = {
                 'time': datetime.datetime(2020,10,20,0,0,0, tzinfo=datetime.timezone.utc),
                 'power_w': 10,
@@ -246,7 +224,7 @@ class ORMSetup_Test(unittest.TestCase):
             expectedRegistry = inverterDataDict
             expectedRegistry['inverter'] = 1
 
-            oneRegistry = orm.select(r for r in InverterRegistry).first()
+            oneRegistry = orm.select(r for r in self.pony.db.InverterRegistry).first()
             oneRegistryList = oneRegistry.to_dict()
             self.assertDictEqual(expectedRegistry, oneRegistryList)
 
@@ -255,9 +233,9 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_InsertOnePlantOneMeterOneRegistry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            meter = Meter(name='Mary', plant=alcolea)
-            meterRegistry = MeterRegistry(
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            meter = self.pony.db.Meter(name='Mary', plant=alcolea)
+            meterRegistry = self.pony.db.MeterRegistry(
                 meter = meter,
                 time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
@@ -270,9 +248,9 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_ReadOnePlantOneMeterOneRegistry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='A fotovoltaic plant')
-            meter = Meter(name='Mary', plant=alcolea)
-            meterRegistry = MeterRegistry(
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='A fotovoltaic plant')
+            meter = self.pony.db.Meter(name='Mary', plant=alcolea)
+            meterRegistry = self.pony.db.MeterRegistry(
                 meter = meter,
                 time = datetime.datetime.now(datetime.timezone.utc),
                 export_energy_wh = 10,
@@ -283,44 +261,44 @@ class ORMSetup_Test(unittest.TestCase):
                 r4_VArh = 0,
             )
 
-            alcolea_read = Plant[1]
+            alcolea_read = self.pony.db.Plant[1]
             self.assertEqual(alcolea_read, alcolea)
             self.assertEqual(alcolea_read.name, alcolea.name)
 
     def test_InsertTwoPlantTwoMeterOneRegistry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
-            alcometer = Meter(name='meter1', plant=alcolea)
-            fonti = Plant(name='SomEnergia_Fontisolar',  codename='SOMSC02', description='descripción de planta')
-            fontimeter = Meter(name='meter1', plant=fonti)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea',  codename='SOMSC01', description='descripción de planta')
+            alcometer = self.pony.db.Meter(name='meter1', plant=alcolea)
+            fonti = self.pony.db.Plant(name='SomEnergia_Fontisolar',  codename='SOMSC02', description='descripción de planta')
+            fontimeter = self.pony.db.Meter(name='meter1', plant=fonti)
 
     def test_InsertOnePlantOneSensor(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensor = SensorTemperatureAmbient(name='TempAlcolea', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            sensor = self.pony.db.SensorTemperatureAmbient(name='TempAlcolea', plant=alcolea)
 
-            sensor_read = Sensor[1]
+            sensor_read = self.pony.db.Sensor[1]
             self.assertEqual(sensor_read,sensor)
 
     def test_InsertOnePlantOneSensorOneRegistry(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensor = SensorIrradiation(name='IrradAlcolea', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            sensor = self.pony.db.SensorIrradiation(name='IrradAlcolea', plant=alcolea)
             sensorRegistry = sensor.insertRegistry(
                 time = datetime.datetime.now(datetime.timezone.utc),
                 irradiation_w_m2 = 68,
                 temperature_dc = 250
             )
 
-            sensor_registry_read = list(SensorIrradiationRegistry.select())[0]
+            sensor_registry_read = list(self.pony.db.SensorIrradiationRegistry.select())[0]
             self.assertEqual(sensor_registry_read,sensorRegistry)
 
     def test_InsertOneForecast(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            forecastVariable = ForecastVariable(name='prod')
-            forecastPredictor = ForecastPredictor(name='aggregated')
-            forecastMetadata = ForecastMetadata(
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            forecastVariable = self.pony.db.ForecastVariable(name='prod')
+            forecastPredictor = self.pony.db.ForecastPredictor(name='aggregated')
+            forecastMetadata = self.pony.db.ForecastMetadata(
                 errorcode = '',
                 plant = alcolea,
                 variable = forecastVariable,
@@ -335,26 +313,26 @@ class ORMSetup_Test(unittest.TestCase):
                 percentil90 = 90,
             )
 
-            forecast_read = list(Forecast.select())[0]
+            forecast_read = list(self.pony.db.Forecast.select())[0]
             self.assertEqual(forecast_read,forecast)
 
     def test_GetRegistriesFromOneSensorInDateRange(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
-            sensor = SensorIrradiation(name='IrradAlcolea', plant=alcolea)
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            sensor = self.pony.db.SensorIrradiation(name='IrradAlcolea', plant=alcolea)
             timetz = datetime.datetime(2020, 7, 28, 9, 21, 7, 881064, tzinfo=datetime.timezone.utc)
             dt = datetime.timedelta(minutes=5)
             value = 60
             dv = 10
             for i in range(5):
-                SensorIrradiationRegistry(
+                self.pony.db.SensorIrradiationRegistry(
                     sensor = sensor,
                     time = timetz + i*dt,
                     irradiation_w_m2 = value + i*dv,
                 )
 
             oneday = datetime.datetime.strptime('2020-07-28','%Y-%m-%d')
-            query = orm.select(r.time for r in SensorIrradiationRegistry
+            query = orm.select(r.time for r in self.pony.db.SensorIrradiationRegistry
                            if oneday.date() == r.time.date())
 
             expected = [timetz + i * dt for i in range(5)]
@@ -389,15 +367,15 @@ class ORMSetup_Test(unittest.TestCase):
                         name: joana
             """)
 
-            importPlants(plantsNS)
+            importPlants(self.pony.db, plantsNS)
 
         #TODO test the whole fixture, not just the plant data
-        expectedPlantns = exportPlants()
+        expectedPlantns = exportPlants(self.pony.db)
         self.assertNsEqual(expectedPlantns, plantsNS)
 
     def test_fillPlantRegistries(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
             alcolea.createPlantFixture()
             plantRegistries = self.fillPlantRegistries(alcolea)
             n = len(plantRegistries['irradiation'])
@@ -407,7 +385,7 @@ class ORMSetup_Test(unittest.TestCase):
 
     def test_GetRegistriesFromManySensorsInDateRange(self):
         with orm.db_session:
-            alcolea = Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
+            alcolea = self.pony.db.Plant(name='SomEnergia_Alcolea', codename='SOMSC01', description='descripción de planta')
             alcolea.createPlantFixture()
             plantRegistries = self.fillPlantRegistries(alcolea)
             n = len(plantRegistries['irradiation'])
@@ -424,9 +402,9 @@ class ORMSetup_Test(unittest.TestCase):
                 ) for i in range(n)
             ]
 
-            q1 = orm.select(r for r in SensorIrradiationRegistry if r.sensor.plant == alcolea)
-            q2 = orm.select(r for r in SensorTemperatureAmbientRegistry if r.sensor.plant == alcolea)
-            q3 = orm.select(r for r in HourlySensorIrradiationRegistry if r.sensor.plant == alcolea)
+            q1 = orm.select(r for r in self.pony.db.SensorIrradiationRegistry if r.sensor.plant == alcolea)
+            q2 = orm.select(r for r in self.pony.db.SensorTemperatureAmbientRegistry if r.sensor.plant == alcolea)
+            q3 = orm.select(r for r in self.pony.db.HourlySensorIrradiationRegistry if r.sensor.plant == alcolea)
 
             qresult = orm.select(
                 (r1_w.time, r1_w.irradiation_w_m2, r2_w.temperature_dc, r3_w.integratedIrradiation_wh_m2, r1_w.sensor, r2_w.sensor, r3_w.sensor)

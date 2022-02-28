@@ -44,7 +44,6 @@ from plantmonitor.storage import (
     PonyMetricStorage,
     ApiMetricStorage,
     InfluxMetricStorage,
-    TimeScaleMetricStorage,
 )
 
 from pony import orm
@@ -54,22 +53,7 @@ import datetime
 from .standardization import registers_to_plant_data
 from .readings_facade import ReadingsFacade
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-)
-
-from ORM.db_utils import connectDatabase, getTablesToTimescale, timescaleTables
+from ORM.pony_manager import PonyManager
 
 def client_db(db):
     try:
@@ -178,7 +162,10 @@ def task():
             logger.error("Getting reading from {} failed. Aborting.".format(plantname))
             return
 
-        ponyStorage = PonyMetricStorage()
+        pony_manager = PonyManager(envinfo.DB_CONF)
+        pony_manager.define_all_models()
+        pony_manager.binddb()
+        ponyStorage = PonyMetricStorage(pony_manager.db)
         apiStorage = ApiMetricStorage(apiconfig)
 
         logger.info("**** Saving data in database ****")
@@ -206,7 +193,12 @@ def task_counter_erp():
         raise
 
 def task_meters_erp_to_orm():
-    r = ReadingsFacade()
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+    r = ReadingsFacade(pony.db)
 
     try:
         # TODO mock measures or fake meters
@@ -216,15 +208,27 @@ def task_meters_erp_to_orm():
         raise
 
 def task_daily_upload_to_api_meteologica(test_env=True):
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+
     configdb = ns.load('conf/config_meteologica.yaml')
     with orm.db_session:
-        uploadMeterReadings(configdb, test_env=test_env)
+        uploadMeterReadings(pony.db, configdb, test_env=test_env)
 
 
 def task_daily_download_from_api_meteologica(test_env=True):
+
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+
     configdb = ns.load('conf/config_meteologica.yaml')
     with orm.db_session:
-        downloadMeterForecasts(configdb, test_env=test_env)
+        downloadMeterForecasts(pony.db, configdb, test_env=test_env)
 
 
 def task_integral():
