@@ -3,31 +3,32 @@
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
-# from pathlib import Path
+from pathlib import Path
 from unittest import TestCase
 
-# from .maintenance import (
-#     get_latest_reading,
-#     round_dt_to_5minutes,
-#     fill_holes,
-#     resample,
-#     update_alarm_inverter_maintenance_via_sql,
-#     update_alarm_meteorologic_station_maintenance_via_sql
-# )
-# from .db_manager import DBManager
+from .maintenance import (
+    get_latest_reading,
+    round_dt_to_5minutes,
+    fill_holes,
+    resample,
+    update_alarm_inverter_maintenance_via_sql,
+    update_alarm_meteorologic_station_maintenance_via_sql,
+    update_bucketed_inverter_registry
+)
+from .db_manager import DBManager
 
-# import pandas as pd
-# from pandas.testing import assert_frame_equal
+import pandas as pd
+from pandas.testing import assert_frame_equal
 
-# import datetime
+import datetime
+
+from .db_test_factory import DbTestFactory
 
 
 class IrradiationDBConnectionTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        import pdb; pdb.set_trace()
-
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
@@ -315,3 +316,52 @@ class IrradiationMaintenanceTests(TestCase):
         result = resample(df)
 
         assert_frame_equal(result, expected, check_datetimelike_compat=True)
+
+class InverterMaintenanceTests(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        from conf import envinfo
+
+        database_info = envinfo.DB_CONF
+        db_info = database_info.copy()
+        db_info['dbname'] = database_info['database']
+        del db_info['provider']
+        del db_info['database']
+
+        debug = False
+
+        cls.dbmanager = DBManager(**db_info, echo=debug)
+        cls.dbmanager.__enter__()
+
+        cls.factory = DbTestFactory(**db_info)
+
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.dbmanager.__exit__()
+
+    def setUp(self):
+        self.session = self.dbmanager.db_con.begin()
+
+    def tearDown(self):
+        self.session.rollback()
+        self.session.close()
+
+    def read_csv(self):
+        pass
+
+    def test__update_bucketed_inverter_registry(self):
+        try:
+            self.factory.create('inverterregistry_factory.csv', 'inverterregistry')
+            self.factory.create_bucket_5min_inverterregistry_empty_table()
+
+            result = update_bucketed_inverter_registry(self.dbmanager.db_con)
+            
+            expected = []#[(readingtime, 1, None, 100, 10000)]
+            self.assertListEqual(result, expected)
+
+        except:
+            self.factory.delete('inverterregistry')
+            self.factory.delete('bucket_5min_inverterregistry')
+            raise

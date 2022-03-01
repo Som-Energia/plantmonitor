@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
+import datetime
+
 # class IrradiationMaintenance():
 
 #     def __init__(self, db):
@@ -90,6 +92,32 @@ def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
     db_con.execute(insert_query)
     return new_records
 
+def update_bucketed_inverter_registry(db_con):
+    setup_5min_table = '''
+        CREATE TABLE IF NOT EXISTS 
+            bucket_5min_inverterregistry 
+            (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint);
+        
+        CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
+            ON bucket_5min_inverterregistry (time, inverter);
+    '''
+    db_con.execute(setup_5min_table)
+    source_table = 'inverterregistry'
+    target_table = 'bucket_5min_{}'.format(source_table)
+    latest_reading = get_latest_reading(db_con, target_table)
+    latest_reading = "{}".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
+    query = Path('queries/maintenance/bucket_5min_{}.sql'.format(source_table)).read_text(encoding='utf8')
+    query = query.format(latest_reading, datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = '''
+        INSERT INTO {}
+         {} 
+         ON CONFLICT (time, inverter) DO 
+            UPDATE
+	            SET temperature_dc = excluded.temperature_dc,
+	            power_w = excluded.power_w,
+	            energy_wh = excluded.energy_wh'''.format(target_table, query)
+    return db_con.execute(insert_query)
+
 def alarm_maintenance(db_con):
     update_alarm_inverter_maintenance_via_sql(db_con)
     update_alarm_meteorologic_station_maintenance_via_sql(db_con)
@@ -102,6 +130,6 @@ def alarm_maintenance(db_con):
 
 
 # Nova taula comuna
-# device_table,device_id,device_name,alarm,description,started,ended
+# device_table,device_id,device_name,alarm,description,severity,started,ended,updated
 # Devices: Qualsevol cosa, sonda, inversor, planta, temps meteorlògic
 # Si ended is null  es current alarm
