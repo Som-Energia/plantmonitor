@@ -7,19 +7,16 @@ import pandas as pd
 
 class DbTestFactory():
 
-    def __init__(self, user, host, port, dbname, password=None):
-        self.dbmanager = DBManager(user, host, port, dbname, password)        
-
+    def __init__(self, dbmanager):
+        self.dbmanager = dbmanager
+     
     def create(self, csv_file, table_name):
         df = pd.read_csv('test_data/{}'.format(csv_file), sep = ',', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-        with self.dbmanager as dbmanager:
-            df.to_sql(table_name, dbmanager.db_con, if_exists='replace', index = False)
+        df.to_sql(table_name, self.dbmanager.db_con, if_exists='replace', index = False)
 
     def delete(self, table_name):
-        with self.dbmanager as dbmanager:
-            dbmanager.db_con.execute("DROP TABLE {};".format(table_name))
+        self.dbmanager.db_con.execute("DROP TABLE IF EXISTS {};".format(table_name))
 
     def create_bucket_5min_inverterregistry_empty_table(self):
         table_name = 'bucket_5min_inverterregistry'
-        with self.dbmanager as dbmanager:
-            dbmanager.db_con.execute('create table {} (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint)'.format(table_name))
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint)'.format(table_name))

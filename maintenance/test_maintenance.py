@@ -40,11 +40,10 @@ class IrradiationDBConnectionTest(TestCase):
         debug = False
 
         cls.dbmanager = DBManager(**db_info, echo=debug)
-        cls.dbmanager.__enter__()
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.dbmanager.__exit__()
+        cls.dbmanager.close_db()
 
     def setUp(self):
         self.session = self.dbmanager.db_con.begin()
@@ -332,34 +331,38 @@ class InverterMaintenanceTests(TestCase):
         debug = False
 
         cls.dbmanager = DBManager(**db_info, echo=debug)
-        cls.dbmanager.__enter__()
 
-        cls.factory = DbTestFactory(**db_info)
+        cls.factory = DbTestFactory(cls.dbmanager)
 
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.dbmanager.__exit__()
+        cls.dbmanager.close_db()
 
     def setUp(self):
         self.session = self.dbmanager.db_con.begin()
+        self.dbmanager.db_con.execute('SET TIME ZONE UTC;')
 
     def tearDown(self):
         self.session.rollback()
         self.session.close()
 
-    def read_csv(self):
-        pass
+    def read_csv(self, csvfile):
+        df = pd.read_csv(csvfile, sep=',')
+        return df
 
     def test__update_bucketed_inverter_registry(self):
         try:
-            self.factory.create('inverterregistry_factory.csv', 'inverterregistry')
+            self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
 
             result = update_bucketed_inverter_registry(self.dbmanager.db_con)
+            result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
+            result['time'] = result['time'].dt.tz_convert('UTC')
             
-            expected = []#[(readingtime, 1, None, 100, 10000)]
-            self.assertListEqual(result, expected)
+            expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case1.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            import pdb; pdb.set_trace()
+            pd.testing.assert_frame_equal(result, expected)
 
         except:
             self.factory.delete('inverterregistry')

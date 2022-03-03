@@ -39,5 +39,3 @@ def readTimedDataTsv(filename, columns):
         for line in data[2:]
     ]
 
-
-

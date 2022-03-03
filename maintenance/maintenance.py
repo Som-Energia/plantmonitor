@@ -115,8 +115,9 @@ def update_bucketed_inverter_registry(db_con):
             UPDATE
 	            SET temperature_dc = excluded.temperature_dc,
 	            power_w = excluded.power_w,
-	            energy_wh = excluded.energy_wh'''.format(target_table, query)
-    return db_con.execute(insert_query)
+	            energy_wh = excluded.energy_wh
+        RETURNING time, inverter, temperature_dc, power_w, energy_wh'''.format(target_table, query)
+    return db_con.execute(insert_query).fetchall()
 
 def alarm_maintenance(db_con):
     update_alarm_inverter_maintenance_via_sql(db_con)

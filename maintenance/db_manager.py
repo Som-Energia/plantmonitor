@@ -11,13 +11,10 @@ class DBManager():
 
         self.echo = echo
 
-    def __enter__(self):
         self.alchemy_engine = create_engine(self.engine_str, pool_recycle=3600, echo=self.echo)
         self.db_con = self.alchemy_engine.connect()
 
-        return self
-
-    def __exit__(self, *args, **kwargs):
+    def close_db(self):
         self.db_con.close()
         self.alchemy_engine.dispose()
 
