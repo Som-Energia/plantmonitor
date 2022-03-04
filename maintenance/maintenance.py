@@ -58,11 +58,14 @@ def resample(df):
 
     return df
 
-def get_latest_reading(db_con, table):
-    table_exists = db_con.execute("SELECT to_regclass('{}');".format(table)).fetchone()
+def get_latest_reading(db_con, target_table, source_table=None):
+    table_exists = db_con.execute("SELECT to_regclass('{}');".format(target_table)).fetchone()
     if not table_exists:
         return None
-    return db_con.execute('select * from {} order by time desc limit 1;'.format(table)).fetchone()
+    last_bucket = db_con.execute('select time from {} order by time desc limit 1;'.format(target_table)).fetchone()
+
+    return 
+
 
 # idea use a simple cron sql query that adds rows to the derivate table
 def update_alarm_inverter_maintenance_via_sql(db_con):

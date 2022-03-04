@@ -114,6 +114,18 @@ class IrradiationDBConnectionTest(TestCase):
 
         self.assertEqual(result, (readingtime+datetime.timedelta(minutes=5), 10))
 
+    def test__get_latest_reading__empty_table(self):
+        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
+        table_name = 'test_alarm_source'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(table_name))
+
+        result = get_latest_reading(self.dbmanager.db_con, table_name)
+
+        self.assertEqual(result, (readingtime+datetime.timedelta(minutes=5), 10))
+
+
+
+
     def create_plant(self, sunrise, sunset):
         # TODO tables already exist, why?
         self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
