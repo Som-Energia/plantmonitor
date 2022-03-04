@@ -112,16 +112,25 @@ class IrradiationDBConnectionTest(TestCase):
 
         result = get_latest_reading(self.dbmanager.db_con, table_name)
 
-        self.assertEqual(result, (readingtime+datetime.timedelta(minutes=5), 10))
+        self.assertEqual(result, readingtime+datetime.timedelta(minutes=5))
 
     def test__get_latest_reading__empty_table(self):
         readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
-        table_name = 'test_alarm_source'
-        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(table_name))
+        target_table = 'test_alarm_target'
+        source_table = 'test_alarm_source'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(target_table))
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, power_w integer)'.format(source_table))
+        self.dbmanager.db_con.execute(
+            "insert into {}(time, power_w) values ('{}', {}), ('{}', {})".format(
+                source_table,
+                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
+                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
+            )
+        )
 
-        result = get_latest_reading(self.dbmanager.db_con, table_name)
+        result = get_latest_reading(self.dbmanager.db_con, target_table, source_table)
 
-        self.assertEqual(result, (readingtime+datetime.timedelta(minutes=5), 10))
+        self.assertEqual(result, readingtime+datetime.timedelta(minutes=5))
 
 
 
@@ -367,10 +376,9 @@ class InverterMaintenanceTests(TestCase):
         try:
             self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
-
             result = update_bucketed_inverter_registry(self.dbmanager.db_con)
             result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
-            result['time'] = result['time'].dt.tz_convert('UTC')
+            #result['time'] = result['time'].dt.tz_convert('UTC')
             
             expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case1.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
             import pdb; pdb.set_trace()

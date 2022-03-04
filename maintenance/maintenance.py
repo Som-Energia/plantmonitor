@@ -63,15 +63,16 @@ def get_latest_reading(db_con, target_table, source_table=None):
     if not table_exists:
         return None
     last_bucket = db_con.execute('select time from {} order by time desc limit 1;'.format(target_table)).fetchone()
+    if not last_bucket:
+        last_bucket = db_con.execute('select time from {} order by time limit 1;'.format(source_table)).fetchone()
 
-    return 
+    return last_bucket[0]
 
 
 # idea use a simple cron sql query that adds rows to the derivate table
 def update_alarm_inverter_maintenance_via_sql(db_con):
     table_name = 'zero_inverter_power_at_daylight'
     latest_reading = get_latest_reading(db_con, table_name)
-    latest_reading = "'{}'".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
     query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
     query = query.format(latest_reading)
 
@@ -86,7 +87,6 @@ def update_alarm_inverter_maintenance_via_sql(db_con):
 def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
     table_name = 'zero_sonda_irradiation_at_daylight'
     latest_reading = get_latest_reading(db_con, table_name)
-    latest_reading = "'{}'".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
     query = Path('queries/zero_sonda_irradiation_at_daylight.sql').read_text(encoding='utf8')
     query = query.format(latest_reading)
     new_records = db_con.execute(query).fetchall()
@@ -107,8 +107,7 @@ def update_bucketed_inverter_registry(db_con):
     db_con.execute(setup_5min_table)
     source_table = 'inverterregistry'
     target_table = 'bucket_5min_{}'.format(source_table)
-    latest_reading = get_latest_reading(db_con, target_table)
-    latest_reading = "{}".format(latest_reading[0] if latest_reading else '1970-01-01 00:00:00+01:00')
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
     query = Path('queries/maintenance/bucket_5min_{}.sql'.format(source_table)).read_text(encoding='utf8')
     query = query.format(latest_reading, datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z'))
     insert_query = '''
