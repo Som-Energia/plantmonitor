@@ -387,3 +387,17 @@ class InverterMaintenanceTests(TestCase):
             self.factory.delete('inverterregistry')
             self.factory.delete('bucket_5min_inverterregistry')
             raise
+    
+    def test__update_bucketed_inverter_registry_horary_change(self):
+        try:
+            self.factory.create('inverterregistry_factory_case_horary_change.csv', 'inverterregistry')
+            self.factory.create_bucket_5min_inverterregistry_empty_table()
+            result = update_bucketed_inverter_registry(self.dbmanager.db_con)
+            result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
+            expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case_horary_change.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            pd.testing.assert_frame_equal(result, expected)
+        
+        except:
+            self.factory.delete('inverterregistry')
+            self.factory.delete('bucket_5min_inverterregistry')
+            raise
