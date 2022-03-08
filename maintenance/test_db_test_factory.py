@@ -7,6 +7,8 @@ from pathlib import Path
 from unittest import TestCase
 from maintenance.db_test_factory import DbTestFactory
 
+from .db_manager import DBManager
+
 class TestDbTestFactory(TestCase):
 
     @classmethod
@@ -19,10 +21,23 @@ class TestDbTestFactory(TestCase):
         del db_info['provider']
         del db_info['database']
 
-        cls.db_info = db_info
+        debug = False
+
+        cls.dbmanager = DBManager(**db_info, echo=debug)
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.dbmanager.close_db()
+
+    def setUp(self):
+        self.session = self.dbmanager.db_con.begin()
+
+    def tearDown(self):
+        self.session.rollback()
+        self.session.close()
 
     def test_create(self):
-        factory = DbTestFactory(**self.db_info)
+        factory = DbTestFactory(self.dbmanager)
         factory.create('inverterregistry_factory.csv', 'inverterregistry')
         factory.delete('inverterregistry')
 
