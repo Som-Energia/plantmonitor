@@ -373,7 +373,15 @@ class InverterMaintenanceTests(TestCase):
         df = pd.read_csv(csvfile, sep=',')
         return df
 
-    def test__update_bucketed_inverter_registry(self):
+    def test__timezone(self):
+        time = self.dbmanager.db_con.execute('''
+            set time zone 'UTC';
+            select time from (values (1, '2021-01-01 10:00+00:00'::timestamptz)) as t (id, time);
+            ''').fetchone()[0]
+
+        self.assertEqual(time.tzinfo, datetime.timezone.utc)
+
+    def test__update_bucketed_inverter_registry__base(self):
         try:
             self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
@@ -389,7 +397,7 @@ class InverterMaintenanceTests(TestCase):
             self.factory.delete('bucket_5min_inverterregistry')
             raise
 
-    def test__update_bucketed_inverter_registry_horary_change(self):
+    def test__update_bucketed_inverter_registry__DST(self):
         try:
             self.factory.create('inverterregistry_factory_case_horary_change.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
