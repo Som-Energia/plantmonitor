@@ -14,10 +14,18 @@ class DBManager():
         self.alchemy_engine = create_engine(self.engine_str, pool_recycle=3600, echo=self.echo)
         self.db_con = self.alchemy_engine.connect()
 
+    def __enter__(self):
+        #just use default constructor
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close_db()
+
     def close_db(self):
         self.db_con.close()
         self.alchemy_engine.dispose()
 
+    # TODO remove this, use `with self.db_con.begin()` instead
     def create_session(self):
         return Session(self.alchemy_engine)
 
