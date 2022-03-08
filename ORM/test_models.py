@@ -139,6 +139,18 @@ class Models_Test(unittest.TestCase):
         """)
         return alcoleaPlantNS
 
+
+    def samplePlantNS_location(self):
+        alcoleaPlantNS = ns.loads("""\
+            name: alcolea
+            codename: SCSOM04
+            description: la bonica planta
+            location:
+                latitude: 47.3
+                longitude: 41.2
+        """)
+        return alcoleaPlantNS
+
     def samplePlantNSWithStrings(self):
         alcoleaPlantNS = ns.loads("""\
             name: alcolea
@@ -335,6 +347,22 @@ class Models_Test(unittest.TestCase):
     def test__Plant_importExport__Strings(self):
 
         alcoleaPlantNS = self.samplePlantNSWithStrings()
+
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+
+        expectedPlantNS = alcoleaPlantNS
+        # expectedPlantNS.inverters[1].inverter['strings'] = []
+
+        #TODO test the whole fixture, not just the plant data
+        plantns = alcolea.exportPlant(skipEmpty=True)
+
+        self.assertNsEqual(plantns, expectedPlantNS)
+
+    def test__Plant_importExport__Location(self):
+
+        alcoleaPlantNS = self.samplePlantNS_location()
 
         alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
         alcolea = alcolea.importPlant(alcoleaPlantNS)

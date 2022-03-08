@@ -187,6 +187,10 @@ def define_models(database):
                 [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
             if 'moduleParameters' in plant:
                 self.setModuleParameters(**plant['moduleParameters'])
+            if 'location' in plant:
+                lat = plant['location']['latitude']
+                long = plant['location']['longitude']
+                PlantLocation(plant=self, latitude=lat, longitude=long)
             return self
 
         def exportPlant(self, skipEmpty=False):
@@ -232,6 +236,11 @@ def define_models(database):
                     plantns['temperatureModuleSensors'] = temperatureModuleSensors
                 if self.moduleParameters:
                     plantns['moduleParameters'] = self.moduleParameters.export()
+                if self.location:
+                    plantns['location'] = {
+                        'latitude': self.location.latitude,
+                        'longitude': self.location.longitude
+                    }
 
             if self.municipality:
                 plantns.municipality = self.municipality.ineCode
