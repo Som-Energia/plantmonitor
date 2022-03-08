@@ -68,11 +68,18 @@ def get_latest_reading(db_con, target_table, source_table=None):
 
     return last_bucket[0]
 
+def get_from_date_alarm(db_con, alarma, registry_table):
+    last_time_alarm = db_con.execute("SELECT updated FROM alarm_normalized_historic WHERE alarm == {} ORDER BY updated DESC LIMIT 1".format(alarm)).fetchone()
+    if not last_time_alarm:
+        last_time_alarm = db_con.execute('select time from {} order by time limit 1;'.format(registry_table)).fetchone()
+
+    return last_time_alarm
 
 # idea use a simple cron sql query that adds rows to the derivate table
 def update_alarm_inverter_maintenance_via_sql(db_con):
-    table_name = 'zero_inverter_power_at_daylight'
-    latest_reading = get_latest_reading(db_con, table_name)
+    target_name = 'alarm_normalized_historic'
+    source_table = 'inverterregistry_5min_avg'
+    latest_reading = get_latest_reading(db_con, target_name, source_table)
     query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
     query = query.format(latest_reading)
 
@@ -97,10 +104,10 @@ def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
 
 def update_bucketed_inverter_registry(db_con):
     setup_5min_table = '''
-        CREATE TABLE IF NOT EXISTS 
-            bucket_5min_inverterregistry 
+        CREATE TABLE IF NOT EXISTS
+            bucket_5min_inverterregistry
             (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint);
-        
+
         CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
             ON bucket_5min_inverterregistry (time, inverter);
     '''
@@ -112,8 +119,8 @@ def update_bucketed_inverter_registry(db_con):
     query = query.format(latest_reading, datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z'))
     insert_query = '''
         INSERT INTO {}
-         {} 
-         ON CONFLICT (time, inverter) DO 
+         {}
+         ON CONFLICT (time, inverter) DO
             UPDATE
 	            SET temperature_dc = excluded.temperature_dc,
 	            power_w = excluded.power_w,
@@ -121,9 +128,34 @@ def update_bucketed_inverter_registry(db_con):
         RETURNING time, inverter, temperature_dc, power_w, energy_wh'''.format(target_table, query)
     return db_con.execute(insert_query).fetchall()
 
+def create_alarm_normalized_historic_table(db_con):
+    alarm_registry = '''
+        CREATE TABLE IF NOT EXISTS
+            alarm_normalized_historic
+            (device_table varchar,
+             device_id integer,
+             device_name varchar,
+             alarm varchar,
+             description varchar,
+             severity integer,
+             started timestamptz,
+             ended timestamptz,
+             updated timestamptz,
+             status varchar);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
+            ON alarm_normalized_historic (started, alarm, device_table, device_id);
+    '''
+    return db_con.execute(alarm_registry)
+
+
 def alarm_maintenance(db_con):
+    create_alarm_normalized_historic_table(db_con)
     update_alarm_inverter_maintenance_via_sql(db_con)
     update_alarm_meteorologic_station_maintenance_via_sql(db_con)
+
+def bucketed_registry_maintenance(db_con):
+    update_bucketed_inverter_registry(db_con)
 
 
 # Alarms:
@@ -136,3 +168,21 @@ def alarm_maintenance(db_con):
 # device_table,device_id,device_name,alarm,description,severity,started,ended,updated
 # Devices: Qualsevol cosa, sonda, inversor, planta, temps meteorlògic
 # Si ended is null  es current alarm
+
+# Alarmes inversors
+# Dashboard: Alarma en temps real potència nula amb radiació tots els inversors
+#   - https://redash.somenergia.coop/queries/128/source#206
+#   - irradiationsensor <- dependencia
+#   - Això no hauria de mirar orto i ocaso?
+
+# Dashboard: Alarma 3 Inversors temperatura anòmala històric temps real->
+#   - https://redash.somenergia.coop/queries/137/source?p_interval=d_this_year#218
+#   - https://redash.somenergia.coop/queries/163/source#266
+#
+
+
+# INVERSOR - ALARMA 2: INTENSITATS ENTRADA INVERSOR
+#    Strings? stringregistry <- dependencia
+#   - https://redash.somenergia.coop/queries/129/source#207
+
+
