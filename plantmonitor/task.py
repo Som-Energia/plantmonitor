@@ -15,6 +15,12 @@ from .meters import (
     transfer_meter_to_plantmonitor,
 )
 
+from maintenance.maintenance import(
+    bucketed_registry_maintenance,
+)
+
+from maintenance.db_manager import DBManager
+
 from .operations import computeIntegralMetrics
 
 from meteologica.daily_upload_to_api import upload_meter_data
@@ -235,3 +241,27 @@ def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
 
+def client_sqlalchemy_db_con():
+
+    database_info = envinfo.DB_CONF
+    db_info = database_info.copy()
+    db_info['dbname'] = database_info['database']
+    del db_info['provider']
+    del db_info['database']
+
+    debug = False
+
+    dbmanager = DBManager(**db_info, echo=debug)
+    dbmanager.db_con.begin()
+
+    return dbmanager
+
+
+def task_maintenance():
+    try:
+        dbmanager = client_sqlalchemy_db_con()
+        bucketed_registry_maintenance(dbmanager.db_con)
+        dbmanager.close_db()
+    except Exception as err:
+        logger.error("[ERROR] %s" % err)
+        raise

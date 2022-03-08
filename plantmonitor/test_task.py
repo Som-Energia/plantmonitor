@@ -10,7 +10,10 @@ from plantmonitor.resource import ProductionPlant
 
 from conf import envinfo
 
-from .task import get_plant_reading
+from .task import (
+    get_plant_reading,
+    client_sqlalchemy_db_con,
+)
 
 from unittest.mock import MagicMock, Mock
 
@@ -48,3 +51,12 @@ class Task_Test(unittest.TestCase):
         plant_data = get_plant_reading(plant)
 
         self.assertIsNone(plant_data)
+
+    def test__client_sqlalchemy_db_con(self):
+
+        dbmanager = client_sqlalchemy_db_con()
+        result = dbmanager.db_con.execute('''
+            SELECT 1 AS COLUMN
+        ''').fetchone()
+
+        self.assertEqual(result[0], 1)
