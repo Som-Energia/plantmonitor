@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+
+from maintenance.db_manager import DBManager
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 import unittest
@@ -12,7 +14,7 @@ from conf import envinfo
 
 from .task import (
     get_plant_reading,
-    client_sqlalchemy_db_con,
+    get_db_info,
 )
 
 from unittest.mock import MagicMock, Mock
@@ -52,11 +54,17 @@ class Task_Test(unittest.TestCase):
 
         self.assertIsNone(plant_data)
 
+    def test__get_db_info(self):
+        dbinfo = get_db_info()
+        # depends on local config just make sure it doesn't raise
+
     def test__client_sqlalchemy_db_con(self):
 
-        dbmanager = client_sqlalchemy_db_con()
-        result = dbmanager.db_con.execute('''
-            SELECT 1 AS COLUMN
-        ''').fetchone()
+        db_info = get_db_info()
+        with DBManager(**db_info) as dbmanager:
+            with dbmanager.db_con.begin():
+                result = dbmanager.db_con.execute('''
+                    SELECT 1 AS COLUMN
+                ''').fetchone()
 
         self.assertEqual(result[0], 1)

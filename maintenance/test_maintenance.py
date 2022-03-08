@@ -352,14 +352,14 @@ class InverterMaintenanceTests(TestCase):
 
         debug = False
 
-        cls.dbmanager = DBManager(**db_info, echo=debug)
+        cls.dbmanager = DBManager(**db_info, echo=debug).__enter__()
 
         cls.factory = DbTestFactory(cls.dbmanager)
 
 
     @classmethod
-    def tearDownClass(cls) -> None:
-        cls.dbmanager.close_db()
+    def tearDownClass(cls):
+        cls.dbmanager.__exit__()
 
     def setUp(self):
         self.session = self.dbmanager.db_con.begin()

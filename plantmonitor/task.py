@@ -241,7 +241,7 @@ def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
 
-def client_sqlalchemy_db_con():
+def get_db_info():
 
     database_info = envinfo.DB_CONF
     db_info = database_info.copy()
@@ -249,19 +249,16 @@ def client_sqlalchemy_db_con():
     del db_info['provider']
     del db_info['database']
 
-    debug = False
-
-    dbmanager = DBManager(**db_info, echo=debug)
-    dbmanager.db_con.begin()
-
-    return dbmanager
+    return db_info
 
 
 def task_maintenance():
     try:
-        dbmanager = client_sqlalchemy_db_con()
-        bucketed_registry_maintenance(dbmanager.db_con)
-        dbmanager.close_db()
+
+        db_info = get_db_info()
+        with DBManager(**db_info) as dbmanager:
+            with dbmanager.db_con.begin():
+                bucketed_registry_maintenance(dbmanager.db_con)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise
