@@ -33,14 +33,10 @@ class IrradiationDBConnectionTest(TestCase):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
-        db_info = database_info.copy()
-        db_info['dbname'] = database_info['database']
-        del db_info['provider']
-        del db_info['database']
 
         debug = False
 
-        cls.dbmanager = DBManager(**db_info, echo=debug)
+        cls.dbmanager = DBManager(**database_info, echo=debug)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -345,14 +341,10 @@ class InverterMaintenanceTests(TestCase):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
-        db_info = database_info.copy()
-        db_info['dbname'] = database_info['database']
-        del db_info['provider']
-        del db_info['database']
 
         debug = False
 
-        cls.dbmanager = DBManager(**db_info, echo=debug).__enter__()
+        cls.dbmanager = DBManager(**database_info, echo=debug).__enter__()
 
         cls.factory = DbTestFactory(cls.dbmanager)
 

@@ -17,33 +17,25 @@ class TestDbManager(TestCase):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
-        db_info = database_info.copy()
-        db_info['dbname'] = database_info['database']
-        del db_info['provider']
-        del db_info['database']
 
         debug = False
 
-        with DBManager(**db_info, echo=debug) as dbmanager:
+        with DBManager(**database_info, echo=debug) as dbmanager:
             pass
 
     def test__connection_with_reserved_characters(self):
         from conf import envinfo
 
         database_info = envinfo.DB_CONF
-        db_info = database_info.copy()
-        db_info['dbname'] = database_info['database']
-        del db_info['provider']
-        del db_info['database']
 
-        db_info['password'] = 'aa@#\\/:aa'
+        database_info['password'] = 'aa@#\\/:aa'
 
         debug = False
 
         # The password is invented which might raise depending on the local configuration
         # but we are solving the OperationalError caused by reserved characters in the password
         try:
-            with DBManager(**db_info, echo=debug) as dbmanager:
+            with DBManager(**database_info, echo=debug) as dbmanager:
                 pass
         except OperationalError:
             raise

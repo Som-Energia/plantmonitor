@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 
 class DBManager():
 
-    def __init__(self, user, host, port, dbname, password=None, echo=False):
+    def __init__(self, provider, user, host, port, database, password=None, echo=False):
 
         user_encoded = urllib.parse.quote_plus(user)
         password_encoded = urllib.parse.quote_plus(password) if password else None
 
         userpass = '{}:{}'.format(user_encoded, password_encoded) if password_encoded else user_encoded
 
-        self.engine_str = 'postgresql+psycopg2://{}@{}:{}/{}'.format(userpass, host, port, dbname)
+        self.engine_str = '{}+psycopg2://{}@{}:{}/{}'.format(provider,userpass, host, port, database)
 
         self.echo = echo
 

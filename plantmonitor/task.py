@@ -244,10 +244,6 @@ def task_integral():
 def get_db_info():
 
     database_info = envinfo.DB_CONF
-    db_info = database_info.copy()
-    db_info['dbname'] = database_info['database']
-    del db_info['provider']
-    del db_info['database']
 
     return db_info
 
@@ -256,7 +252,7 @@ def task_maintenance():
     try:
 
         db_info = get_db_info()
-        with DBManager(**db_info) as dbmanager:
+        with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 bucketed_registry_maintenance(dbmanager.db_con)
     except Exception as err:
