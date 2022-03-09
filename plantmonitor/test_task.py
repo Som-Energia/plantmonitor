@@ -55,8 +55,8 @@ class Task_Test(unittest.TestCase):
 
     def test__client_sqlalchemy_db_con(self):
 
-        db_info = get_db_info()
-        with DBManager(**db_info) as dbmanager:
+        database_info = envinfo.DB_CONF
+        with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 result = dbmanager.db_con.execute('''
                     SELECT 1 AS COLUMN
