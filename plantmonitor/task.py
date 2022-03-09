@@ -241,17 +241,9 @@ def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
 
-def get_db_info():
-
-    database_info = envinfo.DB_CONF
-
-    return database_info
-
-
 def task_maintenance():
     try:
-
-        db_info = get_db_info()
+        database_info = envinfo.DB_CONF
         with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 bucketed_registry_maintenance(dbmanager.db_con)

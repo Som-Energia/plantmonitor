@@ -14,7 +14,6 @@ from conf import envinfo
 
 from .task import (
     get_plant_reading,
-    get_db_info,
 )
 
 from unittest.mock import MagicMock, Mock
@@ -53,10 +52,6 @@ class Task_Test(unittest.TestCase):
         plant_data = get_plant_reading(plant)
 
         self.assertIsNone(plant_data)
-
-    def test__get_db_info(self):
-        dbinfo = get_db_info()
-        # depends on local config just make sure it doesn't raise
 
     def test__client_sqlalchemy_db_con(self):
 
