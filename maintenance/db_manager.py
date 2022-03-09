@@ -11,7 +11,7 @@ class DBManager():
 
         userpass = '{}:{}'.format(user_encoded, password_encoded) if password_encoded else user_encoded
 
-        self.engine_str = '{}+psycopg2://{}@{}:{}/{}'.format(provider,userpass, host, port, database)
+        self.engine_str = '{}+psycopg2://{}@{}:{}/{}'.format(provider+'ql',userpass, host, port, database)
 
         self.echo = echo
 
