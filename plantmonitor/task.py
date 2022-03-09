@@ -245,7 +245,7 @@ def get_db_info():
 
     database_info = envinfo.DB_CONF
 
-    return db_info
+    return database_info
 
 
 def task_maintenance():
