@@ -11,10 +11,14 @@ from .maintenance import (
     round_dt_to_5minutes,
     fill_holes,
     resample,
-    update_alarm_inverter_maintenance_via_sql,
     update_alarm_meteorologic_station_maintenance_via_sql,
     update_bucketed_inverter_registry,
-    create_alarm_normalized_historic_table,
+    update_alarm_nopower_inverter,
+    create_alarm_table,
+    create_alarm_status_table,
+    create_alarm_historic_table,
+    get_alarm_status_nopower_alarmed,
+    get_alarm_current_nopower_inverter
 )
 from .db_manager import DBManager
 
@@ -128,9 +132,6 @@ class IrradiationDBConnectionTest(TestCase):
         result = get_latest_reading(self.dbmanager.db_con, target_table, source_table)
         result = result.astimezone(datetime.timezone.utc)
         self.assertEqual(result, readingtime)
-
-
-
 
     def create_plant(self, sunrise, sunset):
         # TODO tables already exist, why?
@@ -361,6 +362,35 @@ class InverterMaintenanceTests(TestCase):
         self.session.rollback()
         self.session.close()
 
+    def create_plant(self, sunrise, sunset):
+        # TODO tables already exist, why?
+        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
+        self.dbmanager.db_con.execute(
+            "insert into plant(id, name, codename, description) values ({}, '{}', '{}', '{}')".format(
+                1, 'Alibaba', 'SomEnergia_Alibaba', ''
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists inverter (id serial primary key, name text, plant integer)')
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                1, 'Alibaba_inverter', 1
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists sensor (id serial primary key, name text, plant integer not null, description text, deviceColumname text)')
+        self.dbmanager.db_con.execute(
+            "insert into sensor(id, name, plant, description, deviceColumname) values ({}, '{}', {}, '{}', '{}')".format(
+                1, 'SensorIrradiation1', 1, '', 'sensor'
+            )
+        )
+
+        self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
+        self.dbmanager.db_con.execute(
+            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
+                1, 1,
+                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
+            )
+        )
+
     def read_csv(self, csvfile):
         df = pd.read_csv(csvfile, sep=',')
         return df
@@ -403,10 +433,110 @@ class InverterMaintenanceTests(TestCase):
             self.factory.delete('bucket_5min_inverterregistry')
             raise
 
-    def test__create_alarm_normalized_historic_table(self):
-        create_alarm_normalized_historic_table(self.dbmanager.db_con)
+    def test__create_alarm_table(self):
+        create_alarm_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
-            SELECT device_table, device_id, device_name, alarm, description, severity, started, ended, updated, status
-            FROM alarm_normalized_historic
+            SELECT id, name, description, severity, createdate
+            FROM alarm
         ''')
         self.assertTrue(result)
+
+
+    def test__create_alarm_status_table(self):
+        create_alarm_table(self.dbmanager.db_con)
+        create_alarm_status_table(self.dbmanager.db_con)
+        result = self.dbmanager.db_con.execute('''
+            SELECT device_table, device_id, device_name, alarm, updated, status
+            FROM alarm_status
+        ''')
+        import pdb; pdb.set_trace()
+        self.assertTrue(result)
+
+    def test__create_alarm_historic_table(self):
+        create_alarm_table(self.dbmanager.db_con)
+        create_alarm_historic_table(self.dbmanager.db_con)
+        result = self.dbmanager.db_con.execute('''
+            SELECT device_table, device_id, device_name, alarm, description, severity, started, ended, updated
+            FROM alarm_historic
+        ''')
+        self.assertTrue(result)
+
+    def create_alarm_nopower_inverter_tables(self):
+        create_alarm_table(self.dbmanager.db_con)
+        create_alarm_status_table(self.dbmanager.db_con)
+        create_alarm_historic_table(self.dbmanager.db_con)
+
+    def test__get_alarm_status_nopower_alarmed(self):
+        self.create_alarm_nopower_inverter_tables()
+        self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
+        result = get_alarm_status_nopower_alarmed(self.dbmanager.db_con, 'nopower', 'inverter', 1)
+        import pdb; pdb.set_trace()
+        self.assertTrue(result)
+
+    def test__get_alarm_current_nopower_inverter__alarm_triggered(self):
+        self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = '2022-02-17 00:24:55'
+        result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
+
+        expected = [(1, 'Alibaba_inverter', True)]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_nopower_inverter__no_alarm(self):
+        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = '2022-02-17 00:24:55'
+        result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
+
+        expected = [(1, 'Alibaba_inverter', False)]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_nopower_inverter__none_power_readings(self):
+        self.factory.create('input_get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = '2022-02-17 00:24:55'
+        result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
+
+        expected = [(1, 'Alibaba_inverter', None)]
+        self.assertListEqual(result, expected)
+
+    #TODO theoretically should not happen because the gapfill is ran always. Should we throw?
+    def _test__get_alarm_current_nopower_inverter__no_readings(self):
+        self.factory.create('bucket_5min_inverterregistry_case1.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = '2022-02-17 00:24:55'
+        result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
+
+        expected = [(1, 'Alibaba_inverter', True)]
+        self.assertListEqual(result, expected)
+
+    def test__update_alarm_nopower_inverter(self):
+        self.factory.create('bucket_5min_inverterregistry_case1.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+
+        result = None#update_alarm_nopower_inverter()
+
+        result = pd.DataFrame(result)
+        # result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
+        expected = pd.read_csv('test_data/alarm_nopower_inverter_case1.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        pd.testing.assert_frame_equal(result, expected)

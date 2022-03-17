@@ -4,6 +4,13 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
+from conf.logging_configuration import LOGGING
+import logging
+import logging.config
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("plantmonitor")
+
+
 import datetime
 
 # class IrradiationMaintenance():
@@ -75,21 +82,79 @@ def get_from_date_alarm(db_con, alarma, registry_table):
 
     return last_time_alarm
 
-# idea use a simple cron sql query that adds rows to the derivate table
-def update_alarm_inverter_maintenance_via_sql(db_con):
-    target_name = 'alarm_normalized_historic'
-    source_table = 'inverterregistry_5min_avg'
-    latest_reading = get_latest_reading(db_con, target_name, source_table)
-    query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
-    query = query.format(latest_reading)
+# # idea use a simple cron sql query that adds rows to the derivate table
+# def update_alarm_inverter_maintenance_via_sql(db_con):
+#     target_name = 'alarm_normalized_historic'
+#     source_table = 'inverterregistry_5min_avg'
+#     latest_reading = get_latest_reading(db_con, target_name, source_table)
+#     query = Path('queries/zero_inverter_power_at_daylight.sql').read_text(encoding='utf8')
+#     query = query.format(latest_reading)
 
-    new_records = db_con.execute(query).fetchall()
-    new_records_strs = ','.join(["('{}', {}, {})".format(r[0].strftime('%Y-%m-%d %H:%M:%S%z'),r[2],r[3]) for r in new_records])
-    insert_query = 'insert into {}(time, inverter, power_w) VALUES {}'.format(table_name, new_records_strs)
+#     new_records = db_con.execute(query).fetchall()
+#     new_records_strs = ','.join(["('{}', {}, {})".format(r[0].strftime('%Y-%m-%d %H:%M:%S%z'),r[2],r[3]) for r in new_records])
+#     insert_query = 'insert into {}(time, inverter, power_w) VALUES {}'.format(table_name, new_records_strs)
 
-    db_con.execute(insert_query)
+#     db_con.execute(insert_query)
 
-    return new_records
+#     return new_records
+
+
+def get_alarm_status_nopower_alarmed(db_con, alarm, device_table, device_id):
+
+    query = f'''
+        SELECT status
+        FROM alarm_status
+        WHERE
+            device_table = '{device_table}' AND
+            device_id = '{device_id}' AND
+            alarm = '{alarm}'
+    '''
+    return db_con.execute(query).fetchone()[0]
+
+def get_alarm_current_nopower_inverter(db_con, check_time):
+    query = f'''
+        SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nopower
+        FROM bucket_5min_inverterregistry as reg
+        LEFT JOIN inverter AS inv ON inv.id = reg.inverter
+        WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+        group by reg.inverter, inv.name
+    '''
+    return db_con.execute(query).fetchall()
+
+
+def update_alarm_nopower_inverter(db_con, check_time = None):
+    check_time = check_time or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # TODO check alarma noreading que invalida l'alarma nopower
+
+    alarm_current = get_alarm_current_nopower_inverter(db_con, check_time)
+
+    for device_id, device_name, status in alarm_current:
+
+        # if night:
+        #     continue
+
+        # alarm_status = select status from alarm_status where device_table = 'inverter' and device_id = inverter and alarm = 'nopower' limit 1
+        alarm_previous = get_alarm_status_nopower_alarmed(db_con, 'nopower', 'inverter', device_id)
+
+        if alarm_previous does not exist:
+            # insert new row amb el alarm_current
+            return
+
+        #if not status and alarm_previous:
+        #     set alarm_historic.ended_date = check_time
+        #     insert la row a la taula historica
+
+        # UPDATE PSQL ROW with alarm_current
+        alarm_status.status = alarm_current
+        alarm_status.updated = check_time
+
+# device_table,device_id,device_name,alarm,description,severity,started,ended,updated
+
+    # per inversor: max(power_w) == 0: alarma
+
+
+
 
 def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
     table_name = 'zero_sonda_irradiation_at_daylight'
@@ -128,31 +193,85 @@ def update_bucketed_inverter_registry(db_con):
         RETURNING time, inverter, temperature_dc, power_w, energy_wh'''.format(target_table, query)
     return db_con.execute(insert_query).fetchall()
 
-def create_alarm_normalized_historic_table(db_con):
+def create_alarm_table(db_con):
+    table_name = 'alarm'
     alarm_registry = '''
         CREATE TABLE IF NOT EXISTS
-            alarm_normalized_historic
+            {}
+            (id serial primary key,
+            name varchar,
+            description varchar,
+            severity integer,
+            createdate timestamptz
+        );
+    '''.format(table_name)
+    db_con.execute(alarm_registry)
+    return table_name
+
+def create_alarm_status_table(db_con):
+    table_name = 'alarm_status'
+    alarm_registry = '''
+        CREATE TABLE IF NOT EXISTS
+            {}
             (device_table varchar,
              device_id integer,
              device_name varchar,
-             alarm varchar,
+             alarm INTEGER NOT NULL,
+             updated timestamptz,
+             status boolean);
+
+        ALTER TABLE "alarm_status" ADD CONSTRAINT "fk_alarm_status__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE;
+    '''.format(table_name)
+    db_con.execute(alarm_registry)
+    return table_name
+
+def create_alarm_historic_table(db_con):
+    table_name = 'alarm_historic'
+    alarm_registry = '''
+        CREATE TABLE IF NOT EXISTS
+            {}
+            (device_table varchar,
+             device_id integer,
+             device_name varchar,
+             alarm INTEGER NOT NULL,
              description varchar,
              severity integer,
              started timestamptz,
              ended timestamptz,
-             updated timestamptz,
-             status varchar);
+             updated timestamptz);
 
-        CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
-            ON alarm_normalized_historic (started, alarm, device_table, device_id);
-    '''
-    return db_con.execute(alarm_registry)
+        ALTER TABLE "alarm_historic" ADD CONSTRAINT "fk_alarm_historic__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE;
+    '''.format(table_name)
+    db_con.execute(alarm_registry)
+    return table_name
 
+
+
+
+def update_alarm_nopower(db_con):
+    target_table = create_alarm_normalized_historic_table(db_con)
+
+    device_raw_table = 'inverterregistry'
+    clean_source_table = 'bucket_5min_{}'.format(device_raw_table)
+
+    latest_reading = get_latest_reading(db_con, target_table, clean_source_table)
+    query = Path('queries/maintenance/alarms/alarm1_nopower_inverter.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading, datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = '''
+        INSERT INTO {}
+         {}
+         ON CONFLICT (time, inverter) DO
+            UPDATE
+	            SET temperature_dc = excluded.temperature_dc,
+	            power_w = excluded.power_w,
+	            energy_wh = excluded.energy_wh
+        RETURNING time, inverter, temperature_dc, power_w, energy_wh'''.format(target_table, query)
+    return db_con.execute(insert_query).fetchall()
 
 def alarm_maintenance(db_con):
-    create_alarm_normalized_historic_table(db_con)
-    update_alarm_inverter_maintenance_via_sql(db_con)
-    update_alarm_meteorologic_station_maintenance_via_sql(db_con)
+    create_alarm_table(db_con)
+    create_alarm_status_table(db_con)
+    create_alarm_historic_table(db_con)
 
 def bucketed_registry_maintenance(db_con):
     update_bucketed_inverter_registry(db_con)
