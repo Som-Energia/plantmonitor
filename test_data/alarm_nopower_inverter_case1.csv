@@ -1,0 +1,2 @@
+device_table;device_id;device_name;alarm;updated;status
+inverter;16;Alibaba_inverter;1;2021-03-27 01:15:00+00:00;TRIGGERED
