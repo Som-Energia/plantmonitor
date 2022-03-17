@@ -17,6 +17,7 @@ from .meters import (
 
 from maintenance.maintenance import(
     bucketed_registry_maintenance,
+    alarm_maintenance,
 )
 
 from maintenance.db_manager import DBManager
@@ -247,6 +248,8 @@ def task_maintenance():
         with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 bucketed_registry_maintenance(dbmanager.db_con)
+            with dbmanager.db_con.begin():
+                alarm_maintenance(dbmanager.db_con)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise
