@@ -1,3 +1,3 @@
-device_table;device_id;device_name;alarm;updated;status
-inverter;1;Inverter1;nopower;2021-03-27 01:15:00+00:00;True
-inverter;2;Inverter2;nopower;2021-03-27 01:15:00+00:00;
+device_table;device_id;device_name;alarm;create_time,update_time;status
+inverter;1;Inverter1;nopower;2021-03-27 01:15:00+00:00;2021-03-27 01:15:00+00:00;True
+inverter;2;Inverter2;nopower;2021-03-27 01:15:00+00:00;2021-03-27 01:15:00+00:00;

@@ -121,10 +121,66 @@ def get_alarm_current_nopower_inverter(db_con, check_time):
     '''
     return db_con.execute(query).fetchall()
 
+def set_alarm_status(db_con, device_table, device_id, device_name, alarm, check_time, status):
+
+    start_time = 'NULL' if alarm == 'OK' else 'TARGET.start_time'
+
+    query = f'''
+        INSERT INTO
+        alarm_status (
+            device_table,
+            device_id,
+            device_name,
+            alarm,
+            start_time,
+            update_time,
+            status
+        )
+        VALUES('{device_table}','{device_id}','{device_name}','{alarm}','{check_time}', '{check_time}', '{status}')
+        ON CONFLICT (device_table, device_id, alarm)
+        DO UPDATE
+        SET
+            device_name =  EXCLUDED.device_name,
+            --TODO check if this works cuz then we can avoid doing it in python
+            --start_time = CASE WHEN status = OK THEN NULL ELSE TARGET.start_time END
+            start_time = {start_time}
+            update_time = EXCLUDED.update_time,
+            status = EXCLUDED.status
+        RETURNING
+            id, device_table, device_id, device_name, alarm, updated, status;
+    '''
+    return db_con.execute(query).fetchone()
+
+def set_new_alarm(db_con, name, description, severity, createdate):
+    query = f'''
+       INSERT INTO
+        alarm (
+            name,
+            description,
+            severity,
+            createdate,
+        )
+        VALUES('{name}','{description}','{severity}','{createdate}')
+        ON CONFLICT (name) DO IGNORE
+        RETURNING
+            id, name, description, severity, createdate
+        '''
+    row = db_con.execute(query).fetchone()
+    return row and row[0]
 
 def update_alarm_nopower_inverter(db_con, check_time = None):
     check_time = check_time or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    device_table = 'inverter'
+
+    nopower_alarm = {
+        'name': 'nopower',
+        'description': '',
+        'severity': 'critical',
+        'createdate': datetime.date.today().isoformat()
+    }
+
+    alarm_id, *_ = set_new_alarm(db_con=db_con, **nopower_alarm)
     # TODO check alarma noreading que invalida l'alarma nopower
 
     alarm_current = get_alarm_current_nopower_inverter(db_con, check_time)
@@ -135,25 +191,35 @@ def update_alarm_nopower_inverter(db_con, check_time = None):
         #     continue
 
         # alarm_status = select status from alarm_status where device_table = 'inverter' and device_id = inverter and alarm = 'nopower' limit 1
-        alarm_previous = get_alarm_status_nopower_alarmed(db_con, 'nopower', 'inverter', device_id)
+        alarm_previous = get_alarm_status_nopower_alarmed(db_con, alarm_id, device_table, device_id)
 
-        if alarm_previous does not exist:
+        if not status and alarm_previous:
+            #insert la row a la taula historica
+            set_alarm_historic(db_con, device_table, device_id, device_name, alarm_id, check_time)
+
+        if not alarm_previous:
+            set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
             # insert new row amb el alarm_current
             return
 
-        #if not status and alarm_previous:
-        #     set alarm_historic.ended_date = check_time
-        #     insert la row a la taula historica
+
+device_table varchar,
+device_id integer,
+device_name varchar,
+alarm INTEGER NOT NULL,
+description varchar,
+severity integer,
+started timestamptz,
+ended timestamptz,
+updated timestamptz)
+
 
         # UPDATE PSQL ROW with alarm_current
-        alarm_status.status = alarm_current
-        alarm_status.updated = check_time
+        set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
 
 # device_table,device_id,device_name,alarm,description,severity,started,ended,updated
 
     # per inversor: max(power_w) == 0: alarma
-
-
 
 
 def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
@@ -202,7 +268,7 @@ def create_alarm_table(db_con):
             name varchar,
             description varchar,
             severity integer,
-            createdate timestamptz
+            createdate date
         );
     '''.format(table_name)
     db_con.execute(alarm_registry)
@@ -217,7 +283,8 @@ def create_alarm_status_table(db_con):
              device_id integer,
              device_name varchar,
              alarm INTEGER NOT NULL,
-             updated timestamptz,
+             start_time timestamptz,
+             update_time timestamptz,
              status boolean);
 
         ALTER TABLE "alarm_status" ADD CONSTRAINT "fk_alarm_status__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE;

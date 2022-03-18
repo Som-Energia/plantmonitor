@@ -18,7 +18,8 @@ from .maintenance import (
     create_alarm_status_table,
     create_alarm_historic_table,
     get_alarm_status_nopower_alarmed,
-    get_alarm_current_nopower_inverter
+    get_alarm_current_nopower_inverter,
+    set_new_alarm
 )
 from .db_manager import DBManager
 
@@ -446,7 +447,7 @@ class InverterMaintenanceTests(TestCase):
         create_alarm_table(self.dbmanager.db_con)
         create_alarm_status_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
-            SELECT device_table, device_id, device_name, alarm, updated, status
+            SELECT device_table, device_id, device_name, alarm, create_date, update_date, status
             FROM alarm_status
         ''')
         import pdb; pdb.set_trace()
@@ -540,3 +541,17 @@ class InverterMaintenanceTests(TestCase):
         # result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
         expected = pd.read_csv('test_data/alarm_nopower_inverter_case1.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         pd.testing.assert_frame_equal(result, expected)
+
+    def test__set_new_alarm(self):
+
+        alarm = {
+            'name': 'nopower',
+            'description': '',
+            'severity': 'critical',
+            'createdate': '2022-03-18'
+        }
+
+        result = set_new_alarm(self.dbmanager.db_con,alarm['name'],alarm['description'],alarm['severity'],alarm['createdate'])
+        expected = [('nopower','', 'nopower', '2022-03-18')]
+
+        self.assertListEqual(result, expected)
