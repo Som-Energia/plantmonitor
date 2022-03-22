@@ -7,4 +7,4 @@ SELECT
 FROM inverterregistry as sir
 WHERE time >= '{}' and time < '{}'
 GROUP by sir.inverter, time_bucket_gapfill('5 minutes', sir.time::timestamptz)
-order by time desc
+order by time desc,sir.inverter

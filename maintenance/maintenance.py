@@ -106,8 +106,8 @@ def get_alarm_status_nopower_alarmed(db_con, alarm, device_table, device_id):
         FROM alarm_status
         WHERE
             device_table = '{device_table}' AND
-            device_id = '{device_id}' AND
-            alarm = '{alarm}'
+            device_id = {device_id} AND
+            alarm = {alarm}
     '''
     return db_con.execute(query).fetchone()[0]
 
@@ -248,7 +248,8 @@ def update_alarm_meteorologic_station_maintenance_via_sql(db_con):
     db_con.execute(insert_query)
     return new_records
 
-def update_bucketed_inverter_registry(db_con):
+def update_bucketed_inverter_registry(db_con, to_date=None):
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
     setup_5min_table = '''
         CREATE TABLE IF NOT EXISTS
             bucket_5min_inverterregistry
@@ -262,16 +263,17 @@ def update_bucketed_inverter_registry(db_con):
     target_table = 'bucket_5min_{}'.format(source_table)
     latest_reading = get_latest_reading(db_con, target_table, source_table)
     query = Path('queries/maintenance/bucket_5min_{}.sql'.format(source_table)).read_text(encoding='utf8')
-    query = query.format(latest_reading, datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z'))
-    insert_query = '''
-        INSERT INTO {}
-         {}
+    query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = f'''
+        INSERT INTO {target_table}
+         {query}
          ON CONFLICT (time, inverter) DO
             UPDATE
 	            SET temperature_dc = excluded.temperature_dc,
 	            power_w = excluded.power_w,
 	            energy_wh = excluded.energy_wh
-        RETURNING time, inverter, temperature_dc, power_w, energy_wh'''.format(target_table, query)
+        RETURNING time, inverter, temperature_dc, power_w, energy_wh
+    '''
     return db_con.execute(insert_query).fetchall()
 
 def create_alarm_table(db_con):
