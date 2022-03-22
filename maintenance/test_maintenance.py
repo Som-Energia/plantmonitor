@@ -410,11 +410,13 @@ class InverterMaintenanceTests(TestCase):
         try:
             self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
-            result = update_bucketed_inverter_registry(self.dbmanager.db_con)
+
+            to_date = datetime.datetime(2022,2,17,0,20, tzinfo=datetime.timezone.utc)
+            result = update_bucketed_inverter_registry(self.dbmanager.db_con, to_date)
             result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
             #result['time'] = result['time'].dt.tz_convert('UTC')
 
-            expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case1.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            expected = pd.read_csv('test_data/update_bucketed_inverter_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
             pd.testing.assert_frame_equal(result, expected)
 
         except:
@@ -426,7 +428,8 @@ class InverterMaintenanceTests(TestCase):
         try:
             self.factory.create('inverterregistry_factory_case_horary_change.csv', 'inverterregistry')
             self.factory.create_bucket_5min_inverterregistry_empty_table()
-            result = update_bucketed_inverter_registry(self.dbmanager.db_con)
+            to_date = datetime.datetime(2021,3,27,1,15, tzinfo=datetime.timezone.utc)
+            result = update_bucketed_inverter_registry(self.dbmanager.db_con, to_date=to_date)
             result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
             expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case_horary_change.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
             pd.testing.assert_frame_equal(result, expected)
@@ -449,7 +452,7 @@ class InverterMaintenanceTests(TestCase):
         create_alarm_table(self.dbmanager.db_con)
         create_alarm_status_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
-            SELECT device_table, device_id, device_name, alarm, create_date, update_date, status
+            SELECT device_table, device_id, device_name, alarm, start_time, update_time, status
             FROM alarm_status
         ''')
         self.assertTrue(result)
@@ -458,7 +461,7 @@ class InverterMaintenanceTests(TestCase):
         create_alarm_table(self.dbmanager.db_con)
         create_alarm_historic_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
-            SELECT device_table, device_id, device_name, alarm, description, severity, started, ended, updated
+            SELECT device_table, device_id, device_name, alarm, start_time, end_time
             FROM alarm_historic
         ''')
         self.assertTrue(result)
@@ -479,8 +482,7 @@ class InverterMaintenanceTests(TestCase):
     def test__get_alarm_status_nopower_alarmed(self):
         self.create_alarm_nopower_inverter_tables()
         self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
-        result = get_alarm_status_nopower_alarmed(self.dbmanager.db_con, 'nopower', 'inverter', 1)
-        import pdb; pdb.set_trace()
+        result = get_alarm_status_nopower_alarmed(self.dbmanager.db_con, 1, 'inverter', 1)
         self.assertTrue(result)
 
     def test__get_alarm_current_nopower_inverter__alarm_triggered(self):
@@ -491,7 +493,7 @@ class InverterMaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = datetime.datetime(2022,2,17,0,24,55,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,2,17,1,15,0,tzinfo=datetime.timezone.utc)
         result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
 
         expected = [(1, 'Alibaba_inverter', True)]
@@ -519,7 +521,7 @@ class InverterMaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = '2022-02-17 00:24:55'
+        check_time = datetime.datetime(2022,2,17,0,24,55,tzinfo=datetime.timezone.utc)
         result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
 
         expected = [(1, 'Alibaba_inverter', None)]
@@ -634,12 +636,13 @@ class InverterMaintenanceTests(TestCase):
         self.assertDictEqual(dict(result), expected)
 
     def test__set_new_alarm(self):
+        create_alarm_table(self.dbmanager.db_con)
 
         alarm = {
             'name': 'invent',
             'description': '',
             'severity': 'critical',
-            'createdate': '2022-03-18'
+            'createdate': datetime.datetime(2022,3,18)
         }
 
         result = set_new_alarm(self.dbmanager.db_con,alarm['name'],alarm['description'],alarm['severity'],alarm['createdate'])
