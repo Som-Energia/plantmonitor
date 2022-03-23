@@ -20,7 +20,7 @@ class DbTestFactory():
 
     def create_without_time(self, csv_file, table_name):
         df = pd.read_csv('test_data/{}'.format(csv_file), sep = ';')
-        df.to_sql(table_name, self.dbmanager.db_con, if_exists='replace', index = False)
+        df.to_sql(table_name, self.dbmanager.db_con, if_exists='append', index = False)
 
     def delete(self, table_name):
         self.dbmanager.db_con.execute("DROP TABLE IF EXISTS {};".format(table_name))
