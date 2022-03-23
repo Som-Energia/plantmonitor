@@ -46,7 +46,7 @@ def importPlants(db, nsplants):
         if 'municipalities' in nsplants:
             for kmunicipality in nsplants.municipalities:
                 municipality = kmunicipality['municipality']
-                municipality = db.Municipality(
+                municipality = db.Municipality.get(ineCode=municipality.ineCode) or db.Municipality(
                     name=municipality.name,
                     ineCode=municipality.ineCode,
                     countryCode=municipality.get("countryCode"),
@@ -59,7 +59,7 @@ def importPlants(db, nsplants):
         if 'plants' in nsplants:
             for kplantns in nsplants.plants:
                 plantns = kplantns['plant']
-                plant = db.Plant(name=plantns.name, codename=plantns.codename)
+                plant = db.Plant.get(name=plantns.name) or db.Plant(name=plantns.name, codename=plantns.codename)
                 plant.importPlant(plantns)
 
 def exportPlants(db, skipEmpty=False):
@@ -164,6 +164,7 @@ def define_models(database):
             plant = nsplant
             self.name = plant.name
             self.description = plant.description
+            logger.info("Importing plant {}".format(self.name))
             if 'municipality' in plant:
                 m = Municipality.get(ineCode=plant['municipality'])
                 if m:
@@ -173,18 +174,22 @@ def define_models(database):
                     logger.error("Error: municipality {} not found".format(plant['municipality']))
                     raise
             if 'meters' in plant:
-                [Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
+                devs = [Meter.get(plant=self, name=meter['meter'].name) or Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
+                logger.info(devs)
             if 'inverters' in plant:
                 for inverter in plant.inverters:
-                    inv = Inverter(plant=self, name=inverter['inverter'].name)
+                    inv = Inverter.get(plant=self, name=inverter['inverter'].name) or Inverter(plant=self, name=inverter['inverter'].name)
                     for string_name in inverter.inverter.get('strings', []):
-                        String(inverter=inv, name=string_name)
+                        String.get(inverter=inv, name=string_name) or String(inverter=inv, name=string_name)
             if 'irradiationSensors' in plant:
-                [SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
+                devs = [SensorIrradiation.get(plant=self, name=sensor['irradiationSensor'].name) or SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
+                logger.info(devs)
             if 'temperatureAmbientSensors' in plant:
-                [SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
+                devs = [SensorTemperatureAmbient.get(plant=self, name=sensor['temperatureAmbientSensor'].name) or SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
+                logger.info(devs)
             if 'temperatureModuleSensors' in plant:
-                [SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
+                devs = [SensorTemperatureModule.get(plant=self, name=sensor['temperatureModuleSensor'].name) or SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
+                logger.info(devs)
             if 'moduleParameters' in plant:
                 self.setModuleParameters(**plant['moduleParameters'])
             return self
@@ -284,22 +289,29 @@ def define_models(database):
             Voc,
             Isc):
 
-            self.moduleParameters = PlantModuleParameters(
-                plant=self,
-                nominal_power_wp=int(nominalPowerMWp*1000000),
-                efficency_cpercent=int(efficiency*100),
-                n_modules = nModules,
-                degradation_cpercent = int(degradation*100),
-                max_power_current_ma = int(Imp*1000),
-                max_power_voltage_mv = int(Vmp*1000),
-                current_temperature_coefficient_mpercent_c = int(temperatureCoefficientI*1000),
-                voltage_temperature_coefficient_mpercent_c = int(temperatureCoefficientV*1000),
-                max_power_temperature_coefficient_mpercent_c = int(temperatureCoefficientPmax*1000),
-                standard_conditions_irradiation_w_m2 = int(irradiationSTC),
-                standard_conditions_temperature_dc = int(temperatureSTC*10),
-                opencircuit_voltage_mv = int(Voc*1000),
-                shortcircuit_current_ma = int(Isc*1000),
-            )
+            values = {
+                'nominal_power_wp': int(nominalPowerMWp*1000000),
+                'efficency_cpercent': int(efficiency*100),
+                'n_modules': nModules,
+                'degradation_cpercent': int(degradation*100),
+                'max_power_current_ma': int(Imp*1000),
+                'max_power_voltage_mv': int(Vmp*1000),
+                'current_temperature_coefficient_mpercent_c': int(temperatureCoefficientI*1000),
+                'voltage_temperature_coefficient_mpercent_c': int(temperatureCoefficientV*1000),
+                'max_power_temperature_coefficient_mpercent_c': int(temperatureCoefficientPmax*1000),
+                'standard_conditions_irradiation_w_m2': int(irradiationSTC),
+                'standard_conditions_temperature_dc': int(temperatureSTC*10),
+                'opencircuit_voltage_mv': int(Voc*1000),
+                'shortcircuit_current_ma': int(Isc*1000),
+            }
+
+            if self.moduleParameters:
+                self.moduleParameters.set(**values)
+            else:
+                self.moduleParameters = PlantModuleParameters(
+                    plant=self,
+                    **values
+                )
 
         @staticmethod
         def str2device(plant, classname, devicename):
