@@ -304,7 +304,17 @@ class InverterMaintenanceTests(TestCase):
             self.factory.delete('bucket_5min_inverterregistry')
             raise
 
-    def test__create_alarm_table(self):
+    def test__create_alarm_table__base(self):
+        create_alarm_table(self.dbmanager.db_con)
+        result = self.dbmanager.db_con.execute('''
+            SELECT id, name, description, severity, createdate
+            FROM alarm
+        ''')
+        self.assertTrue(result)
+
+
+    def test__create_alarm_table__twice(self):
+        create_alarm_table(self.dbmanager.db_con)
         create_alarm_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
             SELECT id, name, description, severity, createdate

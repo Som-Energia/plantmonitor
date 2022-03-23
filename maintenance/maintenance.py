@@ -24,10 +24,10 @@ def create_alarm_table(db_con):
             name varchar,
             description varchar,
             severity varchar,
-            createdate date
+            createdate date,
+            CONSTRAINT "unique_alarm__name" UNIQUE ("name")
         );
 
-        ALTER TABLE "alarm" ADD CONSTRAINT "unique_alarm__name" UNIQUE ("name");
     '''.format(table_name)
     db_con.execute(alarm_registry)
     return table_name
@@ -44,10 +44,10 @@ def create_alarm_status_table(db_con):
              alarm INTEGER NOT NULL,
              start_time timestamptz,
              update_time timestamptz,
-             status boolean);
-
-        ALTER TABLE {table_name} ADD CONSTRAINT "fk_alarm_status__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE;
-        CREATE UNIQUE INDEX uniq_idx_device_table_device_id_alarm ON {table_name}(device_table, device_id, alarm);
+             status boolean,
+             CONSTRAINT "fk_alarm_status__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS uniq_idx_device_table_device_id_alarm ON {table_name}(device_table, device_id, alarm);
     '''
     db_con.execute(alarm_registry)
     return table_name
@@ -64,10 +64,9 @@ def create_alarm_historic_table(db_con):
                 device_name varchar,
                 alarm INTEGER NOT NULL,
                 start_time timestamptz,
-                end_time timestamptz
+                end_time timestamptz,
+                CONSTRAINT "fk_alarm_historic__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE
             );
-
-        ALTER TABLE "alarm_historic" ADD CONSTRAINT "fk_alarm_historic__alarm" FOREIGN KEY ("alarm") REFERENCES "alarm" ("id") ON DELETE CASCADE;
     '''
     db_con.execute(alarm_registry)
     return table_name
