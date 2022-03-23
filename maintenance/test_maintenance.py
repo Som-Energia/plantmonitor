@@ -8,10 +8,6 @@ from unittest import TestCase
 
 from .maintenance import (
     get_latest_reading,
-    round_dt_to_5minutes,
-    fill_holes,
-    resample,
-    update_alarm_meteorologic_station_maintenance_via_sql,
     update_bucketed_inverter_registry,
     update_alarm_nopower_inverter,
     create_alarm_table,
@@ -21,7 +17,10 @@ from .maintenance import (
     get_alarm_current_nopower_inverter,
     set_new_alarm,
     set_alarm_status,
-    set_alarm_historic
+    set_alarm_historic,
+    set_alarm_status_update_time,
+    is_daylight,
+    NoSolarEventError
 )
 from .db_manager import DBManager
 
@@ -31,6 +30,8 @@ from pandas.testing import assert_frame_equal
 import datetime
 
 from .db_test_factory import DbTestFactory
+
+from re import search
 
 
 class IrradiationDBConnectionTest(TestCase):
@@ -201,142 +202,6 @@ class IrradiationDBConnectionTest(TestCase):
         expected = [(readingtime, 1,1, 0, sunrise, sunset)]
         # check inserted results
         self.assertListEqual(results, expected)
-
-    def __test__update_alarm_inverter_maintenance_via_sql(self):
-
-        # setup
-        # create source table
-        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
-        inverter_5m_table_name = 'inverterregistry_5min_avg'
-        self.dbmanager.db_con.execute('create table {} (time timestamptz, inverter SERIAL PRIMARY KEY, power_w integer)'.format(inverter_5m_table_name))
-        self.dbmanager.db_con.execute(
-            "insert into {}(time, power_w) values ('{}', {}), ('{}', {})".format(
-                inverter_5m_table_name,
-                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0,
-                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 10
-            )
-        )
-
-        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
-        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
-
-        self.create_plant(sunrise, sunset)
-
-        # create destination table
-        dst_table_name = 'zero_inverter_power_at_daylight'
-        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, inverter_5m_table_name))
-
-        new_records = update_alarm_inverter_maintenance_via_sql(self.dbmanager.db_con)
-
-        expected = [(readingtime, 1,1, 0, sunrise, sunset)]
-        self.assertListEqual(new_records, expected)
-
-    def __test__update_alarm_meteorologic_station_maintenance_via_sql_with_zero_irradiation(self):
-
-        readingtime = datetime.datetime(2021,1,1,12,tzinfo=datetime.timezone.utc)
-        sensor_irraditation_5m_table_name = 'sensorirradiationregistry_5min_avg'
-        self.dbmanager.db_con.execute('create table {} (sensor SERIAL, time timestamptz, irradiation_w_m2 integer, temperature_dc integer, PRIMARY KEY (sensor, time))'. format(sensor_irraditation_5m_table_name))
-        self.dbmanager.db_con.execute(
-            "insert into {}(time, irradiation_w_m2, temperature_dc) values('{}', {}, {}), ('{}', {}, {})".format(
-                sensor_irraditation_5m_table_name,
-                readingtime.strftime('%Y-%m-%d %H:%M:%S%z'), 0, 0,
-                (readingtime+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S%z'), 0, 15
-            )
-        )
-
-        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
-        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
-        self.create_plant(sunrise, sunset)
-
-        dst_table_name = 'zero_sonda_irradiation_at_daylight'
-        self.dbmanager.db_con.execute('create table {} (like {}, alarm bool)'.format(dst_table_name, sensor_irraditation_5m_table_name))
-
-        new_records = update_alarm_meteorologic_station_maintenance_via_sql(self.dbmanager.db_con)
-
-        expected = [(1, readingtime, 1, 0, 0, sunrise, sunset)]
-        self.assertListEqual(new_records, expected)
-
-class IrradiationMaintenanceTests(TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    # FYI reading data with mixed time shifts
-    # https://stackoverflow.com/questions/21269399/datetime-dtypes-in-pandas-read-csv
-
-    def test__round_minutes(self):
-
-        df = pd.read_csv('test_data/df_test_round_minutes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-        expected = df.copy()
-        basetime = datetime.datetime(2021,3,26,23,15,0,tzinfo=datetime.timezone.utc)
-        dt = datetime.timedelta(minutes=5)
-        expected['time'] = [basetime, basetime + dt, basetime + 2*dt, basetime + 3*dt]
-
-        result = round_dt_to_5minutes(df)
-
-        assert_frame_equal(result, expected, check_datetimelike_compat=True)
-
-    def test__duplicate_minutes(self):
-
-        df = pd.read_csv('test_data/df_test_round_minutes_duplicates.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-        expected = pd.DataFrame({
-            'sensor': [7]*4,
-            'time': pd.Series([
-                    '2021-03-27 11:15:00+00:00',
-                    '2021-03-27 11:20:00+00:00',
-                    '2021-03-27 11:25:00+00:00',
-                    '2021-03-27 11:35:00+00:00'
-                ]),
-            'irradiation_w_m2': [465, 578, 234, 290],
-            'temperature_dc': [119]*4
-        })
-        expected['time'] = pd.to_datetime(expected['time'])
-
-        result = round_dt_to_5minutes(df)
-
-        assert_frame_equal(result, expected, check_datetimelike_compat=True)
-
-    def _test__duplicate_minutes__many_sensors(self):
-        pass
-
-    def _test__fill_holes(self):
-
-        df = pd.read_csv('test_data/df_test_fill_holes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-        expected = pd.DataFrame({
-            'sensor': [7]*5,
-            'time': pd.Series([
-                    '2021-03-27 11:15:00+00:00',
-                    '2021-03-27 11:20:00+00:00',
-                    '2021-03-27 11:25:00+00:00',
-                    '2021-03-27 11:30:00+00:00',
-                    '2021-03-27 11:35:00+00:00'
-                ]),
-            'irradiation_w_m2': [100, 125, 150, 175, 290],
-            'temperature_dc': [119]*5
-        })
-        expected['time'] = pd.to_datetime(expected['time'])
-
-        result = fill_holes(df)
-
-        print(result)
-        print(expected)
-
-        assert_frame_equal(result, expected, check_datetimelike_compat=True)
-
-    def _test__resample(self):
-
-        df = pd.read_csv('test_data/df_test_round_minutes.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-        expected = df.copy()
-        basetime = datetime.datetime(2021,3,26,23,15,0,tzinfo=datetime.timezone.utc)
-        dt = datetime.timedelta(minutes=5)
-        expected['time'] = [basetime, basetime + dt, basetime + 2*dt, basetime + 3*dt]
-
-        result = resample(df)
-
-        assert_frame_equal(result, expected, check_datetimelike_compat=True)
 
 class InverterMaintenanceTests(TestCase):
 
@@ -671,15 +536,15 @@ class InverterMaintenanceTests(TestCase):
     def test__update_alarm_nopower_inverter__new_alarm(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
-        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
-        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = datetime.datetime(2022,2,17,1,15,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
         update_alarm_nopower_inverter(self.dbmanager.db_con, check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
-        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 1, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 1, 15, tzinfo=datetime.timezone.utc), True)
+        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
 
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
@@ -687,25 +552,91 @@ class InverterMaintenanceTests(TestCase):
     def test__update_alarm_nopower_inverter__status_change(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__change_status.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
-        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
-        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = datetime.datetime(2022,2,17,1,15,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
         update_alarm_nopower_inverter(self.dbmanager.db_con, check_time)
 
         check_time = check_time + datetime.timedelta(minutes=5)
         update_alarm_nopower_inverter(self.dbmanager.db_con, check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
-        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 1, 20, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 1, 20, tzinfo=datetime.timezone.utc), False)
+        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), False)
 
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
         result = self.dbmanager.db_con.execute('select * from alarm_historic').fetchall()
-        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 1, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 1, 20, tzinfo=datetime.timezone.utc))
+        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc))
 
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
+    def test__is_daylight__night(self):
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = datetime.datetime(2021,1,1,3,15,tzinfo=datetime.timezone.utc)
+        result = is_daylight(self.dbmanager.db_con, 1, check_time)
+
+        self.assertEqual(result, False)
+
+    def test__is_daylight__day(self):
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = datetime.datetime(2021,1,1,12,15,tzinfo=datetime.timezone.utc)
+        result = is_daylight(self.dbmanager.db_con, 1, check_time)
+
+        self.assertEqual(result, True)
+
+    def test__is_daylight__not_found(self):
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = datetime.datetime(2022,3,12,12,15,tzinfo=datetime.timezone.utc)
+
+        with self.assertRaises(NoSolarEventError):
+            is_daylight(self.dbmanager.db_con, 1, check_time)
+    
+    def test__set_alarm_status_update_time__empty(self):
+
+        self.create_alarm_nopower_inverter_tables()
+        
+        alarm_status = {
+            'device_table': 'inverter',
+            'device_id': 1,
+            'alarm': 1
+        }
+
+        check_time = datetime.datetime(2022,1,1,tzinfo=datetime.timezone.utc)
+
+        result = set_alarm_status_update_time(self.dbmanager.db_con, **alarm_status, check_time=check_time)
+
+        self.assertIsNone(result)
+    
+    def test__set_alarm_status_update_time__base(self):
+        
+        self.create_alarm_nopower_inverter_tables()
+        self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
+        
+        alarm_status = {
+            'device_table': 'inverter',
+            'device_id': 1,
+            'alarm': 1
+        }
+
+        check_time = datetime.datetime(2022,2,17,1,15,0,tzinfo=datetime.timezone.utc)
+
+        result = set_alarm_status_update_time(self.dbmanager.db_con, **alarm_status, check_time=check_time)
+
+        self.assertEqual(result['update_time'], check_time)
+        self.assertTrue(result['status'])
