@@ -358,7 +358,7 @@ class InverterMaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = datetime.datetime(2022,2,17,1,15,0,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,2,17,13,15,0,tzinfo=datetime.timezone.utc)
         result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
 
         expected = [(1, 'Alibaba_inverter', True)]
