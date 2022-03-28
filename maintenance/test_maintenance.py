@@ -310,7 +310,7 @@ class InverterMaintenanceTests(TestCase):
 
             to_date = datetime.datetime(2022,2,17,0,20, tzinfo=datetime.timezone.utc)
             update_bucketed_inverter_registry(self.dbmanager.db_con, to_date)
-            
+
             result = self.dbmanager.db_con.execute('''
                 SELECT * FROM _timescaledb_catalog.hypertable WHERE table_name = 'bucket_5min_inverterregistry';
             ''').fetchone()
@@ -358,7 +358,7 @@ class InverterMaintenanceTests(TestCase):
             FROM alarm_historic
         ''')
         self.assertTrue(result)
-    
+
     def test__create_alarm_historic_table_is_hypertable__no_timescale(self):
         self.dbmanager.db_con.execute('''
             DROP EXTENSION IF EXISTS timescaledb;
@@ -680,11 +680,11 @@ class InverterMaintenanceTests(TestCase):
 
         with self.assertRaises(NoSolarEventError):
             is_daylight(self.dbmanager.db_con, 1, check_time)
-    
+
     def test__set_alarm_status_update_time__empty(self):
 
         self.create_alarm_nopower_inverter_tables()
-        
+
         alarm_status = {
             'device_table': 'inverter',
             'device_id': 1,
@@ -696,12 +696,12 @@ class InverterMaintenanceTests(TestCase):
         result = set_alarm_status_update_time(self.dbmanager.db_con, **alarm_status, check_time=check_time)
 
         self.assertIsNone(result)
-    
+
     def test__set_alarm_status_update_time__base(self):
-        
+
         self.create_alarm_nopower_inverter_tables()
         self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
-        
+
         alarm_status = {
             'device_table': 'inverter',
             'device_id': 1,

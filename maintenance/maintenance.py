@@ -149,7 +149,7 @@ def set_new_alarm(db_con, name, description, severity, createdate):
     row = db_con.execute(query).fetchone()
 
     db_con.execute("SELECT setval('alarm_id_seq', MAX(id), true) FROM alarm;")
-    
+
     return row and row[0]
 
 def set_alarm_status_update_time(db_con, device_table, device_id, alarm, check_time):
@@ -157,11 +157,11 @@ def set_alarm_status_update_time(db_con, device_table, device_id, alarm, check_t
     check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
 
     query = f'''
-        UPDATE alarm_status 
+        UPDATE alarm_status
         SET update_time = '{check_time}'
-        WHERE 
-            alarm = {alarm} AND 
-            device_table = '{device_table}' AND 
+        WHERE
+            alarm = {alarm} AND
+            device_table = '{device_table}' AND
             device_id = '{device_id}'
         RETURNING *
     '''
@@ -169,7 +169,7 @@ def set_alarm_status_update_time(db_con, device_table, device_id, alarm, check_t
 
 def set_alarm_status(db_con, device_table, device_id, device_name, alarm, update_time, status):
     update_time = update_time.strftime("%Y-%m-%d %H:%M:%S%z")
-
+    status = status or 'NULL'
     # start_time = 'NULL' if alarm == 'OK' else 'TARGET.start_time'
     start_time = None
 
@@ -184,13 +184,13 @@ def set_alarm_status(db_con, device_table, device_id, device_name, alarm, update
             update_time,
             status
         )
-        VALUES('{device_table}','{device_id}','{device_name}','{alarm}','{update_time}', '{update_time}', '{status}')
+        VALUES('{device_table}','{device_id}','{device_name}','{alarm}','{update_time}', '{update_time}', {status})
         ON CONFLICT (device_table, device_id, alarm)
         DO UPDATE
         SET
             device_name = EXCLUDED.device_name,
             start_time = CASE
-                WHEN alarm_status.status != EXCLUDED.status THEN '{update_time}'
+                WHEN alarm_status.status is not EXCLUDED.status THEN '{update_time}'
                 ELSE alarm_status.start_time
                 END,
             update_time = EXCLUDED.update_time,
@@ -226,10 +226,10 @@ def set_alarm_historic(db_con, device_table, device_id, device_name, alarm, star
 
 def is_daylight(db_con, inverter, check_time):
     query = f'''
-        select 
-            case when 
+        select
+            case when
                 '{check_time}' between sunrise and sunset then TRUE
-                else FALSE 
+                else FALSE
             END as is_daylight
             from solarevent
             left join inverter on inverter.id = {inverter}
@@ -239,8 +239,8 @@ def is_daylight(db_con, inverter, check_time):
     '''
     result = db_con.execute(query).fetchone()
     is_day = result and result[0]
-    
-    if is_day is None: 
+
+    if is_day is None:
         raise NoSolarEventError(f"Error: Current datetime of inverter {inverter} does not match any solarevent at {check_time}")
 
     return is_day
@@ -264,17 +264,15 @@ def update_alarm_nopower_inverter(db_con, check_time = None):
     alarm_current = get_alarm_current_nopower_inverter(db_con, check_time)
 
     for device_id, device_name, status in alarm_current:
-        if status is None:
-            continue
-
-        is_day = is_daylight(db_con, device_id, check_time)
-        if not is_day:
-            set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
-            continue
+        if status is not None:
+            is_day = is_daylight(db_con, device_id, check_time)
+            if not is_day:
+                set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
+                continue
 
         current_alarm = set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
 
-        if current_alarm['old_status'] == True and status == False:
+        if current_alarm['old_status'] == True and status != True:
             set_alarm_historic(db_con, device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
 
 def update_bucketed_inverter_registry(db_con, to_date=None):
@@ -317,7 +315,7 @@ def alarm_maintenance(db_con):
     logger.debug("alarm tables creation checked")
     update_alarm_nopower_inverter(db_con)
     logger.info("Updated alarms maintenance")
-    
+
 
 def bucketed_registry_maintenance(db_con):
     logger.debug("Updating bucketed inverter registry table")
