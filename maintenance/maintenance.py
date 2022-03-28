@@ -285,6 +285,7 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
     source_table = 'inverterregistry'
     target_table = 'bucket_5min_{}'.format(source_table)
     latest_reading = get_latest_reading(db_con, target_table, source_table)
+    logger.debug(f"Latest reading of inverter {latest_reading}")
     query = Path('queries/maintenance/bucket_5min_{}.sql'.format(source_table)).read_text(encoding='utf8')
     query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
     insert_query = f'''
@@ -297,6 +298,7 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
 	            energy_wh = excluded.energy_wh
         RETURNING time, inverter, temperature_dc, power_w, energy_wh
     '''
+    logger.debug(f"Insert query {insert_query}")
     return db_con.execute(insert_query).fetchall()
 
 def alarm_maintenance(db_con):
