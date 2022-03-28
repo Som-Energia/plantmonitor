@@ -632,6 +632,22 @@ class InverterMaintenanceTests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
+    def test__update_alarm_nopower_inverter__none_power_readings(self):
+        self.factory.create('input_get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
+        update_alarm_nopower_inverter(self.dbmanager.db_con, check_time)
+
+        result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
+        expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
+
+        self.assertEqual(len(result), 1)
+        self.assertTupleEqual(tuple(result[0]), expected)
+
     def test__is_daylight__night(self):
 
         sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
