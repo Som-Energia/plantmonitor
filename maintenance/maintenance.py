@@ -264,7 +264,9 @@ def update_alarm_nopower_inverter(db_con, check_time = None):
     alarm_current = get_alarm_current_nopower_inverter(db_con, check_time)
 
     for device_id, device_name, status in alarm_current:
-
+        if status is None:
+            pass
+        
         is_day = is_daylight(db_con, device_id, check_time)
         if not is_day:
             set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
