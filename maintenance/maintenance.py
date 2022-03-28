@@ -58,7 +58,7 @@ def create_alarm_historic_table(db_con):
         CREATE TABLE IF NOT EXISTS
             {table_name}
             (
-                id serial primary key,
+                id serial,
                 device_table varchar,
                 device_id integer,
                 device_name varchar,
@@ -69,8 +69,23 @@ def create_alarm_historic_table(db_con):
             );
     '''
     db_con.execute(alarm_registry)
-    return table_name
 
+    check_timescale = '''
+        SELECT extversion
+        FROM pg_extension
+        where extname = 'timescaledb';
+    '''
+    has_timescale = db_con.execute(check_timescale).fetchone()
+
+    if has_timescale:
+        do_hypertable = '''
+        SELECT create_hypertable('alarm_historic','start_time', if_not_exists => TRUE);
+        '''
+        db_con.execute(do_hypertable).fetchone()
+    else:
+        logger.warning(f"Database {db_con.info} does not have timescale")
+
+    return table_name
 
 def get_latest_reading(db_con, target_table, source_table=None):
     table_exists = db_con.execute("SELECT to_regclass('{}');".format(target_table)).fetchone()
@@ -231,8 +246,8 @@ def update_alarm_nopower_inverter(db_con, check_time = None):
     device_table = 'inverter'
 
     nopower_alarm = {
-        'name': 'nopower',
-        'description': '',
+        'name': 'nopowerinverter',
+        'description': 'Inversor sense potència entre alba i posta',
         'severity': 'critical',
         'createdate': datetime.date.today()
     }
@@ -263,6 +278,8 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
 
         CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
             ON bucket_5min_inverterregistry (time, inverter);
+
+        SELECT create_hypertable('bucket_5min_inverterregistry', 'time', if_not_exists => TRUE)
     '''
     db_con.execute(setup_5min_table)
     source_table = 'inverterregistry'
@@ -283,13 +300,18 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
     return db_con.execute(insert_query).fetchall()
 
 def alarm_maintenance(db_con):
+    logger.debug("Updating alarms maintenance")
     create_alarm_table(db_con)
     create_alarm_status_table(db_con)
     create_alarm_historic_table(db_con)
     update_alarm_nopower_inverter(db_con)
+    logger.info("Updated alarms maintenance")
+    
 
 def bucketed_registry_maintenance(db_con):
+    logger.debug("Updating bucketed inverter registry table")
     update_bucketed_inverter_registry(db_con)
+    logger.info('Updated bucketed inverter registry table')
 
 
 # Pending:

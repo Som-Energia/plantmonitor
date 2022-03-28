@@ -4,7 +4,7 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from .maintenance import (
     get_latest_reading,
@@ -304,6 +304,24 @@ class InverterMaintenanceTests(TestCase):
             self.factory.delete('bucket_5min_inverterregistry')
             raise
 
+    def test__update_bucketed_inverter_registry__is_hypertable(self):
+        try:
+            self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
+
+            to_date = datetime.datetime(2022,2,17,0,20, tzinfo=datetime.timezone.utc)
+            update_bucketed_inverter_registry(self.dbmanager.db_con, to_date)
+            
+            result = self.dbmanager.db_con.execute('''
+                SELECT * FROM _timescaledb_catalog.hypertable WHERE table_name = 'bucket_5min_inverterregistry';
+            ''').fetchone()
+
+            self.assertTrue(result)
+
+        except:
+            self.factory.delete('inverterregistry')
+            self.factory.delete('bucket_5min_inverterregistry')
+            raise
+
     def test__create_alarm_table__base(self):
         create_alarm_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
@@ -332,7 +350,7 @@ class InverterMaintenanceTests(TestCase):
         ''')
         self.assertTrue(result)
 
-    def test__create_alarm_historic_table(self):
+    def test__create_alarm_historic_table__base_case(self):
         create_alarm_table(self.dbmanager.db_con)
         create_alarm_historic_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
@@ -340,13 +358,43 @@ class InverterMaintenanceTests(TestCase):
             FROM alarm_historic
         ''')
         self.assertTrue(result)
+    
+    def test__create_alarm_historic_table_is_hypertable__no_timescale(self):
+        self.dbmanager.db_con.execute('''
+            DROP EXTENSION IF EXISTS timescaledb;
+        ''')
+        create_alarm_table(self.dbmanager.db_con)
+        create_alarm_historic_table(self.dbmanager.db_con)
+        has_timescale = bool(self.dbmanager.db_con.execute('''
+            SELECT extversion
+            FROM pg_extension
+            where extname = 'timescaledb';
+        ''').fetchone())
+        self.assertFalse(has_timescale)
+
+        result = self.dbmanager.db_con.execute('''
+            SELECT EXISTS (
+                SELECT FROM pg_tables
+                WHERE  schemaname = 'public'
+                AND    tablename  = 'alarm_historic'
+            );
+        ''')
+        self.assertTrue(result)
+
+    def test__create_alarm_historic_table_is_hypertable__timescale(self):
+        create_alarm_table(self.dbmanager.db_con)
+        create_alarm_historic_table(self.dbmanager.db_con)
+        result = self.dbmanager.db_con.execute('''
+            SELECT * FROM _timescaledb_catalog.hypertable WHERE table_name = 'alarm_historic';
+        ''')
+        self.assertTrue(result)
 
     def create_alarm_nopower_inverter_tables(self):
         create_alarm_table(self.dbmanager.db_con)
 
         nopower_alarm = {
-            'name': 'nopower',
-            'description': '',
+            'name': 'nopowerinverter',
+            'description': 'Inversor sense potència entre alba i posta',
             'severity': 'critical',
             'createdate': datetime.date.today()
         }
