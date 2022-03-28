@@ -125,6 +125,7 @@ def set_new_alarm(db_con, name, description, severity, createdate):
 
     # TODO this has a corner case race condition, see alternative:
     # https://stackoverflow.com/questions/40323799/return-rows-from-insert-with-on-conflict-without-needing-to-update
+    # TODO: How to prevent autoincrement of id serial on conflict
     query = f'''
         WITH ins AS (
             INSERT INTO
@@ -146,6 +147,9 @@ def set_new_alarm(db_con, name, description, severity, createdate):
         LIMIT  1;
     '''
     row = db_con.execute(query).fetchone()
+
+    db_con.execute("SELECT setval('alarm_id_seq', MAX(id), true) FROM alarm;")
+    
     return row and row[0]
 
 def set_alarm_status_update_time(db_con, device_table, device_id, alarm, check_time):
@@ -196,7 +200,9 @@ def set_alarm_status(db_con, device_table, device_id, device_name, alarm, update
             (SELECT old.status FROM alarm_status old WHERE old.id = alarm_status.id) AS old_status,
             (SELECT old.start_time FROM alarm_status old WHERE old.id = alarm_status.id) AS old_start_time;
     '''
-    return db_con.execute(query).fetchone()
+    result = db_con.execute(query).fetchone()
+    db_con.execute("SELECT setval('alarm_status_id_seq', MAX(id), true) FROM alarm_status;")
+    return result
 
 def set_alarm_historic(db_con, device_table, device_id, device_name, alarm, start_time, end_time):
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -298,7 +304,7 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
 	            energy_wh = excluded.energy_wh
         RETURNING time, inverter, temperature_dc, power_w, energy_wh
     '''
-    logger.debug(f"Insert query {insert_query}")
+    logger.debug("Insert query")
     return db_con.execute(insert_query).fetchall()
 
 def alarm_maintenance(db_con):
@@ -306,6 +312,7 @@ def alarm_maintenance(db_con):
     create_alarm_table(db_con)
     create_alarm_status_table(db_con)
     create_alarm_historic_table(db_con)
+    logger.debug("alarm tables creation checked")
     update_alarm_nopower_inverter(db_con)
     logger.info("Updated alarms maintenance")
     
