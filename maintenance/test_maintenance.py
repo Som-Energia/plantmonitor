@@ -494,6 +494,8 @@ class InverterMaintenanceTests(TestCase):
         start_time=datetime.datetime(2022,3,21,12,14,tzinfo=datetime.timezone.utc),
         status=False
     ):
+        status = status or 'NULL'
+
         query = f'''
             INSERT INTO
             alarm_status (
@@ -505,7 +507,7 @@ class InverterMaintenanceTests(TestCase):
                 update_time,
                 status
             )
-            VALUES('{device_table}','{device_id}','{device_name}','{alarm}','{start_time}', '{start_time}', '{status}')
+            VALUES('{device_table}','{device_id}','{device_name}','{alarm}','{start_time}', '{start_time}', {status})
         RETURNING
             device_table, device_id, device_name, alarm, update_time, status;
         '''
@@ -557,6 +559,39 @@ class InverterMaintenanceTests(TestCase):
         )
         expected = {'id':1, **alarm_status, 'start_time': old_start_time, 'old_start_time': old_start_time, 'old_status': True}
         self.assertDictEqual(dict(result), expected)
+
+    def test__set_alarm_status__NOK_to_None(self):
+
+        self.create_alarm_nopower_inverter_tables()
+
+        alarm_status = self.insert_alarm_status(status=True)
+
+        old_start_time = alarm_status['update_time']
+        alarm_status['update_time'] = old_start_time+datetime.timedelta(hours=1)
+        alarm_status['status'] = None
+        result = set_alarm_status(
+            self.dbmanager.db_con,
+            **alarm_status
+        )
+        expected = {'id':1, **alarm_status, 'start_time': alarm_status['update_time'], 'old_start_time': old_start_time, 'old_status': True}
+        self.assertDictEqual(dict(result), expected)
+
+    def test__set_alarm_status__None_to_None(self):
+
+        self.create_alarm_nopower_inverter_tables()
+
+        alarm_status = self.insert_alarm_status(status=None)
+
+        old_start_time = alarm_status['update_time']
+        alarm_status['update_time'] = old_start_time+datetime.timedelta(hours=1)
+        alarm_status['status'] = None
+        result = set_alarm_status(
+            self.dbmanager.db_con,
+            **alarm_status
+        )
+        expected = {'id':1, **alarm_status, 'start_time': old_start_time, 'old_start_time': old_start_time, 'old_status': None}
+        self.assertDictEqual(dict(result), expected)
+
 
     def test__set_new_alarm(self):
         create_alarm_table(self.dbmanager.db_con)

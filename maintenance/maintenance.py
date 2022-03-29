@@ -190,7 +190,7 @@ def set_alarm_status(db_con, device_table, device_id, device_name, alarm, update
         SET
             device_name = EXCLUDED.device_name,
             start_time = CASE
-                WHEN alarm_status.status is not EXCLUDED.status THEN '{update_time}'
+                WHEN EXCLUDED.status is distinct from alarm_status.status THEN '{update_time}'
                 ELSE alarm_status.start_time
                 END,
             update_time = EXCLUDED.update_time,
