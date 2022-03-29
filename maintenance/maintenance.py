@@ -169,9 +169,7 @@ def set_alarm_status_update_time(db_con, device_table, device_id, alarm, check_t
 
 def set_alarm_status(db_con, device_table, device_id, device_name, alarm, update_time, status):
     update_time = update_time.strftime("%Y-%m-%d %H:%M:%S%z")
-    status = status or 'NULL'
-    # start_time = 'NULL' if alarm == 'OK' else 'TARGET.start_time'
-    start_time = None
+    status = 'NULL' if status is None else status
 
     query = f'''
         INSERT INTO

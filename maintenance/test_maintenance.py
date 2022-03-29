@@ -240,8 +240,9 @@ class InverterMaintenanceTests(TestCase):
         )
         self.dbmanager.db_con.execute('create table if not exists inverter (id serial primary key, name text, plant integer)')
         self.dbmanager.db_con.execute(
-            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
-                1, 'Alibaba_inverter', 1
+            "insert into inverter(id, name, plant) values ({}, '{}', {}),({}, '{}', {})".format(
+                1, 'Alibaba_inverter', 1,
+                2, 'Quaranta_Lladres_inverter', 1
             )
         )
         self.dbmanager.db_con.execute('create table if not exists sensor (id serial primary key, name text, plant integer not null, description text, deviceColumname text)')
@@ -359,6 +360,7 @@ class InverterMaintenanceTests(TestCase):
         ''')
         self.assertTrue(result)
 
+    @skipIf(True, 'You must be superuser to drop extensions')
     def test__create_alarm_historic_table_is_hypertable__no_timescale(self):
         self.dbmanager.db_con.execute('''
             DROP EXTENSION IF EXISTS timescaledb;
@@ -444,10 +446,10 @@ class InverterMaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
-        check_time = datetime.datetime(2022,2,17,0,24,55,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,2,17,12,24,55,tzinfo=datetime.timezone.utc)
         result = get_alarm_current_nopower_inverter(self.dbmanager.db_con, check_time)
 
-        expected = [(1, 'Alibaba_inverter', None)]
+        expected = [(1, 'Alibaba_inverter', True), (2, 'Quaranta_Lladres_inverter', None)]
         self.assertListEqual(result, expected)
 
     #TODO theoretically should not happen because the gapfill is ran always. Should we throw?
@@ -494,7 +496,7 @@ class InverterMaintenanceTests(TestCase):
         start_time=datetime.datetime(2022,3,21,12,14,tzinfo=datetime.timezone.utc),
         status=False
     ):
-        status = status or 'NULL'
+        status = 'NULL' if status is None else status
 
         query = f'''
             INSERT INTO
@@ -680,7 +682,7 @@ class InverterMaintenanceTests(TestCase):
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
 
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         self.assertTupleEqual(tuple(result[0]), expected)
 
     def test__is_daylight__night(self):
