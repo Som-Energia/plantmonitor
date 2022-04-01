@@ -7,6 +7,6 @@ SELECT date_trunc('day', reg."time") AS "time",
   FROM inverterregistry reg
     LEFT JOIN inverter ON inverter.id = reg.inverter
     LEFT JOIN plant ON plant.id = inverter.plant
-WHERE plant.name = 'Llanillos'
+WHERE plant.id in (select id from view_plants_exiom)
 GROUP BY (date_trunc('day', reg."time")), plant.id, plant.name, inverter.id, inverter.name
 ORDER BY (date_trunc('day', reg."time")), plant.id, plant.name, inverter.id, inverter.name;
