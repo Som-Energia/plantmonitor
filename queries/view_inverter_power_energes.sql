@@ -5,6 +5,6 @@ SELECT timezone('Europe/Madrid', reg."time") AS "time",
   FROM inverterregistry reg
     LEFT JOIN inverter ON inverter.id = reg.inverter
     LEFT JOIN plant ON plant.id = inverter.plant
-WHERE plant.name in ('Alcolea', 'Florida', 'Matallana')
+WHERE plant.id in (select id from view_plants_energes)
 GROUP BY (timezone('Europe/Madrid', reg."time")), plant.name, ROLLUP(inverter.name)
 ORDER BY (timezone('Europe/Madrid', reg."time"));
