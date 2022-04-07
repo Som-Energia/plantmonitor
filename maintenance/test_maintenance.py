@@ -7,6 +7,8 @@ from pathlib import Path
 from unittest import TestCase, skipIf
 
 from .maintenance import (
+    read_alarms,
+    create_alarms,
     get_latest_reading,
     update_bucketed_inverter_registry,
     update_alarm_nopower_inverter,
@@ -405,6 +407,19 @@ class InverterMaintenanceTests(TestCase):
         create_alarm_status_table(self.dbmanager.db_con)
         create_alarm_historic_table(self.dbmanager.db_con)
 
+    def create_alarm_nointensity_inverter_tables(self):
+        create_alarm_table(self.dbmanager.db_con)
+
+        nopower_alarm = {
+            'name': 'nopowerinverter',
+            'description': 'Inversor sense potència entre alba i posta',
+            'severity': 'critical',
+            'createdate': datetime.date.today()
+        }
+        set_new_alarm(db_con=self.dbmanager.db_con, **nopower_alarm)
+        create_alarm_status_table(self.dbmanager.db_con)
+        create_alarm_historic_table(self.dbmanager.db_con)
+
     def test__get_alarm_status_nopower_alarmed(self):
         self.create_alarm_nopower_inverter_tables()
         self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
@@ -596,7 +611,7 @@ class InverterMaintenanceTests(TestCase):
         self.assertDictEqual(dict(result), expected)
 
 
-    def test__set_new_alarm(self):
+    def test__set_new_alarm__base(self):
         create_alarm_table(self.dbmanager.db_con)
 
         alarm = {
@@ -606,10 +621,27 @@ class InverterMaintenanceTests(TestCase):
             'createdate': datetime.datetime(2022,3,18)
         }
 
-        result = set_new_alarm(self.dbmanager.db_con,alarm['name'],alarm['description'],alarm['severity'],alarm['createdate'])
+        result = set_new_alarm(self.dbmanager.db_con, **alarm)
         expected = 1
 
         self.assertEqual(result, expected)
+
+    def test__set_new_alarm__sql_injection(self):
+        create_alarm_table(self.dbmanager.db_con)
+
+        alarm = {
+            'name': "foo\'; TRUNCATE TABLE alarm; select 1 where ''=\'",
+            'description': '',
+            'severity': 'critical',
+            'createdate': datetime.datetime(2022,3,18)
+        }
+
+        set_new_alarm(self.dbmanager.db_con, **alarm)
+
+        num_alarms = self.dbmanager.db_con.execute("select count(*) from alarm limit 1;").fetchone()
+        self.assertEqual(num_alarms, (1,))
+        alarm_expected = self.dbmanager.db_con.execute("select name from alarm order by name;").fetchone()
+        self.assertEqual(alarm_expected, ("foo'; TRUNCATE TABLE alarm; select 1 where ''='",))
 
     def test__set_alarm_historic(self):
 
@@ -768,3 +800,29 @@ class InverterMaintenanceTests(TestCase):
 
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
+
+    def test__read_alarms__base(self):
+        alarms = read_alarms('test_data/alarms_testing.yaml')
+
+        expected_alarms = {'alarms':[
+            {
+            'name': 'nopowerinverter',
+            'description': 'Inversor sense potència entre alba i posta',
+            'severity': 'critical',
+            'sql': 'nopowerinverter'
+            },{
+            'name': 'nointensityinverter',
+            'description': "String d'inversor sense potència entre alba i posta",
+            'severity': 'critical',
+            'sql': 'nointensityinverter'
+            }
+        ]}
+
+        self.assertDictEqual(alarms, expected_alarms)
+
+    def test__create_alarms__base(self):
+        create_alarms(self.dbmanager.db_con)
+
+        alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
+
+        self.assertListEqual(alarms, [('nointensityinverter',), ('nopowerinverter',)])

@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
+import yaml
+
 from conf.logging_configuration import LOGGING
 import logging
 import logging.config
@@ -13,6 +15,24 @@ logger = logging.getLogger("plantmonitor")
 import datetime
 
 class NoSolarEventError(Exception): pass
+
+def read_alarms(yamlfile):
+    with open(yamlfile, 'r') as stream:
+        alarms = yaml.safe_load(stream)
+        return alarms
+
+def create_alarms(db_con):
+    from conf import envinfo
+
+    alarms_yaml_file = getattr(envinfo,'ALARMS_YAML','conf/alarms.yaml')
+    alarms = read_alarms(alarms_yaml_file)
+
+    create_alarm_table(db_con)
+
+    #TODO silently continue if alarms key does not exist?
+    for alarm in alarms.get('alarms', []):
+        alarm['createdate'] = alarm.get('createdate',datetime.datetime.today())
+        set_new_alarm(db_con=db_con, **alarm)
 
 
 def create_alarm_table(db_con):
@@ -122,6 +142,7 @@ def get_alarm_current_nopower_inverter(db_con, check_time):
 
 def get_alarm_current_nointensity_inverter(db_con, check_time):
     check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+    raise NotImplementedError
     query = f'''
         SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nointensity
         FROM bucket_5min_inverterstringregistry as reg
@@ -132,7 +153,8 @@ def get_alarm_current_nointensity_inverter(db_con, check_time):
     '''
     return db_con.execute(query).fetchall()
 
-def set_new_alarm(db_con, name, description, severity, createdate):
+# TODO store the sql in db?
+def set_new_alarm(db_con, name, description, severity, createdate, sql=None):
     createdate = createdate.strftime("%Y-%m-%d")
 
     # TODO this has a corner case race condition, see alternative:
@@ -147,7 +169,7 @@ def set_new_alarm(db_con, name, description, severity, createdate):
                     severity,
                     createdate
                 )
-                VALUES('{name}','{description}','{severity}','{createdate}')
+                VALUES(%s, %s, %s, %s)
                 ON CONFLICT (name) DO NOTHING
                 RETURNING
                     id
@@ -155,10 +177,10 @@ def set_new_alarm(db_con, name, description, severity, createdate):
         SELECT id FROM ins
         UNION  ALL
         SELECT id FROM alarm
-        WHERE  name = '{name}'  -- only executed if no INSERT
+        WHERE  name = %s  -- only executed if no INSERT
         LIMIT  1;
     '''
-    row = db_con.execute(query).fetchone()
+    row = db_con.execute(query, (name, description, severity, createdate, name)).fetchone()
 
     db_con.execute("SELECT setval('alarm_id_seq', MAX(id), true) FROM alarm;")
 
