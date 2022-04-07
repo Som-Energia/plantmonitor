@@ -120,6 +120,18 @@ def get_alarm_current_nopower_inverter(db_con, check_time):
     '''
     return db_con.execute(query).fetchall()
 
+def get_alarm_current_nointensity_inverter(db_con, check_time):
+    check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+    query = f'''
+        SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nointensity
+        FROM bucket_5min_inverterstringregistry as reg
+        LEFT JOIN inverterstring AS is ON is.id = reg.inverterstring
+        LEFT JOIN inverter AS inv ON inv.id = reg.inverter
+        WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+        group by reg.inverter, inv.name
+    '''
+    return db_con.execute(query).fetchall()
+
 def set_new_alarm(db_con, name, description, severity, createdate):
     createdate = createdate.strftime("%Y-%m-%d")
 
@@ -243,6 +255,21 @@ def is_daylight(db_con, inverter, check_time):
 
     return is_day
 
+# TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
+# e.g. skip_condition(db_con, inverter, check_time)
+def set_devices_alarms_if_daylight(db_con, alarm_id, device_table, alarms_current, check_time):
+    for device_id, device_name, status in alarms_current:
+        if status is not None:
+            is_day = is_daylight(db_con, device_id, check_time)
+            if not is_day:
+                set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
+                continue
+
+        current_alarm = set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
+
+        if current_alarm['old_status'] == True and status != True:
+            set_alarm_historic(db_con, device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
 
 def update_alarm_nopower_inverter(db_con, check_time = None):
     check_time = check_time or datetime.datetime.now()
@@ -260,18 +287,25 @@ def update_alarm_nopower_inverter(db_con, check_time = None):
     # TODO check alarma noreading que invalida l'alarma nopower
 
     alarm_current = get_alarm_current_nopower_inverter(db_con, check_time)
+    set_devices_alarms_if_daylight(db_con, alarm_id, device_table, alarm_current, check_time)
 
-    for device_id, device_name, status in alarm_current:
-        if status is not None:
-            is_day = is_daylight(db_con, device_id, check_time)
-            if not is_day:
-                set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
-                continue
+def update_alarm_nointensity_inverter(db_con, check_time = None):
+    check_time = check_time or datetime.datetime.now()
 
-        current_alarm = set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
+    device_table = 'inverter'
 
-        if current_alarm['old_status'] == True and status != True:
-            set_alarm_historic(db_con, device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+    nointensity_alarm = {
+        'name': 'nointensityinverter',
+        'description': 'Inversor sense intensitat entre alba i posta',
+        'severity': 'critical',
+        'createdate': datetime.date.today()
+    }
+
+    alarm_id = set_new_alarm(db_con=db_con, **nointensity_alarm)
+    # TODO check alarma noreading que invalida l'alarma nopower
+    alarm_current = get_alarm_current_nointensity_inverter(db_con, check_time)
+    set_devices_alarms_if_daylight(db_con, alarm_id, device_table, alarm_current, check_time)
+
 
 def update_bucketed_inverter_registry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
