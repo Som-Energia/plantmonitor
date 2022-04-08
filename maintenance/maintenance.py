@@ -16,22 +16,23 @@ import datetime
 
 class NoSolarEventError(Exception): pass
 
-def read_alarms(yamlfile):
+def read_alarms_config(yamlfile):
     with open(yamlfile, 'r') as stream:
         alarms = yaml.safe_load(stream)
         return alarms
 
-def create_alarms(db_con):
-    from conf import envinfo
+def create_alarms(db_con, alarms_yaml_content):
+    # TODO use this on the final caller
+    # from conf import envinfo
+    # alarms_yaml_file = getattr(envinfo,'ALARMS_YAML','conf/alarms.yaml')
+    # alarms = read_alarms_config(alarms_yaml)
 
-    alarms_yaml_file = getattr(envinfo,'ALARMS_YAML','conf/alarms.yaml')
-    alarms = read_alarms(alarms_yaml_file)
-
+    #TODO should we try to create, we usually will have created alarm,status and historic via create_alarm_tables
     create_alarm_table(db_con)
 
     #TODO silently continue if alarms key does not exist?
-    for alarm in alarms.get('alarms', []):
-        alarm['createdate'] = alarm.get('createdate',datetime.datetime.today())
+    for alarm in alarms_yaml_content.get('alarms', []):
+        alarm['createdate'] = alarm.get('createdate', datetime.datetime.today())
         set_new_alarm(db_con=db_con, **alarm)
 
 
@@ -106,6 +107,11 @@ def create_alarm_historic_table(db_con):
         logger.warning(f"Database {db_con.info} does not have timescale")
 
     return table_name
+
+def create_alarm_tables(db_con):
+    create_alarm_table(db_con)
+    create_alarm_status_table(db_con)
+    create_alarm_historic_table(db_con)
 
 def get_latest_reading(db_con, target_table, source_table=None):
     table_exists = db_con.execute("SELECT to_regclass('{}');".format(target_table)).fetchone()
@@ -328,7 +334,6 @@ def update_alarm_nointensity_inverter(db_con, check_time = None):
     alarm_current = get_alarm_current_nointensity_inverter(db_con, check_time)
     set_devices_alarms_if_daylight(db_con, alarm_id, device_table, alarm_current, check_time)
 
-
 def update_bucketed_inverter_registry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
     setup_5min_table = '''
@@ -357,6 +362,37 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
 	            power_w = excluded.power_w,
 	            energy_wh = excluded.energy_wh
         RETURNING time, inverter, temperature_dc, power_w, energy_wh
+    '''
+    logger.debug("Insert query")
+    return db_con.execute(insert_query).fetchall()
+
+#TODO abstract the time_bucketing
+def update_bucketed_string_registry(db_con, to_date=None):
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
+    setup_5min_table = '''
+        CREATE TABLE IF NOT EXISTS
+            bucket_5min_stringregistry
+            (time TIMESTAMP WITH TIME ZONE NOT NULL, string integer not null, intensity_ma bigint);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS time_string
+            ON bucket_5min_stringregistry (time, string);
+
+        SELECT create_hypertable('bucket_5min_stringregistry', 'time', if_not_exists => TRUE)
+    '''
+    db_con.execute(setup_5min_table)
+    source_table = 'stringregistry'
+    target_table = 'bucket_5min_{}'.format(source_table)
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
+    logger.debug(f"Latest reading of string {latest_reading}")
+    query = Path('queries/maintenance/bucket_5min_{}.sql'.format(source_table)).read_text(encoding='utf8')
+    query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = f'''
+        INSERT INTO {target_table}
+         {query}
+         ON CONFLICT (time, string) DO
+            UPDATE
+	            SET intensity_ma = excluded.intensity_ma
+        RETURNING time, string, intensity_ma
     '''
     logger.debug("Insert query")
     return db_con.execute(insert_query).fetchall()
