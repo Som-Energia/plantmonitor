@@ -7,10 +7,13 @@ from pathlib import Path
 from unittest import TestCase, skipIf
 
 from .maintenance import (
-    read_alarms,
+    read_alarms_config,
     create_alarms,
+    create_alarm_tables,
     get_latest_reading,
+    get_alarm_current_nointensity_inverter,
     update_bucketed_inverter_registry,
+    update_bucketed_string_registry,
     update_alarm_nopower_inverter,
     update_alarm_nointensity_inverter,
     create_alarm_table,
@@ -32,7 +35,7 @@ from pandas.testing import assert_frame_equal
 
 import datetime
 
-from .db_test_factory import DbTestFactory
+from .db_test_factory import DbTestFactory, DbPlantFactory
 
 from re import search
 
@@ -219,6 +222,7 @@ class InverterMaintenanceTests(TestCase):
         cls.dbmanager = DBManager(**database_info, echo=debug).__enter__()
 
         cls.factory = DbTestFactory(cls.dbmanager)
+        cls.plantfactory = DbPlantFactory(cls.dbmanager)
 
 
     @classmethod
@@ -235,33 +239,7 @@ class InverterMaintenanceTests(TestCase):
 
     def create_plant(self, sunrise, sunset):
         # TODO tables already exist, why?
-        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
-        self.dbmanager.db_con.execute(
-            "insert into plant(id, name, codename, description) values ({}, '{}', '{}', '{}')".format(
-                1, 'Alibaba', 'SomEnergia_Alibaba', ''
-            )
-        )
-        self.dbmanager.db_con.execute('create table if not exists inverter (id serial primary key, name text, plant integer)')
-        self.dbmanager.db_con.execute(
-            "insert into inverter(id, name, plant) values ({}, '{}', {}),({}, '{}', {})".format(
-                1, 'Alibaba_inverter', 1,
-                2, 'Quaranta_Lladres_inverter', 1
-            )
-        )
-        self.dbmanager.db_con.execute('create table if not exists sensor (id serial primary key, name text, plant integer not null, description text, deviceColumname text)')
-        self.dbmanager.db_con.execute(
-            "insert into sensor(id, name, plant, description, deviceColumname) values ({}, '{}', {}, '{}', '{}')".format(
-                1, 'SensorIrradiation1', 1, '', 'sensor'
-            )
-        )
-
-        self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
-        self.dbmanager.db_con.execute(
-            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
-                1, 1,
-                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
-            )
-        )
+        self.plantfactory.create_inverter_sensor_plant(sunrise, sunset)
 
     def read_csv(self, csvfile):
         df = pd.read_csv(csvfile, sep=',')
@@ -395,30 +373,26 @@ class InverterMaintenanceTests(TestCase):
         self.assertTrue(result)
 
     def create_alarm_nopower_inverter_tables(self):
-        create_alarm_table(self.dbmanager.db_con)
-
-        nopower_alarm = {
-            'name': 'nopowerinverter',
-            'description': 'Inversor sense potència entre alba i posta',
-            'severity': 'critical',
-            'createdate': datetime.date.today()
+        create_alarm_tables(self.dbmanager.db_con)
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'nopowerinverter',
+                'description': 'Inversor sense potència entre alba i posta',
+                'severity': 'critical',
+                'createdate': datetime.date.today()
+            }]
         }
-        set_new_alarm(db_con=self.dbmanager.db_con, **nopower_alarm)
-        create_alarm_status_table(self.dbmanager.db_con)
-        create_alarm_historic_table(self.dbmanager.db_con)
+        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
 
     def create_alarm_nointensity_inverter_tables(self):
-        create_alarm_table(self.dbmanager.db_con)
-
-        nopower_alarm = {
-            'name': 'nopowerinverter',
-            'description': 'Inversor sense potència entre alba i posta',
-            'severity': 'critical',
-            'createdate': datetime.date.today()
+        create_alarm_tables(self.dbmanager.db_con)
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'nointensityinverter',
+                'description': "Inversor sense intensitat durant potència d'inversor",
+                'severity': 'critical',
+                'createdate': datetime.date.today()
+            }]
         }
-        set_new_alarm(db_con=self.dbmanager.db_con, **nopower_alarm)
-        create_alarm_status_table(self.dbmanager.db_con)
-        create_alarm_historic_table(self.dbmanager.db_con)
+        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
 
     def test__get_alarm_status_nopower_alarmed(self):
         self.create_alarm_nopower_inverter_tables()
@@ -802,7 +776,7 @@ class InverterMaintenanceTests(TestCase):
         self.assertTupleEqual(tuple(result[0]), expected)
 
     def test__read_alarms__base(self):
-        alarms = read_alarms('test_data/alarms_testing.yaml')
+        alarms = read_alarms_config('test_data/alarms_testing.yaml')
 
         expected_alarms = {'alarms':[
             {
@@ -821,8 +795,41 @@ class InverterMaintenanceTests(TestCase):
         self.assertDictEqual(alarms, expected_alarms)
 
     def test__create_alarms__base(self):
-        create_alarms(self.dbmanager.db_con)
+        alarms_yaml_file = 'test_data/alarms_testing.yaml'
+        alarms_yaml_content = read_alarms_config(alarms_yaml_file)
+
+        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
 
         alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
 
         self.assertListEqual(alarms, [('nointensityinverter',), ('nopowerinverter',)])
+
+    def test__update_bucketed_inverterstring_registry__base(self):
+        try:
+            self.factory.create('stringregistry_factory_case1.csv', 'stringregistry')
+            self.factory.create_bucket_5min_stringregistry_empty_table()
+
+            to_date = datetime.datetime(2022,2,17,12,20, tzinfo=datetime.timezone.utc)
+            result = update_bucketed_string_registry(self.dbmanager.db_con, to_date)
+            result = pd.DataFrame(result, columns=['time', 'string', 'intensity_ma'])
+
+            expected = pd.read_csv('test_data/update_bucketed_string_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            pd.testing.assert_frame_equal(result, expected)
+
+        except:
+            self.factory.delete('stringregistry')
+            self.factory.delete('bucket_5min_stringregistry')
+            raise
+
+    def test__get_alarm_current_nointensity_inverter__ok(self):
+        self.create_alarm_nointensity_inverter_tables()
+        self.plantfactory.create_inverter_string_plant()
+        self.factory.create_without_time('input__get_alarm_current_nointensity_inverter__ok.csv', 'bucket_5min_intensity')
+
+        check_time = datetime.datetime(2022,5,23)
+
+        result = get_alarm_current_nointensity_inverter(self.dbmanager.db_con, check_time=check_time)
+
+        expected = [(1, 'Alibaba_inverter', False)]
+
+        self.assertListEqual(result, expected)
