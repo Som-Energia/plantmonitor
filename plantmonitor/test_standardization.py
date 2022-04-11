@@ -17,6 +17,7 @@ from .standardization import (
     wattia_sensor_to_plantdata,
     string_inverter_registers_merge,
     getFVstrings,
+    monsol_meter_to_plantdata
 )
 
 class Standardization_Test(unittest.TestCase):
@@ -762,3 +763,66 @@ class Standardization_Test(unittest.TestCase):
             'readings': [self.expected_inverter_plantdata(inverter_time)]
         }
         self.assertDictEqual(inverter_registers_plantdata, expected_inverter_registers_plantdata)
+
+    def sample_historic_reading(self):
+        return  {
+            'message': '[OK][QUERY][CONTADORES][DATOS ACTUALES] ',
+            'data': [{
+                'elemento': 'VALLEHERMOSO',
+                'id_dispositivo': 2201,
+                'id_tipo_dispositivo': 3,
+                'fecha_completa': '2021-11-01 00:05:00', # TODO a bug in the api ignores hour_ini
+                'kw_pico': 1890,
+                'pac': -6.900000095367432,
+                'pac1': -1.9900000095367432,
+                'pac2': -2.0299999713897705,
+                'pac3': -2.869999885559082,
+                'iac1': 1,
+                'iac2': 1,
+                'iac3': 1,
+                'vac1': 9529.6,
+                'vac2': 9435.7,
+                'vac3': 9557.6,
+                'pr1': -0.68,
+                'pr2': 0.25,
+                'pr3': -0.27,
+                'prt': -0.71,
+                'fp1': 0.94,
+                'fp2': 0.99,
+                'fp3': 0.99,
+                'fpt': 0,
+                'eedia': 0,
+                'eidia': 3,
+                'eae': 18291955,
+                'eai': 104279,
+                'er1': 274,
+                'er2': 1670501,
+                'er3': 4885,
+                'er4': 107377,
+            }],
+            'code': 200,
+            'timestamp': '01-12-2021 14:34:24'
+        }
+
+    def test__standarize_monsol_meter_readings(self):
+
+        meter_name = '1234578'
+        sample = self.sample_historic_reading()
+
+        plant_data = monsol_meter_to_plantdata(meter_name, sample['data'])
+
+        expected = {
+            'id' : 'Meter:{}'.format(meter_name),
+            'readings': [{
+                'time' : dt.datetime(2021, 11, 1, 0, 20, tzinfo=dt.timezone.utc),
+                'export_energy_wh': 0,
+                'import_energy_wh': 3000,
+                'r1_VArh': 274000,
+                'r2_VArh': 1670501000,
+                'r3_VArh': 4885000,
+                'r4_VArh': 107377000,
+            }]
+        }
+
+        self.assertDictEqual(plant_data, expected)
+

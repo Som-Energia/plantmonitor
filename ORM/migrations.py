@@ -17,27 +17,8 @@ from meteologica.plantmonitor_db import (
 )
 
 from pony import orm
+from ORM.pony_manager import PonyManager
 
-from .models import database
-from .models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
 
 def migrateLegacySensorIrradiationTableToPony(configdbns, plantName, deviceName, excerpt=False):
 

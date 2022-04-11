@@ -13,15 +13,10 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-from ORM.models import database
-
-from ORM.db_utils import setupDatabase, dropTables
-
 from pony import orm
-
+from ORM.pony_manager import PonyManager
 from ORM.models import (
     importPlants,
-    Plant,
 )
 
 # yaml = ns.loads("""\
@@ -58,11 +53,11 @@ from ORM.models import (
 #                     - integratedSensor:
 #                         name: voki""")
 
-def importPlantsFromFile(yamlFilename):
+def importPlantsFromFile(db, yamlFilename):
     nsplants = ns.load(yamlFilename)
 
     with orm.db_session:
-        importPlants(nsplants)
+        importPlants(db, nsplants)
 
 @click.command()
 @click.argument('yaml', type=click.Path(exists=True))
@@ -70,9 +65,13 @@ def importPlantCLI(yaml):
     yamlFilename = click.format_filename(yaml)
     logger.debug(yamlFilename)
 
-    setupDatabase(create_tables=False, timescale_tables=False, drop_tables=False)
+    from conf import envinfo
+    pony = PonyManager(envinfo.DB_CONF)
 
-    importPlantsFromFile(yamlFilename)
+    pony.define_all_models()
+    pony.binddb(create_tables=False)
+
+    importPlantsFromFile(pony.db, yamlFilename)
 
 if __name__ == "__main__":
     importPlantCLI()

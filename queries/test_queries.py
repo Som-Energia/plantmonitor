@@ -2,22 +2,14 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from unittest import TestCase
-from ORM.models import (
-    database,
-    Plant,
-    SensorIrradiation,
-    SensorIrradiationRegistry,
-    PlantModuleParameters,
-)
 from pony import orm
+from ORM.pony_manager import PonyManager
 from pathlib import Path
 from plantmonitor.operations import integrateExpectedPower
 from yamlns import namespace as ns
 import datetime
 
 from meteologica.utils import todtaware
-from ORM.db_utils import setupDatabase
-setupDatabase(create_tables=True, timescale_tables=False, drop_tables=True)
 
 class Queries_Test(TestCase):
     from b2btest.b2btest import assertB2BEqual
@@ -33,18 +25,23 @@ class Queries_Test(TestCase):
         self.assertEqual(envinfo.SETTINGS_MODULE, 'conf.settings.testing')
 
         orm.rollback()
-        database.drop_all_tables(with_all_data=True)
 
-        #orm.set_sql_debug(True)
-        database.create_tables()
+        self.pony = PonyManager(envinfo.DB_CONF)
+
+        self.pony.define_all_models()
+        self.pony.binddb(create_tables=True)
+
+        self.pony.db.drop_all_tables(with_all_data=True)
+
+        self.pony.db.create_tables()
 
         orm.db_session.__enter__()
 
     def tearDown(self):
         orm.rollback()
         orm.db_session.__exit__()
-        database.drop_all_tables(with_all_data=True)
-        database.disconnect()
+        self.pony.db.drop_all_tables(with_all_data=True)
+        self.pony.db.disconnect()
 
     def samplePlantNS(self): # Copied from test_models.py:samplePlantNS
         alcoleaPlantNS = ns.loads("""\
@@ -78,34 +75,34 @@ class Queries_Test(TestCase):
 
     def setupPlant(self):
         plantDefinition = self.samplePlantNS()
-        plant = Plant(
+        plant = self.pony.db.Plant(
             name=plantDefinition.name,
             codename=plantDefinition.codename,
         )
         plant.importPlant(plantDefinition)
         plant.flush()
         self.plant = plant.id
-        self.sensor = SensorIrradiation.select().first().id
+        self.sensor = self.pony.db.SensorIrradiation.select().first().id
 
     def importData(self, sensor, filename):
         irradianceTimeSeries = self.readTimeseriesCSV(filename)
         for time, irradiation_w_m2 in irradianceTimeSeries:
-            SensorIrradiationRegistry(
-                sensor=self.sensor,
+            self.pony.db.SensorIrradiationRegistry(
+                sensor=sensor,
                 time=time,
                 irradiation_w_m2=int(round(irradiation_w_m2)),
                 temperature_dc=0,
             )
-        database.flush()
+        self.pony.db.flush()
 
         return [
-            (time, self.plant, self.sensor, irradiation_w_m2)
+            (time, self.plant, sensor, irradiation_w_m2)
             for time, irradiation_w_m2 in irradianceTimeSeries
         ]
 
     def assertOutputB2B(self, result):
         result = "\n".join((
-            "{}, {:.9f}".format(time.isoformat() if time else None, irradiation if irradiation is not None else float('nan'))
+            "{}, {}, {:.9f}".format(time.isoformat() if time else None, sensor or int('nan'), irradiation or float('nan'))
             for time, sensor, irradiation in result
         ))
         self.assertB2BEqual(result)
@@ -116,7 +113,7 @@ class Queries_Test(TestCase):
             'b2bdata/irradiance-2021-07-21-Alcolea.csv'
         )
         query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
-        result = database.select(query)
+        result = self.pony.db.select(query)
 
         self.assertOutputB2B(result)
 
@@ -126,7 +123,7 @@ class Queries_Test(TestCase):
             'b2bdata/irradiance-2021-07-21-Alcolea.csv'
         )
         query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
-        result = [r for r in database.select(query)
+        result = [r for r in self.pony.db.select(query)
             if todtaware('2021-06-01 00:00:00') <= r.time
             and r.time < todtaware('2021-06-02 00:00:00')
             and r.sensor == 1
@@ -140,13 +137,13 @@ class Queries_Test(TestCase):
             'b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv'
         )
         query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
-        result = [r.irradiation_w_m2_h for r in database.select(query)
+        result = [r.irradiation_w_m2_h for r in self.pony.db.select(query)
             if todtaware('2021-07-14 9:00:00') <= r.time
             and r.time < todtaware('2021-07-14 10:00:00')
             and r.sensor == 1
         ][0]
 
-        self.assertEqual(result, 551.2546302777778)
+        self.assertAlmostEqual(result, 551.254630277778, places=5)
 
     def test_irradiation_halfHourWithReadings(self):
         self.setupPlant()
@@ -154,12 +151,56 @@ class Queries_Test(TestCase):
             'b2bdata/irradiance-2021-07-21-Alcolea_test_cases.csv'
         )
         query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
-        result = [r.irradiation_w_m2_h for r in database.select(query)
+        result = [r.irradiation_w_m2_h for r in self.pony.db.select(query)
             if todtaware('2021-07-14 8:00:00') <= r.time
             and r.time < todtaware('2021-07-14 9:00:00')
         ][0]
 
         self.assertAlmostEqual(result, 415.2791252777778, places=5)
+
+    def test_irradiation_second_sensors(self):
+        self.setupPlant()
+        plant = self.plant
+        sensor_florida = self.pony.db.SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = self.pony.db.select(query)
+
+        self.assertOutputB2B(result)
+
+    def test_irradiation_multiple_sensors(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea.csv'
+        )
+        plant = self.plant
+        sensor_florida = self.pony.db.SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = self.pony.db.select(query)
+
+        self.assertOutputB2B(result)
+
+    # TODO test output of one sensor equal to two sensors for the one sensor
+    def _test_irradiation_multiple_sensors_same_as_one(self):
+        self.setupPlant()
+        self.importData(self.sensor,
+            'b2bdata/irradiance-2021-07-21-Alcolea.csv'
+        )
+        plant = self.plant
+        sensor_florida = self.pony.db.SensorIrradiation(plant=plant, name="irradiationSensor2")
+        self.importData(sensor_florida,
+            'b2bdata/irradiance-2021-07-21-Florida.csv'
+        )
+        query = Path('queries/view_irradiation.sql').read_text(encoding='utf8')
+        result = self.pony.db.select(query)
+
+        self.assertOutputB2B(result)
+
 
     def test_irradiation_oneHour_againstTrapezoidal(self):
         # remember that you have an trapezoidal approximation script for csv at scripts/integrate_csv

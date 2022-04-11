@@ -369,6 +369,17 @@ CREATE TABLE "simelregistry" (
 
 ALTER TABLE "simelregistry" ADD CONSTRAINT "fk_simelregistry__simel" FOREIGN KEY ("simel") REFERENCES "simel" ("id") ON DELETE CASCADE;
 
+CREATE TABLE "solarevent" (
+  "id" SERIAL PRIMARY KEY,
+  "plant" INTEGER NOT NULL,
+  "sunrise" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "sunset" TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE INDEX "idx_solarevent__plant" ON "solarevent" ("plant");
+
+ALTER TABLE "solarevent" ADD CONSTRAINT "fk_solarevent__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id") ON DELETE CASCADE;
+
 CREATE TABLE "string" (
   "id" SERIAL PRIMARY KEY,
   "inverter" INTEGER NOT NULL,

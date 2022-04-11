@@ -7,19 +7,7 @@ from pony import orm
 
 import datetime
 
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
-from plantmonitor.storage import PonyMetricStorage, ApiMetricStorage
-
-from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
+from ORM.pony_manager import PonyManager
 
 from meteologica.meteologica_api_utils import (
     MeteologicaApi,
@@ -55,8 +43,8 @@ class ForecastStatus():
 
 # TODO use enum on status, or change to exception
 
-def getForecast(api, facility):
-    plant = Plant.getFromMeteologica(facility)
+def getForecast(database, api, facility):
+    plant =  database.Plant.getFromMeteologica(facility)
 
     if not plant:
         logger.error("meteologica facility {} is not known to database. Please add it.".format(facility))
@@ -90,7 +78,7 @@ def getForecast(api, facility):
 
     return meterDataForecast, status
 
-def addForecast(facility, meterDataForecast, status):
+def addForecast(database, facility, meterDataForecast, status):
 
     deltat = datetime.timedelta(hours=1)
 
@@ -102,12 +90,12 @@ def addForecast(facility, meterDataForecast, status):
 
     forecastDate = datetime.datetime.now(datetime.timezone.utc)
 
-    plant = Plant.get(codename=facility)
-    forecastMetadata = ForecastMetadata.create(plant=plant, forecastdate=forecastDate, errorcode=status)
+    plant =  database.Plant.get(codename=facility)
+    forecastMetadata =  database.ForecastMetadata.create(plant=plant, forecastdate=forecastDate, errorcode=status)
     if status == ForecastStatus.OK:
         forecastMetadata.addForecasts(forecasts)
 
-def downloadMeterForecasts(configdb, test_env=True):
+def downloadMeterForecasts(database, configdb, test_env=True):
 
     if test_env:
         target_wsdl = configdb['meteo_test_url']
@@ -138,7 +126,7 @@ def downloadMeterForecasts(configdb, test_env=True):
             return {}
 
         for facility in facilities:
-            forecast, status = getForecast(api, facility)
+            forecast, status = getForecast(database, api, facility)
             statuses[facility] = status
 
             if status == ForecastStatus.UPTODATE or status == ForecastStatus.UNKNOWNFACILITY:
@@ -146,7 +134,7 @@ def downloadMeterForecasts(configdb, test_env=True):
             else:
 
                 with orm.db_session:
-                    addForecast(facility, forecast, status)
+                    addForecast(database, facility, forecast, status)
 
                 logger.info(
                     "Saved {} forecast records from {} to db - {} ".format
@@ -160,8 +148,8 @@ def downloadMeterForecasts(configdb, test_env=True):
 
     return statuses
 
-def getMeterReadings(facility, fromDate=None, toDate=None):
-    plant = Plant.get(codename=facility)
+def getMeterReadings(database, facility, fromDate=None, toDate=None):
+    plant = database.Plant.get(codename=facility)
     if not plant:
         logger.warning("Plant codename {} is unknown to db".format(facility))
         return None
@@ -170,7 +158,7 @@ def getMeterReadings(facility, fromDate=None, toDate=None):
         logger.error("Plant {} doesn't have any meter".format(plant.name))
         return None
 
-    query = orm.select(r for r in MeterRegistry if r.meter == meter)
+    query = orm.select(r for r in  database.MeterRegistry if r.meter == meter)
     if fromDate:
         query = query.filter(lambda r: fromDate <= r.time)
     if toDate:
@@ -180,26 +168,26 @@ def getMeterReadings(facility, fromDate=None, toDate=None):
 
     return data
 
-def getMeterReadingsFromLastUpload(api, facility):
+def getMeterReadingsFromLastUpload(database, api, facility):
     # TODO use forecastMetadata instead of api lastDateUploaded!
     # Fixes the TODO below and can remote the undo (I guess)
     lastUploadDT = api.lastDateUploaded(facility)
     logger.debug("Facility {} last updated: {}".format(facility, lastUploadDT))
     meterReadings = []
     if not lastUploadDT:
-        meterReadings = getMeterReadings(facility)
+        meterReadings = getMeterReadings(database, facility)
     else:
         # TODO refactor this undo the hour shift due to api understanding start-hours instead of end-hours (see below @101)
         fromDate = lastUploadDT + dt.timedelta(hours=1)
-        meterReadings = getMeterReadings(facility=facility, fromDate=fromDate)
+        meterReadings = getMeterReadings(database, facility=facility, fromDate=fromDate)
 
     if not meterReadings:
         logger.warning("No meter readings for facility {} since {}".format(facility, lastUploadDT))
 
     return meterReadings
 
-def uploadFacilityMeterReadings(api, facility):
-    meterReadings = getMeterReadingsFromLastUpload(api, facility)
+def uploadFacilityMeterReadings(database, api, facility):
+    meterReadings = getMeterReadingsFromLastUpload(database, api, facility)
 
     if not meterReadings:
         return None
@@ -220,7 +208,7 @@ def uploadFacilityMeterReadings(api, facility):
 
     return response
 
-def uploadMeterReadings(configdb, test_env=True):
+def uploadMeterReadings(database, configdb, test_env=True):
 
     if test_env:
         target_wsdl = configdb['meteo_test_url']
@@ -246,7 +234,7 @@ def uploadMeterReadings(configdb, test_env=True):
         with orm.db_session:
             apifacilities = api.getAllFacilities()
 
-            facilities = [plant.codename for plant in Plant.select()]
+            facilities = [plant.codename for plant in database.Plant.select()]
 
             logger.info('Uploading data from {} facilities in db'.format(len(facilities)))
 
@@ -263,7 +251,7 @@ def uploadMeterReadings(configdb, test_env=True):
                     responses[facility] = "INVALID_FACILITY_ID: {}".format(facility)
                     continue
 
-                responses[facility] = uploadFacilityMeterReadings(api, facility)
+                responses[facility] = uploadFacilityMeterReadings(database, api, facility)
 
     elapsed = time.perf_counter() - start
     logger.info('Total elapsed time {:0.4}'.format(elapsed))
@@ -278,7 +266,13 @@ def main():
 
     configdb.update(args)
 
-    downloadMeterForecasts(configdb)
+    from conf import envinfo
+
+    pony = PonyManager(envinfo.DB_CONF)
+    pony.define_all_models()
+    pony.binddb()
+
+    downloadMeterForecasts(pony.db, configdb)
 
 
 if __name__ == "__main__":

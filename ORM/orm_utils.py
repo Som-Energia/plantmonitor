@@ -15,9 +15,9 @@ supported_models = [
 ]
 
 
-def str2model(model_name):
-    module = importlib.import_module('ORM.models')
+def str2model(db, model_name):
+    # module = importlib.import_module('ORM.models')
 
-    return getattr(module, model_name) \
+    return getattr(db, model_name) \
         if model_name in supported_models \
         else None

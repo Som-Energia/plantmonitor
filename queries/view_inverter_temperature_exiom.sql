@@ -7,4 +7,4 @@ SELECT inverterregistry."time",
   FROM inverterregistry
     LEFT JOIN inverter ON inverter.id = inverterregistry.inverter
     LEFT JOIN plant ON plant.id = inverter.plant
-WHERE plant.name = 'Matallana';
+WHERE plant.id in (select id from view_plants_exiom);

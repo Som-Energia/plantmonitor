@@ -9,26 +9,7 @@ import math
 from pathlib import Path
 
 from pony import orm
-from ORM.models import database
-from ORM.models import (
-    Plant,
-    Meter,
-    MeterRegistry,
-    Inverter,
-    InverterRegistry,
-    Sensor,
-    SensorIrradiation,
-    SensorTemperatureAmbient,
-    SensorTemperatureModule,
-    SensorIrradiationRegistry,
-    SensorTemperatureAmbientRegistry,
-    SensorTemperatureModuleRegistry,
-    HourlySensorIrradiationRegistry,
-    ForecastMetadata,
-    ForecastVariable,
-    ForecastPredictor,
-    Forecast,
-)
+from ORM.pony_manager import PonyManager
 
 from conf.logging_configuration import LOGGING
 import logging
@@ -255,9 +236,9 @@ def getTimeRange(sensor, srcregistry, dstregistry, srcCol, dstCol, fromDate=None
     return fromDate, toDate
 
 # TODO refactor this function so it can be merged with integrateAllSensors above
-def integrateExpectedPower(fromDate=None, toDate=None):
+def integrateExpectedPower(database, fromDate=None, toDate=None):
 
-    sensors = orm.select(sensor for sensor in SensorIrradiation)
+    sensors = orm.select(sensor for sensor in database.SensorIrradiation)
 
     expectedPowerViewQuery = Path('queries/view_expected_power.sql').read_text(encoding='utf8')
     srcCol = 'expectedpower'
@@ -285,7 +266,7 @@ def integrateExpectedPower(fromDate=None, toDate=None):
 
         # TODO assuming ordered by time (it's in the query)
         metricToDate = sensorExpectedPower[-1][0] or datetime.now(timezone.utc)
-        metricFromDate = getOldestTime(sensor, HourlySensorIrradiationRegistry, dstCol) or sensorExpectedPower[0][0]
+        metricFromDate = getOldestTime(sensor, database.HourlySensorIrradiationRegistry, dstCol) or sensorExpectedPower[0][0]
 
         # apply from/to filter
         metricFromDate = fromDate if fromDate and metricFromDate < fromDate else metricFromDate
@@ -302,11 +283,11 @@ def integrateExpectedPower(fromDate=None, toDate=None):
 
 # {sensor[i] : [(time, value)] }
 
-def integrateIrradiance(fromDate=None, toDate=None):
+def integrateIrradiance(database, fromDate=None, toDate=None):
 
-    sensors = orm.select(sensor for sensor in SensorIrradiation)
-    srcregistry = SensorIrradiationRegistry
-    dstregistry = HourlySensorIrradiationRegistry
+    sensors = orm.select(sensor for sensor in database.SensorIrradiation)
+    srcregistry = database.SensorIrradiationRegistry
+    dstregistry = database.HourlySensorIrradiationRegistry
 
     srcCol = 'irradiation_w_m2'
     dstCol = 'integratedIrradiation_wh_m2'
@@ -332,11 +313,11 @@ def integrateIrradiance(fromDate=None, toDate=None):
 
     return integratedMetric
 
-def insertHourlySensorIrradiationMetrics(integratedMetrics, columnName):
+def insertHourlySensorIrradiationMetrics(database, integratedMetrics, columnName):
     # update registry column or create if it doesn't exist
     for sensor, timeseries in integratedMetrics.items():
             for time, value in timeseries:
-                reg = HourlySensorIrradiationRegistry.get(sensor=sensor, time=time)
+                reg = database.HourlySensorIrradiationRegistry.get(sensor=sensor, time=time)
                 if not reg:
                     sensor.insertHourlySensorIrradiationMetric(time=time, **{columnName : value}
                     )
@@ -344,12 +325,17 @@ def insertHourlySensorIrradiationMetrics(integratedMetrics, columnName):
                     reg.set(**{columnName:value})
 
 def computeIntegralMetrics():
-    irradiance = integrateIrradiance()
-    insertHourlySensorIrradiationMetrics(irradiance, 'integratedIrradiation_wh_m2')
+    from conf import envinfo
+    pony = PonyManager(envinfo.DB_CONF)
+
+    pony.define_all_models()
+    pony.binddb()
+    irradiance = integrateIrradiance(pony.db)
+    insertHourlySensorIrradiationMetrics(pony.db, irradiance, 'integratedIrradiation_wh_m2')
     orm.flush()
 
-    expectedEnergy = integrateExpectedPower()
-    insertHourlySensorIrradiationMetrics(expectedEnergy, 'expected_energy_wh')
+    expectedEnergy = integrateExpectedPower(pony.db)
+    insertHourlySensorIrradiationMetrics(pony.db, expectedEnergy, 'expected_energy_wh')
 
 
 # def dropNonMonotonicRows(df):
