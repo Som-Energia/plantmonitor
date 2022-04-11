@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 2
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 2
+    row: 3
+text: ''
+visualization: queries/totes-les-alarmes-2/visualizations/table.yaml
+width: 1

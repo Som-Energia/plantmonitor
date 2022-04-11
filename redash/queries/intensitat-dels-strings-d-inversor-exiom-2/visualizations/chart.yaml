@@ -1,0 +1,89 @@
+description: ''
+name: Chart
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: false
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0[.]00
+  yAxis:
+  - type: linear
+    title:
+      text: Intensitat [A]
+  - type: linear
+    opposite: true
+  series:
+    stacking: null
+    percentValues: false
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: line
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    string8:
+      zIndex: 0
+      index: 0
+      type: line
+      yAxis: 0
+    string6:
+      zIndex: 2
+      index: 0
+      type: line
+      yAxis: 0
+    string7:
+      zIndex: 1
+      index: 0
+      type: line
+      yAxis: 0
+    string4:
+      zIndex: 4
+      index: 0
+      type: line
+      yAxis: 0
+    string5:
+      zIndex: 3
+      index: 0
+      type: line
+      yAxis: 0
+    string2:
+      zIndex: 6
+      index: 0
+      type: line
+      yAxis: 0
+    string3:
+      zIndex: 5
+      index: 0
+      type: line
+      yAxis: 0
+    string1:
+      zIndex: 7
+      index: 0
+      type: line
+      yAxis: 0
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: '-'
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    temps: x
+    intensity_a: y
+    stringbox: series
+    string: unused
+  textFormat: ''
+  customCode: '// Available variables are x, ys, element, and Plotly
+
+    // Type console.log(x, ys); for more info about x and ys
+
+    // To plot your graph call Plotly.plot(element, ...)
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
+  legend:
+    enabled: true
+type: CHART

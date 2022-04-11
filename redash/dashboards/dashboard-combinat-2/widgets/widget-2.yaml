@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    plant:
+      type: dashboard-level
+      mapTo: plant
+      name: plant
+      value: null
+      title: ''
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 9
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 9
+text: ''
+visualization: queries/potencia-tots-els-inversors-amb-temps/visualizations/chart.yaml
+width: 1

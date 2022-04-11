@@ -1,0 +1,22 @@
+options:
+  parameterMappings:
+    planta:
+      type: dashboard-level
+      mapTo: planta
+      name: planta
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 2
+    sizeY: 4
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 1
+    col: 0
+    row: 3
+text: ''
+visualization: queries/potencia-activa-inversors-actual-2/visualizations/potencia-activa.yaml
+width: 1

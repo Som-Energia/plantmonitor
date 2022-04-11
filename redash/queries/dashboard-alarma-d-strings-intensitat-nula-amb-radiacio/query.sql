@@ -1,0 +1,1 @@
+select * from query_129 where string_ok = 0 and plant_id in ({{ plant_id }})

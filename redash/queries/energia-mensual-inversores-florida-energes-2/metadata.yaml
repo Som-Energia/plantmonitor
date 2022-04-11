@@ -1,0 +1,36 @@
+can_edit: true
+data_source_id: datasources/energes-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Energia mensual inversores Florida Energes
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 88
+  - name: granularity
+    title: granularity
+    global: false
+    value: month
+    enumOptions: 'hour
+
+      day
+
+      month
+
+      year'
+    parentQueryId: 88
+    type: enum
+    locals: []
+schedule: null
+tags:
+- tecnics
+- energes
+version: 1

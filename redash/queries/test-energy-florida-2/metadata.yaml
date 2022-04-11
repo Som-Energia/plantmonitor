@@ -1,0 +1,33 @@
+can_edit: true
+data_source_id: datasources/energes-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: test energy florida
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_week
+    locals: []
+    type: datetime-range
+    parentQueryId: 91
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: 'minute
+
+      day
+
+      month
+
+      year'
+    type: enum
+    locals: []
+schedule: null
+tags: []
+version: 1

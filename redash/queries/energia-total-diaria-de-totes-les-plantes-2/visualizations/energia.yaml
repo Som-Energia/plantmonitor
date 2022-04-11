@@ -1,0 +1,13 @@
+description: ''
+name: Energia
+options:
+  tooltipFormat: 0,0.000
+  rowNumber: 1
+  stringDecChar: ','
+  stringSuffix: ' kWh'
+  stringDecimal: 0
+  counterColName: export_energy_kwh
+  counterLabel: ' '
+  stringThouSep: ' '
+  targetRowNumber: 1
+type: COUNTER

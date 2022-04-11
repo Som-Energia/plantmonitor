@@ -1,0 +1,82 @@
+description: ''
+name: Producción i PR vs Objetivos vs Historicos vs Horas equivalentes
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: true
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0[.]00000
+  yAxis:
+  - type: linear
+    title:
+      text: Energia [MWh]
+  - rangeMax: null
+    type: linear
+    rangeMin: 0
+    opposite: true
+  series:
+    stacking: null
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: column
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    pr:
+      zIndex: 0
+      index: 0
+      type: line
+      color: '#3BD973'
+      yAxis: 1
+    hores_equivalents:
+      zIndex: 1
+      index: 0
+      type: line
+      color: '#000000'
+      yAxis: 0
+    target_energy_mwh:
+      zIndex: 3
+      index: 0
+      type: line
+      color: '#E92828'
+      yAxis: 0
+    export_energy_mwh:
+      zIndex: 2
+      index: 0
+      type: column
+      color: '#FB8D3D'
+      yAxis: 0
+    historic_avg_mwh:
+      zIndex: 4
+      index: 0
+      type: line
+      color: '#799CFF'
+      yAxis: 0
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: '-'
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    pr: y
+    export_energy_mwh: y
+    target_energy_mwh: y
+    time: x
+    hores_equivalents: y
+    historic_avg_mwh: y
+  textFormat: ''
+  customCode: '// Available variables are x, ys, element, and Plotly
+
+    // Type console.log(x, ys); for more info about x and ys
+
+    // To plot your graph call Plotly.plot(element, ...)
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
+  legend:
+    enabled: true
+type: CHART

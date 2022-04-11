@@ -1,0 +1,18 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: 'Dashboard: Alarma 3: Inversors temperatura anòmala històric sin parametro'
+options:
+  parameters: []
+schedule:
+  interval: 600
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Alarma
+version: 1

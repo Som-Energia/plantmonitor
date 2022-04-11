@@ -1,0 +1,70 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Mètriques d'Inversor v2 dropdown per mètrica amb rollup
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants-2
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: hour
+    enumOptions: 'minute
+
+      hour
+
+      day
+
+      month
+
+      '
+    parentQueryId: 27
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value:
+      start: 2021-05-20 13:32
+      end: 2021-05-27 13:32
+    locals: []
+    type: datetime-range
+    parentQueryId: 27
+  - name: metrics
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - energy_kwh
+    - max_temperature_c
+    - min_temperature_c
+    - avg_temperature_c
+    - power_kw
+    enumOptions: 'energy_kwh
+
+      max_temperature_c
+
+      min_temperature_c
+
+      avg_temperature_c
+
+      power_kw'
+    parentQueryId: 27
+    title: metrics
+    type: enum
+    locals: []
+schedule: null
+tags: []
+version: 1

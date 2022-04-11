@@ -1,0 +1,1 @@
+select name from view_plants_energes;

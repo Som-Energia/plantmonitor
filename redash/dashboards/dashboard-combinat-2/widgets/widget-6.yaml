@@ -1,0 +1,40 @@
+options:
+  parameterMappings:
+    plant:
+      type: dashboard-level
+      mapTo: plant
+      name: plant
+      value: null
+      title: ''
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    metric:
+      type: static-value
+      mapTo: metric
+      name: metric
+      value: energy_kwh
+      title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 9
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 3
+    row: 18
+text: ''
+visualization: queries/metriques-d-inversor-v2-una-metrica-2/visualizations/inversors-energia-wh.yaml
+width: 1

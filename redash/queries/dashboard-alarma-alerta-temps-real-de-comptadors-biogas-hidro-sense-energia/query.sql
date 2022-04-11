@@ -1,0 +1,1 @@
+select * from query_153 where alarm_no_energy = 1 and plant_id in ({{ plant_id }})

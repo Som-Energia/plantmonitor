@@ -1,0 +1,79 @@
+description: ''
+name: Chart
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: true
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0[.]00
+  yAxis:
+  - type: linear
+    title:
+      text: Potència i Energia [W/Wh]
+  - opposite: true
+    type: linear
+    title:
+      text: Temperatura [ºC]
+  series:
+    stacking: null
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: scatter
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    min_temperature_c:
+      zIndex: 4
+      index: 0
+      type: line
+      yAxis: 1
+    power_w:
+      zIndex: 0
+      index: 0
+      type: column
+      color: '#FB8D3D'
+      yAxis: 0
+    energy_wh:
+      zIndex: 1
+      index: 0
+      type: column
+      color: '#A58AFF'
+      yAxis: 0
+    avg_temperature_c:
+      zIndex: 3
+      index: 0
+      type: line
+      yAxis: 1
+    max_temperature_c:
+      zIndex: 2
+      index: 0
+      type: line
+      yAxis: 1
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: '-'
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    min_temperature_c: y
+    max_temperature_c: y
+    avg_temperature_c: y
+    power_w: y
+    energy_wh: y
+    time: x
+  textFormat: ''
+  customCode: '// Available variables are x, ys, element, and Plotly
+
+    // Type console.log(x, ys); for more info about x and ys
+
+    // To plot your graph call Plotly.plot(element, ...)
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
+  legend:
+    enabled: true
+type: CHART

@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    planta:
+      type: static-value
+      mapTo: planta
+      name: planta
+      value: Valteina
+      title: ''
+    interval:
+      type: widget-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 2
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 4
+    row: 95
+text: ''
+visualization: queries/energia-importada-mensual-2/visualizations/table.yaml
+width: 1

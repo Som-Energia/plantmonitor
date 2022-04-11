@@ -1,0 +1,17 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: All plants
+options:
+  parameters: []
+schedule:
+  interval: 2592000
+  until: null
+  day_of_week: null
+  time: '22:15'
+tags: []
+version: 1

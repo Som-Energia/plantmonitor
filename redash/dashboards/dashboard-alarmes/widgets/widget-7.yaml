@@ -1,0 +1,22 @@
+options:
+  parameterMappings:
+    plant_id:
+      type: widget-level
+      mapTo: plant_id
+      name: plant_id
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 7
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 0
+    row: 48
+text: ''
+visualization: queries/dashboard-alarma-alerta-temps-real-de-comptadors-biogas-hidro-sense-energia/visualizations/table.yaml
+width: 1

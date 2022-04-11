@@ -1,0 +1,80 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: 'Alarmes de comptadors: sense energia - Llista històrica'
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    locals: []
+    type: datetime-range
+    parentQueryId: 151
+  - name: plant_type
+    multiValuesOptions:
+      prefix: ''''
+      separator: ','
+      suffix: ''''
+    global: false
+    value:
+    - PB
+    - CH
+    - PV
+    enumOptions: 'PV
+
+      PB
+
+      CH'
+    parentQueryId: 151
+    title: plant_type
+    type: enum
+    locals: []
+  - name: fv_plants
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - '2'
+    - '4'
+    - '5'
+    - '16'
+    - '9'
+    - '10'
+    - '14'
+    - '15'
+    queryId: null
+    parentQueryId: 151
+    title: fv_plants
+    type: query
+    locals: []
+  - name: biogas_plants
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - '10'
+    - '11'
+    queryId: null
+    parentQueryId: 151
+    title: biogas_plants
+    type: query
+    locals: []
+schedule:
+  interval: 300
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Projectes
+- Alarma
+- historico
+version: 1

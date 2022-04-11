@@ -1,0 +1,19 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alarmes de comptadors
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    type: datetime-range
+    locals: []
+schedule: null
+tags: []
+version: 1

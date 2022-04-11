@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: true
+    sizeX: 6
+    sizeY: 5
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 0
+    row: 24
+text: ''
+visualization: queries/historic-d-alarmes-unificades/visualizations/table.yaml
+width: 1

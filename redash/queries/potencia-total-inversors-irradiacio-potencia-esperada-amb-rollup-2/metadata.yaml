@@ -1,0 +1,30 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Potència Total Inversors, Irradiació, Potència Esperada amb Rollup
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants-2
+    parentQueryId: 46
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_week
+    locals: []
+    type: datetime-range
+    parentQueryId: 46
+schedule: null
+tags:
+- indicadors-propis
+- Projectes
+version: 1

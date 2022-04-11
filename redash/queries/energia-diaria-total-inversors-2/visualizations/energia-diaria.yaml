@@ -1,0 +1,13 @@
+description: ''
+name: Energia diaria
+options:
+  tooltipFormat: 0,0.000
+  rowNumber: 1
+  stringDecChar: ','
+  stringSuffix: ' kWh'
+  stringDecimal: 2
+  counterColName: total_energy_daily_kwh
+  counterLabel: ' '
+  stringThouSep: ' '
+  targetRowNumber: 1
+type: COUNTER

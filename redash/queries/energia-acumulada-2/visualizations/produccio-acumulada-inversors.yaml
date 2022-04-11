@@ -1,0 +1,13 @@
+description: ''
+name: Producció Acumulada Inversors
+options:
+  tooltipFormat: 0,0.000
+  rowNumber: 1
+  stringDecChar: ','
+  stringSuffix: ' MWh'
+  stringDecimal: 2
+  counterColName: energy_mwh
+  counterLabel: ' '
+  stringThouSep: ' '
+  targetRowNumber: 1
+type: COUNTER

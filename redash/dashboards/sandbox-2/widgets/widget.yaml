@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 13
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 0
+    row: 0
+text: ''
+visualization: queries/mapa-de-plantes/visualizations/map-markers.yaml
+width: 1

@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: Energia esperada, real i perduda després del comptador calculat amb mitjana
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Energia esperada i perduda després del comptador
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants-2
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: hour
+    enumOptions: 'hour
+
+      day
+
+      month
+
+      year'
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_month
+    type: datetime-range
+    locals: []
+schedule: null
+tags:
+- Projectes
+- indicadors-propis
+- revisar-IT
+version: 1

@@ -1,0 +1,18 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alarmes de tots els dispositius unificada
+options:
+  parameters: []
+schedule:
+  interval: 300
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Projectes
+version: 1

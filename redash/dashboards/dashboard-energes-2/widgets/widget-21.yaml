@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Alcolea
+      title: ''
+    interval:
+      type: widget-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 3
+    row: 11
+text: ''
+visualization: queries/irradiacion-y-temperatura-modulo-energes-2/visualizations/chart.yaml
+width: 1

@@ -1,0 +1,21 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Comparació mati-tarda predicció metologica per planta
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Riudarenes_ZE
+    queryId: queries/all-plants-2
+    type: query
+    locals: []
+schedule: null
+tags:
+- Proves-IT
+version: 1

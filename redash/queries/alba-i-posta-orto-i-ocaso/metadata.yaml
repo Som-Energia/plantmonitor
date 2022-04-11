@@ -1,0 +1,20 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Alba i posta - orto i ocaso
+options:
+  parameters:
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 154
+schedule: null
+tags: []
+version: 1

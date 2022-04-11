@@ -1,0 +1,38 @@
+can_edit: true
+data_source_id: datasources/redash-query-results-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: 'Dashboard: Alarma-Alerta Temps real de comptadors petites fotovoltaiques: sense
+  energia'
+options:
+  parameters:
+  - name: plant_id
+    title: FV Planta petita
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    value:
+    - '2'
+    - '4'
+    - '5'
+    - '9'
+    - '16'
+    - '14'
+    - '15'
+    queryId: queries/all-plants-by-id-2
+    parentQueryId: 161
+    type: query
+    locals: []
+schedule:
+  interval: 300
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Alarma
+- Temps-real
+version: 1

@@ -1,0 +1,41 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: false
+name: Potència Inversors amb Total
+options:
+  parameters:
+  - name: planta
+    title: planta
+    global: false
+    value: Alcolea
+    locals: []
+    type: text
+    parentQueryId: 3
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: 'minute
+
+      hour
+
+      day
+
+      month'
+    parentQueryId: 3
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_week
+    locals: []
+    type: datetime-range
+    parentQueryId: 3
+schedule: null
+tags: []
+version: 1

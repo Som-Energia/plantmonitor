@@ -1,0 +1,33 @@
+can_edit: true
+data_source_id: datasources/redash-query-results-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: 'Dashboard: Alarma-Alerta temps real de comptadors biogas/hidro: sense energia'
+options:
+  parameters:
+  - name: plant_id
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - '10'
+    - '11'
+    queryId: queries/all-plants-by-id-2
+    parentQueryId: 162
+    title: Planta Biogas/hidro
+    type: query
+    locals: []
+schedule:
+  interval: 3600
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Alarma
+- Temps-real
+version: 1

@@ -1,0 +1,10 @@
+name: energes
+options:
+  port: 5432
+  host: 172.17.0.1
+  password: '--------'
+  user: energes
+  dbname: plants
+pause_reason: null
+syntax: sql
+type: pg

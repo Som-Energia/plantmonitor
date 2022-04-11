@@ -1,0 +1,31 @@
+can_edit: true
+data_source_id: datasources/redash-query-results-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: 'Dashboard: Alarma en temps real potència nula amb radiació tots els inversors'
+options:
+  parameters:
+  - name: plant_id
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value: '1'
+    queryId: queries/all-plants-by-id-2
+    parentQueryId: 156
+    title: plant_id
+    type: query
+    locals: []
+schedule:
+  interval: 300
+  until: null
+  day_of_week: null
+  time: null
+tags:
+- Alarma
+- Temps-real
+version: 1

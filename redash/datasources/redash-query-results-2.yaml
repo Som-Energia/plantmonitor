@@ -1,0 +1,5 @@
+name: Redash Query Results
+options: {}
+pause_reason: null
+syntax: sql
+type: results

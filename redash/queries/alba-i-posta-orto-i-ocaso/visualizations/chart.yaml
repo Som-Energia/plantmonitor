@@ -1,0 +1,128 @@
+description: ''
+name: Chart
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: true
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0,0[.]00000
+  yAxis:
+  - type: linear
+    title:
+      text: daylight hours
+  - type: linear
+    opposite: true
+  series:
+    stacking: null
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: line
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    Riudarenes_ZE:
+      zIndex: 3
+      index: 0
+      type: line
+      yAxis: 0
+    Torregrossa:
+      zIndex: 5
+      index: 0
+      type: line
+      yAxis: 0
+    Picanya:
+      zIndex: 4
+      index: 0
+      type: line
+      yAxis: 0
+    Terborg:
+      zIndex: 13
+      index: 0
+      type: line
+      yAxis: 0
+    Manlleu_Piscina:
+      zIndex: 8
+      index: 0
+      type: line
+      yAxis: 0
+    Florida:
+      zIndex: 12
+      index: 0
+      type: line
+      yAxis: 0
+    Alcolea:
+      zIndex: 0
+      index: 0
+      type: line
+      yAxis: 0
+    Riudarenes_BR:
+      zIndex: 2
+      index: 0
+      type: line
+      yAxis: 0
+    Lleida:
+      zIndex: 11
+      index: 0
+      type: line
+      yAxis: 0
+    Matallana:
+      zIndex: 14
+      index: 0
+      type: line
+      yAxis: 0
+    Fontivsolar:
+      zIndex: 7
+      index: 0
+      type: line
+      yAxis: 0
+    Manlleu_Pavello:
+      zIndex: 9
+      index: 0
+      type: line
+      yAxis: 0
+    Valteina:
+      zIndex: 6
+      index: 0
+      type: line
+      yAxis: 0
+    Torrefarrera:
+      zIndex: 10
+      index: 0
+      type: line
+      yAxis: 0
+    Llanillos:
+      zIndex: 15
+      index: 0
+      type: line
+      yAxis: 0
+    Riudarenes_SM:
+      zIndex: 1
+      index: 0
+      type: line
+      yAxis: 0
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: '-'
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    plant: unused
+    name: series
+    sunrise: x
+    day_length: y
+  textFormat: ''
+  customCode: '// Available variables are x, ys, element, and Plotly
+
+    // Type console.log(x, ys); for more info about x and ys
+
+    // To plot your graph call Plotly.plot(element, ...)
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
+  legend:
+    enabled: true
+type: CHART

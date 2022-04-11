@@ -1,0 +1,20 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: false
+name: All plant inverters by id
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: '1'
+    type: text
+    locals: []
+schedule: null
+tags:
+- query param
+version: 1

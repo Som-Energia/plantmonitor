@@ -1,0 +1,42 @@
+can_edit: true
+data_source_id: datasources/plantmonitor-2.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Disponibilitat amb granularitat
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants-2
+    parentQueryId: 53
+    type: query
+    locals: []
+  - name: granularity
+    title: granularity
+    global: false
+    value: month
+    enumOptions: 'day
+
+      month
+
+      year'
+    parentQueryId: 53
+    type: enum
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_year
+    locals: []
+    type: datetime-range
+    parentQueryId: 53
+schedule: null
+tags:
+- Projectes
+- projectes-taules
+version: 1

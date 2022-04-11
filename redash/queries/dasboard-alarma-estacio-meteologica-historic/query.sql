@@ -1,0 +1,1 @@
+select * from query_158 where current_ok = '' or current_ok is null and plant_id in ({{ plant_id }})

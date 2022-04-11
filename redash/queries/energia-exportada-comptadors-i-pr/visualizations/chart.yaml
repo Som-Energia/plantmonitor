@@ -1,0 +1,63 @@
+description: ''
+name: Chart
+options:
+  showDataLabels: false
+  direction:
+    type: counterclockwise
+  missingValuesAsZero: true
+  error_y:
+    visible: true
+    type: data
+  numberFormat: 0[.]00
+  yAxis:
+  - type: linear
+    rangeMin: null
+    title:
+      text: Energia Exportada Comptadors [kWh]
+  - rangeMax: 120
+    type: linear
+    rangeMin: 0
+    opposite: true
+    title:
+      text: PR [%]
+  series:
+    stacking: null
+    error_y:
+      visible: true
+      type: data
+  globalSeriesType: column
+  percentFormat: 0[.]00%
+  sortX: true
+  seriesOptions:
+    pr:
+      zIndex: 1
+      index: 0
+      type: scatter
+      name: PR
+      yAxis: 1
+    exported_energy_kwh:
+      zIndex: 0
+      index: 0
+      type: column
+      yAxis: 0
+  valuesOptions: {}
+  xAxis:
+    labels:
+      enabled: true
+    type: '-'
+  dateTimeFormat: DD/MM/YY HH:mm
+  columnMapping:
+    temps: x
+    pr: y
+    exported_energy_kwh: y
+  textFormat: ''
+  customCode: '// Available variables are x, ys, element, and Plotly
+
+    // Type console.log(x, ys); for more info about x and ys
+
+    // To plot your graph call Plotly.plot(element, ...)
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
+  legend:
+    enabled: true
+type: CHART
