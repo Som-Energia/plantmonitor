@@ -1,0 +1,90 @@
+description: ''
+name: Table
+options:
+  itemsPerPage: 25
+  columns:
+  - linkUrlTemplate: '{{ @ }}'
+    name: time
+    title: time
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100000
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_name
+    title: plant_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100001
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: inverter_name
+    title: inverter_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100002
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_id
+    title: plant_id
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: false
+    alignContent: left
+    imageHeight: ''
+    order: 100003
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+type: TABLE

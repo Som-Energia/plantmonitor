@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 8
+    row: 26
 text: ''
 visualization: queries/potencia-inversors-amb-total/visualizations/chart.yaml
 width: 1

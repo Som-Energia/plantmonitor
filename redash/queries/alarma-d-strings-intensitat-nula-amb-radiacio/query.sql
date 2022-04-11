@@ -1,6 +1,7 @@
 
     SELECT max(inverter_time) at time zone 'Europe/Madrid' as inverter_time,
     max(sensor_time) at time zone 'Europe/Madrid' as sensor_time,
+    plant.id as plant_id,
     plant.name as plant_name,
     inverter.name as inverter_name,
     string.name as string_name,
@@ -38,5 +39,5 @@
     left join plant on plant.id = isub.plant
     left join inverter on inverter.id = isub.inverter
     left join string on string.id = isub.string
-    group by plant.name, inverter.name, string.name
+    group by plant.name, inverter.name, string.name, plant.id
     order by string_ok, plant.name, inverter_name, string_name;

@@ -133,6 +133,41 @@ query:
   140: queries/alarma-estacio-meteologica
   143: queries/alba-i-posta-via-met-no-api
   142: queries/alba-i-posta-via-s-s-api
+  184: queries/potencia-total-inversors-irradiacio-potencia-esperada-v2-2
+  183: queries/copy-of-32-pr-horari-2
+  182: queries/copy-of-4-sonda-d-irradiacio-2
+  180: queries/sensor-d-irradiacio-5min-avg-2
+  179: queries/historic-d-alarmes-unificades-2
+  178: queries/alarmes-de-tots-els-dispositius-unificada-2
+  177: queries/intensitat-de-tots-els-strings-2
+  176: queries/energia-inversors-2
+  175: queries/energia-mensual-inversores-energes-autoreset-diari-2
+  174: queries/energia-mensual-inversors-diferencial-energes-2
+  171: queries/query-sunrise-and-sunset-for-sensorirradiation-2
+  170: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-2
+  169: queries/no-power-inverter-during-daylight-2
+  168: queries/comparacio-mati-tarda-prediccio-metologica-per-planta-2
+  167: queries/comparacio-mati-tarda-prediccio-metologica-total-2
+  166: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-temps-real-2
+  165: queries/todo-dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-historic-2
+  164: queries/dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-2
+  163: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-sin-parametro-2
+  162: queries/dashboard-alarma-alerta-temps-real-de-comptadors-biogas-hidro-sense-energia-2
+  161: queries/dashboard-alarma-alerta-temps-real-de-comptadors-petites-fotovoltaiques-sense-energia-2
+  160: queries/dasboard-alarma-estacio-meteologica-historic-2
+  159: queries/dashboard-alarma-en-temps-real-estacio-meteologica-2
+  158: queries/dashboard-alarma-estacio-meteologica-sin-parametros-2
+  156: queries/dashboard-alarma-en-temps-real-potencia-nula-amb-radiacio-tots-els-inversors-2
+  155: queries/mapa-de-plantes-2
+  154: queries/alba-i-posta-orto-i-ocaso-2
+  153: queries/alarma-alerta-de-comptadors-biogas-hidro-sense-energia-2
+  152: queries/alarma-alerta-de-comptadors-petites-fotovoltaiques-sense-energia-2
+  151: queries/alarmes-de-comptadors-sense-energia-llista-historica-2
+  150: queries/plant-parameters-2
+  149: queries/plant-module-parameters-2
+  148: queries/alarmes-de-comptadors-2
+  146: queries/sensors-temperatura-2
+  145: queries/metriques-basiques-d-inversors-2
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -338,6 +373,64 @@ visualization:
   226: queries/alarma-estacio-meteologica/visualizations/chart.yaml
   228: queries/alba-i-posta-via-met-no-api/visualizations/table.yaml
   227: queries/alba-i-posta-via-s-s-api/visualizations/table.yaml
+  302: queries/potencia-total-inversors-irradiacio-potencia-esperada-v2-2/visualizations/chart.yaml
+  301: queries/potencia-total-inversors-irradiacio-potencia-esperada-v2-2/visualizations/table.yaml
+  299: queries/copy-of-32-pr-horari-2/visualizations/table.yaml
+  300: queries/copy-of-32-pr-horari-2/visualizations/chart.yaml
+  298: queries/copy-of-4-sonda-d-irradiacio-2/visualizations/chart.yaml
+  297: queries/copy-of-4-sonda-d-irradiacio-2/visualizations/table.yaml
+  293: queries/sensor-d-irradiacio-5min-avg-2/visualizations/table.yaml
+  294: queries/sensor-d-irradiacio-5min-avg-2/visualizations/chart.yaml
+  292: queries/historic-d-alarmes-unificades-2/visualizations/table.yaml
+  290: queries/alarmes-de-tots-els-dispositius-unificada-2/visualizations/table.yaml
+  288: queries/intensitat-de-tots-els-strings-2/visualizations/table.yaml
+  289: queries/intensitat-de-tots-els-strings-2/visualizations/chart.yaml
+  285: queries/energia-inversors-2/visualizations/table.yaml
+  286: queries/energia-inversors-2/visualizations/chart.yaml
+  283: queries/energia-mensual-inversores-energes-autoreset-diari-2/visualizations/table.yaml
+  284: queries/energia-mensual-inversores-energes-autoreset-diari-2/visualizations/chart.yaml
+  281: queries/energia-mensual-inversors-diferencial-energes-2/visualizations/table.yaml
+  282: queries/energia-mensual-inversors-diferencial-energes-2/visualizations/chart.yaml
+  276: queries/query-sunrise-and-sunset-for-sensorirradiation-2/visualizations/table.yaml
+  275: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-2/visualizations/table.yaml
+  274: queries/no-power-inverter-during-daylight-2/visualizations/table.yaml
+  272: queries/comparacio-mati-tarda-prediccio-metologica-per-planta-2/visualizations/table.yaml
+  273: queries/comparacio-mati-tarda-prediccio-metologica-per-planta-2/visualizations/chart.yaml
+  270: queries/comparacio-mati-tarda-prediccio-metologica-total-2/visualizations/table.yaml
+  271: queries/comparacio-mati-tarda-prediccio-metologica-total-2/visualizations/chart.yaml
+  269: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-temps-real-2/visualizations/table.yaml
+  268: queries/todo-dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-historic-2/visualizations/table.yaml
+  267: queries/dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-2/visualizations/table.yaml
+  266: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-sin-parametro-2/visualizations/table.yaml
+  265: queries/dashboard-alarma-alerta-temps-real-de-comptadors-biogas-hidro-sense-energia-2/visualizations/table.yaml
+  263: queries/dashboard-alarma-alerta-temps-real-de-comptadors-petites-fotovoltaiques-sense-energia-2/visualizations/table.yaml
+  264: queries/dashboard-alarma-alerta-temps-real-de-comptadors-petites-fotovoltaiques-sense-energia-2/visualizations/.yaml
+  261: queries/dasboard-alarma-estacio-meteologica-historic-2/visualizations/table.yaml
+  262: queries/dasboard-alarma-estacio-meteologica-historic-2/visualizations/.yaml
+  259: queries/dashboard-alarma-en-temps-real-estacio-meteologica-2/visualizations/table.yaml
+  258: queries/dashboard-alarma-estacio-meteologica-sin-parametros-2/visualizations/table.yaml
+  260: queries/dashboard-alarma-estacio-meteologica-sin-parametros-2/visualizations/.yaml
+  254: queries/dashboard-alarma-en-temps-real-potencia-nula-amb-radiacio-tots-els-inversors-2/visualizations/table.yaml
+  255: queries/dashboard-alarma-en-temps-real-potencia-nula-amb-radiacio-tots-els-inversors-2/visualizations/chart.yaml
+  252: queries/mapa-de-plantes-2/visualizations/table.yaml
+  253: queries/mapa-de-plantes-2/visualizations/map-markers.yaml
+  250: queries/alba-i-posta-orto-i-ocaso-2/visualizations/table.yaml
+  251: queries/alba-i-posta-orto-i-ocaso-2/visualizations/chart.yaml
+  248: queries/alarma-alerta-de-comptadors-biogas-hidro-sense-energia-2/visualizations/table.yaml
+  246: queries/alarma-alerta-de-comptadors-petites-fotovoltaiques-sense-energia-2/visualizations/table.yaml
+  243: queries/alarmes-de-comptadors-sense-energia-llista-historica-2/visualizations/table.yaml
+  245: queries/alarmes-de-comptadors-sense-energia-llista-historica-2/visualizations/table-2.yaml
+  249: queries/alarmes-de-comptadors-sense-energia-llista-historica-2/visualizations/chart.yaml
+  242: queries/plant-parameters-2/visualizations/table.yaml
+  241: queries/plant-module-parameters-2/visualizations/table.yaml
+  240: queries/alarmes-de-comptadors-2/visualizations/chart.yaml
+  239: queries/alarmes-de-comptadors-2/visualizations/table.yaml
+  236: queries/sensors-temperatura-2/visualizations/chart.yaml
+  235: queries/sensors-temperatura-2/visualizations/table.yaml
+  231: queries/metriques-basiques-d-inversors-2/visualizations/table.yaml
+  232: queries/metriques-basiques-d-inversors-2/visualizations/chart.yaml
+  234: queries/metriques-basiques-d-inversors-2/visualizations/chart-2.yaml
+  257: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -349,6 +442,8 @@ dashboard:
   10: dashboards/dashboard-exiom-matallana
   9: dashboards/dashboard-global
   13: dashboards/dashboard-somrenovables
+  15: dashboards/dashboard-alarmes-unificat
+  14: dashboards/versio-antiga-dashboard-alarmes
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -470,3 +565,33 @@ widget:
   124: dashboards/grafiques-puntuals/widgets/widget-8.yaml
   168: dashboards/dashboard-somrenovables/widgets/widget.yaml
   167: dashboards/dashboard-somrenovables/widgets/widget-2.yaml
+  224: dashboards/dashboard-alarmes-unificat/widgets/widget.yaml
+  225: dashboards/dashboard-alarmes-unificat/widgets/widget-2.yaml
+  182: dashboards/versio-antiga-dashboard-alarmes/widgets/widget.yaml
+  192: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-2.yaml
+  190: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-3.yaml
+  191: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-4.yaml
+  183: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-5.yaml
+  194: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-6.yaml
+  195: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-7.yaml
+  196: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-8.yaml
+  200: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-9.yaml
+  197: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-10.yaml
+  198: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-11.yaml
+  203: dashboards/versio-antiga-dashboard-alarmes/widgets/widget-12.yaml
+  169: dashboards/dashboard-comptadors/widgets/widget-53.yaml
+  207: dashboards/dashboard-energes/widgets/widget-14.yaml
+  215: dashboards/dashboard-energes/widgets/widget-15.yaml
+  216: dashboards/dashboard-energes/widgets/widget-16.yaml
+  211: dashboards/dashboard-energes/widgets/widget-17.yaml
+  214: dashboards/dashboard-energes/widgets/widget-18.yaml
+  212: dashboards/dashboard-energes/widgets/widget-19.yaml
+  210: dashboards/dashboard-energes/widgets/widget-20.yaml
+  222: dashboards/dashboard-energes/widgets/widget-21.yaml
+  221: dashboards/dashboard-energes/widgets/widget-22.yaml
+  204: dashboards/dashboard-energes/widgets/widget-23.yaml
+  171: dashboards/sandbox/widgets/widget-5.yaml
+  223: dashboards/dashboard-general-de-planta/widgets/widget-13.yaml
+  201: dashboards/grafiques-puntuals/widgets/widget-9.yaml
+  202: dashboards/grafiques-puntuals/widgets/widget-10.yaml
+  170: dashboards/grafiques-puntuals/widgets/widget-11.yaml

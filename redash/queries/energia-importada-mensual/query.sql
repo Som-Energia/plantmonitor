@@ -5,7 +5,7 @@ SELECT date_trunc('month', (reg.time - interval '1 hour') at time zone 'Europe/M
 FROM meterregistry AS reg
 LEFT JOIN meter ON meter.id = reg.meter
 LEFT JOIN plant ON plant.id = meter.plant
-WHERE plant.id = {{ plant }}
+WHERE plant.name ='{{ planta }}'
   AND (reg.time - interval '1 hour') at time zone 'Europe/Madrid' between '{{ interval.start }}' and '{{ interval.end }}'
 GROUP BY plant.name,
          reg.meter,

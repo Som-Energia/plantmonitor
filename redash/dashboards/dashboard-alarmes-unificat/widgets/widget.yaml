@@ -1,0 +1,28 @@
+options:
+  parameterMappings:
+    status:
+      type: widget-level
+      mapTo: status
+      name: status
+      value: null
+      title: ''
+    plant:
+      type: dashboard-level
+      mapTo: plant
+      name: plant
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 6
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 0
+    row: 0
+text: ''
+visualization: queries/alarmes-de-tots-els-dispositius-unificada-2/visualizations/table.yaml
+width: 1

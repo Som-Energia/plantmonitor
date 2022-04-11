@@ -11,7 +11,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_this_year
+    value: d_last_year
     locals: []
     type: date-range
     parentQueryId: 140

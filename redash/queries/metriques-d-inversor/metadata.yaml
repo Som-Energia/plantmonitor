@@ -20,13 +20,19 @@ options:
     title: granularity
     global: false
     value: hour
-    enumOptions: |
-      minute
+    enumOptions: 'minute
+
       hour
+
       day
+
       week
+
       month
+
       year
+
+      '
     parentQueryId: 23
     type: enum
     locals: []

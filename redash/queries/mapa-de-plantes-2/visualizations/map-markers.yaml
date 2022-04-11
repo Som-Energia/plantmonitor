@@ -1,0 +1,17 @@
+description: ''
+name: Map (Markers)
+options:
+  borderColor: '#049235'
+  customizeMarkers: true
+  foregroundColor: '#ffffff'
+  clusterMarkers: false
+  iconFont: circle
+  backgroundColor: '#17BF51'
+  latColName: latitude
+  groups:
+    All:
+      color: '#e377c2'
+  lonColName: longitude
+  classify: none
+  iconShape: marker
+type: MAP

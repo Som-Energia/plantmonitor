@@ -19,11 +19,13 @@ options:
     title: granularity
     global: false
     value: hour
-    enumOptions: |-
-      hour
+    enumOptions: 'hour
+
       day
+
       month
-      year
+
+      year'
     type: enum
     locals: []
   - name: interval

@@ -1,0 +1,198 @@
+created_at: '2022-01-19T15:06:44.979Z'
+description: ''
+id: 264
+name: ''
+options:
+  itemsPerPage: 15
+  columns:
+  - linkUrlTemplate: '{{ @ }}'
+    name: time
+    title: time
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100000
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_id
+    title: plant_id
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100001
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_name
+    title: plant_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100002
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: device_name
+    title: device_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100003
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_type
+    title: plant_type
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100004
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: alarm_no_energy
+    title: alarm_no_energy
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100005
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: sunrise
+    title: sunrise
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100006
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: sunset
+    title: sunset
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100007
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: is_daylight
+    title: is_daylight
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100008
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: null
+    highlightLinks: false
+type: TABLE
+updated_at: '2022-01-19T15:06:44.979Z'

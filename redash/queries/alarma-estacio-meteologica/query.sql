@@ -20,6 +20,7 @@ from
                case when count(*) over w < 3 then NULL else max(reg.irradiation_w_m2) over w = min(reg.irradiation_w_m2) OVER w end as sonda_12_equal,
                reg.irradiation_w_m2 > 1400 as sonda_massa_irradiacio
         from sensorirradiationregistry as reg
+        -- Sustituir por query de sunrise and sunset sensorirrradiation
         INNER JOIN 
             (SELECT
                    date_trunc('day', reg.time AT TIME ZONE 'Europe/Madrid') as time,
@@ -35,6 +36,7 @@ from
                 ORDER BY time DESC
             ) as sunrise_sunset ON sunrise_sunset.time = date_trunc('day', reg.time AT TIME ZONE 'Europe/Madrid')
         WHERE reg.time between sunrise and sunset 
+        -- ^ Sustituir por query de sunrise and sunset sensorirrradiation
         window w as (partition by reg.sensor order by reg.time ROWS between 11 preceding and current row)
         ORDER by reg.time
     ) sub

@@ -1,5 +1,11 @@
 options:
   parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Alcolea
+      title: ''
     interval:
       type: widget-level
       mapTo: interval

@@ -11,10 +11,11 @@ options:
     row: 0
   isHidden: false
   parameterMappings: {}
-text: |-
-  Anar a [Dashboard global](https://redash.somenergia.coop/dashboard/dashboard-global?refresh=300)
+text: 'Anar a [Dashboard global](https://redash.somenergia.coop/dashboard/dashboard-global?refresh=300)
+
 
   **[Detall de planta](https://redash.somenergia.coop/dashboard/dashboard-din-mic-de-planta?&refresh=300)**
 
-  Anar a [General de planta](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?&refresh=300)
+
+  Anar a [General de planta](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?&refresh=300)'
 width: 1

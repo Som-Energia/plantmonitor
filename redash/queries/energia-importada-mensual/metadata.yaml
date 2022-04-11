@@ -8,12 +8,11 @@ is_safe: true
 name: Energia importada mensual
 options:
   parameters:
-  - name: plant
-    title: plant
+  - name: planta
+    title: planta
     global: false
-    value: '9'
-    queryId: queries/all-plants-by-id
-    parentQueryId: 54
+    value: Llanillos
+    queryId: queries/all-plants
     type: query
     locals: []
   - name: interval

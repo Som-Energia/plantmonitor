@@ -38,11 +38,13 @@ options:
     energy_kwh_acumulated: y
     time: x
   textFormat: ''
-  customCode: |-
-    // Available variables are x, ys, element, and Plotly
+  customCode: '// Available variables are x, ys, element, and Plotly
+
     // Type console.log(x, ys); for more info about x and ys
+
     // To plot your graph call Plotly.plot(element, ...)
-    // Plotly examples and docs: https://plot.ly/javascript/
+
+    // Plotly examples and docs: https://plot.ly/javascript/'
   legend:
     enabled: true
 type: CHART

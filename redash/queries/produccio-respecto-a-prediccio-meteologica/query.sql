@@ -1,6 +1,6 @@
-SELECT reg.time as meter_time,
-       forecastreg.time as forecast_time,
-       forecastreg.forecastdate as forecastmetadata_time,
+SELECT reg.time at time zone 'Europe/Madrid' as meter_time,
+       forecastreg.time at time zone 'Europe/Madrid' as forecast_time,
+       forecastreg.forecastdate at time zone 'Europe/Madrid' as forecastmetadata_time,
        export_energy_wh as export_energy_wh,
        forecastreg.meteo_export_energy_wh,
        meter.name as meter_name
@@ -20,7 +20,7 @@ INNER JOIN LATERAL
             ) forecastreg ON forecastreg.plant = plant.id
 where plant.name = '{{plant}}'
 AND reg.time >= '{{ interval.start }}'
-AND reg.time <= '{{ interval.end }}'
+AND reg.time - interval '25 hour' <= '{{ interval.end }}' --added so that last month includes until 00:00 from the 1st day
 order by forecastreg.time desc
 
 

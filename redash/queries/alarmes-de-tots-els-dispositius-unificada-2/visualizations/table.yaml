@@ -1,0 +1,178 @@
+description: ''
+name: Table
+options:
+  itemsPerPage: 25
+  columns:
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_id
+    numberFormat: 0,0
+    title: plant_id
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: false
+    alignContent: right
+    imageHeight: ''
+    order: 100000
+    displayAs: number
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: integer
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: plant_name
+    title: plant_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100001
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: string
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: device_id
+    numberFormat: 0,0
+    title: device_id
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: right
+    imageHeight: ''
+    order: 100002
+    displayAs: number
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: integer
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: device_name
+    title: device_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100003
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: string
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: alarm_name
+    title: alarm_name
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100004
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: string
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: start_time
+    title: start_time
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: right
+    imageHeight: ''
+    order: 100005
+    displayAs: datetime
+    dateTimeFormat: DD/MM/YY HH:mm
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: datetime
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: update_time
+    title: update_time
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: right
+    imageHeight: ''
+    order: 100006
+    displayAs: datetime
+    dateTimeFormat: DD/MM/YY HH:mm
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: datetime
+    highlightLinks: false
+  - linkUrlTemplate: '{{ @ }}'
+    name: status
+    title: status
+    imageUrlTemplate: '{{ @ }}'
+    linkOpenInNewTab: true
+    linkTextTemplate: '{{ @ }}'
+    allowSearch: false
+    allowHTML: true
+    imageTitleTemplate: '{{ @ }}'
+    imageWidth: ''
+    visible: true
+    alignContent: left
+    imageHeight: ''
+    order: 100007
+    displayAs: string
+    linkTitleTemplate: '{{ @ }}'
+    booleanValues:
+    - 'false'
+    - 'true'
+    type: string
+    highlightLinks: false
+type: TABLE

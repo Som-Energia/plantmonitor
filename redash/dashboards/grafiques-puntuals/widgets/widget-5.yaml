@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 24
+    row: 42
 text: ''
 visualization: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/chart.yaml
 width: 1

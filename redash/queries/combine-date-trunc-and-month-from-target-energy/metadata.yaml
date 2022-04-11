@@ -12,9 +12,9 @@ options:
     title: granularity
     global: false
     value: month
-    enumOptions: |-
-      month
-      year
+    enumOptions: 'month
+
+      year'
     parentQueryId: 63
     type: enum
     locals: []

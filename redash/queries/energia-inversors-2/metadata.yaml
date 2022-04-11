@@ -1,0 +1,45 @@
+can_edit: true
+data_source_id: datasources/energes.yaml
+description: null
+is_archived: false
+is_draft: false
+is_favorite: false
+is_safe: true
+name: Energia inversors
+options:
+  parameters:
+  - name: plant
+    title: plant
+    global: false
+    value: Matallana
+    queryId: queries/plant-list-energes
+    parentQueryId: 176
+    type: query
+    locals: []
+  - name: interval
+    title: interval
+    global: false
+    value: d_this_week
+    locals: []
+    type: datetime-range
+    parentQueryId: 176
+  - name: granularity
+    title: granularity
+    global: false
+    value: minute
+    enumOptions: 'minute
+
+      hour
+
+      day
+
+      month
+
+      year'
+    parentQueryId: 176
+    type: enum
+    locals: []
+schedule: null
+tags:
+- Proves-IT
+version: 1

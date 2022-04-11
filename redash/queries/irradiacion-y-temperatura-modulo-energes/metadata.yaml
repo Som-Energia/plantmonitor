@@ -8,12 +8,21 @@ is_safe: true
 name: Irradiación y temperatura módulo Energes
 options:
   parameters:
+  - multiValuesOptions: null
+    name: plant
+    title: plant
+    global: false
+    value: Alcolea
+    queryId: queries/all-plants
+    type: query
+    locals: []
   - name: interval
     title: interval
     global: false
     value: d_last_7_days
-    type: datetime-range
     locals: []
+    type: datetime-range
+    parentQueryId: 95
 schedule: null
 tags:
 - tecnics

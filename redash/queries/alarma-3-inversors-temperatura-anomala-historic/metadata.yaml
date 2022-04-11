@@ -12,9 +12,14 @@ options:
     title: interval
     global: false
     value: d_this_year
-    type: datetime-range
     locals: []
-schedule: null
+    type: datetime-range
+    parentQueryId: 137
+schedule:
+  interval: 1800
+  until: null
+  day_of_week: null
+  time: null
 tags:
 - Alarma
 - Projectes

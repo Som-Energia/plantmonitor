@@ -1,16 +1,16 @@
 options:
   parameterMappings:
-    plant:
+    planta:
       type: static-value
-      mapTo: plant
-      name: plant
-      value: '10'
+      mapTo: planta
+      name: planta
+      value: Torregrossa
       title: ''
     interval:
-      type: static-value
+      type: widget-level
       mapTo: interval
       name: interval
-      value: d_this_year
+      value: null
       title: ''
   isHidden: false
   position:

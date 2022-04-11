@@ -19,11 +19,15 @@ options:
     title: granularity
     global: false
     value: hour
-    enumOptions: |
-      minute
+    enumOptions: 'minute
+
       hour
+
       day
+
       month
+
+      '
     parentQueryId: 27
     type: enum
     locals: []
@@ -48,12 +52,15 @@ options:
     - min_temperature_c
     - avg_temperature_c
     - power_kw
-    enumOptions: |-
-      energy_kwh
+    enumOptions: 'energy_kwh
+
       max_temperature_c
+
       min_temperature_c
+
       avg_temperature_c
-      power_kw
+
+      power_kw'
     parentQueryId: 27
     title: metrics
     type: enum

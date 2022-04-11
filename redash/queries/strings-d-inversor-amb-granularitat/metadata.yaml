@@ -20,15 +20,21 @@ options:
     multiValuesOptions: null
     global: false
     value: inversor1
-    enumOptions: |-
-      inversor1
+    enumOptions: 'inversor1
+
       inversor2
+
       inversor3
+
       inversor4
+
       inversor5
+
       inversor6
+
       inversor7
-      inversor8
+
+      inversor8'
     parentQueryId: 97
     title: inverter
     type: enum

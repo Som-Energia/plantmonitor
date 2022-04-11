@@ -19,10 +19,11 @@ options:
     title: granularity
     global: false
     value: minute
-    enumOptions: |-
-      minute
+    enumOptions: 'minute
+
       hour
-      day
+
+      day'
     type: enum
     locals: []
   - name: interval

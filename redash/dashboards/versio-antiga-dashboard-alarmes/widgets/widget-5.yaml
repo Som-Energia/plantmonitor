@@ -1,0 +1,15 @@
+options:
+  position:
+    autoHeight: false
+    sizeX: 6
+    sizeY: 3
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 1
+    col: 0
+    row: 26
+  isHidden: false
+  parameterMappings: {}
+text: '## ALARMES HISTORIC'
+width: 1

@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 0
+    row: 18
 text: ''
 visualization: queries/strings-d-inversor-amb-granularitat/visualizations/chart.yaml
 width: 1

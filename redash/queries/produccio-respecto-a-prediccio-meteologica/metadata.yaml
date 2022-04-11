@@ -11,7 +11,7 @@ options:
   - name: plant
     title: plant
     global: false
-    value: Alcolea
+    value: Llanillos
     queryId: queries/all-plants
     parentQueryId: 115
     type: query
@@ -19,7 +19,7 @@ options:
   - name: interval
     title: interval
     global: false
-    value: d_this_month
+    value: d_last_month
     locals: []
     type: date-range
     parentQueryId: 115

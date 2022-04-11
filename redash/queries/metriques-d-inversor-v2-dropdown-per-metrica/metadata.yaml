@@ -44,12 +44,15 @@ options:
     - min_temperature_dc
     - avg_temperature_dc
     - power_w
-    enumOptions: |-
-      energy_wh
+    enumOptions: 'energy_wh
+
       max_temperature_dc
+
       min_temperature_dc
+
       avg_temperature_dc
-      power_w
+
+      power_w'
     type: enum
     locals: []
 schedule: null

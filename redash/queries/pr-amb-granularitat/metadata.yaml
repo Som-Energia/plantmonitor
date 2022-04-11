@@ -29,10 +29,11 @@ options:
     title: granularity
     global: false
     value: day
-    enumOptions: |-
-      day
+    enumOptions: 'day
+
       month
-      year
+
+      year'
     parentQueryId: 35
     type: enum
     locals: []

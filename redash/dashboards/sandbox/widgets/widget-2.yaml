@@ -22,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 10
+    row: 23
 text: ''
 visualization: queries/irradiancia-i-irradiacio/visualizations/chart.yaml
 width: 1

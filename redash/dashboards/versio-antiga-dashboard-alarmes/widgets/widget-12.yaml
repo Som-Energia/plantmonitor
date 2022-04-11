@@ -1,0 +1,22 @@
+options:
+  parameterMappings:
+    plant_id:
+      type: dashboard-level
+      mapTo: plant_id
+      name: plant_id
+      value: null
+      title: ''
+  isHidden: false
+  position:
+    autoHeight: true
+    sizeX: 3
+    sizeY: 12
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 2
+    col: 3
+    row: 39
+text: ''
+visualization: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-2/visualizations/table.yaml
+width: 1

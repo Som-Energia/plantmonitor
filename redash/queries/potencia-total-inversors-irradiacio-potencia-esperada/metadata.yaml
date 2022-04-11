@@ -23,7 +23,5 @@ options:
     type: datetime-range
     parentQueryId: 47
 schedule: null
-tags:
-- Projectes
-- indicadors-propis
+tags: []
 version: 1

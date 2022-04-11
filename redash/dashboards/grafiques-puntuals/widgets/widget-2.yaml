@@ -1,9 +1,9 @@
 options:
   parameterMappings:
-    planta:
-      type: dashboard-level
-      mapTo: planta
-      name: planta
+    plant:
+      type: widget-level
+      mapTo: plant
+      name: plant
       value: null
       title: ''
     interval:
@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 3
-    row: 0
+    row: 8
 text: ''
 visualization: queries/sonda-d-irradiacio/visualizations/chart.yaml
 width: 1

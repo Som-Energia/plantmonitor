@@ -19,11 +19,13 @@ options:
     title: granularity
     global: false
     value: minute
-    enumOptions: |-
-      minute
+    enumOptions: 'minute
+
       day
+
       month
-      year
+
+      year'
     type: enum
     locals: []
 schedule: null

@@ -12,10 +12,11 @@ options:
     title: granularity
     global: false
     value: minute
-    enumOptions: |-
-      minute
+    enumOptions: 'minute
+
       hour
-      day
+
+      day'
     parentQueryId: 83
     type: enum
     locals: []
