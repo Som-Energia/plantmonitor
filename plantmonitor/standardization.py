@@ -180,7 +180,7 @@ def fontivsolar_inverter_to_plantdata(inverter_name, inverter_registers):
     time = inverter_registers['time'] if 'time' in inverter_registers else datetime.datetime.now(datetime.timezone.utc)
     #TODO meld toghether Uint16 _h _l into Uint32
     energy_wh = 10*int(round((inverter_registers['DailyEnergy_dWh_h'] << 16) + inverter_registers['DailyEnergy_dWh_l']))
-    power_w = int(round(inverter_registers['ActivePower_dW']/10))
+    power_w = int(round(inverter_registers['ActivePower_daW']*10))
     uptime_h = int(round((inverter_registers['Uptime_h_h'] << 16) + inverter_registers['Uptime_h_l']))
     temperature_dc = None
 
