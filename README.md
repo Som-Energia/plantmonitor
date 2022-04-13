@@ -132,7 +132,8 @@ Upgrading
 - Restart services: `sudo supervisorctl restart all`
 - Check for startup errors in the service logs
 - Wait for the first insert in the api from the plants to return 200 OK
-- Check insert on database
+- Check insert on database or database connection (checks models) with `python check_db_connection.py`
+- Do the same process on every raspberrypi if the models changed
 
 Troubleshooting
 ===============
