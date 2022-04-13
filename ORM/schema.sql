@@ -275,18 +275,18 @@ ALTER TABLE "plantmonthlylegacy" ADD CONSTRAINT "fk_plantmonthlylegacy__plant" F
 CREATE TABLE "plantparameters" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
-  "peak_power_w" INTEGER NOT NULL,
-  "nominal_power_w" INTEGER NOT NULL,
+  "peak_power_w" BIGINT NOT NULL,
+  "nominal_power_w" BIGINT NOT NULL,
   "connection_date" TIMESTAMP WITH TIME ZONE NOT NULL,
   "n_strings_plant" INTEGER,
   "n_strings_inverter" INTEGER,
   "n_modules_string" INTEGER,
   "inverter_loss_mpercent" INTEGER,
   "meter_loss_mpercent" INTEGER,
-  "target_monthly_energy_wh" INTEGER NOT NULL,
-  "historic_monthly_energy_wh" INTEGER,
-  "month_theoric_pr_cpercent" INTEGER,
-  "year_theoric_pr_cpercent" INTEGER
+  "target_monthly_energy_wh" BIGINT NOT NULL,
+  "historic_monthly_energy_wh" BIGINT,
+  "month_theoric_pr_cpercent" BIGINT,
+  "year_theoric_pr_cpercent" BIGINT
 );
 
 CREATE INDEX "idx_plantparameters__plant" ON "plantparameters" ("plant");

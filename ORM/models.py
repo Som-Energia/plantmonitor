@@ -850,8 +850,8 @@ def define_models(database):
 
     class PlantParameters(database.Entity):
         plant = Required(Plant)
-        peak_power_w = Required(int)
-        nominal_power_w = Required(int)
+        peak_power_w = Required(int, size=64)
+        nominal_power_w = Required(int, size=64)
         connection_date = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
         n_strings_plant = Optional(int)
         n_strings_inverter = Optional(int) # TODO poden tenir diferent nombre d'strings els inversors d'una planta?
@@ -859,10 +859,10 @@ def define_models(database):
         inverter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb l'inversor?
         meter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb el comptador?
 
-        target_monthly_energy_wh = Required(int)
-        historic_monthly_energy_wh = Optional(int)
-        month_theoric_pr_cpercent = Optional(int)
-        year_theoric_pr_cpercent = Optional(int)
+        target_monthly_energy_wh = Required(int, size=64)
+        historic_monthly_energy_wh = Optional(int, size=64)
+        month_theoric_pr_cpercent = Optional(int, size=64)
+        year_theoric_pr_cpercent = Optional(int, size=64)
 
     class PlantModuleParameters(database.Entity):
         plant = Required(Plant)
