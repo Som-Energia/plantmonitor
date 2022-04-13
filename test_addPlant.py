@@ -269,6 +269,49 @@ class ImportPlant_Test(unittest.TestCase):
 
             orm.flush()
 
+            resultPlantsNS = exportPlants(self.pony.db, skipEmpty=True)
+            self.assertNsEqual(nsplants, resultPlantsNS)
+
+    def test_importExportPlant__without_description(self):
+        self.maxDiff=None
+
+        with orm.db_session:
+
+            nsplants = ns.loads("""\
+                plants:
+                - plant:
+                    name: alcolea
+            """)
+
+            importPlants(self.pony.db, nsplants)
+
+            orm.flush()
+
             #TODO test the whole fixture, not just the plant data
-            expectedPlantsNS = exportPlants(self.pony.db, skipEmpty=True)
-            self.assertNsEqual(nsplants, expectedPlantsNS)
+            resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
+            nsplants.plants[0].plant.description = ''
+            nsplants.plants[0].plant.codename = 'SomEnergia_alcolea'
+
+            self.assertNsEqual(nsplants, resultPlantNs)
+
+    def test_importExportPlant__new_plant(self):
+        self.maxDiff=None
+
+        with orm.db_session:
+
+            nsplants = ns.loads("""\
+                plants:
+                - plant:
+                    name: new_plant
+            """)
+
+            importPlants(self.pony.db, nsplants)
+
+            orm.flush()
+
+            #TODO test the whole fixture, not just the plant data
+            resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
+            nsplants.plants[0].plant.description = ''
+            nsplants.plants[0].plant.codename = 'SomEnergia_new_plant'
+
+            self.assertNsEqual(nsplants, resultPlantNs)

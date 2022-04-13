@@ -60,6 +60,7 @@ def importPlants(db, nsplants):
         if 'plants' in nsplants:
             for kplantns in nsplants.plants:
                 plantns = kplantns['plant']
+                plantns.codename = plantns.get('codename','SomEnergia_{}'.format(plantns.name))
                 plant = db.Plant.get(name=plantns.name) or db.Plant(name=plantns.name, codename=plantns.codename)
                 plant.importPlant(plantns)
 
@@ -164,7 +165,7 @@ def define_models(database):
         def importPlant(self, nsplant):
             plant = nsplant
             self.name = plant.name
-            self.description = plant.description
+            self.description = plant.get('description', self.description)
             logger.info("Importing plant {}".format(self.name))
             if 'municipality' in plant:
                 m = Municipality.get(ineCode=plant['municipality'])
