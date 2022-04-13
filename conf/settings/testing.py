@@ -9,6 +9,6 @@ ACTIVEPLANT_CONF = test_env.json('PLANT_CONF')
 
 API_CONFIG = test_env.json('API_CONFIG')
 
-MONSOL = test_env.json('MONSOL')
+# MONSOL = test_env.json('MONSOL')
 
-MONSOL_CREDENTIALS = test_env.json('MONSOL_CREDENTIALS')
+# MONSOL_CREDENTIALS = test_env.json('MONSOL_CREDENTIALS')
