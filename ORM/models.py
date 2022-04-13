@@ -3,6 +3,7 @@
 import sys
 
 import datetime
+import pytz
 
 from yamlns import namespace as ns
 
@@ -192,6 +193,10 @@ def define_models(database):
                 logger.info(devs)
             if 'moduleParameters' in plant:
                 self.setModuleParameters(**plant['moduleParameters'])
+            if 'plantParameters' in plant:
+                self.setPlantParameters(**plant['plantParameters'])
+            if 'location' in plant:
+                self.setLocation(**plant['location'])
             return self
 
         def exportPlant(self, skipEmpty=False):
@@ -237,6 +242,10 @@ def define_models(database):
                     plantns['temperatureModuleSensors'] = temperatureModuleSensors
                 if self.moduleParameters:
                     plantns['moduleParameters'] = self.moduleParameters.export()
+                if self.plantParameters:
+                    plantns['plantParameters'] = self.plantParameters.export()
+                if self.location:
+                    plantns['location'] = {'lat': self.location.latitude, 'long': self.location.longitude}
 
             if self.municipality:
                 plantns.municipality = self.municipality.ineCode
@@ -312,6 +321,55 @@ def define_models(database):
                     plant=self,
                     **values
                 )
+
+        def setPlantParameters(
+            self,
+            peakPowerMWp,
+            nominalPowerMW,
+            connectionDate,
+            targetMonthlyEnergyGWh,
+            nStringsPlant=None,
+            nStringsInverter=None,
+            nModulesString=None,
+            inverterLossPercent=None,
+            meterLossPercent=None,
+            historicMonthlyEnergyMWh=None,
+            monthTheoricPRPercent=None,
+            yearTheoricPRPercent=None):
+
+            # yamlns gives us a Date instead of string
+            connection_date = datetime.datetime.combine(connectionDate, datetime.time())
+            cet = pytz.timezone('Europe/Madrid')
+            connection_date = cet.localize(connection_date)
+
+            values = {
+                'peak_power_w': int(peakPowerMWp*1000000),
+                'nominal_power_w': int(nominalPowerMW*1000000),
+                'connection_date': connection_date,
+                'target_monthly_energy_wh': int(targetMonthlyEnergyGWh*1000000000),
+                'n_strings_plant': nStringsPlant and int(nStringsPlant),
+                'n_strings_inverter': nStringsInverter and int(nStringsInverter),
+                'n_modules_string': nModulesString and int(nModulesString*1000),
+                'inverter_loss_mpercent': inverterLossPercent and int(inverterLossPercent*1000),
+                'meter_loss_mpercent': meterLossPercent and int(meterLossPercent*1000),
+                'historic_monthly_energy_wh': historicMonthlyEnergyMWh and int(historicMonthlyEnergyMWh/1000000),
+                'month_theoric_pr_cpercent': monthTheoricPRPercent and int(monthTheoricPRPercent*100),
+                'year_theoric_pr_cpercent': yearTheoricPRPercent and int(yearTheoricPRPercent*100),
+            }
+
+            if self.plantParameters:
+                self.plantParameters.set(**values)
+            else:
+                self.plantParameters = PlantParameters(
+                    plant=self,
+                    **values
+                )
+
+        def setLocation(self, lat, long):
+            if self.location:
+                self.location.set(latitude=lat, longitude=long)
+            else:
+                self.location = PlantLocation(plant=self,latitude=lat,longitude=long)
 
         @staticmethod
         def str2device(plant, classname, devicename):
@@ -875,6 +933,25 @@ def define_models(database):
         historic_monthly_energy_wh = Optional(int, size=64)
         month_theoric_pr_cpercent = Optional(int, size=64)
         year_theoric_pr_cpercent = Optional(int, size=64)
+
+        def export(self):
+            pp = {
+                'peakPowerMWp': int(self.peak_power_w/1000000),
+                'nominalPowerMW': int(self.nominal_power_w/1000000),
+                'connectionDate': self.connection_date.date(),
+                'targetMonthlyEnergyGWh': int(self.target_monthly_energy_wh/1000000000),
+                'nStringsPlant': self.n_strings_plant and int(self.n_strings_plant),
+                'nStringsInverter': self.n_strings_inverter and int(self.n_strings_inverter),
+                'nModulesString': self.n_modules_string and int(self.n_modules_string),
+                'inverterLossPercent': self.inverter_loss_mpercent and self.inverter_loss_mpercent/1000.0,
+                'meterLossPercent': self.meter_loss_mpercent and self.meter_loss_mpercent/1000.0,
+                'historicMonthlyEnergyMWh': self.historic_monthly_energy_wh and int(self.historic_monthly_energy_wh*1000000),
+                'monthTheoricPRPercent': self.month_theoric_pr_cpercent and self.month_theoric_pr_cpercent*100,
+                'yearTheoricPRPercent': self.year_theoric_pr_cpercent and self.year_theoric_pr_cpercent*100,
+            }
+
+            pp = {k:v for k,v in pp.items() if v is not None}
+            return pp
 
     class PlantModuleParameters(database.Entity):
         plant = Required(Plant)

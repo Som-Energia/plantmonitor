@@ -69,7 +69,7 @@ class ImportPlant_Test(unittest.TestCase):
     def tearDown(self):
         self.tearDownORM()
 
-    def test_importExportPlant(self):
+    def test_importExportPlant__base(self):
         with orm.db_session:
 
             nsplants = ns.loads("""\
@@ -240,3 +240,35 @@ class ImportPlant_Test(unittest.TestCase):
             plantns = exportPlants(self.pony.db)
 
         self.assertNsEqual(plantns, content)
+
+    def test_importExportPlant__with_details(self):
+        self.maxDiff=None
+
+        with orm.db_session:
+
+            nsplants = ns.loads("""\
+                plants:
+                - plant:
+                    name: alcolea
+                    codename: SCSOM04
+                    description: la bonica planta
+                    location:
+                        lat: 40.02
+                        long: -2.11
+                    plantParameters:
+                        peakPowerMWp: 100000
+                        nominalPowerMW: 80000
+                        connectionDate: 2022-01-01
+                        targetMonthlyEnergyGWh: 0
+                    meters:
+                    - meter:
+                        name: '1234578'
+            """)
+
+            importPlants(self.pony.db, nsplants)
+
+            orm.flush()
+
+            #TODO test the whole fixture, not just the plant data
+            expectedPlantsNS = exportPlants(self.pony.db, skipEmpty=True)
+            self.assertNsEqual(nsplants, expectedPlantsNS)
