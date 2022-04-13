@@ -3,12 +3,13 @@ import os, sys
 
 from pymodbus.client.sync import ModbusTcpClient
 
-client = ModbusTcpClient('192.168.2.150', port=502)
+client = ModbusTcpClient('192.168.2.217', port=502)
 connection = client.connect()
 
 if connection:
     # TODO check if recive values from address, new sys alert
-    request = client.read_holding_registers(37,count=3,unit=1)
+    # request = client.read_holding_registers(37,count=3,unit=1)
+    request = client.read_input_registers(0,count=3,unit=37)
     result = request.registers
     print("OK")
     sys.exit(0)
