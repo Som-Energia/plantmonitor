@@ -22,8 +22,6 @@ from maintenance.maintenance import(
 
 from maintenance.db_manager import DBManager
 
-from .operations import computeIntegralMetrics
-
 from meteologica.daily_upload_to_api import upload_meter_data
 from meteologica.forecasts import (
     downloadMeterForecasts,
