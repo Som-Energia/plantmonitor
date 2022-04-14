@@ -27,8 +27,9 @@ def check_db_connection():
 
     with orm.db_session:
         plants = pony.db.Plant.select()[:].to_list()
+        plants_names = [plant.name for plant in plants]
 
-    print(plants)
+    print(plants_names)
 
 @click.command()
 def check_db_connection_CLI():

@@ -69,6 +69,8 @@ def importPlantCLI(yaml):
     from conf import envinfo
     pony = PonyManager(envinfo.DB_CONF)
 
+    # orm.set_sql_debug(debug=True, show_values=True)
+
     pony.define_all_models()
     pony.binddb(create_tables=False)
 

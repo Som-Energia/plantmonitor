@@ -164,8 +164,11 @@ def define_models(database):
 
         def importPlant(self, nsplant):
             plant = nsplant
-            self.name = plant.name
-            self.description = plant.get('description', self.description)
+            # checking before setting prevents unnecessary update to db
+            if 'name' in plant and self.name != plant.name:
+                self.name = plant.name
+            if 'description' in plant and self.description != plant['description']:
+                self.description = plant['description']
             logger.info("Importing plant {}".format(self.name))
             if 'municipality' in plant:
                 m = Municipality.get(ineCode=plant['municipality'])

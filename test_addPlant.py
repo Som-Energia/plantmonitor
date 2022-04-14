@@ -315,3 +315,111 @@ class ImportPlant_Test(unittest.TestCase):
             nsplants.plants[0].plant.codename = 'SomEnergia_new_plant'
 
             self.assertNsEqual(nsplants, resultPlantNs)
+
+    def test__importExportPlant__keep_old_meters(self):
+        #orm.set_sql_debug(debug=True, show_values=True)
+
+        nsplants_original = ns.loads("""\
+            plants:
+            - plant:
+                name: Le_Roger
+                codename: SomEnergia_Le_Roger_Meteo
+                description: ohlala
+                meters:
+                - meter:
+                    name: '1234578'
+        """)
+
+        importPlants(self.pony.db, nsplants_original)
+
+        orm.flush()
+
+        nsplants = ns.loads("""\
+            plants:
+            - plant:
+                name: Le_Roger
+                description: sacrebleu
+        """)
+
+        importPlants(self.pony.db, nsplants)
+
+        orm.flush()
+
+        #TODO test the whole fixture, not just the plant data
+        resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
+
+        nsplants_original.plants[0].plant.description = 'sacrebleu'
+
+        self.assertNsEqual(nsplants_original.plants[0].plant.meters, resultPlantNs.plants[0].plant.meters)
+
+    #TODO currently we do not support updating plant's name, codenames or description, it will only get the name
+    def _test__importExportPlant__update_plant_data(self):
+        pass
+
+    def _test__importExportPlant__update_plant_keep_codename(self):
+        self.maxDiff=None
+
+        with orm.db_session:
+            nsplants_original = ns.loads("""\
+                plants:
+                - plant:
+                    name: Le_Roger
+                    codename: SomEnergia_Le_Roger_Meteo
+                    description: ohlala
+            """)
+
+            importPlants(self.pony.db, nsplants_original)
+
+            orm.flush()
+
+            nsplants = ns.loads("""\
+                plants:
+                - plant:
+                    name: Le_Roger
+                    description: sacrebleu
+            """)
+
+            importPlants(self.pony.db, nsplants)
+
+            orm.flush()
+
+            #TODO test the whole fixture, not just the plant data
+            resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
+
+            nsplants_original.plants[0].plant.description = 'sacrebleu'
+
+            self.assertNsEqual(nsplants_original, resultPlantNs)
+
+    def _test__importExportPlant__update_plant_keep_description(self):
+        self.maxDiff=None
+
+        with orm.db_session:
+            nsplants_original = ns.loads("""\
+                plants:
+                - plant:
+                    name: Le_Roger
+                    codename: SomEnergia_Le_Roger_Meteo
+                    description: ohlala
+            """)
+
+            importPlants(self.pony.db, nsplants_original)
+
+            orm.flush()
+
+            nsplants = ns.loads("""\
+                plants:
+                - plant:
+                    name: Le_Roger
+                    codename: SomEnergia_Le_Roger_Nouveau_Meteo
+            """)
+
+            importPlants(self.pony.db, nsplants)
+
+            orm.flush()
+
+            #TODO test the whole fixture, not just the plant data
+            resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
+
+            nsplants_original.plants[0].plant.codename = 'SomEnergia_Le_Roger_Nouveau_Meteo'
+
+            self.assertNsEqual(nsplants_original, resultPlantNs)
