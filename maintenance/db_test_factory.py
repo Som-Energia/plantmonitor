@@ -11,7 +11,7 @@ class DbTestFactory():
         self.dbmanager = dbmanager
 
     def create(self, csv_file, table_name):
-        df = pd.read_csv('test_data/{}'.format(csv_file), sep = ',', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        df = pd.read_csv('test_data/{}'.format(csv_file), sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         df.to_sql(table_name, self.dbmanager.db_con, if_exists='replace', index = False)
 
     def create_custom_time(self, time_columns, csv_file, table_name):
