@@ -259,7 +259,6 @@ class ImportPlant_Test(unittest.TestCase):
                         peakPowerMWp: 100000
                         nominalPowerMW: 80000
                         connectionDate: 2022-01-01
-                        targetMonthlyEnergyGWh: 0
                     meters:
                     - meter:
                         name: '1234578'
@@ -423,3 +422,4 @@ class ImportPlant_Test(unittest.TestCase):
             nsplants_original.plants[0].plant.codename = 'SomEnergia_Le_Roger_Nouveau_Meteo'
 
             self.assertNsEqual(nsplants_original, resultPlantNs)
+# vim: ts=4 sw=4 et
