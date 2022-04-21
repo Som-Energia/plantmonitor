@@ -279,15 +279,17 @@ def is_daylight(db_con, device_table, device_id, check_time):
     is_day = result and result[0]
 
     if is_day is None:
-        raise NoSolarEventError(f"Error: Current datetime of inverter {inverter} does not match any solarevent at {check_time}")
+        raise NoSolarEventError(f"Error: Current datetime of {device_table} {device_id} does not match any solarevent at {check_time}")
 
     return is_day
 
-def set_devices_alarms(db_con, alarm_id, device_table, alarms_current, check_time):
-    raise NotImplementedError
-    for device_id, device_name, status in alarms_current:
+def set_devices_alarms_if_inverter_power(db_con, alarm_id, device_table, alarms_current, check_time):
+    for device_id, device_name, status, inverter_has_power in alarms_current:
         if status is not None:
-            set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
+            if not inverter_has_power:
+                # inverter has no power, update check but don't change status, we can't know if the string can give intensity
+                set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
+                continue
 
         current_alarm = set_alarm_status(db_con, device_table, device_id, device_name, alarm_id, check_time, status)
 
