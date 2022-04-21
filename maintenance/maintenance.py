@@ -21,15 +21,7 @@ def read_alarms_config(yamlfile):
         alarms = yaml.safe_load(stream)
         return alarms
 
-def create_alarms(db_con, alarms_yaml_content):
-    # TODO use this on the final caller
-    # from conf import envinfo
-    # alarms_yaml_file = getattr(envinfo,'ALARMS_YAML','conf/alarms.yaml')
-    # alarms = read_alarms_config(alarms_yaml)
-
-    #TODO should we try to create, we usually will have created alarm,status and historic via create_alarm_tables
-    create_alarm_table(db_con)
-
+def insert_alarms_from_config(db_con, alarms_yaml_content):
     #TODO silently continue if alarms key does not exist?
     for alarm in alarms_yaml_content.get('alarms', []):
         alarm['createdate'] = alarm.get('createdate', datetime.datetime.today())
@@ -113,6 +105,13 @@ def create_alarm_tables(db_con):
     create_alarm_status_table(db_con)
     create_alarm_historic_table(db_con)
 
+def create_alarms(db_con):
+    from conf import envinfo
+    alarms_yaml_file = getattr(envinfo,'ALARMS_YAML','conf/alarms.yaml')
+    alarms_yaml_content = read_alarms_config(alarms_yaml_file)
+
+    insert_alarms_from_config(db_con, alarms_yaml_content)
+
 def get_latest_reading(db_con, target_table, source_table=None):
     table_exists = db_con.execute("SELECT to_regclass('{}');".format(target_table)).fetchone()
     if not table_exists:
@@ -160,7 +159,7 @@ def get_alarm_current_nointensity_string(db_con, check_time):
     return db_con.execute(query).fetchall()
 
 # TODO store the sql in db?
-def set_new_alarm(db_con, name, description, severity, createdate, sql=None):
+def set_new_alarm(db_con, name, description, severity, createdate, active=True, sql=None):
     createdate = createdate.strftime("%Y-%m-%d")
 
     # TODO this has a corner case race condition, see alternative:
@@ -173,7 +172,8 @@ def set_new_alarm(db_con, name, description, severity, createdate, sql=None):
                     name,
                     description,
                     severity,
-                    createdate
+                    createdate,
+                    active
                 )
                 VALUES(%s, %s, %s, %s)
                 ON CONFLICT (name) DO NOTHING
@@ -411,9 +411,8 @@ def update_bucketed_string_registry(db_con, to_date=None):
 
 def alarm_maintenance(db_con):
     logger.debug("Updating alarms maintenance")
-    create_alarm_table(db_con)
-    create_alarm_status_table(db_con)
-    create_alarm_historic_table(db_con)
+    create_alarm_tables(db_con)
+    create_alarms(db_con)
     logger.debug("alarm tables creation checked")
     update_alarm_nopower_inverter(db_con)
     update_alarm_nointensity_string(db_con)
