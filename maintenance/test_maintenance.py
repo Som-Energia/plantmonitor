@@ -8,7 +8,7 @@ from unittest import TestCase, skipIf
 
 from .maintenance import (
     read_alarms_config,
-    create_alarms,
+    insert_alarms_from_config,
     create_alarm_tables,
     get_latest_reading,
     get_alarm_current_nointensity_string,
@@ -381,7 +381,7 @@ class InverterMaintenanceTests(TestCase):
                 'createdate': datetime.date.today()
             }]
         }
-        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
+        insert_alarms_from_config(self.dbmanager.db_con, alarms_yaml_content)
 
     def create_alarm_nointensity_string_tables(self):
         create_alarm_tables(self.dbmanager.db_con)
@@ -392,7 +392,7 @@ class InverterMaintenanceTests(TestCase):
                 'createdate': datetime.date.today()
             }]
         }
-        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
+        insert_alarms_from_config(self.dbmanager.db_con, alarms_yaml_content)
 
     def test__get_alarm_status_nopower_alarmed(self):
         self.create_alarm_nopower_inverter_tables()
@@ -786,7 +786,7 @@ class InverterMaintenanceTests(TestCase):
             'sql': 'nopowerinverter'
             },{
             'name': 'nointensityinverter',
-            'description': "String d'inversor sense potència entre alba i posta",
+            'description': "String d'inversor sense potència amb potència inversor > 10 kw",
             'severity': 'critical',
             'sql': 'nointensityinverter'
             }
@@ -794,11 +794,13 @@ class InverterMaintenanceTests(TestCase):
 
         self.assertDictEqual(alarms, expected_alarms)
 
-    def test__create_alarms__base(self):
+    def test__insert_alarms_from_config__base(self):
         alarms_yaml_file = 'test_data/alarms_testing.yaml'
         alarms_yaml_content = read_alarms_config(alarms_yaml_file)
 
-        create_alarms(self.dbmanager.db_con, alarms_yaml_content)
+        create_alarm_table(self.dbmanager.db_con)
+
+        insert_alarms_from_config(self.dbmanager.db_con, alarms_yaml_content)
 
         alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
 
