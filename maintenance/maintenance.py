@@ -345,10 +345,16 @@ def update_alarm_nointensity_string(db_con, check_time = None):
     }
 
     alarm_id = set_new_alarm(db_con=db_con, **nointensity_alarm)
-    # TODO check alarma noreading que invalida l'alarma nopower
+    # TODO check alarma noreading que invalida l'alarma nointensity
     alarm_current = get_alarm_current_nointensity_string(db_con, check_time)
 
     set_devices_alarms(db_con, alarm_id, device_table, alarm_current, check_time)
+
+
+# TODO Refactor the bucketing to make it agnostic of the registry. Requires:
+# - pass registry table name as a parameter
+# - specifying which columns are metrics (for the update)
+# - specifying which agregation method to use on the buckets (avg, max, ...)
 
 def update_bucketed_inverter_registry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
