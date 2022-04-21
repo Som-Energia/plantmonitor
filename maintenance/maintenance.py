@@ -262,7 +262,7 @@ def set_alarm_historic(db_con, device_table, device_id, device_name, alarm, star
     '''
     return db_con.execute(query).fetchone()
 
-def is_daylight(db_con, inverter, check_time):
+def is_daylight(db_con, device_table, device_id, check_time):
     query = f'''
         select
             case when
@@ -270,8 +270,8 @@ def is_daylight(db_con, inverter, check_time):
                 else FALSE
             END as is_daylight
             from solarevent
-            left join inverter on inverter.id = {inverter}
-            left join plant on plant.id = inverter.plant
+            left join {device_table} on {device_table}.id = {device_id}
+            left join plant on plant.id = {device_table}.plant
         where solarevent.plant = plant.id
         and '{check_time}'::date = sunrise::date
     '''
@@ -299,7 +299,9 @@ def set_devices_alarms(db_con, alarm_id, device_table, alarms_current, check_tim
 def set_devices_alarms_if_daylight(db_con, alarm_id, device_table, alarms_current, check_time):
     for device_id, device_name, status in alarms_current:
         if status is not None:
-            is_day = is_daylight(db_con, device_id, check_time)
+            # TODO we could pass the plant id instead of device_table+device_id
+            # TODO this generates as many queries as inverters, we should fetch all of them beforehand or merge it in the alarm sql
+            is_day = is_daylight(db_con, device_table, device_id, check_time)
             if not is_day:
                 set_alarm_status_update_time(db_con, device_table, device_id, alarm_id, check_time)
                 continue
