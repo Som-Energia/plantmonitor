@@ -6,11 +6,6 @@ os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 from pathlib import Path
 from unittest import TestCase, skipIf
 
-from .maintenance import (
-    get_latest_reading,
-    update_bucketed_inverter_registry,
-    update_bucketed_string_registry,
-)
 from .db_manager import DBManager
 
 import pandas as pd
@@ -236,57 +231,6 @@ class InverterMaintenanceTests(TestCase):
 
         self.assertEqual(time.tzinfo, datetime.timezone.utc)
 
-    def test__update_bucketed_inverter_registry__base(self):
-        try:
-            self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
-            self.factory.create_bucket_5min_inverterregistry_empty_table()
-
-            to_date = datetime.datetime(2022,2,17,0,20, tzinfo=datetime.timezone.utc)
-            result = update_bucketed_inverter_registry(self.dbmanager.db_con, to_date)
-            result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
-            #result['time'] = result['time'].dt.tz_convert('UTC')
-
-            expected = pd.read_csv('test_data/update_bucketed_inverter_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-            pd.testing.assert_frame_equal(result, expected)
-
-        except:
-            self.factory.delete('inverterregistry')
-            self.factory.delete('bucket_5min_inverterregistry')
-            raise
-
-    def test__update_bucketed_inverter_registry__DST(self):
-        try:
-            self.factory.create('inverterregistry_factory_case_horary_change.csv', 'inverterregistry')
-            self.factory.create_bucket_5min_inverterregistry_empty_table()
-            to_date = datetime.datetime(2021,3,27,1,15, tzinfo=datetime.timezone.utc)
-            result = update_bucketed_inverter_registry(self.dbmanager.db_con, to_date=to_date)
-            result = pd.DataFrame(result, columns=['time', 'inverter', 'temperature_dc', 'power_w', 'energy_wh'])
-            expected = pd.read_csv('test_data/update_bucketed_inverter_registry_case_horary_change.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-            pd.testing.assert_frame_equal(result, expected)
-
-        except:
-            self.factory.delete('inverterregistry')
-            self.factory.delete('bucket_5min_inverterregistry')
-            raise
-
-    def test__update_bucketed_inverter_registry__is_hypertable(self):
-        try:
-            self.factory.create('inverterregistry_factory_case1.csv', 'inverterregistry')
-
-            to_date = datetime.datetime(2022,2,17,0,20, tzinfo=datetime.timezone.utc)
-            update_bucketed_inverter_registry(self.dbmanager.db_con, to_date)
-
-            result = self.dbmanager.db_con.execute('''
-                SELECT * FROM _timescaledb_catalog.hypertable WHERE table_name = 'bucket_5min_inverterregistry';
-            ''').fetchone()
-
-            self.assertTrue(result)
-
-        except:
-            self.factory.delete('inverterregistry')
-            self.factory.delete('bucket_5min_inverterregistry')
-            raise
-
     def test__create_alarm_table__base(self):
         create_alarm_table(self.dbmanager.db_con)
         result = self.dbmanager.db_con.execute('''
@@ -404,6 +348,24 @@ class InverterMaintenanceTests(TestCase):
             device_table, device_id, device_name, alarm, update_time, status;
         '''
         return dict(self.dbmanager.db_con.execute(query).fetchone())
+
+    def test__set_alarm_historic(self):
+
+        self.create_alarm_nopower_inverter_tables()
+
+        alarm_historic = {
+            'device_table': 'invent',
+            'device_id': 1,
+            'device_name': 'critical',
+            'alarm': 1,
+            'start_time': datetime.datetime(2022,3,21,12,14,tzinfo=datetime.timezone.utc),
+            'end_time': datetime.datetime(2022,3,22,23,34,tzinfo=datetime.timezone.utc)
+        }
+
+        result = set_alarm_historic(self.dbmanager.db_con, **alarm_historic)
+
+        expected = {'id': 1, **alarm_historic}
+        self.assertDictEqual(dict(result), expected)
 
     def test__update_alarm_nopower_inverter__new_alarm(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
@@ -575,23 +537,6 @@ class InverterMaintenanceTests(TestCase):
         alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
 
         self.assertListEqual(alarms, [('nointensityinverter',), ('nopowerinverter',)])
-
-    def test__update_bucketed_inverterstring_registry__base(self):
-        try:
-            self.factory.create('stringregistry_factory_case1.csv', 'stringregistry')
-            self.factory.create_bucket_5min_stringregistry_empty_table()
-
-            to_date = datetime.datetime(2022,2,17,12,20, tzinfo=datetime.timezone.utc)
-            result = update_bucketed_string_registry(self.dbmanager.db_con, to_date)
-            result = pd.DataFrame(result, columns=['time', 'string', 'intensity_ma'])
-
-            expected = pd.read_csv('test_data/update_bucketed_string_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
-            pd.testing.assert_frame_equal(result, expected)
-
-        except:
-            self.factory.delete('stringregistry')
-            self.factory.delete('bucket_5min_stringregistry')
-            raise
 
     def test__get_alarm_current_nointensity_string__alarm_ok(self):
         self.create_alarm_nointensity_string_tables()
