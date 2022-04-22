@@ -106,3 +106,31 @@ class DbPlantFactory():
                 1, 1, 'string1', ''
             )
         )
+
+    def add_more_strings_and_inverters(self):
+
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values (%s, %s, %s)",
+            [
+                (3, 'Wonderland_inverter', 1),
+                (4, 'Borderland_inverter', 1),
+                (5, 'Collierland_inverter', 1),
+                (6, 'Dunklerland_inverter', 1)
+            ]
+        )
+
+        string_tuple_list = [
+            (2, 1, 'string11', ''),
+            (3, 1, 'string22', ''),
+            (4, 2, 'string11', ''),
+            (5, 2, 'string22', ''),
+            (6, 3, 'string18', ''),
+            (7, 3, 'string19', ''),
+            (8, 4, 'string11', ''),
+            (9, 5, 'string22', '')
+        ]
+
+        self.dbmanager.db_con.execute(
+            "insert into string(id, inverter, name, stringbox_name) values (%s, %s, %s, %s)", string_tuple_list
+        )
+
