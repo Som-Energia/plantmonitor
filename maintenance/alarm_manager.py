@@ -19,6 +19,9 @@ class AlarmManager:
             alarms = yaml.safe_load(stream)
             return alarms
 
+    def get_alarm_by_name(self, name) -> Alarm:
+        return next((alarm for alarm in self.alarms if alarm.name == name), None)
+
     def insert_alarms_from_config(self, alarms_yaml_content):
         #TODO silently continue if alarms key does not exist?
         for alarm in alarms_yaml_content.get('alarms', []):
