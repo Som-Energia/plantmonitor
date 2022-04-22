@@ -80,7 +80,7 @@ class AlarmTests(TestCase):
 
 
     def test__get_alarm_status_nopower_alarmed(self):
-        self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
+        self.factory.create_without_time('input__alarm_status_nopower_alarmed.csv', 'alarm_status')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -89,7 +89,7 @@ class AlarmTests(TestCase):
         self.assertTrue(result)
 
     def test__get_alarm_current_nopower_inverter__alarm_triggered(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -104,7 +104,7 @@ class AlarmTests(TestCase):
         self.assertListEqual(result, expected)
 
     def test__get_alarm_current_nopower_inverter__no_alarm(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -119,7 +119,7 @@ class AlarmTests(TestCase):
         self.assertListEqual(result, expected)
 
     def test__get_alarm_current_nopower_inverter__none_power_readings(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -329,7 +329,7 @@ class AlarmTests(TestCase):
         self.assertDictEqual(dict(result), expected)
 
     def test__update_alarm_nopower_inverter__new_alarm(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -347,7 +347,7 @@ class AlarmTests(TestCase):
         self.assertTupleEqual(tuple(result[0]), expected)
 
     def test__update_alarm_nopower_inverter__status_change(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__change_status.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__change_status.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -374,7 +374,7 @@ class AlarmTests(TestCase):
         self.assertTupleEqual(tuple(result[0]), expected)
 
     def test__update_alarm_nopower_inverter__none_power_readings(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
@@ -451,7 +451,7 @@ class AlarmTests(TestCase):
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
 
-        self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
+        self.factory.create_without_time('input__alarm_status_nopower_alarmed.csv', 'alarm_status')
 
         alarm_status = {
             'device_table': 'inverter',
@@ -467,7 +467,7 @@ class AlarmTests(TestCase):
         self.assertTrue(result['status'])
 
     def test__update_alarm_nointensity_string__new_alarm(self):
-        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
         self.create_alarm_nointensity_string_tables()
         alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
@@ -485,7 +485,7 @@ class AlarmTests(TestCase):
 
     def test__get_alarm_current_nointensity_string__alarm_ok(self):
         self.plantfactory.create_inverter_string_plant()
-        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_ok.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
@@ -501,7 +501,7 @@ class AlarmTests(TestCase):
 
     def test__get_alarm_current_nointensity_string__alarm_triggered(self):
         self.plantfactory.create_inverter_string_plant()
-        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
@@ -517,7 +517,7 @@ class AlarmTests(TestCase):
 
     def test__get_alarm_current_nointensity_string__only_string_inverter_joined(self):
         self.plantfactory.create_inverter_string_plant()
-        self.factory.create('input_get_alarm_current_nopower_inverter__two_inverters_readings.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nopower_inverter__two_inverters_readings.csv', 'bucket_5min_inverterregistry')
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
@@ -544,5 +544,21 @@ class AlarmTests(TestCase):
         result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
 
         expected = [(1, 'string1', None)]
+
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_nointensity_string__many_strings_many_inverter_all_casesjoined(self):
+        self.plantfactory.create_inverter_string_plant()
+        self.factory.create('input__get_alarm_current_nopower_inverter__two_inverters_readings.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
+
+        self.create_alarm_nointensity_string_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
+
+        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+
+        expected = [(1, 'string1', True)]
 
         self.assertListEqual(result, expected)
