@@ -326,7 +326,7 @@ def define_models(database):
                     **values
                 )
 
-        def setPlantTargetMonthlyEnergyHistoricMonthlyEnergy(
+        def setPlantExpectedMonthlyEnergy(
             self,
             time,
             monthlyTargetEnergyKWh,
@@ -336,10 +336,10 @@ def define_models(database):
                 'monthly_target_energy_kwh': monthlyTargetEnergyKWh,
                 'monthly_historic_energy_kwh': monthlyHistoricEnergyKWh,
             }
-            if self.plantTargetMonthlyEnergyHistoricMonthlyEnergy:
-                self.plantTargetMonthlyEnergyHistoricMonthlyEnergy.set(**values)
+            if self.plantExpectedMonthlyEnergy:
+                self.plantExpectedMonthlyEnergy.set(**values)
             else:
-                self.plantTargetMonthlyEnergyHistoricMonthlyEnergy = PlantTargetMonthlyEnergyHistoricMonthlyEnergy(
+                self.plantExpectedMonthlyEnergy = PlantExpectedMonthlyEnergy(
                     plantparameters=self,
                     **values
                 )
@@ -938,7 +938,7 @@ def define_models(database):
 
     class PlantParameters(database.Entity):
         plant = Required(Plant)
-        plant_target_historic_energy = Optional('PlantTargetMonthlyEnergyHistoricMonthlyEnergy')
+        plant_expected_monthly_energy = Optional('PlantExpectedMonthlyEnergy')
         peak_power_w = Required(int, size=64)
         nominal_power_w = Required(int, size=64)
         connection_date = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
@@ -968,7 +968,7 @@ def define_models(database):
             pp = {k:v for k,v in pp.items() if v is not None}
             return pp
 
-    class PlantTargetMonthlyEnergyHistoricMonthlyEnergy(database.Entity):
+    class PlantExpectedMonthlyEnergy(database.Entity):
         plantparameters = Required(PlantParameters)
         time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
         monthly_target_energy_kwh = Required(int, size=64)

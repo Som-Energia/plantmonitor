@@ -291,7 +291,7 @@ CREATE INDEX "idx_plantparameters__plant" ON "plantparameters" ("plant");
 
 ALTER TABLE "plantparameters" ADD CONSTRAINT "fk_plantparameters__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id");
 
-CREATE TABLE "planttargetmonthlyenergyhistoricmonthlyenergy" (
+CREATE TABLE "plantexpectedmonthlyenergy" (
   "id" SERIAL PRIMARY KEY,
   "plantparameters" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -299,9 +299,9 @@ CREATE TABLE "planttargetmonthlyenergyhistoricmonthlyenergy" (
   "monthly_historic_energy_kwh" BIGINT NOT NULL
 );
 
-CREATE INDEX "idx_planttargetmonthlyenergyhistoricmonthlyenergy__plantparamet" ON "planttargetmonthlyenergyhistoricmonthlyenergy" ("plantparameters");
+CREATE INDEX "idx_plantexpectedmonthlyenergy__plantparameters" ON "plantexpectedmonthlyenergy" ("plantparameters");
 
-ALTER TABLE "planttargetmonthlyenergyhistoricmonthlyenergy" ADD CONSTRAINT "fk_planttargetmonthlyenergyhistoricmonthlyenergy__plantparamete" FOREIGN KEY ("plantparameters") REFERENCES "plantparameters" ("id");
+ALTER TABLE "plantexpectedmonthlyenergy" ADD CONSTRAINT "fk_plantexpectedmonthlyenergy__plantparameters" FOREIGN KEY ("plantparameters") REFERENCES "plantparameters" ("id");
 
 CREATE TABLE "sensor" (
   "id" SERIAL PRIMARY KEY,
