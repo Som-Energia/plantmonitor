@@ -1,5 +1,6 @@
 import yaml
 import datetime
+from typing import List
 from conf.log import logger
 
 from .alarm import Alarm
@@ -8,7 +9,8 @@ class AlarmManager:
 
     def __init__(self, db_con):
         self.db_con = db_con
-        self.alarms = []
+        #TODO type hinting supported since which python, 3.5?
+        self.alarms: List[Alarm] = []
 
     def add_alarm(self, **kwargs):
         alarm = Alarm(db_con=self.db_con, **kwargs)

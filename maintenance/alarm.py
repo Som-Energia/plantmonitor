@@ -77,13 +77,46 @@ class Alarm:
     def get_alarm_current_nointensity_string(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
 
+        #TODO this alarm is preceded by the noreadings of inverter and strings per inverter and per string
+
+        # TODO this simplifies debugging, are we relying too much on sql?
+        # query = f'''
+        #     SELECT
+        #         reg.time as time,
+        #         ireg.inverter as inverter,
+        #         reg.string as string_id,
+        #         s.name as string_name,
+        #         reg.intensity_ma,
+        #         ireg.power_w,
+        #         CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 ELSE 0 END as nullcount
+        #     FROM bucket_5min_stringregistry as reg
+        #     LEFT JOIN string AS s ON s.id = reg.string
+        #     LEFT JOIN inverter AS inv ON inv.id = s.inverter
+        #     -- is it left joining on the whole table?
+        #     LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
+        #     WHERE
+        #         '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+        #         AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
+        # '''
+        # print(self.db_con.execute(query).fetchall())
+
         query = f'''
-            SELECT reg.string as string, s.name as string_name, max(reg.intensity_ma) = 0 as nointensity
+            SELECT
+                reg.string as string_id,
+                s.name as string_name,
+                CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 ELSE 0 END) > 10
+                     THEN NULL
+                     ELSE BOOL_AND(reg.intensity_ma = 0 and ireg.power_w != 0)
+                END as nointensity
             FROM bucket_5min_stringregistry as reg
             LEFT JOIN string AS s ON s.id = reg.string
             LEFT JOIN inverter AS inv ON inv.id = s.inverter
-            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
-            group by inverter, string, inv.name, s.name
+            -- is it left joining on the whole table?
+            LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
+            WHERE
+                '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+                AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
+            group by string_id, string_name
         '''
         return self.db_con.execute(query).fetchall()
 
@@ -180,12 +213,12 @@ class Alarm:
         return is_day
 
     def set_devices_alarms_if_inverter_power(self, alarm_id, device_table, alarms_current, check_time):
-        for device_id, device_name, status, inverter_has_power in alarms_current:
-            if status is not None:
-                if not inverter_has_power:
-                    # inverter has no power, update check but don't change status, we can't know if the string can give intensity
-                    self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
-                    continue
+        for device_id, device_name, status in alarms_current:
+            # TODO should we handle no inverter power in some other way? right now it'll just transition to NULL hence 'Sense Dades'
+            # if status is not None:
+            #     # inverter has no power, update check but don't change status, we can't know if the string can give intensity
+            #     self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+            #     continue
 
             current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
 
