@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
-
 import datetime
 import pytz
 
 from yamlns import namespace as ns
-
-from meteologica.utils import todt
 
 from .orm_utils import str2model
 
@@ -26,7 +22,6 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-# database = orm.Database()
 
 class RegisterMixin:
 
@@ -179,22 +174,38 @@ def define_models(database):
                     logger.error("Error: municipality {} not found".format(plant['municipality']))
                     raise
             if 'meters' in plant:
-                devs = [Meter.get(plant=self, name=meter['meter'].name) or Meter(plant=self, name=meter['meter'].name) for meter in plant.meters]
-                logger.info(devs)
+                devices = [
+                    Meter.get(plant=self, name=meter['meter'].name)
+                    or Meter(plant=self, name=meter['meter'].name)
+                    for meter in plant.meters
+                ]
+                logger.info(devices)
             if 'inverters' in plant:
                 for inverter in plant.inverters:
                     inv = Inverter.get(plant=self, name=inverter['inverter'].name) or Inverter(plant=self, name=inverter['inverter'].name)
                     for string_name in inverter.inverter.get('strings', []):
                         String.get(inverter=inv, name=string_name) or String(inverter=inv, name=string_name)
             if 'irradiationSensors' in plant:
-                devs = [SensorIrradiation.get(plant=self, name=sensor['irradiationSensor'].name) or SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name) for sensor in plant.irradiationSensors]
-                logger.info(devs)
+                devices = [
+                    SensorIrradiation.get(plant=self, name=sensor['irradiationSensor'].name)
+                    or SensorIrradiation(plant=self, name=sensor['irradiationSensor'].name)
+                    for sensor in plant.irradiationSensors
+                ]
+                logger.info(devices)
             if 'temperatureAmbientSensors' in plant:
-                devs = [SensorTemperatureAmbient.get(plant=self, name=sensor['temperatureAmbientSensor'].name) or SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name) for sensor in plant.temperatureAmbientSensors]
-                logger.info(devs)
+                devices = [
+                    SensorTemperatureAmbient.get(plant=self, name=sensor['temperatureAmbientSensor'].name)
+                    or SensorTemperatureAmbient(plant=self, name=sensor['temperatureAmbientSensor'].name)
+                    for sensor in plant.temperatureAmbientSensors
+                ]
+                logger.info(devices)
             if 'temperatureModuleSensors' in plant:
-                devs = [SensorTemperatureModule.get(plant=self, name=sensor['temperatureModuleSensor'].name) or SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name) for sensor in plant.temperatureModuleSensors]
-                logger.info(devs)
+                devices = [
+                    SensorTemperatureModule.get(plant=self, name=sensor['temperatureModuleSensor'].name)
+                    or SensorTemperatureModule(plant=self, name=sensor['temperatureModuleSensor'].name)
+                    for sensor in plant.temperatureModuleSensors
+                ]
+                logger.info(devices)
             if 'moduleParameters' in plant:
                 self.setModuleParameters(**plant['moduleParameters'])
             if 'plantParameters' in plant:
@@ -940,16 +951,16 @@ def define_models(database):
 
         def export(self):
             pp = {
-                'peakPowerMWp': int(self.peak_power_w/1000000),
-                'nominalPowerMW': int(self.nominal_power_w/1000000),
+                'peakPowerMWp': round(self.peak_power_w/1000000.0, 3),
+                'nominalPowerMW': round(self.nominal_power_w/1000000.0, 3),
                 'connectionDate': self.connection_date.date(),
-                'targetMonthlyEnergyGWh': int(self.target_monthly_energy_wh/1000000000),
+                'targetMonthlyEnergyGWh': round(self.target_monthly_energy_wh/1000000000.0, 3),
                 'nStringsPlant': self.n_strings_plant and int(self.n_strings_plant),
                 'nStringsInverter': self.n_strings_inverter and int(self.n_strings_inverter),
                 'nModulesString': self.n_modules_string and int(self.n_modules_string),
                 'inverterLossPercent': self.inverter_loss_mpercent and self.inverter_loss_mpercent/1000.0,
                 'meterLossPercent': self.meter_loss_mpercent and self.meter_loss_mpercent/1000.0,
-                'historicMonthlyEnergyMWh': self.historic_monthly_energy_wh and int(self.historic_monthly_energy_wh*1000000),
+                'historicMonthlyEnergyMWh': self.historic_monthly_energy_wh and round(self.historic_monthly_energy_wh*1000000.0, 3),
                 'monthTheoricPRPercent': self.month_theoric_pr_cpercent and self.month_theoric_pr_cpercent*100,
                 'yearTheoricPRPercent': self.year_theoric_pr_cpercent and self.year_theoric_pr_cpercent*100,
             }

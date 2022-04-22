@@ -69,7 +69,7 @@ class ImportPlant_Test(unittest.TestCase):
     def tearDown(self):
         self.tearDownORM()
 
-    def test_importExportPlant__base(self):
+    def test__importExportPlant__base(self):
         with orm.db_session:
 
             nsplants = ns.loads("""\
@@ -241,7 +241,7 @@ class ImportPlant_Test(unittest.TestCase):
 
         self.assertNsEqual(plantns, content)
 
-    def test_importExportPlant__with_details(self):
+    def test__importExportPlant__with_details(self):
         self.maxDiff=None
 
         with orm.db_session:
@@ -256,10 +256,10 @@ class ImportPlant_Test(unittest.TestCase):
                         lat: 40.02
                         long: -2.11
                     plantParameters:
-                        peakPowerMWp: 100000
-                        nominalPowerMW: 80000
+                        peakPowerMWp: 100000.0
+                        nominalPowerMW: 80000.0
                         connectionDate: 2022-01-01
-                        targetMonthlyEnergyGWh: 0
+                        targetMonthlyEnergyGWh: 0.0
                     meters:
                     - meter:
                         name: '1234578'
@@ -272,7 +272,7 @@ class ImportPlant_Test(unittest.TestCase):
             resultPlantsNS = exportPlants(self.pony.db, skipEmpty=True)
             self.assertNsEqual(nsplants, resultPlantsNS)
 
-    def test_importExportPlant__without_description(self):
+    def test__importExportPlant__without_description(self):
         self.maxDiff=None
 
         with orm.db_session:
@@ -294,7 +294,7 @@ class ImportPlant_Test(unittest.TestCase):
 
             self.assertNsEqual(nsplants, resultPlantNs)
 
-    def test_importExportPlant__new_plant(self):
+    def test__importExportPlant__new_plant(self):
         self.maxDiff=None
 
         with orm.db_session:
@@ -317,7 +317,6 @@ class ImportPlant_Test(unittest.TestCase):
             self.assertNsEqual(nsplants, resultPlantNs)
 
     def test__importExportPlant__keep_old_meters(self):
-        #orm.set_sql_debug(debug=True, show_values=True)
 
         nsplants_original = ns.loads("""\
             plants:
