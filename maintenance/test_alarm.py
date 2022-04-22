@@ -17,7 +17,7 @@ from .db_test_factory import DbTestFactory, DbPlantFactory
 
 from re import search
 
-from .alarm import Alarm
+from .alarm import Alarm, NoSolarEventError
 from .alarm_manager import AlarmManager
 
 class AlarmTests(TestCase):
@@ -314,6 +314,7 @@ class AlarmTests(TestCase):
     def test__set_alarm_historic(self):
 
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
 
         alarm_historic = {
             'device_table': 'invent',
@@ -324,7 +325,7 @@ class AlarmTests(TestCase):
             'end_time': datetime.datetime(2022,3,22,23,34,tzinfo=datetime.timezone.utc)
         }
 
-        result = self.set_alarm_historic(**alarm_historic)
+        result = alarm.set_alarm_historic(**alarm_historic)
 
         expected = {'id': 1, **alarm_historic}
         self.assertDictEqual(dict(result), expected)
@@ -332,12 +333,14 @@ class AlarmTests(TestCase):
     def test__update_alarm_nopower_inverter__new_alarm(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
+
         sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
         sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        self.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm_nopower_inverter(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -348,15 +351,17 @@ class AlarmTests(TestCase):
     def test__update_alarm_nopower_inverter__status_change(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__change_status.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
+
         sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
         sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        self.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm_nopower_inverter(check_time)
 
         check_time = check_time + datetime.timedelta(minutes=5)
-        self.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm_nopower_inverter(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), False)
@@ -373,12 +378,14 @@ class AlarmTests(TestCase):
     def test__update_alarm_nopower_inverter__none_power_readings(self):
         self.factory.create('input_get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
+
         sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
         sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        self.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm_nopower_inverter(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -393,7 +400,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2021,1,1,3,15,tzinfo=datetime.timezone.utc)
-        result = alarm.is_daylight(1, check_time)
+        result = Alarm.is_daylight(self.dbmanager.db_con, 'inverter', 1, check_time)
 
         self.assertEqual(result, False)
 
@@ -404,7 +411,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2021,1,1,12,15,tzinfo=datetime.timezone.utc)
-        result = is_daylight(self.dbmanager.db_con, 1, check_time)
+        result = Alarm.is_daylight(self.dbmanager.db_con, 'inverter', 1, check_time)
 
         self.assertEqual(result, True)
 
@@ -417,11 +424,12 @@ class AlarmTests(TestCase):
         check_time = datetime.datetime(2022,3,12,12,15,tzinfo=datetime.timezone.utc)
 
         with self.assertRaises(NoSolarEventError):
-            is_daylight(self.dbmanager.db_con, 1, check_time)
+            Alarm.is_daylight(self.dbmanager.db_con, 'inverter', 1, check_time)
 
     def test__set_alarm_status_update_time__empty(self):
 
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
 
         alarm_status = {
             'device_table': 'inverter',
@@ -431,13 +439,15 @@ class AlarmTests(TestCase):
 
         check_time = datetime.datetime(2022,1,1,tzinfo=datetime.timezone.utc)
 
-        result = set_alarm_status_update_time(self.dbmanager.db_con, **alarm_status, check_time=check_time)
+        result = alarm.set_alarm_status_update_time(**alarm_status, check_time=check_time)
 
         self.assertIsNone(result)
 
     def test__set_alarm_status_update_time__base(self):
 
         self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
+
         self.factory.create_without_time('input_alarm_status_nopower_alarmed.csv', 'alarm_status')
 
         alarm_status = {
@@ -448,7 +458,7 @@ class AlarmTests(TestCase):
 
         check_time = datetime.datetime(2022,2,17,1,15,0,tzinfo=datetime.timezone.utc)
 
-        result = set_alarm_status_update_time(self.dbmanager.db_con, **alarm_status, check_time=check_time)
+        result = alarm.set_alarm_status_update_time(**alarm_status, check_time=check_time)
 
         self.assertEqual(result['update_time'], check_time)
         self.assertTrue(result['status'])
@@ -456,12 +466,12 @@ class AlarmTests(TestCase):
     def test__update_alarm_nointensity_string__new_alarm(self):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
         self.create_alarm_nointensity_string_tables()
-        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
-        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        alarm = self.alarm_manager.alarms[0]
+
         self.plantfactory.create_inverter_string_plant()
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        update_alarm_nointensity_string(self.dbmanager.db_con, check_time)
+        alarm.update_alarm_nointensity_string(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -469,59 +479,35 @@ class AlarmTests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
-    def test__read_alarms__base(self):
-        alarms = read_alarms_config('test_data/alarms_testing.yaml')
-
-        expected_alarms = {'alarms':[
-            {
-            'name': 'nopowerinverter',
-            'description': 'Inversor sense potència entre alba i posta',
-            'severity': 'critical',
-            'sql': 'nopowerinverter'
-            },{
-            'name': 'nointensityinverter',
-            'description': "String d'inversor sense potència amb potència inversor > 10 kw",
-            'severity': 'critical',
-            'sql': 'nointensityinverter'
-            }
-        ]}
-
-        self.assertDictEqual(alarms, expected_alarms)
-
-    def test__insert_alarms_from_config__base(self):
-        alarms_yaml_file = 'test_data/alarms_testing.yaml'
-        alarms_yaml_content = read_alarms_config(alarms_yaml_file)
-
-        create_alarm_table(self.dbmanager.db_con)
-
-        insert_alarms_from_config(self.dbmanager.db_con, alarms_yaml_content)
-
-        alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
-
-        self.assertListEqual(alarms, [('nointensityinverter',), ('nopowerinverter',)])
-
-
     def test__get_alarm_current_nointensity_string__alarm_ok(self):
         self.create_alarm_nointensity_string_tables()
+        self.factory.create('input_get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
+
+        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        self.assertIsNotNone(alarm)
+
         self.plantfactory.create_inverter_string_plant()
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_ok.csv', 'bucket_5min_stringregistry')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = get_alarm_current_nointensity_string(self.dbmanager.db_con, check_time=check_time)
+        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
 
-        expected = [(1, 1, 'Alibaba_inverter', 'string1', False)]
+        expected = [(1, 'Alibaba_inverter', 1, 'string1', False)]
 
         self.assertListEqual(result, expected)
 
     def test__get_alarm_current_nointensity_string__alarm_triggered(self):
         self.create_alarm_nointensity_string_tables()
+        alarm = self.alarm_manager.alarms[0]
+
         self.plantfactory.create_inverter_string_plant()
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = get_alarm_current_nointensity_string(self.dbmanager.db_con, check_time=check_time)
+        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
 
         expected = [(1, 1, 'Alibaba_inverter', 'string1', True)]
 

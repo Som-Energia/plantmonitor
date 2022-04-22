@@ -13,11 +13,13 @@ class Alarm:
 
     def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
         self.db_con = db_con
+        self.name = name
         self.id = self.set_new_alarm(name, description, severity, createdate, active=True, sql=None)
 
     # TODO store the sql in db?
     def set_new_alarm(self, name, description, severity, createdate, active=True, sql=None):
         createdate = createdate.strftime("%Y-%m-%d")
+        self.name = name
 
         # TODO this has a corner case race condition, see alternative:
         # https://stackoverflow.com/questions/40323799/return-rows-from-insert-with-on-conflict-without-needing-to-update
@@ -155,7 +157,8 @@ class Alarm:
         '''
         return self.db_con.execute(query).fetchone()
 
-    def is_daylight(self, device_table, device_id, check_time):
+    @classmethod
+    def is_daylight(cls, db_con, device_table, device_id, check_time):
         query = f'''
             select
                 case when
@@ -168,7 +171,7 @@ class Alarm:
             where solarevent.plant = plant.id
             and '{check_time}'::date = sunrise::date
         '''
-        result = self.db_con.execute(query).fetchone()
+        result = db_con.execute(query).fetchone()
         is_day = result and result[0]
 
         if is_day is None:
@@ -196,7 +199,7 @@ class Alarm:
             if status is not None:
                 # TODO we could pass the plant id instead of device_table+device_id
                 # TODO this generates as many queries as inverters, we should fetch all of them beforehand or merge it in the alarm sql
-                is_day = self.is_daylight(device_table, device_id, check_time)
+                is_day = self.is_daylight(self.db_con, device_table, device_id, check_time)
                 if not is_day:
                     self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
                     continue
@@ -241,4 +244,4 @@ class Alarm:
         # TODO check alarma noreading que invalida l'alarma nointensity
         alarm_current = self.get_alarm_current_nointensity_string(check_time)
 
-        self.set_devices_alarms(alarm_id, device_table, alarm_current, check_time)
+        self.set_devices_alarms_if_inverter_power(alarm_id, device_table, alarm_current, check_time)
