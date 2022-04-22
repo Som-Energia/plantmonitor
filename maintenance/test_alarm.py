@@ -547,10 +547,12 @@ class AlarmTests(TestCase):
 
         self.assertListEqual(result, expected)
 
-    def test__get_alarm_current_nointensity_string__many_strings_many_inverter_all_casesjoined(self):
+    def test__get_alarm_current_nointensity_string__zero_zero(self):
+        self.maxDiff=None
         self.plantfactory.create_inverter_string_plant()
-        self.factory.create('input__get_alarm_current_nopower_inverter__two_inverters_readings.csv', 'bucket_5min_inverterregistry')
-        self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
+        self.plantfactory.add_more_strings_and_inverters()
+        self.factory.create('input__get_alarm_current_nointensity_inverter__zero_zero.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__zero_zero.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
         alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
@@ -559,6 +561,56 @@ class AlarmTests(TestCase):
 
         result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
 
-        expected = [(1, 'string1', True)]
+        expected = [
+            (8, 'string11', True)
+        ]
+
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_nointensity_string__debug_case_1(self):
+        self.maxDiff=None
+        self.plantfactory.create_inverter_string_plant()
+        self.plantfactory.add_more_strings_and_inverters()
+        self.factory.create('input__get_alarm_current_nointensity_inverter__debug_case.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__debug_case.csv', 'bucket_5min_stringregistry')
+
+        self.create_alarm_nointensity_string_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
+
+        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+
+        expected = [
+            (8, 'string11', True)
+        ]
+
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_nointensity_string__many_strings_many_inverter_all_cases(self):
+        self.maxDiff=None
+        self.plantfactory.create_inverter_string_plant()
+        self.plantfactory.add_more_strings_and_inverters()
+        self.factory.create('input__get_alarm_current_nointensity_inverter__many_cases.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__string_many_cases.csv', 'bucket_5min_stringregistry')
+
+        self.create_alarm_nointensity_string_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+
+        check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
+
+        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+
+        expected = [
+            (1, 'string1', None),
+            (2, 'string11', None),
+            (3, 'string22', None),
+            (4, 'string11', None),
+            (5, 'string22', None),
+            (6, 'string18', False),
+            (7, 'string19', False),
+            (8, 'string11', True),
+            (9, 'string22', False)
+        ]
 
         self.assertListEqual(result, expected)

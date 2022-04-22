@@ -88,7 +88,8 @@ class Alarm:
         #         s.name as string_name,
         #         reg.intensity_ma,
         #         ireg.power_w,
-        #         CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 ELSE 0 END as nullcount
+        #         CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL or ireg.power_w = 0) THEN 1 ELSE NULL END as nullcount,
+        #         case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END as nointensity
         #     FROM bucket_5min_stringregistry as reg
         #     LEFT JOIN string AS s ON s.id = reg.string
         #     LEFT JOIN inverter AS inv ON inv.id = s.inverter
@@ -100,13 +101,24 @@ class Alarm:
         # '''
         # print(self.db_con.execute(query).fetchall())
 
+        # The logic is:
+        # if >8 null readings (either power or intensity) -> None (sense dades)
+        # if power_w = 0 row doesn't vote for alarm
+        # if power_w != 0 and intensity = 0 vote for True (Alarm)
+        # if power_w != 0 and intensity != 0 vote for False (OK)
+        # if there's one False vote, alarm is False
+        # if all power_w readings are NULL, then None as per >8 condition
+
+        #TODO assumes we have the 12 readings
+        minimum_non_null_readings = 8
+
         query = f'''
             SELECT
                 reg.string as string_id,
                 s.name as string_name,
-                CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 ELSE 0 END) > 10
+                CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 END) > {minimum_non_null_readings}
                      THEN NULL
-                     ELSE BOOL_AND(reg.intensity_ma = 0 and ireg.power_w != 0)
+                     ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END)
                 END as nointensity
             FROM bucket_5min_stringregistry as reg
             LEFT JOIN string AS s ON s.id = reg.string
