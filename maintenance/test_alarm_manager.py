@@ -44,14 +44,6 @@ class AlarmManagerTests(TestCase):
         self.session.rollback()
         self.session.close()
 
-    def create_plant(self, sunrise, sunset):
-        # TODO tables already exist, why?
-        self.plantfactory.create_inverter_sensor_plant(sunrise, sunset)
-
-    def read_csv(self, csvfile):
-        df = pd.read_csv(csvfile, sep=',')
-        return df
-
     def test__timezone(self):
         time = self.dbmanager.db_con.execute('''
             set time zone 'UTC';
@@ -222,3 +214,20 @@ class AlarmManagerTests(TestCase):
         alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
 
         self.assertListEqual(alarms, [('noinverterpower',), ('nostringintensity',)])
+
+    def test__update_alarms__no_bucket_tables(self):
+        alarm_manager = AlarmManager(self.dbmanager.db_con)
+        alarm_manager.update_alarms()
+
+    def test__update_alarms__base(self):
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_string_plant_with_solar_events(sunrise, sunset)
+
+        self.factory.create('input__get_alarm_current_nointensity_inverter__none_inverter_power_readings.csv', 'bucket_5min_inverterregistry')
+        self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
+
+
+        check_time = datetime.datetime(2022,2,17,13,15,0,tzinfo=datetime.timezone.utc)
+        alarm_manager = AlarmManager(self.dbmanager.db_con)
+        alarm_manager.update_alarms(check_time=check_time)

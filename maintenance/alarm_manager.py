@@ -24,7 +24,7 @@ class AlarmManager:
         elif name == 'invertertemperatureanomaly':
             alarm = AlarmInverterTemperatureAnomaly(db_con=self.db_con, name=name, **kwargs)
         else:
-            raise UndefinedAlarmError
+            raise UndefinedAlarmError("{} alarm is not known to alarms table".format(name))
 
         self.alarms.append(alarm)
 
@@ -128,11 +128,12 @@ class AlarmManager:
 
         self.insert_alarms_from_config(alarms_yaml_content)
 
-    def update_alarms(self):
+    def update_alarms(self, check_time=None):
         logger.debug("Updating alarms maintenance")
         self.create_alarm_tables()
         self.create_alarms()
         logger.debug("alarm tables creation checked")
         for alarm in self.alarms:
-            alarm.update_alarm()
+            logger.debug(f'Updating alarm {alarm.name}')
+            alarm.update_alarm(check_time)
         logger.info("Updated alarms maintenance")

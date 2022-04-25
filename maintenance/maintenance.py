@@ -93,13 +93,13 @@ def update_bucketed_string_registry(db_con, to_date=None):
         RETURNING time, string, intensity_ma
     '''
     logger.debug("Insert query")
-    return db_con.execute(insert_query).fetchall()
+    result = db_con.execute(insert_query).fetchall()
+    logger.debug("{} records inserted".format(len(result)))
+    return result
 
 def alarm_maintenance(db_con):
     alarm_manager = AlarmManager(db_con)
-    alarm_manager.create()
-    alarm_manager.check_alarms()
-
+    alarm_manager.update_alarms()
 
 def bucketed_registry_maintenance(db_con):
     logger.debug("Updating bucketed registries table")
