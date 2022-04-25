@@ -1,5 +1,6 @@
 import yaml
 import datetime
+import pandas as pd
 
 from abc import ABCMeta, abstractmethod
 from conf.logging_configuration import LOGGING
@@ -55,18 +56,6 @@ class Alarm(metaclass=ABCMeta):
         self.db_con.execute("SELECT setval('alarm_id_seq', MAX(id), true) FROM alarm;")
 
         return row and row[0]
-
-    def get_alarm_status_nopower_alarmed(self, alarm, device_table, device_id):
-
-        query = f'''
-            SELECT status
-            FROM alarm_status
-            WHERE
-                device_table = '{device_table}' AND
-                device_id = {device_id} AND
-                alarm = {alarm}
-        '''
-        return self.db_con.execute(query).fetchone()[0]
 
     def set_alarm_status_update_time(self, device_table, device_id, alarm, check_time):
 
@@ -216,6 +205,61 @@ class AlarmInverterNoPower(Alarm):
         alarm_current = self.get_alarm_current(check_time)
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
+
+class AlarmInverterTemperatureAnomaly(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'inverter'
+
+    def get_inverter_temperatures(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        # where assumes UTC otherwise it would be wrong on DST change days
+        query = f'''
+            SELECT reg.time as time, inv.plant as plant, reg.inverter AS inverter, inv.name as inverter_name, reg.temperature_dc as temperature_dc
+            FROM bucket_5min_inverterregistry as reg
+            LEFT JOIN inverter AS inv ON inv.id = reg.inverter
+            WHERE '{check_time}'::timestamptz - interval '120 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+            order by reg.time, inv.plant, reg.inverter
+        '''
+        queryresult = self.db_con.execute(query)
+        return queryresult.fetchall(), queryresult.keys()
+
+    def get_alarm_current(self, check_time):
+        # si la temperatura de l'inversor X és > 40C and la diferencia entre l'inversor X i la resta és > a 10C durant 2 hores
+
+        inverter_temperatures, keys = self.get_inverter_temperatures(check_time)
+        df = pd.DataFrame(inverter_temperatures)
+        df.columns = keys
+        df['minimum'] = df.groupby(['plant','time'])['temperature_dc'].transform('min')
+        df['overhot'] = ((df['temperature_dc'] - df['minimum']) > 400) & (df['minimum'] > 100)
+        df['null_temperature'] = df['temperature_dc'].isnull()
+        alarm_status_df = df.groupby(['plant','inverter'], as_index=False).agg({'inverter_name': 'max', 'overhot': 'all', 'null_temperature': 'all'})
+        # TODO return alarm to None if we don't have at least two non-null inverters
+        # at the moment we only set to None if the inverter doesn't have values
+        alarm_status_df.loc[alarm_status_df.null_temperature, 'overhot'] = pd.NA
+        alarm_status_df.overhot = alarm_status_df.overhot.replace({pd.NA: None})
+        # alternatives: pd.NA, numpy.nan
+        alarm_status_df.drop(columns=['plant','null_temperature'], inplace=True)
+        temperature_anomaly_alarm_status = alarm_status_df.to_records(index=False).tolist()
+        return temperature_anomaly_alarm_status
+
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
+        check_time = check_time or datetime.datetime.now()
+
+        # TODO check alarma noreading que invalida l'alarma temperatureanomaly
+
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
 class AlarmStringNoIntensity(Alarm):
 

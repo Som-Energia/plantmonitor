@@ -62,8 +62,22 @@ class AlarmTests(TestCase):
                 'name': 'noinverterpower',
                 'description': 'Inversor sense potència entre alba i posta',
                 'severity': 'critical',
+                'active': True,
                 'createdate': datetime.date.today(),
                 'sql': 'noinverterpower'
+            }]
+        }
+        self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
+
+    def create_alarm_inverter_temperature_anomaly_tables(self):
+        self.alarm_manager.create_alarm_tables()
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'invertertemperatureanomaly',
+                'description': 'Inversor amb temperatura > 40 respecte els altres',
+                'severity': 'critical',
+                'active': True,
+                'createdate': datetime.date.today(),
+                'sql': 'invertertemperatureanomaly'
             }]
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
@@ -74,20 +88,11 @@ class AlarmTests(TestCase):
                 'name': 'nostringintensity',
                 'description': "String sense intensitat durant potència d'inversor",
                 'severity': 'critical',
+                'active': True,
                 'createdate': datetime.date.today()
             }]
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
-
-
-    def test__get_alarm_status_nopower_alarmed(self):
-        self.factory.create_without_time('input__alarm_status_nopower_alarmed.csv', 'alarm_status')
-        self.create_alarm_nopower_inverter_tables()
-        alarm = self.alarm_manager.alarms[0]
-
-        result = alarm.get_alarm_status_nopower_alarmed(1, 'inverter', 1)
-
-        self.assertTrue(result)
 
     def test__get_alarm_current_nopower_inverter__alarm_triggered(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
@@ -614,4 +619,161 @@ class AlarmTests(TestCase):
             (9, 'string22', False)
         ]
 
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__alarm_ok(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__no_alarm.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', False),
+            (2, 'Quaranta_Lladres_inverter', False),
+            (3, 'Els_cavalls_inverter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__alarm_ok__too_cold(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__no_alarm__too_cold.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', False),
+            (2, 'Quaranta_Lladres_inverter', False),
+            (3, 'Els_cavalls_inverter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__alarm_triggered(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', True),
+            (2, 'Quaranta_Lladres_inverter', False),
+            (3, 'Els_cavalls_inverter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__too_many_none_readings(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__too_many_none_readings.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        # TODO it should be all None but we accept octopus
+        expected = [
+            (1, 'Alibaba_inverter', False),
+            (2, 'Quaranta_Lladres_inverter', None),
+            (3, 'Els_cavalls_inverter', None)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__some_none_readings(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__some_none_readings.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', True),
+            (2, 'Quaranta_Lladres_inverter', False),
+            (3, 'Els_cavalls_inverter', None)
+        ]
+        self.assertListEqual(result, expected)
+
+    def _test__get_alarm_current_temperature_anomaly_inverter__many_plants(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__some_none_readings.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', None),
+            (2, 'Quaranta_Lladres_inverter', None),
+            (3, 'Els_cavalls_inverter', None)
+        ]
         self.assertListEqual(result, expected)
