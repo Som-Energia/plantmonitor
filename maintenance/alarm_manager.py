@@ -3,7 +3,7 @@ import datetime
 from typing import List
 from conf.log import logger
 
-from .alarm import Alarm, AlarmInverterNoPower, AlarmStringNoIntensity
+from .alarm import Alarm, AlarmInverterNoPower, AlarmInverterTemperatureAnomaly, AlarmStringNoIntensity
 
 class UndefinedAlarmError(Exception):
     pass
@@ -21,6 +21,8 @@ class AlarmManager:
             alarm = AlarmInverterNoPower(db_con=self.db_con, name=name, **kwargs)
         elif name == 'nostringintensity':
             alarm = AlarmStringNoIntensity(db_con=self.db_con, name=name, **kwargs)
+        elif name == 'invertertemperatureanomaly':
+            alarm = AlarmInverterTemperatureAnomaly(db_con=self.db_con, name=name, **kwargs)
         else:
             raise UndefinedAlarmError
 

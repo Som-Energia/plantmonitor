@@ -2,9 +2,16 @@ alarms:
 - name: noinverterpower
   description: "Inversor sense potència entre alba i posta"
   severity: critical
+  active: True
   sql: noinverterpower
+- name: invertertempertatureanomaly
+  description: "Inversor amb temperatura > 40 respecte els altres"
+  severity: critical
+  active: True
+  sql: invertertempertatureanomaly
 - name: nostringintensity
   description: "String d'inversor sense potència amb potència inversor > 10 kw"
   severity: critical
+  active: True
   sql: nostringintensity
 
