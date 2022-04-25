@@ -10,6 +10,7 @@ from .maintenance import (
     get_latest_reading,
     update_bucketed_inverter_registry,
     update_bucketed_string_registry,
+    alarm_maintenance
 )
 from .db_manager import DBManager
 
@@ -284,3 +285,25 @@ class MaintenanceTests(TestCase):
             self.factory.delete('inverterregistry')
             self.factory.delete('bucket_5min_inverterregistry')
             raise
+
+    def test__update_bucketed_string_registry__base(self):
+        try:
+            self.factory.create('stringregistry_factory_case1.csv', 'stringregistry')
+            self.factory.create_bucket_5min_stringregistry_empty_table()
+
+            to_date = datetime.datetime(2022,2,17,12,20, tzinfo=datetime.timezone.utc)
+            result = update_bucketed_string_registry(self.dbmanager.db_con, to_date)
+            result = pd.DataFrame(result, columns=['time', 'string', 'intensity_ma'])
+            #result['time'] = result['time'].dt.tz_convert('UTC')
+
+            expected = pd.read_csv('test_data/update_bucketed_string_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            pd.testing.assert_frame_equal(result, expected)
+
+        except:
+            self.factory.delete('stringregistry')
+            self.factory.delete('bucket_5min_stringregistry')
+            raise
+
+    def test__alarm_maintenance__no_bucket_tables(self):
+
+        alarm_maintenance(self.dbmanager.db_con)

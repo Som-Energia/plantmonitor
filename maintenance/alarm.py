@@ -128,6 +128,11 @@ class Alarm(metaclass=ABCMeta):
         return self.db_con.execute(query).fetchone()
 
     @classmethod
+    def source_table_exists(cls, db_con, table_name):
+        query = f"select exists ( select from information_schema.tables where table_name = '{table_name}')"
+        return db_con.execute(query).fetchone()[0]
+
+    @classmethod
     def is_daylight(cls, db_con, device_table, device_id, check_time):
         query = f'''
             select
@@ -157,8 +162,9 @@ class Alarm(metaclass=ABCMeta):
     def set_devices_alarms(self, check_time):
         pass
 
+    # TODO all update_alarms are equal, it can be placed here
     @abstractmethod
-    def update_alarm(self, check_time):
+    def update_alarm(self, check_time = None):
         pass
 
 
@@ -168,12 +174,13 @@ class AlarmInverterNoPower(Alarm):
         super().__init__(db_con, name, description, severity, createdate, active, sql)
         #TODO absolute and unique device ids must replace device_table specification requirement
         self.device_table = 'inverter'
+        self.source_table = 'bucket_5min_inverterregistry'
 
     def get_alarm_current(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
         query = f'''
             SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nopower
-            FROM bucket_5min_inverterregistry as reg
+            FROM {self.source_table} as reg
             LEFT JOIN inverter AS inv ON inv.id = reg.inverter
             WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
             group by reg.inverter, inv.name
@@ -198,12 +205,19 @@ class AlarmInverterNoPower(Alarm):
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
 
     def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
         check_time = check_time or datetime.datetime.now()
 
         # TODO check alarma noreading que invalida l'alarma nopower
 
         alarm_current = self.get_alarm_current(check_time)
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
 
 
 class AlarmInverterTemperatureAnomaly(Alarm):
@@ -212,13 +226,14 @@ class AlarmInverterTemperatureAnomaly(Alarm):
         super().__init__(db_con, name, description, severity, createdate, active, sql)
         #TODO absolute and unique device ids must replace device_table specification requirement
         self.device_table = 'inverter'
+        self.source_table = 'bucket_5min_inverterregistry'
 
     def get_inverter_temperatures(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
         # where assumes UTC otherwise it would be wrong on DST change days
         query = f'''
             SELECT reg.time as time, inv.plant as plant, reg.inverter AS inverter, inv.name as inverter_name, reg.temperature_dc as temperature_dc
-            FROM bucket_5min_inverterregistry as reg
+            FROM {self.source_table} as reg
             LEFT JOIN inverter AS inv ON inv.id = reg.inverter
             WHERE '{check_time}'::timestamptz - interval '120 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
             order by reg.time, inv.plant, reg.inverter
@@ -230,8 +245,7 @@ class AlarmInverterTemperatureAnomaly(Alarm):
         # si la temperatura de l'inversor X és > 40C and la diferencia entre l'inversor X i la resta és > a 10C durant 2 hores
 
         inverter_temperatures, keys = self.get_inverter_temperatures(check_time)
-        df = pd.DataFrame(inverter_temperatures)
-        df.columns = keys
+        df = pd.DataFrame(inverter_temperatures, columns=keys)
         df['minimum'] = df.groupby(['plant','time'])['temperature_dc'].transform('min')
         df['overhot'] = ((df['temperature_dc'] - df['minimum']) > 400) & (df['minimum'] > 100)
         df['null_temperature'] = df['temperature_dc'].isnull()
@@ -254,6 +268,11 @@ class AlarmInverterTemperatureAnomaly(Alarm):
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
 
     def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
         check_time = check_time or datetime.datetime.now()
 
         # TODO check alarma noreading que invalida l'alarma temperatureanomaly
@@ -261,12 +280,16 @@ class AlarmInverterTemperatureAnomaly(Alarm):
         alarm_current = self.get_alarm_current(check_time)
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
+
+
 class AlarmStringNoIntensity(Alarm):
 
     def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
         super().__init__(db_con, name, description, severity, createdate, active, sql)
         #TODO absolute and unique device ids must replace device_table specification requirement
         self.device_table = 'string'
+        self.source_table = 'bucket_5min_stringregistry'
 
     def get_alarm_current(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -314,7 +337,7 @@ class AlarmStringNoIntensity(Alarm):
                      THEN NULL
                      ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END)
                 END as nointensity
-            FROM bucket_5min_stringregistry as reg
+            FROM {self.source_table} as reg
             LEFT JOIN string AS s ON s.id = reg.string
             LEFT JOIN inverter AS inv ON inv.id = s.inverter
             -- is it left joining on the whole table?
@@ -340,9 +363,16 @@ class AlarmStringNoIntensity(Alarm):
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
 
     def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
         check_time = check_time or datetime.datetime.now()
 
         # TODO check alarma noreading que invalida l'alarma nointensity
         alarm_current = self.get_alarm_current(check_time)
 
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records")

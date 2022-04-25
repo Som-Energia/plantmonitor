@@ -94,6 +94,30 @@ class AlarmTests(TestCase):
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
 
+    def test__source_table_exists(self):
+        self.alarm_manager.create_alarm_tables()
+        alarm_table_exists = Alarm.source_table_exists(self.dbmanager.db_con, 'alarm')
+        self.assertTrue(alarm_table_exists)
+
+        alarm_table_exists = Alarm.source_table_exists(self.dbmanager.db_con, 'foo')
+        self.assertFalse(alarm_table_exists)
+
+    # TODO what should we expect in this case?
+    def _test__get_alarm_current_nopower_inverter__no_readings_in_range(self):
+        self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_nopower_inverter_tables()
+        alarm = self.alarm_manager.alarms[0]
+
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        check_time = datetime.datetime(2050,1,1,10,0,0,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [(1, 'Alibaba_inverter', None)]
+        self.assertListEqual(result, expected)
+
     def test__get_alarm_current_nopower_inverter__alarm_triggered(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
