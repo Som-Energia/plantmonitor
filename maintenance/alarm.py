@@ -175,6 +175,11 @@ class Alarm(metaclass=ABCMeta):
 
 class AlarmInverterNoPower(Alarm):
 
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'inverter'
+
     def get_alarm_current(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
         query = f'''
@@ -206,23 +211,18 @@ class AlarmInverterNoPower(Alarm):
     def update_alarm(self, check_time = None):
         check_time = check_time or datetime.datetime.now()
 
-        device_table = 'inverter'
-
-        nopower_alarm = {
-            'name': 'noinverterpower',
-            'description': 'Inversor sense potència entre alba i posta',
-            'severity': 'critical',
-            'createdate': datetime.date.today()
-        }
-
-        alarm_id = self.set_new_alarm(**nopower_alarm)
         # TODO check alarma noreading que invalida l'alarma nopower
 
         alarm_current = self.get_alarm_current(check_time)
-        self.set_devices_alarms(alarm_id, device_table, alarm_current, check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
 
 class AlarmStringNoIntensity(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'string'
 
     def get_alarm_current(self, check_time):
         check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -298,17 +298,7 @@ class AlarmStringNoIntensity(Alarm):
     def update_alarm(self, check_time = None):
         check_time = check_time or datetime.datetime.now()
 
-        device_table = 'string'
-
-        nointensity_alarm = {
-            'name': 'nostringintensity',
-            'description': 'String sense intensitat entre alba i posta',
-            'severity': 'critical',
-            'createdate': datetime.date.today()
-        }
-
-        alarm_id = self.set_new_alarm(**nointensity_alarm)
         # TODO check alarma noreading que invalida l'alarma nointensity
         alarm_current = self.get_alarm_current(check_time)
 
-        self.set_devices_alarms(alarm_id, device_table, alarm_current, check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
