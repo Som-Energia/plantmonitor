@@ -3,7 +3,10 @@ import datetime
 from typing import List
 from conf.log import logger
 
-from .alarm import Alarm
+from .alarm import Alarm, AlarmInverterNoPower, AlarmStringNoIntensity
+
+class UndefinedAlarmError(Exception):
+    pass
 
 class AlarmManager:
 
@@ -12,8 +15,15 @@ class AlarmManager:
         #TODO type hinting supported since which python, 3.5?
         self.alarms: List[Alarm] = []
 
-    def add_alarm(self, **kwargs):
-        alarm = Alarm(db_con=self.db_con, **kwargs)
+    def add_alarm(self, name=None, **kwargs):
+        # TODO use factory
+        if name == 'noinverterpower':
+            alarm = AlarmInverterNoPower(db_con=self.db_con, name=name, **kwargs)
+        elif name == 'nostringintensity':
+            alarm = AlarmStringNoIntensity(db_con=self.db_con, name=name, **kwargs)
+        else:
+            raise UndefinedAlarmError
+
         self.alarms.append(alarm)
 
     def read_alarms_config(self, yamlfile):
@@ -121,6 +131,6 @@ class AlarmManager:
         self.create_alarm_tables()
         self.create_alarms()
         logger.debug("alarm tables creation checked")
-        self.update_alarm_nopower_inverter()
-        self.update_alarm_nointensity_string()
+        for alarm in self.alarms:
+            alarm.update_alarm()
         logger.info("Updated alarms maintenance")
