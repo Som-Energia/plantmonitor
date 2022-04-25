@@ -138,7 +138,7 @@ class AlarmManagerTests(TestCase):
         alarm_manager = AlarmManager(self.dbmanager.db_con)
         alarm_manager.create_alarm_table()
         alarms_yaml_content = { 'alarms':[{
-                'name': 'nopowerinverter',
+                'name': 'noinverterpower',
                 'description': 'Inversor sense potència entre alba i posta',
                 'severity': 'critical',
                 'createdate': datetime.date.today()
@@ -150,7 +150,7 @@ class AlarmManagerTests(TestCase):
         alarm_manager = AlarmManager(self.dbmanager.db_con)
         alarm_manager.create_alarm_table()
         alarms_yaml_content = { 'alarms':[{
-                'name': 'nointensitystring',
+                'name': 'nostringintensity',
                 'description': "String sense intensitat durant potència d'inversor",
                 'severity': 'critical',
                 'createdate': datetime.date.today()
@@ -193,17 +193,17 @@ class AlarmManagerTests(TestCase):
 
         expected_alarms = {'alarms': sorted([
             {
-            'name': 'nopowerinverter',
+            'name': 'noinverterpower',
             'description': 'Inversor sense potència entre alba i posta',
             'severity': 'critical',
             'active': True,
-            'sql': 'nopowerinverter'
+            'sql': 'noinverterpower'
             },{
-            'name': 'nointensityinverter',
+            'name': 'nostringintensity',
             'description': "String d'inversor sense potència amb potència inversor > 10 kw",
             'severity': 'critical',
             'active': True,
-            'sql': 'nointensityinverter'
+            'sql': 'nostringintensity'
             }
         ],key=lambda d: d['name'])}
 
@@ -221,4 +221,4 @@ class AlarmManagerTests(TestCase):
 
         alarms = self.dbmanager.db_con.execute('select name from alarm order by name;').fetchall()
 
-        self.assertListEqual(alarms, [('nointensityinverter',), ('nopowerinverter',)])
+        self.assertListEqual(alarms, [('noinverterpower',), ('nostringintensity',)])

@@ -1,6 +1,7 @@
 import yaml
 import datetime
 
+from abc import ABCMeta, abstractmethod
 from conf.logging_configuration import LOGGING
 import logging
 import logging.config
@@ -9,11 +10,15 @@ logger = logging.getLogger("plantmonitor")
 
 class NoSolarEventError(Exception): pass
 
-class Alarm:
+class Alarm(metaclass=ABCMeta):
 
     def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
         self.db_con = db_con
         self.name = name
+
+        #TODO instead of using the weird "get if exists set+get otherwise" syntax
+        # just get and, if the alarm doesn't exist, then create
+        # also optionally update fields other than name
         self.id = self.set_new_alarm(name, description, severity, createdate, active=True, sql=None)
 
     # TODO store the sql in db?
@@ -62,75 +67,6 @@ class Alarm:
                 alarm = {alarm}
         '''
         return self.db_con.execute(query).fetchone()[0]
-
-    def get_alarm_current_nopower_inverter(self, check_time):
-        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
-        query = f'''
-            SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nopower
-            FROM bucket_5min_inverterregistry as reg
-            LEFT JOIN inverter AS inv ON inv.id = reg.inverter
-            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
-            group by reg.inverter, inv.name
-        '''
-        return self.db_con.execute(query).fetchall()
-
-    def get_alarm_current_nointensity_string(self, check_time):
-        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
-
-        #TODO this alarm is preceded by the noreadings of inverter and strings per inverter and per string
-
-        # TODO this simplifies debugging, are we relying too much on sql?
-        # query = f'''
-        #     SELECT
-        #         reg.time as time,
-        #         ireg.inverter as inverter,
-        #         reg.string as string_id,
-        #         s.name as string_name,
-        #         reg.intensity_ma,
-        #         ireg.power_w,
-        #         CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL or ireg.power_w = 0) THEN 1 ELSE NULL END as nullcount,
-        #         case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END as nointensity
-        #     FROM bucket_5min_stringregistry as reg
-        #     LEFT JOIN string AS s ON s.id = reg.string
-        #     LEFT JOIN inverter AS inv ON inv.id = s.inverter
-        #     -- is it left joining on the whole table?
-        #     LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
-        #     WHERE
-        #         '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
-        #         AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
-        # '''
-        # print(self.db_con.execute(query).fetchall())
-
-        # The logic is:
-        # if >8 null readings (either power or intensity) -> None (sense dades)
-        # if power_w = 0 row doesn't vote for alarm
-        # if power_w != 0 and intensity = 0 vote for True (Alarm)
-        # if power_w != 0 and intensity != 0 vote for False (OK)
-        # if there's one False vote, alarm is False
-        # if all power_w readings are NULL, then None as per >8 condition
-
-        #TODO assumes we have the 12 readings
-        minimum_non_null_readings = 8
-
-        query = f'''
-            SELECT
-                reg.string as string_id,
-                s.name as string_name,
-                CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 END) > {minimum_non_null_readings}
-                     THEN NULL
-                     ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END)
-                END as nointensity
-            FROM bucket_5min_stringregistry as reg
-            LEFT JOIN string AS s ON s.id = reg.string
-            LEFT JOIN inverter AS inv ON inv.id = s.inverter
-            -- is it left joining on the whole table?
-            LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
-            WHERE
-                '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
-                AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
-            group by string_id, string_name
-        '''
-        return self.db_con.execute(query).fetchall()
 
     def set_alarm_status_update_time(self, device_table, device_id, alarm, check_time):
 
@@ -224,22 +160,35 @@ class Alarm:
 
         return is_day
 
-    def set_devices_alarms_if_inverter_power(self, alarm_id, device_table, alarms_current, check_time):
-        for device_id, device_name, status in alarms_current:
-            # TODO should we handle no inverter power in some other way? right now it'll just transition to NULL hence 'Sense Dades'
-            # if status is not None:
-            #     # inverter has no power, update check but don't change status, we can't know if the string can give intensity
-            #     self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
-            #     continue
+    @abstractmethod
+    def get_alarm_current(self, check_time):
+        pass
 
-            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+    @abstractmethod
+    def set_devices_alarms(self, check_time):
+        pass
 
-            if current_alarm['old_status'] == True and status != True:
-                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+    @abstractmethod
+    def update_alarm(self, check_time):
+        pass
+
+
+class AlarmInverterNoPower(Alarm):
+
+    def get_alarm_current(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        query = f'''
+            SELECT reg.inverter AS inverter, inv.name as inverter_name, max(reg.power_w) = 0 as nopower
+            FROM bucket_5min_inverterregistry as reg
+            LEFT JOIN inverter AS inv ON inv.id = reg.inverter
+            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+            group by reg.inverter, inv.name
+        '''
+        return self.db_con.execute(query).fetchall()
 
     # TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
     # e.g. skip_condition(db_con, inverter, check_time)
-    def set_devices_alarms_if_daylight(self, alarm_id, device_table, alarms_current, check_time):
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
         for device_id, device_name, status in alarms_current:
             if status is not None:
                 # TODO we could pass the plant id instead of device_table+device_id
@@ -254,14 +203,13 @@ class Alarm:
             if current_alarm['old_status'] == True and status != True:
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
 
-
-    def update_alarm_nopower_inverter(self, check_time = None):
+    def update_alarm(self, check_time = None):
         check_time = check_time or datetime.datetime.now()
 
         device_table = 'inverter'
 
         nopower_alarm = {
-            'name': 'nopowerinverter',
+            'name': 'noinverterpower',
             'description': 'Inversor sense potència entre alba i posta',
             'severity': 'critical',
             'createdate': datetime.date.today()
@@ -270,16 +218,90 @@ class Alarm:
         alarm_id = self.set_new_alarm(**nopower_alarm)
         # TODO check alarma noreading que invalida l'alarma nopower
 
-        alarm_current = self.get_alarm_current_nopower_inverter(check_time)
-        self.set_devices_alarms_if_daylight(alarm_id, device_table, alarm_current, check_time)
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(alarm_id, device_table, alarm_current, check_time)
 
-    def update_alarm_nointensity_string(self, check_time = None):
+
+class AlarmStringNoIntensity(Alarm):
+
+    def get_alarm_current(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+
+        #TODO this alarm is preceded by the noreadings of inverter and strings per inverter and per string
+
+        # TODO this simplifies debugging, are we relying too much on sql?
+        # query = f'''
+        #     SELECT
+        #         reg.time as time,
+        #         ireg.inverter as inverter,
+        #         reg.string as string_id,
+        #         s.name as string_name,
+        #         reg.intensity_ma,
+        #         ireg.power_w,
+        #         CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL or ireg.power_w = 0) THEN 1 ELSE NULL END as nullcount,
+        #         case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END as nointensity
+        #     FROM bucket_5min_stringregistry as reg
+        #     LEFT JOIN string AS s ON s.id = reg.string
+        #     LEFT JOIN inverter AS inv ON inv.id = s.inverter
+        #     -- is it left joining on the whole table?
+        #     LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
+        #     WHERE
+        #         '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+        #         AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
+        # '''
+        # print(self.db_con.execute(query).fetchall())
+
+        # The logic is:
+        # if >8 null readings (either power or intensity) -> None (sense dades)
+        # if power_w = 0 row doesn't vote for alarm
+        # if power_w != 0 and intensity = 0 vote for True (Alarm)
+        # if power_w != 0 and intensity != 0 vote for False (OK)
+        # if there's one False vote, alarm is False
+        # if all power_w readings are NULL, then None as per >8 condition
+
+        #TODO assumes we have the 12 readings
+        minimum_non_null_readings = 8
+
+        query = f'''
+            SELECT
+                reg.string as string_id,
+                s.name as string_name,
+                CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 END) > {minimum_non_null_readings}
+                     THEN NULL
+                     ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END)
+                END as nointensity
+            FROM bucket_5min_stringregistry as reg
+            LEFT JOIN string AS s ON s.id = reg.string
+            LEFT JOIN inverter AS inv ON inv.id = s.inverter
+            -- is it left joining on the whole table?
+            LEFT JOIN bucket_5min_inverterregistry as ireg on reg.time = ireg.time and ireg.inverter = s.inverter
+            WHERE
+                '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+                AND '{check_time}'::timestamptz - interval '60 minutes' <= ireg.time and ireg.time <= '{check_time}'::timestamptz
+            group by string_id, string_name
+        '''
+        return self.db_con.execute(query).fetchall()
+
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+            # TODO should we handle no inverter power in some other way? right now it'll just transition to NULL hence 'Sense Dades'
+            # if status is not None:
+            #     # inverter has no power, update check but don't change status, we can't know if the string can give intensity
+            #     self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+            #     continue
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
         check_time = check_time or datetime.datetime.now()
 
         device_table = 'string'
 
         nointensity_alarm = {
-            'name': 'nointensitystring',
+            'name': 'nostringintensity',
             'description': 'String sense intensitat entre alba i posta',
             'severity': 'critical',
             'createdate': datetime.date.today()
@@ -287,6 +309,6 @@ class Alarm:
 
         alarm_id = self.set_new_alarm(**nointensity_alarm)
         # TODO check alarma noreading que invalida l'alarma nointensity
-        alarm_current = self.get_alarm_current_nointensity_string(check_time)
+        alarm_current = self.get_alarm_current(check_time)
 
-        self.set_devices_alarms_if_inverter_power(alarm_id, device_table, alarm_current, check_time)
+        self.set_devices_alarms(alarm_id, device_table, alarm_current, check_time)

@@ -1,10 +1,10 @@
 alarms:
-- name: nopowerinverter
+- name: noinverterpower
   description: "Inversor sense potència entre alba i posta"
   severity: critical
-  sql: nopowerinverter
-- name: nointensityinverter
+  sql: noinverterpower
+- name: nostringintensity
   description: "String d'inversor sense potència amb potència inversor > 10 kw"
   severity: critical
-  sql: nointensityinverter
+  sql: nostringintensity
 

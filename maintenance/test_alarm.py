@@ -17,7 +17,7 @@ from .db_test_factory import DbTestFactory, DbPlantFactory
 
 from re import search
 
-from .alarm import Alarm, NoSolarEventError
+from .alarm import Alarm, AlarmInverterNoPower, NoSolarEventError
 from .alarm_manager import AlarmManager
 
 class AlarmTests(TestCase):
@@ -59,10 +59,11 @@ class AlarmTests(TestCase):
     def create_alarm_nopower_inverter_tables(self):
         self.alarm_manager.create_alarm_tables()
         alarms_yaml_content = { 'alarms':[{
-                'name': 'nopowerinverter',
+                'name': 'noinverterpower',
                 'description': 'Inversor sense potència entre alba i posta',
                 'severity': 'critical',
-                'createdate': datetime.date.today()
+                'createdate': datetime.date.today(),
+                'sql': 'noinverterpower'
             }]
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
@@ -70,7 +71,7 @@ class AlarmTests(TestCase):
     def create_alarm_nointensity_string_tables(self):
         self.alarm_manager.create_alarm_tables()
         alarms_yaml_content = { 'alarms':[{
-                'name': 'nointensitystring',
+                'name': 'nostringintensity',
                 'description': "String sense intensitat durant potència d'inversor",
                 'severity': 'critical',
                 'createdate': datetime.date.today()
@@ -98,7 +99,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,0,tzinfo=datetime.timezone.utc)
-        result = alarm.get_alarm_current_nopower_inverter(check_time)
+        result = alarm.get_alarm_current(check_time)
 
         expected = [(1, 'Alibaba_inverter', True)]
         self.assertListEqual(result, expected)
@@ -113,7 +114,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
-        result = alarm.get_alarm_current_nopower_inverter(check_time)
+        result = alarm.get_alarm_current(check_time)
 
         expected = [(1, 'Alibaba_inverter', False)]
         self.assertListEqual(result, expected)
@@ -128,7 +129,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
-        result = alarm.get_alarm_current_nopower_inverter(check_time)
+        result = alarm.get_alarm_current(check_time)
 
         expected = [(1, 'Alibaba_inverter', True), (2, 'Quaranta_Lladres_inverter', None)]
         self.assertListEqual(result, expected)
@@ -144,7 +145,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = '2022-02-17 00:24:55'
-        result = alarm.get_alarm_current_nopower_inverter(check_time)
+        result = alarm.get_alarm_current(check_time)
 
         expected = [(1, 'Alibaba_inverter', True)]
         self.assertListEqual(result, expected)
@@ -286,7 +287,7 @@ class AlarmTests(TestCase):
             'createdate': datetime.datetime(2022,3,18)
         }
 
-        alarm = Alarm(self.dbmanager.db_con, **alarm)
+        alarm = AlarmInverterNoPower(self.dbmanager.db_con, **alarm)
 
         expected = 1
 
@@ -302,7 +303,7 @@ class AlarmTests(TestCase):
             'createdate': datetime.datetime(2022,3,18)
         }
 
-        alarm = Alarm(self.dbmanager.db_con, **alarm)
+        alarm = AlarmInverterNoPower(self.dbmanager.db_con, **alarm)
 
         num_alarms = self.dbmanager.db_con.execute("select count(*) from alarm limit 1;").fetchone()
         self.assertEqual(num_alarms, (1,))
@@ -328,7 +329,7 @@ class AlarmTests(TestCase):
         expected = {'id': 1, **alarm_historic}
         self.assertDictEqual(dict(result), expected)
 
-    def test__update_alarm_nopower_inverter__new_alarm(self):
+    def test__alarm_inverter_no_power__update_alarm____new_alarm(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__alarm_triggered.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
@@ -338,7 +339,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        alarm.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -346,7 +347,7 @@ class AlarmTests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
-    def test__update_alarm_nopower_inverter__status_change(self):
+    def test__alarm_inverter_no_power__update_alarm__status_change(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__change_status.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
@@ -356,10 +357,10 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        alarm.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm(check_time)
 
         check_time = check_time + datetime.timedelta(minutes=5)
-        alarm.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 20, tzinfo=datetime.timezone.utc), False)
@@ -373,7 +374,7 @@ class AlarmTests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertTupleEqual(tuple(result[0]), expected)
 
-    def test__update_alarm_nopower_inverter__none_power_readings(self):
+    def test__alarm_inverter_no_power__update_alarm__none_power_readings(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__none_power_readings.csv', 'bucket_5min_inverterregistry')
         self.create_alarm_nopower_inverter_tables()
         alarm = self.alarm_manager.alarms[0]
@@ -383,7 +384,7 @@ class AlarmTests(TestCase):
         self.create_plant(sunrise, sunset)
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        alarm.update_alarm_nopower_inverter(check_time)
+        alarm.update_alarm(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'inverter', 1, 'Alibaba_inverter', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -426,7 +427,7 @@ class AlarmTests(TestCase):
 
     def test__get_alarm_by_name__base(self):
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
         self.assertIsNotNone(alarm)
 
     def test__set_alarm_status_update_time__empty(self):
@@ -466,16 +467,16 @@ class AlarmTests(TestCase):
         self.assertEqual(result['update_time'], check_time)
         self.assertTrue(result['status'])
 
-    def test__update_alarm_nointensity_string__new_alarm(self):
+    def test__alarm_string_intensity__update_alarm___new_alarm(self):
         self.factory.create('input__get_alarm_current_nopower_inverter__no_alarm.csv', 'bucket_5min_inverterregistry')
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         self.plantfactory.create_inverter_string_plant()
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
-        alarm.update_alarm_nointensity_string(check_time)
+        alarm.update_alarm(check_time)
 
         result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
         expected = (1, 'string', 1, 'string1', 1, datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), datetime.datetime(2022, 2, 17, 13, 15, tzinfo=datetime.timezone.utc), True)
@@ -489,11 +490,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_ok.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [(1, 'string1', False)]
 
@@ -505,11 +506,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [(1, 'string1', True)]
 
@@ -521,11 +522,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [(1, 'string1', True)]
 
@@ -537,11 +538,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [(1, 'string1', None)]
 
@@ -555,11 +556,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__zero_zero.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [
             (8, 'string11', True)
@@ -575,11 +576,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__debug_case.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [
             (8, 'string11', True)
@@ -595,11 +596,11 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__string_many_cases.csv', 'bucket_5min_stringregistry')
 
         self.create_alarm_nointensity_string_tables()
-        alarm = self.alarm_manager.get_alarm_by_name('nointensitystring')
+        alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
 
-        result = alarm.get_alarm_current_nointensity_string(check_time=check_time)
+        result = alarm.get_alarm_current(check_time=check_time)
 
         expected = [
             (1, 'string1', None),
