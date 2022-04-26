@@ -283,6 +283,8 @@ CREATE TABLE "plantparameters" (
   "n_modules_string" INTEGER,
   "inverter_loss_mpercent" INTEGER,
   "meter_loss_mpercent" INTEGER,
+  "target_monthly_energy_wh" BIGINT NOT NULL,
+  "historic_monthly_energy_wh" BIGINT,
   "month_theoric_pr_cpercent" BIGINT,
   "year_theoric_pr_cpercent" BIGINT
 );

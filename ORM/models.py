@@ -360,11 +360,13 @@ def define_models(database):
             peakPowerMWp,
             nominalPowerMW,
             connectionDate,
+            targetMonthlyEnergyGWh,
             nStringsPlant=None,
             nStringsInverter=None,
             nModulesString=None,
             inverterLossPercent=None,
             meterLossPercent=None,
+            historicMonthlyEnergyMWh=None,
             monthTheoricPRPercent=None,
             yearTheoricPRPercent=None):
 
@@ -377,11 +379,13 @@ def define_models(database):
                 'peak_power_w': int(peakPowerMWp*1000000),
                 'nominal_power_w': int(nominalPowerMW*1000000),
                 'connection_date': connection_date,
+                'target_monthly_energy_wh': int(targetMonthlyEnergyGWh*1000000000),
                 'n_strings_plant': nStringsPlant and int(nStringsPlant),
                 'n_strings_inverter': nStringsInverter and int(nStringsInverter),
                 'n_modules_string': nModulesString and int(nModulesString*1000),
                 'inverter_loss_mpercent': inverterLossPercent and int(inverterLossPercent*1000),
                 'meter_loss_mpercent': meterLossPercent and int(meterLossPercent*1000),
+                'historic_monthly_energy_wh': historicMonthlyEnergyMWh and int(historicMonthlyEnergyMWh/1000000),
                 'month_theoric_pr_cpercent': monthTheoricPRPercent and int(monthTheoricPRPercent*100),
                 'year_theoric_pr_cpercent': yearTheoricPRPercent and int(yearTheoricPRPercent*100),
             }
@@ -958,7 +962,8 @@ def define_models(database):
         n_modules_string = Optional(int)
         inverter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb l'inversor?
         meter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb el comptador?
-
+        target_monthly_energy_wh = Required(int, size=64)
+        historic_monthly_energy_wh = Optional(int, size=64)
         month_theoric_pr_cpercent = Optional(int, size=64)
         year_theoric_pr_cpercent = Optional(int, size=64)
 
