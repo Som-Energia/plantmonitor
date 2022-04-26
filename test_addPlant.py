@@ -422,3 +422,4 @@ class ImportPlant_Test(unittest.TestCase):
             nsplants_original.plants[0].plant.codename = 'SomEnergia_Le_Roger_Nouveau_Meteo'
 
             self.assertNsEqual(nsplants_original, resultPlantNs)
+# vim: ts=4 sw=4 et

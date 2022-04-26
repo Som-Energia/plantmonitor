@@ -337,18 +337,34 @@ def define_models(database):
                     **values
                 )
 
+        def setEstimateddMonthlyEnergy(
+            self,
+            time,
+            monthlyTargetEnergyKWh,
+            monthlyHistoricEnergyKWh):
+            values = {
+                'time': time,
+                'monthly_target_energy_kwh': monthlyTargetEnergyKWh,
+                'monthly_historic_energy_kwh': monthlyHistoricEnergyKWh,
+            }
+            if self.plantEstimatedMonthlyEnergy:
+                self.plantEstimatedMonthlyEnergy.set(**values)
+            else:
+                self.plantEstimatedMonthlyEnergy = PlantEstimatedMonthlyEnergy(
+                    plantparameters=self,
+                    **values
+                )
+
         def setPlantParameters(
             self,
             peakPowerMWp,
             nominalPowerMW,
             connectionDate,
-            targetMonthlyEnergyGWh,
             nStringsPlant=None,
             nStringsInverter=None,
             nModulesString=None,
             inverterLossPercent=None,
             meterLossPercent=None,
-            historicMonthlyEnergyMWh=None,
             monthTheoricPRPercent=None,
             yearTheoricPRPercent=None):
 
@@ -361,13 +377,11 @@ def define_models(database):
                 'peak_power_w': int(peakPowerMWp*1000000),
                 'nominal_power_w': int(nominalPowerMW*1000000),
                 'connection_date': connection_date,
-                'target_monthly_energy_wh': int(targetMonthlyEnergyGWh*1000000000),
                 'n_strings_plant': nStringsPlant and int(nStringsPlant),
                 'n_strings_inverter': nStringsInverter and int(nStringsInverter),
                 'n_modules_string': nModulesString and int(nModulesString*1000),
                 'inverter_loss_mpercent': inverterLossPercent and int(inverterLossPercent*1000),
                 'meter_loss_mpercent': meterLossPercent and int(meterLossPercent*1000),
-                'historic_monthly_energy_wh': historicMonthlyEnergyMWh and int(historicMonthlyEnergyMWh/1000000),
                 'month_theoric_pr_cpercent': monthTheoricPRPercent and int(monthTheoricPRPercent*100),
                 'year_theoric_pr_cpercent': yearTheoricPRPercent and int(yearTheoricPRPercent*100),
             }
@@ -935,6 +949,7 @@ def define_models(database):
 
     class PlantParameters(database.Entity):
         plant = Required(Plant)
+        plant_estimated_monthly_energy = Optional('PlantEstimatedMonthlyEnergy')
         peak_power_w = Required(int, size=64)
         nominal_power_w = Required(int, size=64)
         connection_date = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
@@ -944,8 +959,6 @@ def define_models(database):
         inverter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb l'inversor?
         meter_loss_mpercent = Optional(int) # TODO és fixe a la planta o canvia amb el comptador?
 
-        target_monthly_energy_wh = Required(int, size=64)
-        historic_monthly_energy_wh = Optional(int, size=64)
         month_theoric_pr_cpercent = Optional(int, size=64)
         year_theoric_pr_cpercent = Optional(int, size=64)
 
@@ -965,6 +978,21 @@ def define_models(database):
                 'yearTheoricPRPercent': self.year_theoric_pr_cpercent and self.year_theoric_pr_cpercent*100,
             }
 
+            pp = {k:v for k,v in pp.items() if v is not None}
+            return pp
+
+    class PlantEstimatedMonthlyEnergy(database.Entity):
+        plantparameters = Required(PlantParameters)
+        time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+        monthly_target_energy_kwh = Required(int, size=64)
+        monthly_historic_energy_kwh = Required(int, size=64)
+
+        def export(self):
+            pp = {
+                'time': self.time.date(),
+                'monthly_target_energy_kwh': self.monthly_target_energy_kwh,
+                'monthly_historic_energy_kwh': self.monthly_historic_energy_kwh,
+            }
             pp = {k:v for k,v in pp.items() if v is not None}
             return pp
 
