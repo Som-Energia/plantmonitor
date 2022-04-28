@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://geomodel.eu/schema/common/types" elementFormDefault="qualified" 
+	xmlns="http://www.w3.org/2001/XMLSchema" 
+	xmlns:t="http://geomodel.eu/schema/common/types">
+
+	<complexType name="DatePeriod" abstract="true">
+		<annotation>
+			<documentation>Date period abstract type, implementing types are DatePeriodExpr and DatePeriodConst</documentation>
+		</annotation>
+	</complexType>
+
+	<complexType name="DatePeriodExpr">
+		<complexContent>
+			<extension base="t:DatePeriod">
+				<attribute name="from" type="t:dateExpr" use="required" />
+				<attribute name="to" type="t:dateExpr" use="required" />			
+			</extension>
+		</complexContent>		
+	</complexType>
+	
+	<complexType name="DatePeriodConst">
+		<complexContent>
+			<extension base="t:DatePeriod">
+				<annotation>
+					<documentation>required are any two of attributes, to determine exact date period</documentation>
+				</annotation>
+				<attribute name="from" type="date"/>
+				<attribute name="to" type="date"/>
+				<attribute name="days" type="int"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="TimeInterval">
+		<attribute name="unit" type="t:timeUnitEnum" use="required"/>
+		<attribute name="value" type="t:positiveInt" use="required"/>
+	</complexType>
+
+	<complexType name="MonthlyValues">
+		<attribute name="monthly" use="required">
+			<annotation>
+				<documentation>Values for all 12 months (January-December) separated by space, example: 85.6 85.1 84.1 81.2 79.1 78.1 77.5 77.8 80.0 81.9 83.4 84.5</documentation>
+			</annotation>
+			<simpleType>
+				<restriction base="t:stringValues">
+					<pattern value="[^ ]*( [^ ]*){11}"></pattern>
+				</restriction>
+			</simpleType>
+		</attribute>
+		<attribute name="yearly" type="string" use="optional">
+			<annotation>
+				<documentation>Yearly summary of average of monthly values</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+
+    <simpleType name="percent">
+    	<annotation>
+    		<documentation>signed percent value bounded to maximum 100%</documentation>
+    	</annotation>
+    	<restriction base="double">
+    		<minInclusive value="-100"></minInclusive>
+    		<maxInclusive value="100"></maxInclusive>
+    	</restriction>
+    </simpleType>
+    
+	<simpleType name="positiveInt">	
+		<restriction base="int">
+			<minExclusive value="0" />			
+		</restriction>
+	</simpleType>
+
+	<simpleType name="dateWithTimeZone">
+		<annotation>
+			<documentation>To determine DateWithTimeZone JAXB generation, at XML level same as xs:date</documentation>
+		</annotation>
+		<restriction base="date"/>
+	</simpleType>
+
+	<simpleType name="timeZoneGMT">
+		<annotation>
+			<documentation>Time Zone definition according to Greenwich Mean Time, valid pattern: GMT[+-][number of hours]</documentation>
+		</annotation>
+		<restriction base="string">
+			<pattern value="GMT[+-]\d{1,2}"/>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="stringValues">
+		<list itemType="string"/>
+	</simpleType>
+	
+	<simpleType name="doublePair">
+		<annotation>
+			<documentation>Pair of double values separated by colon character ':'</documentation>
+		</annotation>
+		<restriction base="string">
+			<pattern value="-?\d+(\.\d+)?:-?\d+(\.\d+)?"></pattern>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="doublePairs">
+		<list itemType="t:doublePair"/>
+	</simpleType>
+
+	<simpleType name="doubleValues">
+		<list itemType="double"/>
+	</simpleType>
+
+	<simpleType name="month">
+		<restriction base="integer">
+			<minInclusive value="1"/>
+			<maxInclusive value="12"/>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="dayOfYear">
+		<restriction base="integer">
+			<minInclusive value="1"/>	
+			<maxInclusive value="365"/>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="timeUnitEnum">
+		<restriction base="string">
+			<enumeration value="SECOND" />
+			<enumeration value="MINUTE" />
+			<enumeration value="HOUR" />
+			<enumeration value="DAY" />
+			<enumeration value="WEEK" />
+			<enumeration value="MONTH" />
+			<enumeration value="YEAR" />
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="dateUnitEnum">
+		<restriction base="t:timeUnitEnum">			
+			<enumeration value="DAY" />
+			<enumeration value="WEEK" />
+			<enumeration value="MONTH" />
+			<enumeration value="YEAR" />
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="dateExpr">
+		<annotation>
+			<documentation>
+				Date expression format:
+				TODAY - today's date
+				DATE:2012-12-31 - date constant in format yyyy-MM-dd
+				META - date fetched by metadata service
+				MONTH:-5:LEFT - today - 5 months, aligned to beginning of month
+				YEAR:0:RIGHT - today, aligned to end of current year
+			</documentation>
+		</annotation>
+		<restriction base="string">
+			<pattern value="TODAY|META|(DATE:\d{4}-\d{2}-\d{2})|((DAY|WEEK|MONTH|YEAR):-?\d+(:(LEFT|RIGHT|NONE))?)" />
+		</restriction>
+	</simpleType>
+	
+	<attributeGroup name="dateRangeAttributes">
+		<attribute name="dateFrom" type="t:dateWithTimeZone" use="required">
+			<annotation>
+				<documentation>begin date of the date range</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="dateTo" type="t:dateWithTimeZone" use="required">
+			<annotation>
+				<documentation>end date of the date range</documentation>
+			</annotation>
+		</attribute>
+	</attributeGroup>
+
+	<attributeGroup name="optionalDateRangeAttributes">
+		<attribute name="dateFrom" type="t:dateWithTimeZone">
+			<annotation>
+				<documentation>begin date of the date range</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="dateTo" type="t:dateWithTimeZone">
+			<annotation>
+				<documentation>end date of the date range</documentation>
+			</annotation>
+		</attribute>
+	</attributeGroup>
+	
+	
+</schema>

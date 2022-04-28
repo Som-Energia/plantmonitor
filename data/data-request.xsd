@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://geomodel.eu/schema/data/request" elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns:t="http://geomodel.eu/schema/common/types"  
+	xmlns:pv="http://geomodel.eu/schema/common/pv" 
+	xmlns:data="http://geomodel.eu/schema/common/data"
+	xmlns:cus="http://geomodel.eu/schema/model/customer"
+	xmlns:req="http://geomodel.eu/schema/data/request">
+	
+	<import namespace="http://geomodel.eu/schema/common/types" schemaLocation="common-types.xsd"/>
+	<import namespace="http://geomodel.eu/schema/common/data" schemaLocation="common-data.xsd"/>
+	<import namespace="http://geomodel.eu/schema/common/pv" schemaLocation="common-pv.xsd"/>
+	<import namespace="http://geomodel.eu/schema/model/customer" schemaLocation="model-customer.xsd"/>
+
+	<element name="tsRequest" type="req:TsRequest"/>
+	<element name="ltaRequest" type="req:LtaRequest"/>
+	<element name="tmyRequest" type="req:TmyRequest"/>
+
+	<complexType name="TsRequest">
+		<annotation>
+			<documentation>Time Series climData request</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="req:ClimDataRequest">
+				<attributeGroup ref="t:dateRangeAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="LtaRequest">
+		<annotation>
+			<documentation>Long-term averages climData request</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="req:ClimDataRequest">
+				<attributeGroup ref="t:optionalDateRangeAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="TmyRequest">
+		<annotation>
+			<documentation>Typical Meteorological Year climData request</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="req:ClimDataRequest">
+				<attribute name="type" type="req:tmyType" use="required"/>
+				<attributeGroup ref="t:optionalDateRangeAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="DataRequest">
+		<sequence>
+			<element name="site" type="req:DataSite" maxOccurs="unbounded"/>
+			<element name="processing" type="req:Processing"/>
+		</sequence>
+	</complexType>
+	<complexType name="DataSite">
+		<complexContent>
+			<extension base="pv:Site">
+				<attributeGroup ref="req:siteAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<attributeGroup name="siteAttributes">
+		<attribute name="id" type="ID" use="required">
+			<annotation>
+				<documentation>unique site ID</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="name" type="string">
+			<annotation>
+				<documentation>name of the site</documentation>
+			</annotation>
+		</attribute>
+	</attributeGroup>
+	<!-- 
+	<complexType name="ServerDataRequest">
+		<complexContent>
+			<extension base="req:DataRequest">
+				<sequence>
+					<element name="export" type="req:Export" minOccurs="0"/>
+				</sequence>
+				<attribute name="contractId" type="string">
+					<annotation>
+						<documentation>Determine the contract for users with multiple contracts, if not specified default contract is assumed</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="OnetimeDataRequest">
+		<complexContent>
+			<extension base="req:ServerDataRequest">
+				<attributeGroup ref="t:dateRangeAttributes">
+					<annotation>
+						<documentation>date range is limited by contract 'allowed data from' and 'validity to'</documentation>
+					</annotation>
+				</attributeGroup>
+			</extension>
+		</complexContent>
+	</complexType>
+	-->
+	<complexType name="ClimDataRequest" abstract="true">
+		<complexContent>
+			<extension base="req:DataRequest">
+				<sequence>
+					<element name="customer" type="cus:Customer" minOccurs="0"/>
+					<element name="export" type="req:Export" maxOccurs="unbounded"/>
+				</sequence>
+				<attribute name="reportId" type="string" use="optional"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="Processing">
+		<all>
+			<element name="timeZone" type="t:timeZoneGMT" default="GMT+0" minOccurs="0" maxOccurs="1">
+				<annotation>
+					<documentation>if unspecified, default value is GMT+0</documentation>
+				</annotation>
+			</element>
+			<element name="timestampType" type="req:processingTimestampTypeEnum" minOccurs="0" maxOccurs="1">
+				<annotation>
+					<documentation>if unspecified, default value is CENTER for HOURLY summarization</documentation>
+				</annotation>
+			</element>
+		</all>
+		<attribute name="key" type="req:processingKeys" use="required">
+			<annotation>
+				<documentation>limited by contract 'allowed processing keys'</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="summarization" type="req:summarizationEnum" use="required">
+			<annotation>
+				<documentation>output data sumarization type, limited by contract 'allowed minimum summarization', larger summarization is always allowed</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="terrainShading" type="boolean" default="false">
+			<annotation>
+				<documentation>apply terrain shading</documentation>
+			</annotation>
+		</attribute>		
+	</complexType>
+	<simpleType name="summarizationEnum">
+		<restriction base="data:summarizationPeriodEnum">			
+			<enumeration value="YEARLY"/>
+            <enumeration value="MONTHLY"/>
+			<enumeration value="DAILY"/>
+			<enumeration value="HOURLY"/>
+            <enumeration value="MIN_30"/>
+            <enumeration value="MIN_15"/>
+            <enumeration value="MIN_10"/>
+            <enumeration value="MIN_5"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="processingKeys">
+		<list itemType="req:processingKeyEnum"/>
+	</simpleType>
+	<simpleType name="processingKeyEnum">
+		<restriction base="data:dataCodeEnum">
+			<enumeration value="GHI"/> <!-- Global Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_C"/> <!-- Clear-sky Global Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_UNC_HIGH"/> <!-- GHI high estimate (10 % prob. of exceedance) resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_UNC_LOW"/> <!-- GHI low estimate (90 % prob. of exceedance) [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DNI"/> <!-- Direct Normal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DNI_C"/> <!-- Clear-sky Direct Normal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DIF"/> <!-- Diffuse Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI"/> <!-- Global Tilted Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI_UNC_HIGH"/> <!-- GTI high estimate (10 % prob. of exceedance) resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI_UNC_LOW"/> <!-- GTI low estimate (90 % prob. of exceedance) [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="CI_FLAG"/>	<!-- Cloud identification quality flag [categories] -->
+			<enumeration value="FLAG_R"/>	<!-- Cloud identification quality flag [categories], alias of CI_FLAG -->
+            <enumeration value="KTM"/>	<!-- Deprecated alias of KC. Clear-sky index [unitless] -->
+            <enumeration value="KC"/>	<!-- Clear-sky index [unitless] -->
+            <enumeration value="PAR"/> <!-- Photosynthetically Active Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="SE"/>  <!-- Sun Altitude (Elevation) Angle [deg.] -->
+            <enumeration value="SA"/>  <!-- Sun Azimuth Angle [deg.] -->
+            <enumeration value="TEMP"/> <!-- Air Temperature at 2m [deg. C]-->
+            <enumeration value="TD"/> <!-- Dew Point Temperature [deg. C]-->
+            <enumeration value="WBT"/> <!-- Wet Bulb Temperature [deg. C]-->
+            <enumeration value="AP"/> <!-- Atmospheric Pressure [hPa] -->
+            <enumeration value="RH"/> <!-- Relative Humidity [%] -->
+            <enumeration value="WS"/> <!-- Wind Speed [m/s] -->
+            <enumeration value="WD"/> <!-- Wind Direction [deg.] -->
+            <enumeration value="PREC"/> <!-- Precipitation Rate [kg/m2] -->
+            <enumeration value="PWAT"/> <!-- Precipitable Water [kg/m2] -->
+            <enumeration value="PVOUT"/> <!-- Photovoltaic Output [kW, resp. kWh] -->
+            <enumeration value="PVOUT_UNC_HIGH"/> <!-- PVOUT high estimate (10 % prob. of exceedance) [kW, resp. kWh] -->
+            <enumeration value="PVOUT_UNC_LOW"/> <!-- PVOUT low estimate (90 % prob. of exceedance) [kW, resp. kWh] -->
+            <enumeration value="KT"/> <!-- clearness index, values range (0, 1.1), during the night -9 -->
+            <enumeration value="SWE"/> <!-- Deprecated alias of SDWE. Water equivalent of accumulated snow depth [kg/m2] -->
+			<enumeration value="SDWE"/> <!-- Water equivalent of accumulated snow depth [kg/m2] -->
+            <enumeration value="TMOD"/> <!-- Module temperature [deg. C] -->
+            <enumeration value="WG"/> <!-- Wind Gust [m/s] -->
+            <enumeration value="GTI_C"/> <!-- Global tilted clear-sky irradiance [W/m2] -->
+            <enumeration value="WS100"/> <!-- Wind speed at 100 m [m/s] -->
+            <enumeration value="WD100"/> <!-- Wind direction at 100 m [deg.] -->
+            <enumeration value="SFWE"/> <!-- Water equivalent of fresh snowfall rate [kg/m2/hour] - no recent data 4 recent months missing, from ERA5 -->
+            <enumeration value="INC"/> <!-- Incidence angle of direct irradiance [deg.] -->
+            <enumeration value="TILT"/> <!-- Tilt of inclined surface [deg.] -->
+            <enumeration value="ASPECT"/> <!-- Aspect of inclined surface [deg.] -->
+		</restriction>
+	</simpleType>
+	<simpleType name="processingTimestampTypeEnum">
+		<annotation>
+			<documentation>
+                Valid for [sub]hourly summarization. Summarization interval can be time-stamped at center (default) or at start or end.
+                In other words users can choose left or right edge of the time interval as its label.
+            </documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="CENTER"/>
+			<enumeration value="END"/>
+            <enumeration value="START"/>
+		</restriction>
+	</simpleType>
+	<complexType name="Export">
+		<sequence>
+			<element name="deliveryTarget" type="req:DeliveryTarget" minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>delivery target email addresses / ftp accounts / local folders</documentation>
+				</annotation>
+			</element>
+		</sequence>
+		<attribute name="format" type="string" use="required"/>
+		<attribute name="filename" type="string">
+			<annotation>
+				<documentation>output filename, if not specified - generated automatically</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="compression" type="req:compressionEnum">
+			<annotation>
+				<documentation>optional compression of the output *.csv file</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<simpleType name="compressionEnum">
+		<restriction base="string">
+			<enumeration value="ZIP"/>
+			<enumeration value="GZ"/>
+		</restriction>
+	</simpleType>
+	<complexType name="DeliveryTarget" abstract="true"/>
+	<complexType name="FTPTarget">
+		<complexContent>
+			<extension base="req:DeliveryTarget">
+				<attribute name="host" type="string" use="required"/>
+				<attribute name="username" type="string" use="required"/>
+				<attribute name="password" type="string" use="required"/>
+				<attribute name="folder" type="string"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="EmailTarget">
+		<complexContent>
+			<extension base="req:DeliveryTarget">
+				<attribute name="emailAddress" type="req:emailAddress" use="required"/>
+				<attribute name="subject" type="string"/>
+				<attribute name="message" type="string"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="FolderTarget">
+		<complexContent>
+			<extension base="req:DeliveryTarget">
+				<attribute name="host" type="string" use="required"/>
+				<attribute name="folderPath" type="string" use="required"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<simpleType name="emailAddress">
+		<restriction base="string">
+			<pattern value="[\w\._%+-]+@[\w\._+-]+\.[\w]{2,4}"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="tmyType">
+		<annotation>
+			<documentation>P##, e.g. P50, P90, etc.</documentation>
+		</annotation>
+		<restriction base="string">
+			<pattern value="P\d\d"></pattern>
+		</restriction>
+	</simpleType>
+</schema>

@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2011 rel. 3 sp1 (http://www.altova.com) by Michal Moravcik (GeoModel Solar) -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="http://geomodel.eu/schema/common/types" xmlns:geo="http://geomodel.eu/schema/common/geo" xmlns:pv="http://geomodel.eu/schema/common/pv" targetNamespace="http://geomodel.eu/schema/common/pv" elementFormDefault="qualified">
+	
+	<import namespace="http://geomodel.eu/schema/common/types" schemaLocation="common-types.xsd"/>
+	<import namespace="http://geomodel.eu/schema/common/geo" schemaLocation="common-geo.xsd"/>
+	
+	<complexType name="Site">
+		<complexContent>
+			<extension base="geo:Location">
+				<sequence>
+					<element name="geometry" type="pv:Geometry" minOccurs="0"/>
+					<element name="system" type="pv:PvSystem" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="PvSystem">
+		<annotation>
+			<documentation>PV system configuration</documentation>
+		</annotation>
+		<all>
+			<element name="module" type="pv:ModuleSettings"/>
+			<element name="topology" type="pv:Topology" minOccurs="0"/>
+			<element name="inverter" type="pv:InverterSettings"/>
+			<element name="losses" type="pv:Losses"/>
+		</all>
+		<attribute name="selfShading" type="boolean" default="false">
+			<annotation>
+				<documentation>apply panels self shading</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="installedPower">
+			<annotation>
+				<documentation>Installed PV system power [kWp]</documentation>
+			</annotation>
+			<simpleType>
+				<restriction base="double">
+					<minExclusive value="0">
+						<annotation>
+							<documentation>lower limit is 0 kWp</documentation>
+						</annotation>
+					</minExclusive>
+				</restriction>
+			</simpleType>
+		</attribute>
+		<attribute name="dateStartup" type="t:dateWithTimeZone">
+			<annotation>
+				<documentation>PV system startup date for degradation calculation</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="installationType" type="pv:moduleInstallationTypeEnum" default="FREE_STANDING"/>
+		<attribute name="availability" type="t:percent">
+			<annotation>
+				<documentation>PV system availability [%]</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<complexType name="Losses">
+		<annotation>
+			<documentation>Losses of system components</documentation>
+		</annotation>
+		<all>
+			<element name="dcLosses" minOccurs="0">
+				<complexType>
+					<attribute name="snowPollution" type="t:percent">
+						<annotation>
+							<documentation>Annual value of the percentual loss [%]; Typically 1 – 10% loss of power</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="monthlySnowPollution" type="t:doubleValues">
+						<annotation>
+							<documentation>12 monthly values of percentual losses [%]; Typically 1 – 10% loss of power</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="cables" type="t:percent">
+						<annotation>
+							<documentation>Omic losses pre-calculated by user [%]; Typically 0.7 – 1.5 % loss of power</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="mismatch" type="t:percent">
+						<annotation>
+							<documentation>Given by manufacturer (power tolerance dependent) [%]; Typically 0.5 – 1.0 % loss of power</documentation>
+						</annotation>
+					</attribute>
+				</complexType>
+			</element>
+			<element name="acLosses" minOccurs="0">
+				<complexType>
+					<attribute name="transformer" type="t:percent">
+						<annotation>
+							<documentation>AC losses - transformer [%]</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="cables" type="t:percent">
+						<annotation>
+							<documentation>AC losses - cables [%]</documentation>
+						</annotation>
+					</attribute>
+				</complexType>
+			</element>
+		</all>
+		<attribute name="dc" type="t:percent">
+			<annotation>
+				<documentation>Syntethic DC losses - aggregated PollutionSnow, DCCables and DCMismatch losses [%]</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="ac" type="t:percent">
+			<annotation>
+				<documentation>Transformer and AC cabling losses [%]</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<complexType name="ModuleSettings">
+		<all>
+			<element name="degradation" type="t:percent" minOccurs="0">
+				<annotation>
+					<documentation>annual degradation of pv modules [%]</documentation>
+				</annotation>
+			</element>
+			<element name="degradationFirstYear" type="t:percent" minOccurs="0">
+				<annotation>
+					<documentation>annual degradation for the first year [%]</documentation>
+				</annotation>
+			</element>
+			<element name="surfaceReflectance" type="double" minOccurs="0">
+				<annotation>
+					<documentation>empirical coeff, dimensionless (typical value 0.12)</documentation>
+				</annotation>
+			</element>
+			<element name="powerTolerance" minOccurs="0">
+				<complexType>
+					<attribute name="low" type="t:percent">
+						<annotation>
+							<documentation>low limit tolerance of nominal power at STC [%]
+							</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="high" type="t:percent">
+						<annotation>
+							<documentation>high limit tolerance of nominal power at STC [%]
+							</documentation>
+						</annotation>
+					</attribute>			
+				</complexType>			
+			</element>
+			<element name="nominalOperatingCellTemp" type="double" minOccurs="0">
+				<annotation>
+					<documentation>Nominal Operating Cell Temperature (NOCT) [°C]</documentation>
+				</annotation>
+			</element>
+			<element name="openCircuitVoltageCoeff" type="double" minOccurs="0">
+				<annotation>
+					<documentation>Thermal coeffiecient of Open circuit voltage, in % per degree Celsius [%/°C]</documentation>
+				</annotation>
+			</element>
+			<element name="shortCircuitCurrentCoeff" type="double" minOccurs="0">
+				<annotation>
+					<documentation>Thermal coefficient of Short circuit current, in % per degree Celsius [%/°C]</documentation>
+				</annotation>
+			</element>
+			<element name="PmaxCoeff" type="double" minOccurs="0">
+				<annotation>
+					<documentation>Thermal coefficient of nominal power at STC, in % per degree Celsius [%/°C]</documentation>
+				</annotation>
+			</element>
+		</all>
+		<attribute name="type" type="pv:moduleTypeEnum" use="required"/>
+		<attributeGroup ref="pv:modulePowerAttributes">
+			<annotation>
+				<documentation>required if installedPower is not defined and vice versa</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<simpleType name="moduleTypeEnum">
+		<annotation>
+			<documentation>PV module type enumeration</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="CSI">
+				<annotation>
+					<documentation>crystalline silicon (c-Si)</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="ASI">
+				<annotation>
+					<documentation>amorphous silicon (a-Si)</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="CDTE">
+				<annotation>
+					<documentation>cadmium telluride (CdTe)</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="CIS">
+				<annotation>
+					<documentation>copper indium selenide (CIS)</documentation>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<attributeGroup name="modulePowerAttributes">
+		<attribute name="count" type="int">
+			<annotation><documentation>number of modules</documentation></annotation>
+		</attribute>
+		<attribute name="nominalPower" type="int">
+			<annotation><documentation>[W]</documentation></annotation>
+		</attribute>
+	</attributeGroup>
+
+	<complexType name="InverterSettings">
+		<all>
+			<element name="startPower" type="double" minOccurs="0">
+				<annotation>
+					<documentation>minimum power when inverter starts to work [kW]</documentation>
+				</annotation>
+			</element>
+			<element name="limitationACPower" type="double" minOccurs="0">
+				<annotation>
+					<documentation>maximum power when inverted limits the AC output [kW]</documentation>
+				</annotation>
+			</element>
+			<element name="nominalDCPower" type="double" minOccurs="0">
+				<annotation>
+					<documentation>[kW]</documentation>
+				</annotation>
+			</element>
+			<element name="efficiency" type="pv:Efficiency" minOccurs="0"/>
+		</all>
+		<attribute name="count" type="int">
+			<annotation>
+				<documentation>number of inverters</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="interconnection" type="pv:inverterInterconnectionEnum"/>
+	</complexType>
+	<simpleType name="inverterInterconnectionEnum">
+		<annotation>
+			<documentation>inverter interconnection enumeration</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="SERIAL"/>
+			<enumeration value="PARALLEL"/>
+			<enumeration value="SERIOPARALLEL"/>
+		</restriction>
+	</simpleType>
+	<complexType name="Efficiency" abstract="true">
+		<annotation>
+			<documentation>Inverter efficiency model abstract type</documentation>
+		</annotation>
+	</complexType>
+	<complexType name="EfficiencyConstant">
+		<complexContent>
+			<extension base="pv:Efficiency">
+				<attribute name="percent" type="t:percent" use="required">
+					<annotation>
+						<documentation>Constant inverter efficiency, typically 70 - 100 [%]</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="EfficiencyCurve">
+		<complexContent>
+			<extension base="pv:Efficiency">
+				<attribute name="dataPairs" type="t:doublePairs">
+					<annotation>
+						<documentation>Efficiency curve defined by data pairs</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="Topology" abstract="true">
+		<annotation>
+			<documentation>PV systems topology configuration</documentation>
+		</annotation>
+		<attribute name="type" type="pv:topologyTypeEnum">
+			<annotation>
+				<documentation>if unspecified, default value is PROPORTIONAL (CSI,ASI,CDTE) or UNPROPORTIONAL1 (CSI)</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<complexType name="TopologyRow">
+	    <annotation>
+	    	<documentation>The parameter has effect only if back-tracking is true in the case of tracking systems. It specifies the ratio between distance between the equivalent trackers legs (axis) and pv collector width. It has an effect for GeometryTwoAxisAstronomical tracker and GeometryOneAxisHorizontalEW tracker. For fixed mounting this parameter is used to calculate the impact of self shading.
+</documentation>
+	    </annotation>
+		<complexContent>
+			<extension base="pv:Topology">
+				<attribute name="relativeSpacing" type="double" use="required"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="TopologySimple">
+	    <annotation>
+	    	<documentation>DEPRECATED use TopologyRow instead</documentation>
+	    </annotation>
+		<complexContent>
+			<extension base="pv:TopologyRow"/>
+		</complexContent>
+	</complexType>
+	<complexType name="TopologyColumn">
+	    <annotation>
+	    	<documentation> The parameter, has effect only if back-tracking is true in the case of tracking systems. It specifies the ratio between distance between the equivalent trackers legs (axis) and pv collector width. It has an effect for GeometryTwoAxisAstronomical, GeometryOneAxisVertical, GeometryOneAxisHorizontalNS and GeometryOneAxisInclined.</documentation>
+	    </annotation>
+		<complexContent>
+			<extension base="pv:Topology">
+				<attribute name="relativeSpacing" type="double" use="required"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="TopologyShadingAngle">
+		<complexContent>
+			<extension base="pv:Topology">
+				<attribute name="shadingAngle" type="geo:inclination" use="required">
+					<annotation>
+						<documentation>Shading angle is the lowest sun elevation angle above the horizon plane which doesn't cause mutual shading between rows of PV modules</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="TopologyExact">
+		<complexContent>
+			<extension base="pv:Topology">
+				<attribute name="absoluteSpacing" type="double" use="required">
+					<annotation>
+						<documentation>[m]</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="tableWidth" type="double" use="required">
+					<annotation>
+						<documentation>[m]</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<simpleType name="topologyTypeEnum">
+		<annotation>
+			<documentation>Optimization category into which field topology of PV system belongs, qualitative and empirical ranking</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="PROPORTIONAL">
+				<annotation>
+					<documentation>applicable for a-Si, CdTe and CIS (thin film technologies), the loss of generated electricity is proportional to the size of module area in shade</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="UNPROPORTIONAL1">
+				<annotation>
+					<documentation>applicable for c-Si, modules are landscape oriented with proper layout optimization</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="UNPROPORTIONAL2">
+				<annotation>
+					<documentation>applicable for c-Si, modules are landscape oriented with intermediate layout optimization</documentation>
+				</annotation>
+			</enumeration>
+			<enumeration value="UNPROPORTIONAL3">
+				<annotation>
+					<documentation>applicable for c-Si, modules are portrait oriented with poor layout optimization, bottom cells in shade will shut the whole row of modules down</documentation>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="Geometry" abstract="true">	
+		<annotation>
+			<documentation>PV system mounting abstract type</documentation>
+		</annotation>
+	</complexType>
+	<complexType name="GeometryTracker" abstract="true">
+		<annotation>
+			<documentation>False value for the backTracking attribute corresponds to a single tracker without neighbours (best possible option).</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="pv:Geometry">
+				<attribute name="backTracking" type="boolean" use="optional"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<simpleType name="moduleInstallationTypeEnum">
+		<restriction base="string">
+			<enumeration value="BUILDING_INTEGRATED"/>
+			<enumeration value="ROOF_MOUNTED"/>
+			<enumeration value="FREE_STANDING"/>
+		</restriction>
+	</simpleType>
+	<attributeGroup name="rotationLimitEastWestAttributes">
+        <annotation>
+            <documentation>rotationLimitEast/rotationLimitWest are the parameters pair of limiting rotation angles for 1xV, 2x and 1xNS horizontal or 1xNS inclined trackers. If tracker is purely theoretical (no limits) the value of [-180,180] should be used. </documentation>
+        </annotation>
+		<attribute name="rotationLimitEast" type="double" use="optional"/>
+		<attribute name="rotationLimitWest" type="double" use="optional"/>
+	</attributeGroup>
+	<attributeGroup name="tiltLimitAttributes">
+        <annotation>
+            <documentation>tiltLimitMin/tiltLimitMax parameters are the pair of limiting tilt angles for 2x trackers. Because of technical realisations of variable tilt often alinear actuator is used, inclination angle seldom varies from (0 to 90) but often has smaller range eg.(10 to 80). If tracker is purely theoretical (no limits) the range -90 to 90 should be used. Selecting tilt limits of [45,45] will convert 2x tracker to 1x vertical with 45 degrees tilt</documentation>
+        </annotation>
+		<attribute name="tiltLimitMin" type="double" use="optional" />
+		<attribute name="tiltLimitMax" type="double" use="optional" />
+	</attributeGroup>
+	<complexType name="GeometryFixedOneAngle">
+		<complexContent>
+			<extension base="pv:Geometry">
+				<attribute name="tilt" type="geo:inclination" use="required">
+					<annotation>
+						<documentation>Inclined surface tilt; 0 horizontal, 90 vertical</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="azimuth" type="geo:azimuth" use="required">
+					<annotation>
+						<documentation>Inclined surface orientation; 0 for North, 180 for South, clockwise</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- may be redefined later 
+	<complexType name="GeometryFixedTwoAngles">
+		<annotation>
+			<documentation>Fixed mounting with two inclinations: winter and summer</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="pv:Geometry">
+				<attribute name="azimuth" type="geo:azimuth" use="required"/>
+				<attribute name="tiltWinter" type="geo:inclination" default="48"/>
+				<attribute name="tiltSummer" type="geo:inclination" default="17"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	-->
+	<complexType name="GeometryOneAxisVertical">
+		<complexContent>
+			<extension base="pv:GeometryTracker">
+				<attribute name="tilt" type="geo:inclination" default="30"/>
+				<attributeGroup ref="pv:rotationLimitEastWestAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="GeometryOneAxisInclinedNS">
+		<complexContent>
+			<extension base="pv:GeometryTracker">
+				<attribute name="axisTilt" type="geo:inclination" default="30"/>
+				<attribute name="azimuth" type="pv:axisAzimuth" default="180">
+					<annotation>
+						<documentation>
+							It is an integer value in degrees. The value of geogr. azimuth (compass value, from 0 to 360 exclusive),
+							at which the southern end of the axis is oriented. Regardless of the Earth's hemisphere.
+							The value is limited to the range from 135 deg. to 225 deg. inclusive, so the deviation from the North-South line is
+							never bigger than 45 degrees.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attributeGroup ref="pv:rotationLimitEastWestAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="GeometryOneAxisHorizontalNS">
+		<complexContent>
+			<extension base="pv:GeometryTracker">
+				<attribute name="azimuth" type="pv:axisAzimuth" default="180">
+					<annotation>
+						<documentation>
+							See the documentation of the GeometryOneAxisInclinedNS tracker type.
+						</documentation>
+					</annotation>
+				</attribute>
+				<attributeGroup ref="pv:rotationLimitEastWestAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>	
+	<complexType name="GeometryTwoAxisAstronomical">
+		<complexContent>
+			<extension base="pv:GeometryTracker">
+				<attributeGroup ref="pv:rotationLimitEastWestAttributes"/>
+				<attributeGroup ref="pv:tiltLimitAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<simpleType name="axisAzimuth">
+		<annotation>
+			<documentation>Geographical azimuth (compass) of the southern end of the tracker axis.</documentation>
+		</annotation>
+		<restriction base="int">
+			<minInclusive value="135"/>
+			<maxInclusive value="225"/>
+		</restriction>
+	</simpleType>
+</schema>

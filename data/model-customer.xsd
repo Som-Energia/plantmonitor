@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://geomodel.eu/schema/model/customer" elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns:cus="http://geomodel.eu/schema/model/customer"
+	xmlns:geo="http://geomodel.eu/schema/common/geo">
+	
+	<import namespace="http://geomodel.eu/schema/common/geo" schemaLocation="common-geo.xsd"/>
+	
+	<element name="customer" type="cus:Customer"/>
+	<element name="country" type="cus:Country"/>
+
+	<complexType name="Customer">
+		<sequence>
+			<element name="address" type="cus:Address" minOccurs="0"/>
+			<element name="person" type="cus:Person" minOccurs="0"/>
+		</sequence>
+		<attribute name="companyName" type="string"/>
+		<attribute name="registrationId" type="string"/>
+		<attribute name="vatId" type="string"/>
+		<attributeGroup ref="cus:contactAttributes"/>
+	</complexType>
+	
+	<complexType name="Address">
+		<attribute name="street" type="string" use="required"/>
+		<attribute name="city" type="string" use="required"/>
+		<attribute name="zipCode" type="string" use="required"/>
+		<attribute name="countryCode" type="string" use="required"/>
+		<attribute name="stateCode" type="string"/>
+	</complexType>
+
+	<complexType name="Person">
+		<attribute name="title" type="string"/>
+		<attribute name="firstName" type="string" use="required"/>
+		<attribute name="middleName" type="string"/>
+		<attribute name="lastName" type="string" use="required"/>
+		<attributeGroup ref="cus:contactAttributes"/>
+	</complexType>
+	
+	<complexType name="Country">
+		<complexContent>
+			<extension base="geo:Region">
+				<sequence>
+					<element name="state" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+				<attribute name="countryCode" type="string" use="required"/>
+				<attribute name="vatPrefix" type="string"/>
+				<attribute name="callingCode" type="string"/>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="State">
+		<attribute name="name" type="string" use="required"/>
+		<attribute name="stateCode" type="string" use="required"/>
+	</complexType>
+
+	<attributeGroup name="contactAttributes">
+		<attribute name="email" type="string"/> <!-- TODO emailType -->
+		<attribute name="phone" type="string"/>
+		<attribute name="web" type="string"/>
+	</attributeGroup>
+
+</schema>

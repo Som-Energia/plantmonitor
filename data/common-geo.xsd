@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="http://geomodel.eu/schema/common/types" xmlns:geo="http://geomodel.eu/schema/common/geo" targetNamespace="http://geomodel.eu/schema/common/geo" elementFormDefault="qualified">
+	
+	<import namespace="http://geomodel.eu/schema/common/types" schemaLocation="common-types.xsd"/>
+
+	<simpleType name="latitude">
+		<annotation>
+			<documentation>Latitude coordinate in decimal format [-90,90]</documentation>
+		</annotation>
+		<restriction base="double">
+			<minInclusive value="-90"/>
+			<maxInclusive value="90"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="longitude">
+		<annotation>
+			<documentation>Longitude coordinate in decimal format [-180,180]</documentation>
+		</annotation>
+		<restriction base="double">
+			<minInclusive value="-180"/>
+			<maxInclusive value="180"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="azimuth">
+		<annotation>
+			<documentation>azimuth direction in degrees</documentation>
+		</annotation>
+		<restriction base="int">
+			<minInclusive value="0"/>
+			<maxExclusive value="360"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="inclination">
+		<annotation>
+			<documentation>inclination angle in degrees</documentation>
+		</annotation>
+		<restriction base="double">
+			<minInclusive value="0"/>
+			<maxInclusive value="90"/>
+		</restriction>
+	</simpleType>
+	<complexType name="Placemark">
+		<annotation>
+			<documentation>Address and country data of specified location</documentation>
+		</annotation>
+		<attribute name="address" type="string"/>
+		<attribute name="street" type="string"/>
+		<attribute name="locality" type="string"/>
+		<attribute name="postalCode" type="string"/>
+		<attribute name="area" type="string"/>
+		<attribute name="countryName" type="string"/>
+		<attribute name="countryCode" type="string">
+			<annotation>
+				<documentation>ISO2 country code</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<complexType name="Terrain">
+		<annotation>
+			<documentation>Terrain data corresponding to LatLng location</documentation>
+		</annotation>
+		<attribute name="elevation" type="int">
+			<annotation>
+				<documentation>Altitude of surface at specified location in meters</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="tilt" type="geo:inclination">
+			<annotation>
+				<documentation>Slope inclination at specified location; 0 horizontal, 90 vertical</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="azimuth" type="geo:azimuth">
+			<annotation>
+				<documentation>Slope orientation at specified location; 0 for North, 180 for South, clockwise</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<simpleType name="horizonValue">
+		<annotation>
+			<documentation>Solargis horizon format: [azimuth degrees:0-360]:[horizon degrees:0-90] ...multiple values... Example: 0:5 7.5:3 15:7 22.5:0</documentation>
+		</annotation>
+		<restriction base="t:doublePairs">
+			<pattern value="\d{1,3}(\.\d{1,2})?:\d{1,2}(\.\d{1,2})?( \d{1,3}(\.\d{1,2})?:\d{1,2}(\.\d{1,2})?)*"/>
+		</restriction>
+	</simpleType>
+	<complexType name="LatLng">
+		<annotation>
+			<documentation>Latitude longitude coordinates</documentation>
+		</annotation>
+		<attribute name="lat" type="geo:latitude" use="required"/>
+		<attribute name="lng" type="geo:longitude" use="required"/>
+	</complexType>
+	<complexType name="Location">
+		<complexContent>
+			<extension base="geo:LatLng">
+				<sequence>
+					<element name="placemark" type="geo:Placemark" minOccurs="0"/>
+					<element name="terrain" type="geo:Terrain" minOccurs="0"/>
+					<element name="horizon" type="geo:horizonValue" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="Boundary" abstract="true"/>
+	
+	<complexType name="BoundingBox">
+		<complexContent>
+			<extension base="geo:Boundary" >
+				<sequence>
+					<element name="northWest" type="geo:LatLng" />
+					<element name="southEast" type="geo:LatLng" />
+				</sequence>		
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="BoundingPath">
+		<complexContent>
+			<extension base="geo:Boundary" >
+				<sequence>
+					<element name="point" type="geo:LatLng" minOccurs="3" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="BoundingMicroregion">
+		<complexContent>
+			<extension base="geo:Boundary">
+				<sequence>
+					<element name="center" type="geo:LatLng" />
+					<element name="microregion" type="geo:Microregion" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="Region">
+		<sequence>					
+			<element name="boundary" type="geo:Boundary" minOccurs="0" maxOccurs="1" />
+		</sequence>
+		<attribute name="id" type="string"/>
+		<attribute name="name" type="string"/>
+		<attribute name="color" type="string"/>
+	</complexType>
+
+	<complexType name="Microregion">
+		<attribute name="type" type="geo:DeltaTypeEnum" use="required"/>
+		<attribute name="doubleDelta" type="double" use="required"/>
+	</complexType>
+
+	<simpleType name="DeltaTypeEnum">
+		<restriction base="string">
+			<enumeration value="KM"/>
+			<enumeration value="DEG"/>
+		</restriction>
+	</simpleType>
+</schema>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://geomodel.eu/schema/ws/data" elementFormDefault="qualified" 
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:t="http://geomodel.eu/schema/common/types"
+	xmlns:geo="http://geomodel.eu/schema/common/geo"
+	xmlns:req="http://geomodel.eu/schema/data/request"
+	xmlns:ws="http://geomodel.eu/schema/ws/data">
+
+	<import schemaLocation="common-types.xsd" namespace="http://geomodel.eu/schema/common/types"/>
+	<import schemaLocation="common-geo.xsd" namespace="http://geomodel.eu/schema/common/geo"/>
+	<import schemaLocation="data-request.xsd" namespace="http://geomodel.eu/schema/data/request"/>
+	
+	<element name="dataDeliveryRequest">
+		<annotation>
+			<documentation>Root element for data delivery request</documentation>
+		</annotation>
+		<complexType>
+			<complexContent>
+				<extension base="req:DataRequest">
+					<attributeGroup ref="t:dateRangeAttributes"/>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	
+		
+	<element name="dataDeliveryValidationResponse">
+		<annotation>
+			<documentation>Root element for data delivery validation response</documentation>
+		</annotation>
+		<complexType>
+			<attribute name="valid" type="boolean" use="required"/>
+			<attribute name="msg" type="string"/>
+		</complexType>
+	</element>
+
+	
+	<element name="dataDeliveryResponse">
+		<annotation>
+			<documentation>Root element for data delivery response</documentation>
+		</annotation>
+		<complexType>
+			<sequence>
+				<element name="site" type="ws:DataDelivery" maxOccurs="unbounded"/>
+			</sequence>
+		</complexType>
+	</element>
+	
+	<complexType name="DataDelivery">
+		<complexContent>
+			<extension base="geo:LatLng">
+				<sequence>
+					<element name="metadata" type="string"/>
+					<element name="columns" type="t:stringValues"/>
+					<element name="row" type="ws:DataRow" maxOccurs="unbounded"/>
+				</sequence>
+				<attributeGroup ref="req:siteAttributes"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="DataRow">
+		<attribute name="date" type="t:dateWithTimeZone"/>
+		<attribute name="dateTime" type="dateTime"/>
+		<attribute name="yearMonth" type="gYearMonth"/>
+		<attribute name="month" type="t:month"/>
+		<attribute name="dayOfYear" type="t:dayOfYear"/>
+		<attribute name="values" type="t:doubleValues" use="required"/>
+	</complexType>
+	
+</schema>

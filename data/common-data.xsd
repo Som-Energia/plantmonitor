@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://geomodel.eu/schema/common/data" elementFormDefault="qualified" 
+	xmlns:data="http://geomodel.eu/schema/common/data">
+	
+	<simpleType name="dataParameterGroupEnum">
+		<restriction base="string">
+			<enumeration value="SOLAR" />
+			<enumeration value="METEO" />
+			<enumeration value="ATMO" />
+			<enumeration value="TERRAIN" />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="dataParameterOriginEnum">
+		<restriction base="string">
+			<enumeration value="SATELLITE_MODEL" />
+			<enumeration value="NUMERICAL_WEATHER_MODEL" />
+			<enumeration value="FORECAST_MODEL" />
+			<enumeration value="GROUND_MEASUREMENT" />
+			<enumeration value="RADAR_BASED" />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="dataCodeEnum">
+		<restriction base="string">
+            <enumeration value="GHI"/> <!-- Global Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_C"/> <!-- Clear-sky Global Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_UNC_HIGH"/> <!-- GHI high estimate (10 % prob. of exceedance) resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GHI_UNC_LOW"/> <!-- GHI low estimate (90 % prob. of exceedance) [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DNI"/> <!-- Direct Normal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DNI_C"/> <!-- Clear-sky Direct Normal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="DIF"/> <!-- Diffuse Horizontal Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI"/> <!-- Global Tilted Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI_UNC_HIGH"/> <!-- GTI high estimate (10 % prob. of exceedance) resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="GTI_UNC_LOW"/> <!-- GTI low estimate (90 % prob. of exceedance) [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="CI_FLAG"/>	<!-- Cloud identification quality flag [categories] -->
+			<enumeration value="FLAG_R"/>	<!-- Cloud identification quality flag [categories], alias of CI_FLAG -->
+            <enumeration value="KTM"/>	<!-- Deprecated alias of KC. Clear-sky index [unitless] -->
+            <enumeration value="KC"/>	<!-- Clear-sky index [unitless] -->
+            <enumeration value="PAR"/> <!-- Photosynthetically Active Irradiation resp. Irradiance [kWh/m2, Wh/m2 resp. W/m2] -->
+            <enumeration value="SE"/>  <!-- Sun Altitude (Elevation) Angle [deg.] -->
+            <enumeration value="SA"/>  <!-- Sun Azimuth Angle [deg.] -->
+            <enumeration value="TEMP"/> <!-- Air Temperature at 2m [deg. C]-->
+            <enumeration value="TD"/> <!-- Dew Point Temperature [deg. C]-->
+            <enumeration value="WBT"/> <!-- Wet Bulb Temperature [deg. C]-->
+            <enumeration value="AP"/> <!-- Atmospheric Pressure [hPa] -->
+            <enumeration value="RH"/> <!-- Relative Humidity [%] -->
+            <enumeration value="WS"/> <!-- Wind Speed [m/s] -->
+            <enumeration value="WD"/> <!-- Wind Direction [deg.] -->
+            <enumeration value="PREC"/> <!-- Precipitation Rate [kg/m2] -->
+            <enumeration value="PWAT"/> <!-- Precipitable Water [kg/m2] -->
+            <enumeration value="PVOUT"/> <!-- Photovoltaic Output [kW, resp. kWh] -->
+            <enumeration value="PVOUT_UNC_HIGH"/> <!-- PVOUT high estimate (10 % prob. of exceedance) [kW, resp. kWh] -->
+            <enumeration value="PVOUT_UNC_LOW"/> <!-- PVOUT low estimate (90 % prob. of exceedance) [kW, resp. kWh] -->
+            <enumeration value="KT"/> <!-- clearness index, values range (0, 1.1), during the night -9 -->
+            <enumeration value="SWE"/> <!-- Deprecated alias of SDWE. Water equivalent of accumulated snow depth [kg/m2] -->
+			<enumeration value="SDWE"/> <!-- Water equivalent of accumulated snow depth [kg/m2] -->
+            <enumeration value="TMOD"/> <!-- Module temperature [deg. C] -->
+            <enumeration value="WG"/> <!-- Wind Gust [m/s] -->
+            <enumeration value="GTI_C"/> <!-- Global tilted clear-sky irradiance [W/m2] -->
+            <enumeration value="WS100"/> <!-- Wind speed at 100 m [m/s] -->
+            <enumeration value="WD100"/> <!-- Wind direction at 100 m [deg.] -->
+            <enumeration value="SFWE"/> <!-- Water equivalent of fresh snowfall rate [kg/m2/hour] - no recent data 4 recent months missing, from ERA5 -->
+            <enumeration value="INC"/> <!-- Incidence angle of direct irradiance [deg.] -->
+            <enumeration value="TILT"/> <!-- Tilt of inclined surface [deg.] -->
+            <enumeration value="ASPECT"/> <!-- Aspect of inclined surface [deg.] -->
+            
+            <!-- Only for metadata purposes -->
+            <enumeration value="AOD"/> <!-- Aerosol Optical Depth [unitless] -->
+            <enumeration value="ELEV"/> 	<!-- Elevation above sea level [m] -->
+            <enumeration value="IRRAD"/> 	<!-- Group of solar radiation data codes -->
+        </restriction>
+	</simpleType>
+
+	<!-- For metadata purposes -->
+	<simpleType name="dataParameterCodeEnum">
+		<restriction base="data:dataCodeEnum">
+			<enumeration value="IRRAD" >
+				<annotation>
+					<documentation>All solar radiation data parameters: GHI, DIF, DNI</documentation>
+				</annotation>		
+			</enumeration>		
+
+			<enumeration value="TEMP">
+				<annotation>
+					<documentation>Air temperature at 2m [deg. C]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="ELEV">
+				<annotation>
+					<documentation>Elevation above sea level [m]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="AOD">
+				<annotation>
+					<documentation>Aerosol Optical Depth [unitless]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="AP">
+				<annotation>
+					<documentation>Atmospheric Pressure [hPa]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="RH">
+				<annotation>
+					<documentation>Relative Humidity [%]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="WD">
+				<annotation>
+					<documentation>Wind Direction [deg.]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="WS">
+				<annotation>
+					<documentation>Wind Speed [m/s]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="PREC">
+				<annotation>
+					<documentation>Precipitation Rate [kg/m2]</documentation>
+				</annotation>
+			</enumeration>
+			
+			<enumeration value="PWAT">
+				<annotation>
+					<documentation>Precipittable Water [kg/m2]</documentation>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="temporalDataTypeEnum">
+		<restriction base="string">
+			<enumeration value="TIME_SERIES" />
+			<enumeration value="LTA" />
+			<enumeration value="TMY" />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="summarizationPeriodEnum">
+		<restriction base="string">
+			<enumeration value="YEARLY"/>
+			<enumeration value="MONTHLY"/>
+			<enumeration value="DAILY"/>
+			<enumeration value="HOURLY"/>
+			<enumeration value="MIN_30"/>
+			<enumeration value="MIN_15"/>
+			<enumeration value="MIN_10"/>
+			<enumeration value="MIN_5"/>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="deliveryModeEnum">
+		<restriction base="string">
+			<enumeration value="NONE"/>
+			<enumeration value="MANUAL"/>
+			<enumeration value="AUTOMATIC"/>			
+		</restriction>
+	</simpleType>
+	
+</schema>

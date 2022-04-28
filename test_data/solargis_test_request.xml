@@ -1,0 +1,11 @@
+<ws:dataDeliveryRequest dateFrom="2014-04-28" dateTo="2014-04-28"
+xmlns="http://geomodel.eu/schema/data/request"
+xmlns:ws="http://geomodel.eu/schema/ws/data"
+xmlns:geo="http://geomodel.eu/schema/common/geo"
+xmlns:pv="http://geomodel.eu/schema/common/pv"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<site id="demo_site" name="Demo site" lat="48.61259" lng="20.827079">
+</site>
+<processing key="GHI" summarization="HOURLY" terrainShading="true">
+</processing>
+</ws:dataDeliveryRequest>
