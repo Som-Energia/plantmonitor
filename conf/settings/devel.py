@@ -12,3 +12,5 @@ API_CONFIG = devel_env.json('API_CONFIG')
 
 # MONSOL = devel_env.json('MONSOL')
 # MONSOL_CREDENTIALS = devel_env.json('MONSOL_CREDENTIALS')
+
+SOLARGIS = devel_env.json('SOLARGIS')

@@ -182,3 +182,28 @@ class DbPlantFactory():
                 sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
             )
         )
+
+    # TODO use plant yaml (used in pony) instead of hardcoding structure
+    def create_plant_with_location(self):
+        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
+        self.dbmanager.db_con.execute(
+            "insert into plant(id, name, codename, description) values ({}, '{}', '{}', '{}'),({}, '{}', '{}', '{}')".format(
+                1, 'Alibaba', 'SomEnergia_Alibaba', '',
+                2, 'Quaranta_Lladres', 'SomEnergia_Quaranta_Lladres', ''
+            )
+        )
+
+        self.dbmanager.db_con.execute('''
+            create table if not exists plantlocation (
+            id serial primary key,
+            plant integer not null references plant (id),
+            latitude DOUBLE PRECISION NOT NULL,
+            longitude DOUBLE PRECISION NOT NULL)
+        ''')
+
+        self.dbmanager.db_con.execute(
+            "insert into plantlocation(id, plant, latitude, longitude) values ({}, {}, {}, {}),({}, {}, {}, {})".format(
+                1, 1, 40.932389, -4.968694,
+                2, 2, 39.440722, -0.428722
+            )
+        )

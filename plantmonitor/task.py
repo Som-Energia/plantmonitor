@@ -242,6 +242,10 @@ def task_integral():
     with orm.db_session:
         computeIntegralMetrics()
 
+def task_daily_download_from_api_solargis():
+    from external_api.api_solargis import ApiSolargis
+    ApiSolargis.daily_download()
+
 def task_maintenance():
     try:
         database_info = envinfo.DB_CONF
