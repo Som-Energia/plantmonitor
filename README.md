@@ -24,6 +24,8 @@ Install the required Python libraries for pymodbus:
 pip install -r requirements.txt
 ```
 
+Requires python >= 3.5
+
 ## Testing
 
 Testing requires:
