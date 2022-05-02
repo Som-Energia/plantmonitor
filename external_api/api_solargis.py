@@ -4,17 +4,25 @@ import datetime
 
 import xmlschema
 
+from typing import NamedTuple
+
 from conf.log import logger
 
 from plantmonitor.utils import rfc3336todt
 
+class Site(NamedTuple):
+    id: int
+    name: str
+    peak_power_w: int
+    latitude: float
+    longitude: float
+
 class ApiSolargis:
 
-    def __init__(self, api_base_url, site_id, api_key):
+    def __init__(self, api_base_url, api_key):
 
         self.api_base_url = api_base_url
         self.api_request_url = "{}/{}".format(api_base_url, "datadelivery/request")
-        self.site_id = site_id
         self.api_key = api_key
         self.api_name = 'solargis'
 
@@ -22,10 +30,29 @@ class ApiSolargis:
 
         # TODO set from database wither via Pony, sqlalchemy or else if we stick with a satellite api
         # {plant_id: (lat, long)}
-        self.plant_locations = {
-            3: (40.932389, -4.968694), # Fontivsolar
-            9: (39.440722, -0.428722), # Picanya
-            70: (37.504330, -3.236476) # Llanillos
+
+        self.sites = {
+            3: Site(
+                id=3,
+                name='Fontivsolar',
+                latitude=40.932389,
+                longitude=-4.968694,
+                peak_power_w=990,
+            ),
+            9: Site(
+                id=9,
+                name='Picanya',
+                latitude=39.440722,
+                longitude=-0.428722,
+                peak_power_w=335,
+            ),
+            22: Site(
+                id=22,
+                name='Llanillos',
+                latitude=37.504330,
+                longitude=-3.236476,
+                peak_power_w=3820,
+            ),
         }
 
     def create_xsd_schema(self):
@@ -55,7 +82,7 @@ class ApiSolargis:
         ]
         return readings
 
-    def get_current_solargis_irradiance_readings_location(self, lat, lon, from_date, to_date, processing_keys):
+    def get_current_solargis_irradiance_readings_site(self, site: Site, from_date, to_date, processing_keys):
 
         from_date_str = datetime.datetime.strftime(from_date, '%Y-%m-%d')
         to_date_str = datetime.datetime.strftime(to_date, '%Y-%m-%d')
@@ -67,7 +94,12 @@ class ApiSolargis:
             xmlns:geo="http://geomodel.eu/schema/common/geo"
             xmlns:pv="http://geomodel.eu/schema/common/pv"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <site id="{self.site_id}" lat="{lat}" lng="{lon}">
+            <site id="{site.name}" lat="{site.latitude}" lng="{site.longitude}">
+             <pv:system installedPower="{site.peak_power_w}">
+                <pv:module type="ASI"/>
+                <pv:inverter/>
+                <pv:losses/>
+             </pv:system>
             </site>
             <processing key="{processing_keys}" summarization="HOURLY" terrainShading="true">
             </processing>
@@ -85,18 +117,18 @@ class ApiSolargis:
     def get_current_solargis_irradiance_readings(self, from_date=None, to_date=None, processing_keys=None):
 
         processing_keys = processing_keys or 'GHI GTI TMOD PVOUT'
-        from_date = from_date or datetime.date.today()
-        to_date = to_date or datetime.date.today()
+        from_date = from_date or datetime.date.today() - datetime.timedelta(days=1)
+        to_date = to_date or datetime.date.today() - datetime.timedelta(days=1)
 
         all_readings = []
-        for plant, latlong in self.plant_locations.items():
-            lat, lon = latlong
-            status, readings = self.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+        for plant_id, site in self.sites.items():
+            plant_name = site.name
+            status, readings = self.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
             if status != 200:
-                logger.error(f"Error reading plant {plant} {status}")
+                logger.error(f"Error reading plant {plant_id} {plant_name} {status}")
             else:
                 all_readings = [
-                    (t, plant, *values)
+                    (t, plant_id, *values)
                     for t, *values in readings
                 ]
 
@@ -104,21 +136,20 @@ class ApiSolargis:
 
     def get_current_solargis_readings_standarized(self, from_date=None, to_date=None):
 
+        #TODO PVOUT is unauthorised at the moment
         #processing_keys = 'GHI GTI TMOD PVOUT'
-        #TODO TMOD doesn't work at the moment, using TEMP instead
-        processing_keys = 'GHI GTI TEMP'
-        from_date = from_date or datetime.date.today()
-        to_date = to_date or datetime.date.today()
+        processing_keys = 'GHI GTI TMOD'
+        from_date = from_date or datetime.date.today() - datetime.timedelta(days=1)
+        to_date = to_date or datetime.date.today() - datetime.timedelta(days=1)
 
         all_readings = []
-        for plant, latlong in self.plant_locations.items():
-            lat, lon = latlong
-            status, readings = self.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+        for plant_id, site in self.sites.items():
+            status, readings = self.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
             if status != 200:
-                logger.error(f"Error reading plant {plant} {status}")
+                logger.error(f"Error reading plant {plant_id} {site.name} {status}")
             else:
                 all_readings = [
-                    (t, plant, int(ghi), int(gti), int(tmod*10), None, source, request_time)
+                    (t, plant_id, int(ghi), int(gti), int(tmod*10), None, source, request_time)
                     for t, ghi, gti, tmod, source, request_time in readings
                 ]
 

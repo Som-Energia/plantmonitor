@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from maintenance.db_manager import DBManager
 from maintenance.db_test_factory import DbPlantFactory
 
-from external_api.api_solargis import ApiSolargis
+from external_api.api_solargis import ApiSolargis, Site
 
 from meteologica.utils import todtaware
 
@@ -31,6 +31,35 @@ class ApiSolargis_Test(unittest.TestCase):
         pass
 
     def sample_reading(self):
+        # Datetime GHI GTI TMOD PVOUT
+        return [
+            (datetime(2015,1,1, 0,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 1,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 2,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 5., -4.6, 0.),
+            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 66., -3.3, 0.),
+            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 123., -1.4, 0.),
+            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 110., -1.3, 0.),
+            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 91., -1.3, 0.),
+            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 102., -0.6, 0.),
+            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 86., -1.0, 0.),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 52., -1.8, 0.),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 9., -3.1, 0.),
+            (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,18,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,19,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,20,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,21,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,23,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+        ]
+
+    def sample_reading_temp(self):
         # Datetime GHI GTI TEMP PVOUT
         return [
             (datetime(2015,1,1, 0,30,tzinfo=timezone.utc), 0., 0., -6.2, 0.),
@@ -177,11 +206,10 @@ class ApiSolargis_Test(unittest.TestCase):
 
         from_date = todtaware('2015-1-01 13:00:00')
         to_date = todtaware('2015-1-01 15:00:00')
-        lat = 48.61259
-        lon = 20.827079
+        site = Site(id=1, name="demo_site", latitude=48.61259, longitude=20.827079, peak_power_w=1000)
         processing_keys = 'GHI'
 
-        status, readings = self.api.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+        status, readings = self.api.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
 
         self.assertEqual(status, 200)
 
@@ -196,36 +224,36 @@ class ApiSolargis_Test(unittest.TestCase):
 
         from_date = todtaware('2015-01-01 13:00:00')
         to_date = todtaware('2015-01-01 15:00:00')
-        lat = 48.61259
-        lon = 20.827079
+        site = Site(id=1, name="demo_site", latitude=48.61259, longitude=20.827079, peak_power_w=1000)
         processing_keys = 'GHI GTI TEMP'
 
-        status, readings = self.api.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+        status, readings = self.api.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
 
         self.assertEqual(status, 200)
 
-        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_temp()]
 
         print([(ghi, gti, temp) for _, ghi, gti, temp, *_ in readings])
 
         self.assertEqual(status, 200)
         self.assertListEqual(readings, expected)
 
-    # TMOD is not working
-    def _test__get_current_solargis_irradiance_readings_location__GHI_GTI_TMOD(self):
+    def test__get_current_solargis_irradiance_readings_location__GHI_GTI_TMOD(self):
 
         self.maxDiff = None
 
         from_date = todtaware('2015-01-01 13:00:00')
         to_date = todtaware('2015-01-01 15:00:00')
-        lat = 48.61259
-        lon = 20.827079
+        site = Site(id=1, name="demo_site", latitude=48.61259, longitude=20.827079, peak_power_w=1000)
         processing_keys = 'GHI GTI TMOD'
 
-        readings = self.api.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+        status, readings = self.api.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
 
-        expected = [(t, 1, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
 
+        print([(ghi, gti, tmod) for t, ghi, gti, tmod, *_ in readings])
+
+        self.assertEqual(status, 200)
         self.assertListEqual(readings, expected)
 
     def test__get_current_solargis_irradiance_readings__real_processing_keys(self):
@@ -236,9 +264,9 @@ class ApiSolargis_Test(unittest.TestCase):
         to_date = todtaware('2015-01-01 15:00:00')
         #TODO pvout doesnt work atm
         #processing_keys = 'GHI GTI TEMP PVOUT'
-        processing_keys = 'GHI GTI TEMP'
+        processing_keys = 'GHI GTI TMOD'
 
-        self.api.plant_locations = {1: (48.61259,20.827079)}
+        self.api.sites = { 1: Site(id=1, name="demo_site", latitude=48.61259, longitude=20.827079, peak_power_w=1000)}
 
         readings = self.api.get_current_solargis_irradiance_readings(from_date, to_date, processing_keys)
 
@@ -255,7 +283,7 @@ class ApiSolargis_Test(unittest.TestCase):
         to_date = todtaware('2015-01-01 15:00:00')
         #processing_keys = 'GHI GTI TEMP'
 
-        self.api.plant_locations = {1: (48.61259,20.827079)}
+        self.api.sites = { 1: Site(id=1, name="demo_site", latitude=48.61259, longitude=20.827079, peak_power_w=1000)}
 
         readings = self.api.get_current_solargis_readings_standarized(from_date, to_date)
 

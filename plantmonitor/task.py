@@ -244,7 +244,7 @@ def task_integral():
 
 def task_daily_download_from_api_solargis():
     from external_api.api_solargis import ApiSolargis
-    ApiSolargis.daily_download()
+    ApiSolargis.daily_download_readings()
 
 def task_maintenance():
     try:
