@@ -247,6 +247,23 @@ class ApiSolargis_Test(unittest.TestCase):
         self.assertListEqual(readings, expected)
 
 
+    def test__get_current_solargis_readings_standarized__base(self):
+
+        self.maxDiff = None
+
+        from_date = todtaware('2015-01-01 13:00:00')
+        to_date = todtaware('2015-01-01 15:00:00')
+        #processing_keys = 'GHI GTI TEMP'
+
+        self.api.plant_locations = {1: (48.61259,20.827079)}
+
+        readings = self.api.get_current_solargis_readings_standarized(from_date, to_date)
+
+        expected = [(t, 1, int(ghi), int(gti), int(temp*10), None, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+
+        self.assertListEqual(readings, expected)
+
+
 class ApiSolargis_DB_Test(unittest.TestCase):
 
     @classmethod

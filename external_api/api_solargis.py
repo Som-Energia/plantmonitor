@@ -100,8 +100,27 @@ class ApiSolargis:
                     for t, *values in readings
                 ]
 
+        return all_readings
 
-        # TODO make it match to a 4 processing keys pattern ()
+    def get_current_solargis_readings_standarized(self, from_date=None, to_date=None):
+
+        #processing_keys = 'GHI GTI TMOD PVOUT'
+        #TODO TMOD doesn't work at the moment, using TEMP instead
+        processing_keys = 'GHI GTI TEMP'
+        from_date = from_date or datetime.date.today()
+        to_date = to_date or datetime.date.today()
+
+        all_readings = []
+        for plant, latlong in self.plant_locations.items():
+            lat, lon = latlong
+            status, readings = self.get_current_solargis_irradiance_readings_location(lat, lon, from_date, to_date, processing_keys)
+            if status != 200:
+                logger.error(f"Error reading plant {plant} {status}")
+            else:
+                all_readings = [
+                    (t, plant, int(ghi), int(gti), int(tmod*10), None, source, request_time)
+                    for t, ghi, gti, tmod, source, request_time in readings
+                ]
 
         return all_readings
 
@@ -191,22 +210,20 @@ class ApiSolargis:
         with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 api.create_table(dbmanager.db_con)
-                processing_keys = 'GHI GTI TEMP'
-                readings = api.get_current_solargis_irradiance_readings(processing_keys=processing_keys)
-                readings = [
-                    (t, plant, ghi, gti, tmod, None, source, request_time)
-                    for t, plant, ghi, gti, tmod, source, request_time in readings
-                ]
+                readings = api.get_current_solargis_readings_standarized()
                 api.save_to_db(dbmanager.db_con, readings)
 
 
 if __name__ == '__main__':
     import sys
     try:
-        from_date = sys.argv[1]
-        to_date = sys.argv[2]
-        processing_keys = ' '.join(sys.argv[3:]) if len(sys.argv) > 3 else None
-        ApiSolargis.daily_download(from_date, to_date, processing_keys)
+        if len(sys.argv < 3):
+            logger.error("Missing paramaters. expected from_date to_date [processing_keys]")
+        else:
+            from_date = datetime.strptime(sys.argv[1], '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+            to_date = datetime.strptime(sys.argv[2], '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+            processing_keys = ' '.join(sys.argv[3:]) if len(sys.argv) > 3 else None
+            ApiSolargis.download_readings(from_date, to_date, processing_keys)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise
