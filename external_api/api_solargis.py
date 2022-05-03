@@ -61,10 +61,17 @@ class ApiSolargis:
     def get_arbitrary_payload(self, xml_request_content):
         headers = {'Content-Type' : 'application/xml'}
 
-        response = requests.post(self.api_request_url, params=self.api_key_params, headers=headers, data=xml_request_content.encode('utf8'))
-
-        if response.status_code != 200:
-            logger.error(response.text)
+        try:
+            response = requests.post(
+                self.api_request_url,
+                params=self.api_key_params,
+                headers=headers,
+                data=xml_request_content.encode('utf8'),
+                timeout=30
+            )
+            response.raise_for_status()
+        except requests.RequestException as e:
+            logger.error("Request exception {}".format(e))
             return response.status_code, None
 
         text_response = response.text
@@ -120,6 +127,7 @@ class ApiSolargis:
         from_date = from_date or datetime.date.today() - datetime.timedelta(days=1)
         to_date = to_date or datetime.date.today() - datetime.timedelta(days=1)
 
+        # TODO add a requests session here to reuse TCP connection
         all_readings = []
         for plant_id, site in self.sites.items():
             plant_name = site.name

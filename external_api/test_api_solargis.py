@@ -322,12 +322,6 @@ class ApiSolargis_DB_Test(unittest.TestCase):
         self.session.rollback()
         self.session.close()
 
-    def create_plant(self):
-        query = '''
-
-        '''
-        self.dbmanager.execute(query)
-
     def test__create_table__base(self):
 
         self.plantfactory.create_plant_with_location()
