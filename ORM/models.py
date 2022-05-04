@@ -989,8 +989,8 @@ def define_models(database):
     class PlantEstimatedMonthlyEnergy(database.Entity):
         plantparameters = Required(PlantParameters)
         time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
-        monthly_target_energy_kwh = Required(int, size=64)
-        monthly_historic_energy_kwh = Required(int, size=64)
+        monthly_target_energy_kwh = Optional(int, size=64)
+        monthly_historic_energy_kwh = Optional(int, size=64)
 
         def export(self):
             pp = {
