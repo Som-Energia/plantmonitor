@@ -297,8 +297,8 @@ CREATE TABLE "plantestimatedmonthlyenergy" (
   "id" SERIAL PRIMARY KEY,
   "plantparameters" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
-  "monthly_target_energy_kwh" BIGINT NOT NULL,
-  "monthly_historic_energy_kwh" BIGINT NOT NULL
+  "monthly_target_energy_kwh" BIGINT,
+  "monthly_historic_energy_kwh" BIGINT
 );
 
 CREATE INDEX "idx_plantestimatedmonthlyenergy__plantparameters" ON "plantestimatedmonthlyenergy" ("plantparameters");
