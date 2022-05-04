@@ -953,7 +953,7 @@ def define_models(database):
 
     class PlantParameters(database.Entity):
         plant = Required(Plant)
-        plant_estimated_monthly_energy = Optional('PlantEstimatedMonthlyEnergy')
+        plant_estimated_monthly_energy = Set('PlantEstimatedMonthlyEnergy')
         peak_power_w = Required(int, size=64)
         nominal_power_w = Required(int, size=64)
         connection_date = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))

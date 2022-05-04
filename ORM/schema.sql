@@ -303,7 +303,7 @@ CREATE TABLE "plantestimatedmonthlyenergy" (
 
 CREATE INDEX "idx_plantestimatedmonthlyenergy__plantparameters" ON "plantestimatedmonthlyenergy" ("plantparameters");
 
-ALTER TABLE "plantestimatedmonthlyenergy" ADD CONSTRAINT "fk_plantestimatedmonthlyenergy__plantparameters" FOREIGN KEY ("plantparameters") REFERENCES "plantparameters" ("id");
+ALTER TABLE "plantestimatedmonthlyenergy" ADD CONSTRAINT "fk_plantestimatedmonthlyenergy__plantparameters" FOREIGN KEY ("plantparameters") REFERENCES "plantparameters" ("id") ON DELETE CASCADE;
 
 CREATE TABLE "sensor" (
   "id" SERIAL PRIMARY KEY,
