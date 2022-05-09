@@ -4,7 +4,7 @@ options:
   showDataLabels: false
   direction:
     type: counterclockwise
-  missingValuesAsZero: true
+  missingValuesAsZero: false
   error_y:
     visible: true
     type: data
@@ -22,7 +22,7 @@ options:
     error_y:
       visible: true
       type: data
-  globalSeriesType: column
+  globalSeriesType: line
   percentFormat: 0[.]00%
   sortX: true
   seriesOptions:
@@ -32,7 +32,7 @@ options:
       type: line
       yAxis: 0
     export_energy_mwh:
-      zIndex: 0
+      zIndex: 1
       index: 0
       type: column
       yAxis: 0
@@ -41,18 +41,23 @@ options:
       index: 0
       type: line
       yAxis: 0
-    irradiation_kwh_m2:
-      zIndex: 1
-      index: 0
-      type: line
-      yAxis: 0
     pr:
       zIndex: 3
       index: 0
       type: line
       yAxis: 1
-    historic_avg_mwh:
+    historic_energy_mwh:
+      zIndex: 6
+      index: 0
+      type: line
+      yAxis: 0
+    historic_average_mwh:
       zIndex: 5
+      index: 0
+      type: line
+      yAxis: 0
+    irradiation_kwh_m2:
+      zIndex: 0
       index: 0
       type: line
       yAxis: 0

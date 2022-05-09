@@ -1,5 +1,5 @@
 
-SELECT date_trunc('year', meterregistry.time at time zone 'Europe/Madrid') AS "time",
+SELECT date_trunc('year', meterregistry.time at time zone 'Europe/Madrid')  AS "time",
 sum(export_energy_wh)/1000000.0 AS value,
 'export_energy_mwh' as metric
 from meterregistry
@@ -24,14 +24,26 @@ union
 
 select date_trunc('year', time at time zone 'Europe/Madrid') AS "time",
 historic_avg as value,
-'historic_avg_mwh' as metric
+'historic_average_mwh' as metric
 from view_average_yearly_production_plant AS historic 
 WHERE plant = '{{ plant }}'
+
+union 
+
+select 
+    date_trunc('year', pe.time at time zone 'Europe/Madrid') AS create_year,
+    sum(monthly_historic_energy_kwh)/1000.0 as value,
+    'historic_energy_mwh' as metric
+from plantestimatedmonthlyenergy as pe
+left join plantparameters as pp on pp.id = pe.plantparameters
+left join plant on plant.id = pp.plant
+WHERE plant.name = '{{ plant }}'
+group by date_trunc('year', pe.time at time zone 'Europe/Madrid'), plantparameters
 
 union
 
 -- TODO this will break if there's more than one year per plant
-select ys as "time", 
+select ys at time zone 'Europe/Madrid' as "time", 
 value as value,
 metric as metric
 from generate_series('2016-01-01', NOW(), interval '1 year') ys,   (
