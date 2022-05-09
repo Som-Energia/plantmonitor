@@ -1,0 +1,16 @@
+options:
+  parameterMappings: {}
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 3
+    row: 24
+text: ''
+visualization: queries/new-query/visualizations/chart.yaml
+width: 1

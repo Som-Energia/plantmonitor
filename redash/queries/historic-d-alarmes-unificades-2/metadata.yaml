@@ -15,7 +15,8 @@ options:
       suffix: ''
     global: false
     value:
-    - '0'
+    - '1'
+    - '3'
     queryId: queries/all-plants-by-id
     parentQueryId: 179
     title: plant

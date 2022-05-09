@@ -168,6 +168,8 @@ query:
   148: queries/alarmes-de-comptadors-2
   146: queries/sensors-temperatura-2
   145: queries/metriques-basiques-d-inversors-2
+  186: queries/copy-of-79-energia-exportada-comptadors-amb-granularitat
+  185: queries/sample-meter-dump-per-ce
 visualization:
   44: queries/metriques-d-inversor-v2-una-metrica/visualizations/table.yaml
   45: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
@@ -431,6 +433,9 @@ visualization:
   232: queries/metriques-basiques-d-inversors-2/visualizations/chart.yaml
   234: queries/metriques-basiques-d-inversors-2/visualizations/chart-2.yaml
   257: queries/alarma-3-inversors-temperatura-anomala-historic/visualizations/.yaml
+  304: queries/copy-of-79-energia-exportada-comptadors-amb-granularitat/visualizations/table.yaml
+  305: queries/copy-of-79-energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
+  303: queries/sample-meter-dump-per-ce/visualizations/table.yaml
 dashboard:
   4: dashboards/dashboard-dinamic-de-planta
   2: dashboards/dashboard-general-de-planta
@@ -444,6 +449,7 @@ dashboard:
   13: dashboards/dashboard-somrenovables
   15: dashboards/dashboard-alarmes-unificat
   14: dashboards/versio-antiga-dashboard-alarmes
+  16: dashboards/dashboard-d-irradiacio-i-derivats
 widget:
   16: dashboards/dashboard-dinamic-de-planta/widgets/widget.yaml
   18: dashboards/dashboard-dinamic-de-planta/widgets/widget-2.yaml
@@ -595,3 +601,11 @@ widget:
   201: dashboards/grafiques-puntuals/widgets/widget-9.yaml
   202: dashboards/grafiques-puntuals/widgets/widget-10.yaml
   170: dashboards/grafiques-puntuals/widgets/widget-11.yaml
+  227: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget.yaml
+  228: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-2.yaml
+  230: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-3.yaml
+  229: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-4.yaml
+  231: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-5.yaml
+  232: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-6.yaml
+  235: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-7.yaml
+  233: dashboards/dashboard-d-irradiacio-i-derivats/widgets/widget-8.yaml

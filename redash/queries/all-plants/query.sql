@@ -1,1 +1,1 @@
-SELECT name from plant;
+SELECT name from plant where description not like 'SomRenovables';

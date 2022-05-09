@@ -2,36 +2,41 @@ can_edit: true
 data_source_id: datasources/plantmonitor.yaml
 description: null
 is_archived: false
-is_draft: false
+is_draft: true
 is_favorite: false
 is_safe: true
-name: Energia Exportada Comptadors i PR
+name: Copy of (#79) Energia exportada Comptadors amb granularitat
 options:
   parameters:
-  - name: plant
-    title: plant
+  - name: planta
+    title: planta
     global: false
-    value: Alcolea
+    value: Riudarenes_ZE
     queryId: queries/all-plants
+    parentQueryId: 186
     type: query
     locals: []
   - name: granularity
     title: granularity
     global: false
-    value: month
-    enumOptions: 'day
+    value: hour
+    enumOptions: 'hour
+
+      day
 
       month
 
       year'
+    parentQueryId: 186
     type: enum
     locals: []
   - name: interval
     title: interval
     global: false
-    value: d_this_year
-    type: date-range
+    value: d_last_7_days
     locals: []
+    type: datetime-range
+    parentQueryId: 186
 schedule: null
 tags: []
 version: 1

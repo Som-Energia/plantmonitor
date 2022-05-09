@@ -16,7 +16,7 @@ options:
   position:
     autoHeight: false
     sizeX: 6
-    sizeY: 8
+    sizeY: 12
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1

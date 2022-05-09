@@ -22,7 +22,7 @@ options:
     minSizeY: 1
     minSizeX: 2
     col: 0
-    row: 8
+    row: 12
 text: ''
 visualization: queries/historic-d-alarmes-unificades-2/visualizations/table.yaml
 width: 1

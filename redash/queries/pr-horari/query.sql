@@ -4,7 +4,7 @@
     meterregistry.export_energy_wh AS export_energy_wh,
     view_irradiation.irradiation_w_m2_h,
     (
-        meterregistry.export_energy_wh / 2160000.0 -- potencia pic 2.16 MWp
+        meterregistry.export_energy_wh / plantparameters.peak_power_w::float -- potencia pic 2.16 MWp
     ) / (
         NULLIF(view_irradiation.irradiation_w_m2_h, 0.0) / 1000.0 -- GSTC 1000 W/m2
     ) AS pr_hourly
@@ -15,4 +15,6 @@
     ON view_irradiation."time" = meterregistry."time"
  join sensor
     on sensor.plant = meter.plant 
-    and view_irradiation.sensor = sensor.id;
+    and view_irradiation.sensor = sensor.id
+ JOIN plant ON meter.plant = plant.id
+ JOIN plantparameters ON plant.id = plantparameters.plant;

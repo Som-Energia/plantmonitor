@@ -1,0 +1,18 @@
+options:
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 1
+    minSizeX: 1
+    col: 0
+    row: 0
+  isHidden: false
+  parameterMappings: {}
+text: "Llista d'indicadors\n---------------------------\n- Sonda d'irradiació bruta\n\
+  - View de la sonda d'irradiació\n- HT\n- HD\n- disponibilitat\n- YR\n- PR \n- PR\
+  \ real vs PR objectiu\n- energia esperada inversors\n- energia esperada comptadors\n\
+  - potencia esperada"
+width: 1

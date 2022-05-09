@@ -29,7 +29,6 @@ options:
     global: false
     value:
     - ALARMA!
-    - Sense dades
     enumOptions: 'All
 
       OK

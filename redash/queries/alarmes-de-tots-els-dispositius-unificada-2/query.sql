@@ -14,9 +14,10 @@ select * from (
         END as _status
     from alarm_status
     left join alarm on alarm_status.alarm = alarm.id
-    left join inverter on inverter.id = alarm_status.device_id and device_table = 'inverter'
+    left join string on string.id = alarm_status.device_id and device_table = 'string'
+    left join inverter on inverter.id = alarm_status.device_id and device_table = 'inverter' or inverter.id = string.inverter
     --left join meter on meter.id = alarm_status.device_id and device_table = 'meter'
     left join plant on inverter.plant = plant.id
 ) sub
-where 'All' IN ({{ status }}) OR _status IN ({{ status }}) 
-AND 0 IN ({{ plant }}) OR plant_id IN ({{ plant }});
+where ('All' IN ({{ status }}) OR _status IN ({{ status }}))
+AND (0 IN ({{ plant }}) OR plant_id IN ({{ plant }}));

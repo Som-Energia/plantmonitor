@@ -5,13 +5,10 @@ is_archived: false
 is_draft: false
 is_favorite: false
 is_safe: true
-name: All plants from SomEnergia
+name: Sample meter dump per CE
 options:
   parameters: []
-schedule:
-  interval: 2592000
-  until: null
-  day_of_week: null
-  time: '22:15'
-tags: []
+schedule: null
+tags:
+- Proves-IT
 version: 1

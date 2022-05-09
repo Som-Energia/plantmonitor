@@ -7,7 +7,7 @@ options:
       value: Alcolea
       title: ''
     interval:
-      type: dashboard-level
+      type: widget-level
       mapTo: interval
       name: interval
       value: null
