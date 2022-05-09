@@ -1,21 +1,16 @@
 options:
+  parameterMappings: {}
+  isHidden: false
   position:
     autoHeight: false
-    sizeX: 6
-    sizeY: 3
+    sizeX: 2
+    sizeY: 8
     maxSizeY: 1000
     maxSizeX: 6
-    minSizeY: 1
+    minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 0
-  isHidden: false
-  parameterMappings: {}
-text: '**[Dashboard global](https://redash.somenergia.coop/dashboard/dashboard-global?refresh=300)**
-
-
-  Anar a [Detall de planta](https://redash.somenergia.coop/dashboard/dashboard-din-mic-de-planta?&refresh=300)
-
-
-  Anar a [General de planta](https://redash.somenergia.coop/dashboard/dashboard-general-de-planta?&refresh=300)'
+    row: 8
+text: ''
+visualization: queries/estat-de-totes-les-plantes/visualizations/chart.yaml
 width: 1

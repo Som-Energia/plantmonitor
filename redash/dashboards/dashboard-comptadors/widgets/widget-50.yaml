@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: planta
       name: planta
-      value: Terborg
+      value: Llanillos
       title: ''
     interval:
       type: widget-level
@@ -21,14 +21,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 6
+    sizeX: 4
     sizeY: 8
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 201
+    row: 228
 text: ''
-visualization: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
+visualization: queries/energia-exportada-comptadors-amb-granularitat-mensual/visualizations/chart.yaml
 width: 1

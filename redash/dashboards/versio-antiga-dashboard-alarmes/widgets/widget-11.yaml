@@ -36,5 +36,5 @@ options:
     col: 0
     row: 39
 text: ''
-visualization: queries/alarmes-de-comptadors-sense-energia-llista-historica-2/visualizations/table.yaml
+visualization: queries/alarmes-de-comptadors-sense-energia-llista-historica/visualizations/table.yaml
 width: 1

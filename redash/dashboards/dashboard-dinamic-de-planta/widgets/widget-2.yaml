@@ -7,13 +7,19 @@ options:
       value: null
       title: ''
     interval:
-      type: dashboard-level
+      type: widget-level
       mapTo: interval
       name: interval
       value: null
       title: ''
+    metric:
+      type: widget-level
+      mapTo: metric
+      name: metric
+      value: null
+      title: ''
     granularity:
-      type: dashboard-level
+      type: widget-level
       mapTo: granularity
       name: granularity
       value: null
@@ -27,8 +33,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 0
+    col: 3
     row: 13
 text: ''
-visualization: queries/metriques-de-comptador/visualizations/chart.yaml
+visualization: queries/metriques-d-inversor-v2-una-metrica/visualizations/potencia-energia-i-temperatures-d-inversors.yaml
 width: 1

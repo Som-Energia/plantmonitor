@@ -4,10 +4,10 @@ options:
       type: static-value
       mapTo: plant
       name: plant
-      value: Matallana
+      value: Alcolea
       title: ''
     interval:
-      type: dashboard-level
+      type: widget-level
       mapTo: interval
       name: interval
       value: null
@@ -22,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 3
-    row: 74
+    row: 11
 text: ''
 visualization: queries/irradiacion-y-temperatura-modulo-energes/visualizations/chart.yaml
 width: 1

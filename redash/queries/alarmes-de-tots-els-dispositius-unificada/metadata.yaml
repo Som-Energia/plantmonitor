@@ -1,5 +1,5 @@
 can_edit: true
-data_source_id: datasources/plantmonitor-2.yaml
+data_source_id: datasources/plantmonitor.yaml
 description: null
 is_archived: false
 is_draft: false
@@ -7,7 +7,39 @@ is_favorite: false
 is_safe: true
 name: Alarmes de tots els dispositius unificada
 options:
-  parameters: []
+  parameters:
+  - name: plant
+    multiValuesOptions:
+      prefix: ''
+      separator: ','
+      suffix: ''
+    global: false
+    value:
+    - '0'
+    queryId: queries/all-plants-by-id
+    parentQueryId: 178
+    title: plant
+    type: query
+    locals: []
+  - name: status
+    multiValuesOptions:
+      prefix: ''''
+      separator: ','
+      suffix: ''''
+    global: false
+    value:
+    - ALARMA!
+    enumOptions: 'All
+
+      OK
+
+      ALARMA!
+
+      Sense dades'
+    parentQueryId: 178
+    title: status
+    type: enum
+    locals: []
 schedule:
   interval: 300
   until: null

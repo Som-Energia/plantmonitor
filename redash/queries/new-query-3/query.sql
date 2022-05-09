@@ -1,14 +1,14 @@
-SELECT date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid') AS "time",
-       reg.sensor,
+SELECT date_trunc('{{ granularity }}', reg.time) AS temps,
        plant.name AS plant,
-       count(*) AS ht
-FROM plant
-INNER JOIN sensor ON sensor.plant = plant.id
-INNER JOIN view_irradiation AS reg ON reg.sensor = sensor.id
-WHERE reg.irradiation_w_m2_h > 5
-  AND sensor.classtype = 'SensorIrradiation'
-GROUP BY date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid'),
-         reg.sensor,
-         plant.name
-ORDER BY date_trunc('month', reg.time AT TIME ZONE 'Europe/Madrid');
-
+       inverter.name AS inverter,
+       count(*)
+FROM inverterregistry AS reg
+LEFT JOIN inverter ON inverter.id=reg.inverter
+LEFT JOIN plant ON plant.id=inverter.plant
+WHERE plant.name='{{ planta }}'
+  AND reg.time >= '{{ interval.start }}'
+  AND reg.time <= '{{ interval.end }}'
+  AND inverter.name = 'inversor1'
+GROUP BY date_trunc('{{ granularity }}', reg.time),
+         plant.name,
+         inverter.name;

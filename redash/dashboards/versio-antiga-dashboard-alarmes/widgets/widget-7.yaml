@@ -18,5 +18,5 @@ options:
     col: 0
     row: 19
 text: ''
-visualization: queries/dashboard-alarma-alerta-temps-real-de-comptadors-biogas-hidro-sense-energia-2/visualizations/table.yaml
+visualization: queries/dashboard-alarma-alerta-temps-real-de-comptadors-biogas-hidro-sense-energia/visualizations/table.yaml
 width: 1

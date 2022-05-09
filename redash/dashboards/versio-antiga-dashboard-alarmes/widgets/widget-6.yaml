@@ -18,5 +18,5 @@ options:
     col: 0
     row: 29
 text: ''
-visualization: queries/dasboard-alarma-estacio-meteologica-historic-2/visualizations/table.yaml
+visualization: queries/dasboard-alarma-estacio-meteologica-historic/visualizations/table.yaml
 width: 1

@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: planta
       name: planta
-      value: Valteina
+      value: Fontivsolar
       title: ''
     interval:
       type: widget-level
@@ -22,7 +22,7 @@ options:
     minSizeY: 1
     minSizeX: 2
     col: 4
-    row: 95
+    row: 133
 text: ''
 visualization: queries/energia-importada-mensual/visualizations/table.yaml
 width: 1

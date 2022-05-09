@@ -1,15 +1,9 @@
 options:
   parameterMappings:
-    metrics:
-      type: widget-level
-      mapTo: metrics
-      name: metrics
-      value: null
-      title: ''
-    planta:
+    plant:
       type: dashboard-level
       mapTo: plant
-      name: planta
+      name: plant
       value: null
       title: ''
     interval:
@@ -28,13 +22,13 @@ options:
   position:
     autoHeight: false
     sizeX: 3
-    sizeY: 10
+    sizeY: 8
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 21
+    row: 13
 text: ''
-visualization: queries/metriques-d-inversor-v2-dropdown-per-metrica-amb-rollup/visualizations/chart.yaml
+visualization: queries/metriques-de-comptador/visualizations/chart.yaml
 width: 1

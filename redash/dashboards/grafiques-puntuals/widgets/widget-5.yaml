@@ -1,19 +1,19 @@
 options:
   parameterMappings:
     planta:
-      type: dashboard-level
+      type: widget-level
       mapTo: planta
       name: planta
       value: null
       title: ''
     interval:
-      type: dashboard-level
+      type: widget-level
       mapTo: interval
       name: interval
       value: null
       title: ''
     granularity:
-      type: dashboard-level
+      type: widget-level
       mapTo: granularity
       name: granularity
       value: null
@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 42
+    row: 34
 text: ''
-visualization: queries/energia-esperada-i-perduda-despres-del-comptador/visualizations/chart.yaml
+visualization: queries/numero-de-lectures-d-inversor/visualizations/chart.yaml
 width: 1

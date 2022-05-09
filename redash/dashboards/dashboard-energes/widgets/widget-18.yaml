@@ -1,15 +1,4 @@
 options:
-  position:
-    autoHeight: false
-    sizeX: 3
-    sizeY: 8
-    maxSizeY: 1000
-    maxSizeX: 6
-    minSizeY: 5
-    minSizeX: 1
-    col: 3
-    row: 31
-  isHidden: false
   parameterMappings:
     plant:
       type: static-value
@@ -24,11 +13,22 @@ options:
       value: null
       title: ''
     granularity:
-      type: widget-level
+      type: dashboard-level
       mapTo: granularity
       name: granularity
       value: null
       title: ''
+  isHidden: false
+  position:
+    autoHeight: false
+    sizeX: 3
+    sizeY: 8
+    maxSizeY: 1000
+    maxSizeX: 6
+    minSizeY: 5
+    minSizeX: 1
+    col: 0
+    row: 39
 text: ''
-visualization: queries/energia-mensual-inversors-diferencial-energes-2/visualizations/chart.yaml
+visualization: queries/intensitat-dels-inversors-energes/visualizations/chart.yaml
 width: 1

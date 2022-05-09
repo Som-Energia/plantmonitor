@@ -18,5 +18,5 @@ options:
     col: 3
     row: 3
 text: ''
-visualization: queries/dashboard-alarma-en-temps-real-potencia-nula-amb-radiacio-tots-els-inversors-2/visualizations/table.yaml
+visualization: queries/dashboard-alarma-en-temps-real-potencia-nula-amb-radiacio-tots-els-inversors/visualizations/table.yaml
 width: 1

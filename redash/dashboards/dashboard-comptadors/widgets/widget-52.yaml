@@ -1,15 +1,28 @@
 options:
+  parameterMappings:
+    planta:
+      type: static-value
+      mapTo: planta
+      name: planta
+      value: Llanillos
+      title: ''
+    interval:
+      type: widget-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+  isHidden: false
   position:
-    autoHeight: false
-    sizeX: 6
-    sizeY: 3
+    autoHeight: true
+    sizeX: 2
+    sizeY: 10
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1
-    minSizeX: 1
-    col: 0
-    row: 217
-  isHidden: false
-  parameterMappings: {}
-text: '#Llanillos'
+    minSizeX: 2
+    col: 4
+    row: 228
+text: ''
+visualization: queries/energia-importada-mensual/visualizations/table.yaml
 width: 1

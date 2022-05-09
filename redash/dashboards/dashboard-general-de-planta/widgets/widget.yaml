@@ -1,34 +1,16 @@
 options:
-  parameterMappings:
-    plant:
-      type: dashboard-level
-      mapTo: planta
-      name: plant
-      value: null
-      title: ''
-    interval:
-      type: widget-level
-      mapTo: interval
-      name: interval
-      value: null
-      title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
+  parameterMappings: {}
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 2
-    sizeY: 11
+    sizeX: 1
+    sizeY: 6
     maxSizeY: 1000
     maxSizeX: 6
-    minSizeY: 5
+    minSizeY: 1
     minSizeX: 1
-    col: 4
-    row: 14
+    col: 0
+    row: 25
 text: ''
-visualization: queries/exportada-pr/visualizations/chart.yaml
+visualization: queries/sonda-d-irradiacio-actual/visualizations/sonda-irradiacio-details-view.yaml
 width: 1

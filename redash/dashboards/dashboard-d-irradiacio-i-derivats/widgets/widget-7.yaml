@@ -12,5 +12,5 @@ options:
     col: 3
     row: 24
 text: ''
-visualization: queries/new-query/visualizations/chart.yaml
+visualization: queries/pr-horari-2/visualizations/chart.yaml
 width: 1

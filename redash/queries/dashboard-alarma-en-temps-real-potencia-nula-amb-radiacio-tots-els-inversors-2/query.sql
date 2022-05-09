@@ -1,1 +1,0 @@
-select * from query_128 where inverter_ok=0 and plant_id in ({{ plant_id }});

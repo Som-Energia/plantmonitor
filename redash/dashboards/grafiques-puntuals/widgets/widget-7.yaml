@@ -1,21 +1,15 @@
 options:
   parameterMappings:
-    planta:
+    plant:
       type: dashboard-level
-      mapTo: planta
-      name: planta
+      mapTo: plant
+      name: plant
       value: null
       title: ''
     interval:
       type: dashboard-level
       mapTo: interval
       name: interval
-      value: null
-      title: ''
-    granularity:
-      type: dashboard-level
-      mapTo: granularity
-      name: granularity
       value: null
       title: ''
   isHidden: false
@@ -27,8 +21,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 0
+    col: 3
     row: 16
 text: ''
-visualization: queries/energia-esperada-i-energia-perduda/visualizations/chart.yaml
+visualization: queries/potencia-esperada/visualizations/chart.yaml
 width: 1

@@ -1,16 +1,40 @@
 options:
-  parameterMappings: {}
+  parameterMappings:
+    plant_type:
+      type: widget-level
+      mapTo: plant_type
+      name: plant_type
+      value: null
+      title: ''
+    interval:
+      type: widget-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    fv_plants:
+      type: widget-level
+      mapTo: fv_plants
+      name: fv_plants
+      value: null
+      title: ''
+    biogas_plants:
+      type: widget-level
+      mapTo: biogas_plants
+      name: biogas_plants
+      value: null
+      title: ''
   isHidden: false
   position:
     autoHeight: false
     sizeX: 3
-    sizeY: 8
+    sizeY: 10
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 0
+    row: 8
 text: ''
-visualization: queries/comparacio-mati-tarda-prediccio-metologica-total-2/visualizations/chart.yaml
+visualization: queries/alarmes-de-comptadors-sense-energia-llista-historica/visualizations/chart.yaml
 width: 1

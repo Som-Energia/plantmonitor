@@ -1,5 +1,11 @@
 options:
   parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Florida
+      title: ''
     interval:
       type: widget-level
       mapTo: interval
@@ -21,8 +27,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 3
-    row: 3
+    col: 0
+    row: 47
 text: ''
-visualization: queries/energia-mensual-inversores-energes-alcolea/visualizations/chart.yaml
+visualization: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
 width: 1

@@ -24,5 +24,5 @@ options:
     col: 0
     row: 16
 text: ''
-visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada-v2-2/visualizations/chart.yaml
+visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada-v2/visualizations/chart.yaml
 width: 1

@@ -30,5 +30,5 @@ options:
     col: 3
     row: 0
 text: ''
-visualization: queries/pr-amb-granularitat/visualizations/produccio-i-pr-vs-objectius.yaml
+visualization: queries/pr-amb-granularitat-i-objectius/visualizations/produccio-i-pr-vs-objectius.yaml
 width: 1

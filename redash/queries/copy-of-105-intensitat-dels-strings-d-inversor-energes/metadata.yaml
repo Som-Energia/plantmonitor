@@ -12,7 +12,7 @@ options:
     title: plant
     global: false
     value: Florida
-    queryId: queries/all-plants
+    queryId: queries/all-plants-from-somenergia
     locals: []
     type: query
     parentQueryId: 105

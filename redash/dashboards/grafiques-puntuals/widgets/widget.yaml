@@ -1,23 +1,5 @@
 options:
-  parameterMappings:
-    planta:
-      type: dashboard-level
-      mapTo: planta
-      name: planta
-      value: null
-      title: ''
-    interval:
-      type: dashboard-level
-      mapTo: interval
-      name: interval
-      value: null
-      title: ''
-    granularity:
-      type: dashboard-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
+  parameterMappings: {}
   isHidden: false
   position:
     autoHeight: false
@@ -28,7 +10,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 26
+    row: 0
 text: ''
-visualization: queries/potencia-inversors-amb-total/visualizations/chart.yaml
+visualization: queries/comparacio-mati-tarda-prediccio-metologica-total/visualizations/chart.yaml
 width: 1

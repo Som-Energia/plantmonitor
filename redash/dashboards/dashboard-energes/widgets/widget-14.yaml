@@ -12,6 +12,12 @@ options:
       name: interval
       value: null
       title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
   isHidden: false
   position:
     autoHeight: false
@@ -22,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 58
+    row: 66
 text: ''
-visualization: queries/potencia-inversor-energes/visualizations/chart.yaml
+visualization: queries/intensitat-dels-inversors-energes/visualizations/chart.yaml
 width: 1

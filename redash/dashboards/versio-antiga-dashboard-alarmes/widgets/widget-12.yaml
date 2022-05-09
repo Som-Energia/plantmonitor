@@ -18,5 +18,5 @@ options:
     col: 3
     row: 39
 text: ''
-visualization: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic-2/visualizations/table.yaml
+visualization: queries/dashboard-alarma-3-inversors-temperatura-anomala-historic/visualizations/table.yaml
 width: 1

@@ -7,19 +7,13 @@ options:
       value: null
       title: ''
     interval:
-      type: widget-level
+      type: dashboard-level
       mapTo: interval
       name: interval
       value: null
       title: ''
-    metric:
-      type: widget-level
-      mapTo: metric
-      name: metric
-      value: null
-      title: ''
     granularity:
-      type: widget-level
+      type: dashboard-level
       mapTo: granularity
       name: granularity
       value: null
@@ -27,14 +21,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 3
-    sizeY: 8
+    sizeX: 6
+    sizeY: 10
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 3
-    row: 13
+    col: 0
+    row: 3
 text: ''
-visualization: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
+visualization: queries/metriques-d-inversor/visualizations/chart.yaml
 width: 1

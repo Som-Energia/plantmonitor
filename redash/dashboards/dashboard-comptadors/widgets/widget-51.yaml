@@ -1,34 +1,15 @@
 options:
-  parameterMappings:
-    planta:
-      type: static-value
-      mapTo: planta
-      name: planta
-      value: Llanillos
-      title: ''
-    interval:
-      type: widget-level
-      mapTo: interval
-      name: interval
-      value: null
-      title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
-  isHidden: false
   position:
     autoHeight: false
-    sizeX: 4
-    sizeY: 8
+    sizeX: 6
+    sizeY: 3
     maxSizeY: 1000
     maxSizeX: 6
-    minSizeY: 5
+    minSizeY: 1
     minSizeX: 1
     col: 0
-    row: 228
-text: ''
-visualization: queries/energia-exportada-comptadors-amb-granularitat-mensual/visualizations/chart.yaml
+    row: 217
+  isHidden: false
+  parameterMappings: {}
+text: '#Llanillos'
 width: 1

@@ -12,7 +12,7 @@ options:
     title: plant
     global: false
     value: Alcolea
-    queryId: queries/all-plants
+    queryId: queries/all-plants-from-somenergia
     parentQueryId: 101
     type: query
     locals: []

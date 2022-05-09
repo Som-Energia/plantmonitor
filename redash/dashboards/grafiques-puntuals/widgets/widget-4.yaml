@@ -1,5 +1,23 @@
 options:
-  parameterMappings: {}
+  parameterMappings:
+    plant:
+      type: widget-level
+      mapTo: plant
+      name: plant
+      value: null
+      title: ''
+    interval:
+      type: dashboard-level
+      mapTo: interval
+      name: interval
+      value: null
+      title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
   isHidden: false
   position:
     autoHeight: false
@@ -12,5 +30,5 @@ options:
     col: 3
     row: 8
 text: ''
-visualization: queries/new-query/visualizations/chart.yaml
+visualization: queries/sonda-d-irradiacio/visualizations/chart.yaml
 width: 1

@@ -18,5 +18,5 @@ options:
     col: 0
     row: 3
 text: ''
-visualization: queries/dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-2/visualizations/table.yaml
+visualization: queries/dashboard-alarma-d-strings-intensitat-nula-amb-radiacio/visualizations/table.yaml
 width: 1

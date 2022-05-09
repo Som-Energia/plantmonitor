@@ -27,12 +27,17 @@ options:
   sortX: true
   seriesOptions:
     hores_equivalents:
-      zIndex: 2
+      zIndex: 0
       index: 0
       type: line
       yAxis: 0
+    pr:
+      zIndex: 1
+      index: 0
+      type: line
+      yAxis: 1
     export_energy_mwh:
-      zIndex: 0
+      zIndex: 2
       index: 0
       type: column
       yAxis: 0
@@ -42,15 +47,10 @@ options:
       type: line
       yAxis: 0
     irradiation_kwh_m2:
-      zIndex: 1
-      index: 0
-      type: line
-      yAxis: 0
-    pr:
       zIndex: 3
       index: 0
       type: line
-      yAxis: 1
+      yAxis: 0
     historic_avg_mwh:
       zIndex: 5
       index: 0

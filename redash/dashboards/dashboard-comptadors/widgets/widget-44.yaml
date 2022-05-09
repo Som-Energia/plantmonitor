@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: planta
       name: planta
-      value: Matallana
+      value: Valteina
       title: ''
     interval:
       type: widget-level
@@ -22,7 +22,7 @@ options:
     minSizeY: 1
     minSizeX: 2
     col: 4
-    row: 171
+    row: 95
 text: ''
 visualization: queries/energia-importada-mensual/visualizations/table.yaml
 width: 1

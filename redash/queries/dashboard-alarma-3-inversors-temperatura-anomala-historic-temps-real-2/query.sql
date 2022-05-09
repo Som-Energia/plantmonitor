@@ -1,1 +1,0 @@
-select * from query_163 WHERE time BETWEEN datetime('now', 'start of day') AND datetime('now', '+1 day') and plant_id in ({{ plant_id }})

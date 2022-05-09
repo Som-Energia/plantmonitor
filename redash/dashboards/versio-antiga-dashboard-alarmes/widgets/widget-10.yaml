@@ -12,5 +12,5 @@ options:
     col: 3
     row: 29
 text: ''
-visualization: queries/todo-dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-historic-2/visualizations/table.yaml
+visualization: queries/todo-dashboard-alarma-d-strings-intensitat-nula-amb-radiacio-historic/visualizations/table.yaml
 width: 1

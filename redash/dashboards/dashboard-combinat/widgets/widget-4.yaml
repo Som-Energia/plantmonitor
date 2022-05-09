@@ -12,6 +12,12 @@ options:
       name: interval
       value: null
       title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
+      value: null
+      title: ''
   isHidden: false
   position:
     autoHeight: false
@@ -22,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 0
+    row: 18
 text: ''
-visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada/visualizations/chart.yaml
+visualization: queries/sonda-d-irradiacio/visualizations/chart.yaml
 width: 1

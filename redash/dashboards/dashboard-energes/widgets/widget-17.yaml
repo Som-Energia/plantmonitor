@@ -4,10 +4,10 @@ options:
       type: static-value
       mapTo: plant
       name: plant
-      value: Matallana
+      value: Florida
       title: ''
     interval:
-      type: widget-level
+      type: dashboard-level
       mapTo: interval
       name: interval
       value: null
@@ -27,8 +27,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 0
-    row: 74
+    col: 3
+    row: 47
 text: ''
-visualization: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
+visualization: queries/intensitat-dels-strings-d-inversor-energes/visualizations/chart.yaml
 width: 1

@@ -1,22 +1,16 @@
 options:
-  parameterMappings:
-    planta:
-      type: dashboard-level
-      mapTo: planta
-      name: planta
-      value: null
-      title: ''
+  parameterMappings: {}
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 2
-    sizeY: 4
+    sizeX: 1
+    sizeY: 15
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1
     minSizeX: 1
-    col: 4
-    row: 3
+    col: 0
+    row: 7
 text: ''
-visualization: queries/energia-acumulada/visualizations/produccio-acumulada.yaml
+visualization: queries/plant-overview/visualizations/details-view.yaml
 width: 1

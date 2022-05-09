@@ -15,8 +15,8 @@ options:
     maxSizeX: 6
     minSizeY: 1
     minSizeX: 1
-    col: 0
-    row: 24
+    col: 2
+    row: 3
 text: ''
-visualization: queries/alarma-de-comptador/visualizations/details-view.yaml
+visualization: queries/energia-diaria-total-inversors/visualizations/energia-diaria.yaml
 width: 1

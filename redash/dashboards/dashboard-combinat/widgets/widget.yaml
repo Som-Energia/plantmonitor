@@ -22,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 9
+    row: 0
 text: ''
-visualization: queries/potencia-tots-els-inversors-amb-temps-i-granularitat/visualizations/chart.yaml
+visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada/visualizations/chart.yaml
 width: 1

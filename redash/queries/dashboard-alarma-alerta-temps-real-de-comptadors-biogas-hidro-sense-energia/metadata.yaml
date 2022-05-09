@@ -1,5 +1,5 @@
 can_edit: true
-data_source_id: datasources/redash-query-results-2.yaml
+data_source_id: datasources/redash-query-results.yaml
 description: null
 is_archived: false
 is_draft: false
@@ -17,7 +17,7 @@ options:
     value:
     - '10'
     - '11'
-    queryId: queries/all-plants-by-id-2
+    queryId: queries/all-plants-by-id
     parentQueryId: 162
     title: Planta Biogas/hidro
     type: query

@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: planta
       name: planta
-      value: Torregrossa
+      value: Alcolea
       title: ''
     interval:
       type: widget-level
@@ -12,23 +12,17 @@ options:
       name: interval
       value: null
       title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 6
+    sizeX: 2
     sizeY: 8
     maxSizeY: 1000
     maxSizeX: 6
-    minSizeY: 5
-    minSizeX: 1
-    col: 0
-    row: 106
+    minSizeY: 1
+    minSizeX: 2
+    col: 4
+    row: 152
 text: ''
-visualization: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
+visualization: queries/energia-importada-mensual/visualizations/table.yaml
 width: 1

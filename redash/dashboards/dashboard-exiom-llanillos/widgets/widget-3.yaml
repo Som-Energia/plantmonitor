@@ -18,5 +18,5 @@ options:
     col: 0
     row: 0
 text: ''
-visualization: queries/potencia-inversor-exiom-2/visualizations/chart.yaml
+visualization: queries/potencia-inversor-exiom/visualizations/chart.yaml
 width: 1

@@ -4,18 +4,12 @@ options:
       type: static-value
       mapTo: plant
       name: plant
-      value: Matallana
+      value: Florida
       title: ''
     interval:
-      type: widget-level
+      type: dashboard-level
       mapTo: interval
       name: interval
-      value: null
-      title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
       value: null
       title: ''
   isHidden: false
@@ -28,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 3
-    row: 66
+    row: 39
 text: ''
-visualization: queries/energia-mensual-inversores-energes-autoreset-diari-2/visualizations/chart.yaml
+visualization: queries/irradiacion-y-temperatura-modulo-energes/visualizations/chart.yaml
 width: 1

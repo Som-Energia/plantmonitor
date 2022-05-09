@@ -12,7 +12,7 @@ options:
     title: planta
     global: false
     value: Torregrossa
-    queryId: queries/all-plants
+    queryId: queries/all-plants-from-somenergia
     parentQueryId: 122
     type: query
     locals: []

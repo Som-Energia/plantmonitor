@@ -1,5 +1,5 @@
 can_edit: true
-data_source_id: datasources/energes-2.yaml
+data_source_id: datasources/energes.yaml
 description: null
 is_archived: false
 is_draft: false
@@ -12,7 +12,7 @@ options:
     title: plant
     global: false
     value: Florida
-    queryId: queries/plant-list-energes-2
+    queryId: queries/plant-list-energes
     parentQueryId: 174
     type: query
     locals: []

@@ -1,15 +1,21 @@
 options:
   parameterMappings:
-    plant:
+    planta:
       type: dashboard-level
-      mapTo: plant
-      name: plant
+      mapTo: planta
+      name: planta
       value: null
       title: ''
     interval:
       type: dashboard-level
       mapTo: interval
       name: interval
+      value: null
+      title: ''
+    granularity:
+      type: dashboard-level
+      mapTo: granularity
+      name: granularity
       value: null
       title: ''
   isHidden: false
@@ -21,8 +27,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 3
-    row: 16
+    col: 0
+    row: 26
 text: ''
-visualization: queries/potencia-esperada/visualizations/chart.yaml
+visualization: queries/potencia-inversors-amb-total/visualizations/chart.yaml
 width: 1

@@ -1,14 +1,2 @@
-SELECT date_trunc('{{ granularity }}', reg.time) AS temps,
-       plant.name AS plant,
-       inverter.name AS inverter,
-       count(*)
-FROM inverterregistry AS reg
-LEFT JOIN inverter ON inverter.id=reg.inverter
-LEFT JOIN plant ON plant.id=inverter.plant
-WHERE plant.name='{{ planta }}'
-  AND reg.time >= '{{ interval.start }}'
-  AND reg.time <= '{{ interval.end }}'
-  AND inverter.name = 'inversor1'
-GROUP BY date_trunc('{{ granularity }}', reg.time),
-         plant.name,
-         inverter.name;
+select sum(export_energy_wh) from meterregistry join meter on meterregistry.meter = meter.id where meter = 2 order by time asc limit 1000;
+

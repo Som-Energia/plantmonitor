@@ -36,5 +36,5 @@ options:
     col: 3
     row: 0
 text: ''
-visualization: queries/metriques-d-inversor-v2-una-metrica/visualizations/chart.yaml
+visualization: queries/metriques-d-inversor-v2-una-metrica/visualizations/potencia-energia-i-temperatures-d-inversors.yaml
 width: 1

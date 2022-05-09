@@ -1,5 +1,5 @@
 can_edit: true
-data_source_id: datasources/redash-query-results-2.yaml
+data_source_id: datasources/redash-query-results.yaml
 description: null
 is_archived: false
 is_draft: false
@@ -16,7 +16,7 @@ options:
     title: plant_id
     global: false
     value: '1'
-    queryId: queries/all-plants-by-id-2
+    queryId: queries/all-plants-by-id
     type: query
     locals: []
 schedule:

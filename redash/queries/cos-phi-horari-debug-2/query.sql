@@ -1,1 +1,0 @@
-select * from view_cos_phi_hourly_debug where qimportada != 0 and qexportada != 0 order by time desc limit 1000;

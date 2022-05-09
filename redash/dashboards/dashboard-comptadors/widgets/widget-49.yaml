@@ -21,14 +21,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 4
+    sizeX: 6
     sizeY: 8
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 209
+    row: 201
 text: ''
-visualization: queries/energia-exportada-comptadors-amb-granularitat-mensual/visualizations/chart.yaml
+visualization: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
 width: 1

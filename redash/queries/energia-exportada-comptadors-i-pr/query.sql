@@ -22,17 +22,17 @@ SELECT date_trunc('{{ granularity }}', meterregistry.time at time zone 'Europe/M
        plant.name AS plant,
        sum(export_energy_wh) AS export_energy_wh,
        sum(view_irradiation.irradiation_w_m2_h) AS irradiation_w_m2_h,
-       100*(sum(export_energy_wh / 2160000.0) / sum(NULLIF(view_irradiation.irradiation_w_m2_h, 0.0) / 1000.0)) AS pr
+       100*(sum(export_energy_wh / plantparameters.peak_power_w::float) / sum(NULLIF(view_irradiation.irradiation_w_m2_h, 0.0) / 1000.0)) AS pr
 FROM meterregistry
 JOIN meter ON meterregistry.meter = meter.id
 JOIN view_irradiation ON view_irradiation."time" = meterregistry."time"
 JOIN sensor ON sensor.plant = meter.plant
 AND view_irradiation.sensor = sensor.id
 JOIN plant ON meter.plant = plant.id
+JOIN plantparameters ON plant.id = plantparameters.plant
 WHERE plant.name = '{{ plant }}'
   AND meterregistry.time >= '{{ interval.start }}'
   AND meterregistry.time <= '{{ interval.end }}'
 GROUP BY date_trunc('{{ granularity }}', meterregistry.time at time zone 'Europe/Madrid'),
          meter.name,
          plant.name) AS sub_pr ON meter_energy.temps = sub_pr.time;
-

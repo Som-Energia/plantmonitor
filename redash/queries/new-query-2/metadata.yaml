@@ -4,31 +4,10 @@ description: null
 is_archived: false
 is_draft: true
 is_favorite: false
-is_safe: false
+is_safe: true
 name: New Query
 options:
-  parameters:
-  - name: granularity
-    title: granularity
-    global: false
-    value: minute
-    locals: []
-    type: text
-    parentQueryId: 30
-  - name: planta
-    title: planta
-    global: false
-    value: Fontivsolar
-    locals: []
-    type: text
-    parentQueryId: 30
-  - name: interval
-    title: interval
-    global: false
-    value: d_last_month
-    locals: []
-    type: datetime-range
-    parentQueryId: 30
+  parameters: []
 schedule: null
 tags: []
 version: 1

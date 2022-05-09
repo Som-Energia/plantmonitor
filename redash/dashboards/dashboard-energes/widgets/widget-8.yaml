@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: plant
       name: plant
-      value: Florida
+      value: Alcolea
       title: ''
     interval:
       type: widget-level
@@ -27,8 +27,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 0
-    row: 47
+    col: 3
+    row: 3
 text: ''
-visualization: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
+visualization: queries/energia-mensual-inversores-energes-autoreset-diari/visualizations/chart.yaml
 width: 1

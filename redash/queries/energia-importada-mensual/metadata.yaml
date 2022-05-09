@@ -12,7 +12,7 @@ options:
     title: planta
     global: false
     value: Llanillos
-    queryId: queries/all-plants
+    queryId: queries/all-plants-from-somenergia
     type: query
     locals: []
   - name: interval

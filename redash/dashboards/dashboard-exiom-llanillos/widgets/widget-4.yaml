@@ -30,5 +30,5 @@ options:
     col: 3
     row: 8
 text: ''
-visualization: queries/intensitat-dels-strings-d-inversor-exiom-2/visualizations/chart.yaml
+visualization: queries/intensitat-dels-strings-d-inversor-exiom/visualizations/chart.yaml
 width: 1

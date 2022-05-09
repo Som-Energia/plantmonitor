@@ -15,14 +15,14 @@ options:
   isHidden: false
   position:
     autoHeight: false
-    sizeX: 5
-    sizeY: 10
+    sizeX: 3
+    sizeY: 11
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
     col: 1
-    row: 25
+    row: 14
 text: ''
-visualization: queries/potencia-total-inversors-irradiacio-potencia-esperada/visualizations/chart.yaml
+visualization: queries/potencia-tots-els-inversors-amb-temps/visualizations/chart.yaml
 width: 1

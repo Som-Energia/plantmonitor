@@ -4,7 +4,7 @@ options:
       type: static-value
       mapTo: planta
       name: planta
-      value: Alcolea
+      value: Torregrossa
       title: ''
     interval:
       type: widget-level
@@ -28,7 +28,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 144
+    row: 106
 text: ''
 visualization: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
 width: 1

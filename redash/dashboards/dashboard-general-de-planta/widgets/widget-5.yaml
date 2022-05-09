@@ -1,18 +1,22 @@
 options:
+  parameterMappings:
+    planta:
+      type: dashboard-level
+      mapTo: planta
+      name: planta
+      value: null
+      title: ''
+  isHidden: false
   position:
     autoHeight: false
-    sizeX: 1
-    sizeY: 3
+    sizeX: 2
+    sizeY: 4
     maxSizeY: 1000
     maxSizeX: 6
     minSizeY: 1
     minSizeX: 1
-    col: 0
-    row: 22
-  isHidden: false
-  parameterMappings: {}
-text: '[Esquema Unifilar](https://drive.google.com/file/d/1MDw4k9CO-Djf0Vmwpv1Lu1gsZDBs0qq4/view?usp=sharing)
-
-
-  [Distribució General](https://drive.google.com/file/d/1V5QyXCOuGoMIlyTpfQxc8p6xExMWgCDt/view?usp=sharing)'
+    col: 4
+    row: 3
+text: ''
+visualization: queries/energia-acumulada/visualizations/produccio-acumulada-inversors.yaml
 width: 1

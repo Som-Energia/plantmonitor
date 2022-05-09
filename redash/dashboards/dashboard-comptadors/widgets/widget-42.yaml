@@ -1,34 +1,15 @@
 options:
-  parameterMappings:
-    planta:
-      type: static-value
-      mapTo: planta
-      name: planta
-      value: Florida
-      title: ''
-    interval:
-      type: widget-level
-      mapTo: interval
-      name: interval
-      value: null
-      title: ''
-    granularity:
-      type: widget-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
-  isHidden: false
   position:
     autoHeight: false
     sizeX: 6
-    sizeY: 8
+    sizeY: 3
     maxSizeY: 1000
     maxSizeX: 6
-    minSizeY: 5
+    minSizeY: 1
     minSizeX: 1
     col: 0
-    row: 182
-text: ''
-visualization: queries/energia-exportada-comptadors-amb-granularitat/visualizations/chart.yaml
+    row: 179
+  isHidden: false
+  parameterMappings: {}
+text: '#La Florida'
 width: 1

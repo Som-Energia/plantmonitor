@@ -1,5 +1,11 @@
 options:
   parameterMappings:
+    plant:
+      type: static-value
+      mapTo: plant
+      name: plant
+      value: Matallana
+      title: ''
     interval:
       type: widget-level
       mapTo: interval
@@ -7,7 +13,7 @@ options:
       value: null
       title: ''
     granularity:
-      type: widget-level
+      type: dashboard-level
       mapTo: granularity
       name: granularity
       value: null
@@ -21,8 +27,8 @@ options:
     maxSizeX: 6
     minSizeY: 5
     minSizeX: 1
-    col: 3
-    row: 31
+    col: 0
+    row: 74
 text: ''
-visualization: queries/energia-mensual-inversores-florida-energes/visualizations/chart.yaml
+visualization: queries/temperatura-media-inversores-energes/visualizations/chart.yaml
 width: 1

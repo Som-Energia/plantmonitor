@@ -1,2 +1,0 @@
-select *, extract(epoch from sunset - sunrise)/3600.0 as day_length from solarevent
-left join plant on plant.id = solarevent.plant WHERE solarevent.sunrise between '{{ interval.start }}' and '{{ interval.end }}';

@@ -18,5 +18,5 @@ options:
     col: 3
     row: 27
 text: ''
-visualization: queries/pr-con-granularidad-objetivos-historicos/visualizations/produccion-i-pr-vs-objetivos-vs-historicos-vs-horas-equivalentes.yaml
+visualization: queries/pr-con-granularidad-objetivos-historicos-horas-equivalentes/visualizations/produccion-i-pr-vs-objetivos-vs-historicos-vs-horas-equivalentes.yaml
 width: 1

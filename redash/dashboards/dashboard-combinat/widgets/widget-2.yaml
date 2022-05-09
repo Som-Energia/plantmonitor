@@ -12,12 +12,6 @@ options:
       name: interval
       value: null
       title: ''
-    granularity:
-      type: dashboard-level
-      mapTo: granularity
-      name: granularity
-      value: null
-      title: ''
   isHidden: false
   position:
     autoHeight: false
@@ -28,7 +22,7 @@ options:
     minSizeY: 5
     minSizeX: 1
     col: 0
-    row: 18
+    row: 9
 text: ''
-visualization: queries/sonda-d-irradiacio/visualizations/chart.yaml
+visualization: queries/potencia-tots-els-inversors-amb-temps/visualizations/chart.yaml
 width: 1

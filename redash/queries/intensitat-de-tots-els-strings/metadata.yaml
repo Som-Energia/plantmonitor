@@ -1,5 +1,5 @@
 can_edit: true
-data_source_id: datasources/plantmonitor-2.yaml
+data_source_id: datasources/plantmonitor.yaml
 description: null
 is_archived: false
 is_draft: false
@@ -12,7 +12,7 @@ options:
     title: plant
     global: false
     value: Matallana
-    queryId: queries/all-plants-2
+    queryId: queries/all-plants-from-somenergia
     parentQueryId: 177
     type: query
     locals: []
