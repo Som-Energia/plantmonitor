@@ -286,7 +286,7 @@ class ApiSolargis:
 
                 readings = api.get_current_solargis_irradiance_readings(from_date=from_date, to_date=to_date, processing_keys=processing_keys)
 
-                if processing_keys == 'GHI GTI TMOD PVOUT':
+                if processing_keys is None or processing_keys == 'GHI GTI TMOD PVOUT':
                     api.save_to_db(dbmanager.db_con, readings)
                 elif processing_keys == 'GHI GTI TMOD':
                     readings = [(t, ghi, gti, tmod, None, source, request_time) for t, ghi, gti, tmod, source, request_time in readings]
@@ -318,11 +318,11 @@ class ApiSolargis:
 if __name__ == '__main__':
     import sys
     try:
-        if len(sys.argv < 3):
+        if len(sys.argv) < 3:
             logger.error("Missing paramaters. expected from_date to_date [processing_keys]")
         else:
-            from_date = datetime.strptime(sys.argv[1], '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
-            to_date = datetime.strptime(sys.argv[2], '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+            from_date = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
+            to_date = datetime.datetime.strptime(sys.argv[2], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
             processing_keys = ' '.join(sys.argv[3:]) if len(sys.argv) > 3 else None
             ApiSolargis.download_readings(from_date, to_date, processing_keys)
     except Exception as err:
