@@ -219,7 +219,7 @@ class ApiSolargis:
                 logger.error(f"Error reading plant {plant_id} {site.name} {status}")
             else:
                 all_readings = [
-                    (t, plant_id, int(ghi), int(gti), int(tmod*10), int(pvout*1000), None, source, request_time)
+                    (t, plant_id, int(ghi), int(gti), int(tmod*10) if tmod != -99 else None, int(pvout*1000), None, source, request_time)
                     for t, ghi, gti, tmod, pvout, source, request_time in readings
                 ]
 

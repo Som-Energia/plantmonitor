@@ -355,8 +355,8 @@ class ApiSolargis_DB_Test(unittest.TestCase):
         readings = [
             (todtaware('2021-11-01 13:00:00'), 1, 100, 900, 6000, 10000, 'solargis', request_time),
             (todtaware('2021-11-01 14:00:00'), 1, 200, 1000, 6000, 10000, 'solargis', request_time),
-            (todtaware('2021-11-01 13:00:00'), 2, 10000, 90000, 600000, 1000000, 'solargis', request_time),
-            (todtaware('2021-11-01 14:00:00'), 2, 20000, 100000, 600000, 1000000, 'solargis', request_time),
+            (todtaware('2021-11-01 13:00:00'), 2, 10000, 90000, None, 1000000, 'solargis', request_time),
+            (todtaware('2021-11-01 14:00:00'), 2, 20000, 100000, None, 1000000, 'solargis', request_time),
         ]
 
         num_rows = self.api.save_to_db(self.dbmanager.db_con, readings)
