@@ -6,7 +6,7 @@ from external_api.api_solargis import ApiSolargis, Site
 
 from meteologica.utils import todtaware
 
-# run with pytest external_api.test_api_solargis_production
+# run with pytest external_api/test_api_solargis_production
 # to ensure this script sets the PLANTMONITOR_MODULE_SETTINGS to devel
 # before any other test module
 @unittest.skipIf(True, "we're querying an external api, let's disable tests by default")

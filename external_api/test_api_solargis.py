@@ -291,7 +291,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         readings = self.api.get_current_solargis_readings_standarized(from_date, to_date)
 
-        expected = [(t, 1, int(ghi), int(gti), int(temp*10), int(1000*pvout), None, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        expected = [(t, 1, int(ghi), int(gti), int(temp*10) if temp != -99 else None, int(1000*pvout), 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
 
         self.assertListEqual(readings, expected)
 

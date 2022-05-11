@@ -219,7 +219,7 @@ class ApiSolargis:
                 logger.error(f"Error reading plant {plant_id} {site.name} {status}")
             else:
                 all_readings = [
-                    (t, plant_id, int(ghi), int(gti), int(tmod*10) if tmod != -99 else None, int(pvout*1000), None, source, request_time)
+                    (t, plant_id, int(ghi), int(gti), int(tmod*10) if tmod != -99 else None, int(pvout*1000), source, request_time)
                     for t, ghi, gti, tmod, pvout, source, request_time in readings
                 ]
 
@@ -284,14 +284,14 @@ class ApiSolargis:
             with dbmanager.db_con.begin():
                 api.create_table(dbmanager.db_con)
 
-                readings = api.get_current_solargis_irradiance_readings(from_date=from_date, to_date=to_date, processing_keys=processing_keys)
+                if not processing_keys or processing_keys == 'GHI GTI TMOD PVOUT':
+                    readings = api.get_current_solargis_readings_standarized(from_date=from_date, to_date=to_date)
 
-                if processing_keys is None or processing_keys == 'GHI GTI TMOD PVOUT':
                     api.save_to_db(dbmanager.db_con, readings)
-                elif processing_keys == 'GHI GTI TMOD':
-                    readings = [(t, ghi, gti, tmod, None, source, request_time) for t, ghi, gti, tmod, source, request_time in readings]
-                    api.save_to_db(dbmanager.db_con, readings)
+
                 else:
+                    readings = api.get_current_solargis_irradiance_readings(from_date=from_date, to_date=to_date, processing_keys=processing_keys)
+
                     logger.info("database expects GHI GTI TMOD PVOUT, we're not saving. Just showing you the result.")
                     logger.info(readings)
 
