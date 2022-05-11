@@ -1,14 +1,29 @@
+from operator import invert
 import requests
 
 import datetime
 
 import xmlschema
 
-from typing import NamedTuple
+from typing import NamedTuple, Dict
 
 from conf.log import logger
 
 from plantmonitor.utils import rfc3336todt
+
+# class Module(NamedTuple):
+#     degradation_mpercent: int
+#     degradation_first_year_mpercent: int
+#     surface_reflectance_dc: int
+#     nominal_operating_cell_temp_dc: int
+
+# class Inverter(NamedTuple):
+#     efficiency_mpercent: int
+#     limitation_ac_power_w: int
+
+# class Losses(NamedTuple):
+#     dc_losses_mpercent: Dict[str,int]
+#     ac_losses_mpercent: Dict[str,int]
 
 class Site(NamedTuple):
     id: int
@@ -16,6 +31,7 @@ class Site(NamedTuple):
     peak_power_w: int
     latitude: float
     longitude: float
+    installation_type: str
 
 class ApiSolargis:
 
@@ -38,6 +54,7 @@ class ApiSolargis:
                 latitude=40.932389,
                 longitude=-4.968694,
                 peak_power_w=990,
+                installation_type='FREE_STANDING',
             ),
             9: Site(
                 id=9,
@@ -45,6 +62,7 @@ class ApiSolargis:
                 latitude=39.440722,
                 longitude=-0.428722,
                 peak_power_w=335,
+                installation_type='FREE_STANDING',
             ),
             22: Site(
                 id=22,
@@ -52,8 +70,53 @@ class ApiSolargis:
                 latitude=37.504330,
                 longitude=-3.236476,
                 peak_power_w=3820,
+                installation_type='FREE_STANDING',
             ),
         }
+
+    @staticmethod
+    def get_system_xml(site: Site):
+        # TODO OO this once we have a few examples and an idea of the topology
+
+        module_xml = '''
+            <pv:module type="CSI">
+                <pv:degradation>0.3</pv:degradation>
+                <pv:degradationFirstYear>0.8</pv:degradationFirstYear>
+                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>
+                <pv:PmaxCoeff>-0.38</pv:PmaxCoeff>
+            </pv:module>
+        '''
+        inverter_xml = '''
+            <pv:inverter>
+                <pv:efficiency xsi:type="pv:EfficiencyConstant" percent="97.5"/>
+                <!--<pv:efficiency xsi:type="pv:EfficiencyCurve" dataPairs="0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7"/>-->
+                <pv:limitationACPower>900</pv:limitationACPower>
+            </pv:inverter>
+        '''
+
+        losses_xml = '''
+            <pv:losses>
+                <pv:acLosses cables="0.1" transformer="0.9"/>
+                <pv:dcLosses cables="0.2" mismatch="0.3" snowPollution="3.0"/>
+                <!-- <pv:dcLosses cables="0.2" mismatch="0.3" monthlySnowPollution="5 5.2 3 1 1 1 1 1 1 1 2 4"/> -->
+            </pv:losses>
+        '''
+
+        topology_xml = '''
+           <pv:topology xsi:type="pv:TopologySimple" relativeSpacing="2.4" type="UNPROPORTIONAL2"/>
+           <!-- <pv:topology xsi:type="pv:TopologyColumn" relativeSpacing="2.5" type="UNPROPORTIONAL2"/> -->
+        '''
+
+        system = f'''
+        <pv:system installedPower="{site.peak_power_w}" installationType="{site.installation_type}" dateStartup="2022-01-03" selfShading="true">
+            {module_xml}
+            {inverter_xml}
+            {losses_xml}
+            {topology_xml}
+        </pv:system>
+        '''
+
+        return system
 
     def create_xsd_schema(self):
         self.schema = xmlschema.XMLSchema('data/ws-data.xsd')
@@ -73,6 +136,9 @@ class ApiSolargis:
         except requests.RequestException as e:
             logger.error("Request exception {}".format(e))
             return response.status_code, None
+
+        if response.status_code != 200:
+            logger.error("Request error {}".format(response.text))
 
         text_response = response.text
         return response.status_code, text_response
@@ -94,6 +160,8 @@ class ApiSolargis:
         from_date_str = datetime.datetime.strftime(from_date, '%Y-%m-%d')
         to_date_str = datetime.datetime.strftime(to_date, '%Y-%m-%d')
 
+        system = ApiSolargis.get_system_xml(site)
+
         xml_request_content = f'''
             <ws:dataDeliveryRequest dateFrom="{from_date_str}" dateTo="{to_date_str}"
             xmlns="http://geomodel.eu/schema/data/request"
@@ -102,11 +170,7 @@ class ApiSolargis:
             xmlns:pv="http://geomodel.eu/schema/common/pv"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <site id="{site.name}" lat="{site.latitude}" lng="{site.longitude}">
-             <pv:system installedPower="{site.peak_power_w}">
-                <pv:module type="ASI"/>
-                <pv:inverter/>
-                <pv:losses/>
-             </pv:system>
+                {system}
             </site>
             <processing key="{processing_keys}" summarization="HOURLY" terrainShading="true">
             </processing>
@@ -144,9 +208,7 @@ class ApiSolargis:
 
     def get_current_solargis_readings_standarized(self, from_date=None, to_date=None):
 
-        #TODO PVOUT is unauthorised at the moment
-        #processing_keys = 'GHI GTI TMOD PVOUT'
-        processing_keys = 'GHI GTI TMOD'
+        processing_keys = 'GHI GTI TMOD PVOUT'
         from_date = from_date or datetime.date.today() - datetime.timedelta(days=1)
         to_date = to_date or datetime.date.today() - datetime.timedelta(days=1)
 
@@ -157,8 +219,8 @@ class ApiSolargis:
                 logger.error(f"Error reading plant {plant_id} {site.name} {status}")
             else:
                 all_readings = [
-                    (t, plant_id, int(ghi), int(gti), int(tmod*10), None, source, request_time)
-                    for t, ghi, gti, tmod, source, request_time in readings
+                    (t, plant_id, int(ghi), int(gti), int(tmod*10), int(pvout*1000), None, source, request_time)
+                    for t, ghi, gti, tmod, pvout, source, request_time in readings
                 ]
 
         return all_readings
