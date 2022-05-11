@@ -206,6 +206,7 @@ class ApiSolargis:
 
         return all_readings
 
+    # For hourly requests GHI GTI and PVOUT [Wh/m2] with mWh/m2 resolution TMOD [C] with one decimal resolution
     def get_current_solargis_readings_standarized(self, from_date=None, to_date=None):
 
         processing_keys = 'GHI GTI TMOD PVOUT'
@@ -219,7 +220,7 @@ class ApiSolargis:
                 logger.error(f"Error reading plant {plant_id} {site.name} {status}")
             else:
                 all_readings = [
-                    (t, plant_id, int(ghi), int(gti), int(tmod*10) if tmod != -99 else None, int(pvout*1000), source, request_time)
+                    (t, plant_id, int(ghi), int(gti), int(tmod*10) if tmod != -99 else None, int(pvout), source, request_time)
                     for t, ghi, gti, tmod, pvout, source, request_time in readings
                 ]
 
