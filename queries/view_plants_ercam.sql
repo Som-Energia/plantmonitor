@@ -4,4 +4,4 @@ SELECT plant.id,
    plant.municipality,
    plant.description
   FROM plant
- WHERE plant.name in ('Florida', 'Alcolea', 'Matallana');
+ WHERE plant.name in ('Fontivsolar');
