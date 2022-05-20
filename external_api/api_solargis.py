@@ -25,6 +25,33 @@ from plantmonitor.utils import rfc3336todt
 #     dc_losses_mpercent: Dict[str,int]
 #     ac_losses_mpercent: Dict[str,int]
 
+class PVSystem(NamedTuple):
+    geometry_type: str
+    geometry_azimuth: int
+    geometry_tilt: int
+    geometry_backTracking: bool
+    geometry_rotationLimitEast: int
+    geometry_rotationLimitWest: int
+    system_installedPower: int
+    system_installationType: str
+    system_dateStartup: str
+    system_selfShading: bool
+    module_type: str
+    degradation_content: float
+    degradationFirstYear_content: float
+    PmaxCoeff_content: float
+    efficiency_type: str
+    efficiency_content: float
+    limitationACPower_content: int
+    dcLosses_snowPollution: float
+    dcLosses_cables: float
+    dcLosses_mismatch: float
+    acLosses_transformer: float
+    acLosses_cables: float
+    topology_xsi_type: str
+    topology_relativeSpacing: float
+    topology_type: str
+
 class Site(NamedTuple):
     id: int
     name: str
@@ -32,6 +59,7 @@ class Site(NamedTuple):
     latitude: float
     longitude: float
     installation_type: str
+    pvsystem: PVSystem
 
 class ApiSolargis:
 
@@ -47,6 +75,93 @@ class ApiSolargis:
         # TODO set from database wither via Pony, sqlalchemy or else if we stick with a satellite api
         # {plant_id: (lat, long)}
 
+        # Data fetched from here:
+        # https://docs.google.com/spreadsheets/d/1J2G6IuqIxIXT4ETG3vxVpryszs9Or_ss8NtMnGCJ6yw/edit#gid=0
+
+        pvsystems = {
+            9: PVSystem(
+                geometry_type = 'GeometryFixedOneAngle',
+                geometry_azimuth = 150,
+                geometry_tilt = 5,
+                geometry_backTracking = None,
+                geometry_rotationLimitEast = None,
+                geometry_rotationLimitWest = None,
+                system_installedPower = 335,
+                system_installationType = 'ROOF_MOUNTED',
+                system_dateStartup = '2012-09-01',
+                system_selfShading = 'true',
+                module_type = 'CSI',
+                degradation_content = 0.71,
+                degradationFirstYear_content = 2.00,
+                PmaxCoeff_content = -0.41,
+                efficiency_type = 'EfficiencyConstant',
+                efficiency_content = 94.80,
+                limitationACPower_content = 290,
+                dcLosses_snowPollution = 8.00,
+                dcLosses_cables = 2.00,
+                dcLosses_mismatch = 1.00,
+                acLosses_transformer = 0.50,
+                acLosses_cables = 0.50,
+                topology_xsi_type = 'TopologyRow',
+                topology_relativeSpacing = 1.2,
+                topology_type = 'UNPROPORTIONAL1',
+            ),
+            3: PVSystem(
+                geometry_type = 'GeometryOneAxisHorizontalNS',
+                geometry_azimuth = 220,
+                geometry_tilt = 0,
+                geometry_backTracking = 'true',
+                geometry_rotationLimitEast = -45,
+                geometry_rotationLimitWest = 45,
+                system_installedPower = 988,
+                system_installationType = 'FREE_STANDING',
+                system_dateStartup = '2018-05-01',
+                system_selfShading = 'true',
+                module_type = 'CSI',
+                degradation_content = 0.68,
+                degradationFirstYear_content = 2.00,
+                PmaxCoeff_content = -0.41,
+                efficiency_type = 'EfficiencyConstant',
+                efficiency_content = 98.10,
+                limitationACPower_content = 800,
+                dcLosses_snowPollution = 2.00,
+                dcLosses_cables = 1.50,
+                dcLosses_mismatch = 1,
+                acLosses_transformer = 0.50,
+                acLosses_cables = 0.50,
+                topology_xsi_type = 'TopologyColumn',
+                topology_relativeSpacing = 2,
+                topology_type = 'UNPROPORTIONAL1',
+            ),
+            22: PVSystem(
+                geometry_type='GeometryFixedOneAngle',
+                geometry_azimuth=180,
+                geometry_tilt=30,
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=3820,
+                system_installationType='FREE_STANDING',
+                system_dateStartup='2021-03-01',
+                system_selfShading='true',
+                module_type='CSI',
+                degradation_content=0.59,
+                degradationFirstYear_content=2.00,
+                PmaxCoeff_content=-0.4,
+                efficiency_type='EfficiencyConstant',
+                efficiency_content=98.50,
+                limitationACPower_content=3200,
+                dcLosses_snowPollution=3.00,
+                dcLosses_cables=2,
+                dcLosses_mismatch=1,
+                acLosses_transformer=0.50,
+                acLosses_cables=0.50,
+                topology_xsi_type='TopologyRow',
+                topology_relativeSpacing=2,
+                topology_type='UNPROPORTIONAL1',
+            ),
+        }
+
         self.sites = {
             3: Site(
                 id=3,
@@ -55,6 +170,7 @@ class ApiSolargis:
                 longitude=-4.968694,
                 peak_power_w=990,
                 installation_type='FREE_STANDING',
+                pvsystem=pvsystems[3]
             ),
             9: Site(
                 id=9,
@@ -63,6 +179,7 @@ class ApiSolargis:
                 longitude=-0.428722,
                 peak_power_w=335,
                 installation_type='FREE_STANDING',
+                pvsystem=pvsystems[9]
             ),
             22: Site(
                 id=22,
@@ -71,6 +188,7 @@ class ApiSolargis:
                 longitude=-3.236476,
                 peak_power_w=3820,
                 installation_type='FREE_STANDING',
+                pvsystem=pvsystems[22]
             ),
         }
 
@@ -78,37 +196,55 @@ class ApiSolargis:
     def get_system_xml(site: Site):
         # TODO OO this once we have a few examples and an idea of the topology
 
-        module_xml = '''
-            <pv:module type="CSI">
-                <pv:degradation>0.3</pv:degradation>
-                <pv:degradationFirstYear>0.8</pv:degradationFirstYear>
-                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>
-                <pv:PmaxCoeff>-0.38</pv:PmaxCoeff>
+        # extras_xml = f'''
+        #     <geo:terrain elevation="120" azimuth="180" tilt="5"/>
+        #     <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>
+        # '''
+
+        # TODO to be implemented as necessary
+        # <!-- <pv:geometry xsi:type="pv:GeometryOneAxisInclinedNS" axisTilt="30" rotationLimitEast="-90" rotationLimitWest="90" backTracking="true" azimuth="180"/> -->
+        # <!-- <pv:geometry xsi:type="pv:GeometryOneAxisVertical" tilt="25" rotationLimitEast="-180" rotationLimitWest="180" backTracking="true"/> -->
+        # <!-- <pv:geometry xsi:type="pv:GeometryTwoAxisAstronomical" rotationLimitEast="-180" rotationLimitWest="180" tiltLimitMin="10" tiltLimitMax="60" backTracking="true"/> -->
+
+
+        if site.pvsystem.geometry_type == 'GeometryOneAxisHorizontalNS':
+            geo_xml = f'''
+                <pv:geometry xsi:type="pv:{site.pvsystem.geometry_type}" rotationLimitEast="{site.pvsystem.geometry_rotationLimitEast}" rotationLimitWest="{site.pvsystem.geometry_rotationLimitWest}" backTracking="{site.pvsystem.geometry_backTracking}" azimuth="{site.pvsystem.geometry_azimuth}"/>
+            '''
+        else: # 'GeometryFixedOneAngle'
+            geo_xml = f'''
+                <pv:geometry xsi:type="pv:{site.pvsystem.geometry_type}" azimuth="{site.pvsystem.geometry_azimuth}" tilt="{site.pvsystem.geometry_tilt}"/>
+            '''
+
+        module_xml = f'''
+            <pv:module type="{site.pvsystem.module_type}">
+                <pv:degradation>{site.pvsystem.degradation_content}</pv:degradation>
+                <pv:degradationFirstYear>{site.pvsystem.degradationFirstYear_content}</pv:degradationFirstYear>
+                <pv:PmaxCoeff>{site.pvsystem.PmaxCoeff_content}</pv:PmaxCoeff>
             </pv:module>
         '''
-        inverter_xml = '''
+
+        inverter_xml = f'''
             <pv:inverter>
-                <pv:efficiency xsi:type="pv:EfficiencyConstant" percent="97.5"/>
-                <!--<pv:efficiency xsi:type="pv:EfficiencyCurve" dataPairs="0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7"/>-->
-                <pv:limitationACPower>900</pv:limitationACPower>
+                <pv:efficiency xsi:type="pv:{site.pvsystem.efficiency_type}" percent="{site.pvsystem.efficiency_content}"/>
+                <pv:limitationACPower>{site.pvsystem.limitationACPower_content}</pv:limitationACPower>
             </pv:inverter>
         '''
 
-        losses_xml = '''
+        losses_xml = f'''
             <pv:losses>
-                <pv:acLosses cables="0.1" transformer="0.9"/>
-                <pv:dcLosses cables="0.2" mismatch="0.3" snowPollution="3.0"/>
-                <!-- <pv:dcLosses cables="0.2" mismatch="0.3" monthlySnowPollution="5 5.2 3 1 1 1 1 1 1 1 2 4"/> -->
+                <pv:acLosses cables="{site.pvsystem.acLosses_cables}" transformer="{site.pvsystem.acLosses_transformer}"/>
+                <pv:dcLosses cables="{site.pvsystem.dcLosses_cables}" mismatch="{site.pvsystem.dcLosses_mismatch}" snowPollution="{site.pvsystem.dcLosses_snowPollution}"/>
             </pv:losses>
         '''
 
-        topology_xml = '''
-           <pv:topology xsi:type="pv:TopologySimple" relativeSpacing="2.4" type="UNPROPORTIONAL2"/>
-           <!-- <pv:topology xsi:type="pv:TopologyColumn" relativeSpacing="2.5" type="UNPROPORTIONAL2"/> -->
+        topology_xml = f'''
+           <pv:topology xsi:type="pv:{site.pvsystem.topology_xsi_type}" relativeSpacing="{site.pvsystem.topology_relativeSpacing}" type="{site.pvsystem.topology_type}"/>
         '''
 
         system = f'''
-        <pv:system installedPower="{site.peak_power_w}" installationType="{site.installation_type}" dateStartup="2022-01-03" selfShading="true">
+        {geo_xml}
+        <pv:system installedPower="{site.peak_power_w}" installationType="{site.installation_type}" dateStartup="{site.pvsystem.system_dateStartup}" selfShading="{site.pvsystem.system_selfShading}">
             {module_xml}
             {inverter_xml}
             {losses_xml}

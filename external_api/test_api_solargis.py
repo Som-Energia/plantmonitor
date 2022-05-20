@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from maintenance.db_manager import DBManager
 from maintenance.db_test_factory import DbPlantFactory
 
-from external_api.api_solargis import ApiSolargis, Site
+from external_api.api_solargis import ApiSolargis, Site, PVSystem
 
 from meteologica.utils import todtaware
 
@@ -39,15 +39,44 @@ class ApiSolargis_Test(unittest.TestCase):
             (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 5., -4.6, 1.421),
-            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 66., -3.2, 39.441),
-            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 123., -1.3, 95.396),
-            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 110., -1.1, 87.989),
-            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 91., -1.1, 73.364),
-            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 102., -0.4, 82.974),
-            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 86., -0.8, 66.801),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 52., -1.7, 35.331),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 9., -3.1, 3.802),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 6., -4.5,  1.445),
+            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 84., -2.6, 37.257),
+            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 141., -0.5, 79.982),
+            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 120., -0.6, 72.394),
+            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 92., -1, 62.699),
+            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 104., -0.2, 69.844),
+            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 88., -0.6, 55.652),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 53., -1.7, 29.994),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 10., -3.1, 3.274),
+            (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,18,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,19,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,20,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,21,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1,23,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+        ]
+
+    def sample_reading_oneaxis(self):
+        # Datetime GHI GTI TMOD PVOUT
+        return [
+            (datetime(2015,1,1, 0,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 1,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 2,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5.0, 6.0, -4.5, 1.364),
+            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66.0, 91.0, -2.3, 64.526),
+            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123.0, 171.0, 0.6, 151.429),
+            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110.0, 143.0, 0.2, 125.781),
+            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91.0, 86.0, -1.2, 68.384),
+            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102.0, 97.0, -0.4, 78.409),
+            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86.0, 83.0, -0.8, 64.47),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52.0, 50.0, -1.7, 33.408),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 8., -3.1, 2.995),
             (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
@@ -68,15 +97,15 @@ class ApiSolargis_Test(unittest.TestCase):
             (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -5.3, 0.),
             (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -5.2, 0.),
             (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -5.1, 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 5., -4.8, 0.),
-            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 66., -4.9, 0.),
-            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 123., -4.7, 0.),
-            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 110., -4.3, 0.),
-            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 91., -3.9, 0.),
-            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 102., -3.4, 0.),
-            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 86., -3.4, 0.),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 52., -3.3, 0.),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 9., -3.5, 0.),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 6., -4.8, 0.),
+            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 84., -4.9, 0.),
+            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 141., -4.7, 0.),
+            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 120., -4.3, 0.),
+            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 92., -3.9, 0.),
+            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 104., -3.4, 0.),
+            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 88., -3.4, 0.),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 53., -3.3, 0.),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 10., -3.5, 0.),
             (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -3.7, 0.),
             (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -3.8, 0.),
             (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -4.0, 0.),
@@ -118,9 +147,71 @@ class ApiSolargis_Test(unittest.TestCase):
         ]
 
     def demo_site(self, id=None):
+        demo_system = PVSystem(
+                geometry_type = 'GeometryFixedOneAngle',
+                geometry_azimuth = 150,
+                geometry_tilt = 5,
+                geometry_backTracking = None,
+                geometry_rotationLimitEast = None,
+                geometry_rotationLimitWest = None,
+                system_installedPower = 335,
+                system_installationType = 'ROOF_MOUNTED',
+                system_dateStartup = '2012-09-01',
+                system_selfShading = 'true',
+                module_type = 'CSI',
+                degradation_content = 0.71,
+                degradationFirstYear_content = 2.00,
+                PmaxCoeff_content = -0.41,
+                efficiency_type = 'EfficiencyConstant',
+                efficiency_content = 94.80,
+                limitationACPower_content = 290,
+                dcLosses_snowPollution = 8.00,
+                dcLosses_cables = 2.00,
+                dcLosses_mismatch = 1.00,
+                acLosses_transformer = 0.50,
+                acLosses_cables = 0.50,
+                topology_xsi_type = 'TopologyRow',
+                topology_relativeSpacing = 1.2,
+                topology_type = 'UNPROPORTIONAL1',
+        )
+
         return Site(
             id=id or 1, name="demo_site", latitude=48.61259, longitude=20.827079,
-            peak_power_w=1000, installation_type='FREE_STANDING'
+            peak_power_w=1000, installation_type='FREE_STANDING', pvsystem=demo_system
+        )
+
+    def demo_site_oneaxis(self, id=None):
+        demo_system = PVSystem(
+                geometry_type = 'GeometryOneAxisHorizontalNS',
+                geometry_azimuth = 220,
+                geometry_tilt = 0,
+                geometry_backTracking = 'true',
+                geometry_rotationLimitEast = -45,
+                geometry_rotationLimitWest = 45,
+                system_installedPower = 988,
+                system_installationType = 'FREE_STANDING',
+                system_dateStartup = '2018-05-01',
+                system_selfShading = 'true',
+                module_type = 'CSI',
+                degradation_content = 0.68,
+                degradationFirstYear_content = 2.00,
+                PmaxCoeff_content = -0.41,
+                efficiency_type = 'EfficiencyConstant',
+                efficiency_content = 98.10,
+                limitationACPower_content = 800,
+                dcLosses_snowPollution = 2.00,
+                dcLosses_cables = 1.50,
+                dcLosses_mismatch = 1,
+                acLosses_transformer = 0.50,
+                acLosses_cables = 0.50,
+                topology_xsi_type = 'TopologyColumn',
+                topology_relativeSpacing = 2,
+                topology_type = 'UNPROPORTIONAL1'
+        )
+
+        return Site(
+            id=id or 1, name="demo_site", latitude=48.61259, longitude=20.827079,
+            peak_power_w=1000, installation_type='FREE_STANDING', pvsystem=demo_system
         )
 
     def test__check_connection__arbitrary(self):
@@ -242,6 +333,10 @@ class ApiSolargis_Test(unittest.TestCase):
         print([(ghi, gti, temp) for _, ghi, gti, temp, *_ in readings])
 
         self.assertEqual(status, 200)
+
+        for i in range(0,len(expected)):
+            self.assertTupleEqual(readings[i], expected[i])
+
         self.assertListEqual(readings, expected)
 
     def test__get_current_solargis_irradiance_readings_location__GHI_GTI_TMOD(self):
@@ -279,6 +374,22 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.assertListEqual(readings, expected)
 
+    def test__get_current_solargis_irradiance_readings__real_processing_keys_one_axis_plant(self):
+
+        self.maxDiff = None
+
+        from_date = todtaware('2015-01-01 13:00:00')
+        to_date = todtaware('2015-01-01 15:00:00')
+
+        processing_keys = 'GHI GTI TMOD PVOUT'
+
+        self.api.sites = {1: self.demo_site_oneaxis() }
+
+        readings = self.api.get_current_solargis_irradiance_readings(from_date, to_date, processing_keys)
+
+        expected = [(t, 1, ghi, gti, temp, pvout, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_oneaxis()]
+
+        self.assertListEqual(readings, expected)
 
     def test__get_current_solargis_readings_standarized__base(self):
 
@@ -317,8 +428,6 @@ class ApiSolargis_Test(unittest.TestCase):
         ]
 
         self.assertListEqual(readings, expected)
-
-
 
 
 class ApiSolargis_DB_Test(unittest.TestCase):
