@@ -423,8 +423,8 @@ class ApiSolargis:
 
                 if not processing_keys or processing_keys == 'GHI GTI TMOD PVOUT':
                     readings = api.get_current_solargis_readings_standarized(from_date=from_date, to_date=to_date)
-
-                    api.save_to_db(dbmanager.db_con, readings)
+                    if readings:
+                        api.save_to_db(dbmanager.db_con, readings)
 
                 else:
                     readings = api.get_current_solargis_irradiance_readings(from_date=from_date, to_date=to_date, processing_keys=processing_keys)
