@@ -270,7 +270,7 @@ class ApiSolargis:
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            logger.error("Request exception {}".format(e))
+            logger.error("Request exception {} msg: {}".format(e, response.text))
             return response.status_code, None
 
         if response.status_code != 200:
