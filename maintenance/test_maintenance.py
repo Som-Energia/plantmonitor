@@ -7,7 +7,10 @@ from pathlib import Path
 from unittest import TestCase, skipIf
 
 from .maintenance import (
+    create_clean_irradiation,
     get_latest_reading,
+    irradiation_cleaning,
+    update_bucketed_irradiation_registry,
     update_bucketed_inverter_registry,
     update_bucketed_string_registry,
     alarm_maintenance
@@ -322,3 +325,23 @@ class MaintenanceTests(TestCase):
     def test__alarm_maintenance__no_bucket_tables(self):
 
         alarm_maintenance(self.dbmanager.db_con)
+
+    def test__create_irradiation(self):
+        create_clean_irradiation(self.dbmanager.db_con, 'clean_sensorirradiation')
+
+    def test__cleaning_maintenance(self):
+
+        # TODO we don't need sunrise sunset
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_sensor_plant(sunrise, sunset)
+
+        self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
+
+        to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
+        result = irradiation_cleaning(self.dbmanager.db_con, to_date=to_date)
+        result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
+        #result['time'] = result['time'].dt.tz_convert('UTC')
+
+        expected = pd.read_csv('test_data/clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        pd.testing.assert_frame_equal(result, expected)

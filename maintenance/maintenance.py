@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from importlib.metadata import metadata
 from pathlib import Path
 import pandas as pd
 import numpy as np
 
 import yaml
 
-from conf.logging_configuration import LOGGING
-import logging
-import logging.config
-logging.config.dictConfig(LOGGING)
-logger = logging.getLogger("plantmonitor")
+from sqlalchemy import BigInteger, MetaData, Table, Text, Integer, Column, DateTime, ForeignKey, Identity
+from sqlalchemy import insert
+from conf.log import logger
 
 import datetime
 
@@ -134,6 +133,183 @@ def update_bucketed_string_registry(db_con, to_date=None):
     logger.debug("{} records inserted".format(len(result)))
     return result
 
+def create_clean_irradiation(db_con, target_table_name):
+
+    # let's see how sqlalchemy does it
+
+    metadata_obj = MetaData()
+
+    sources_table = Table('source', metadata_obj,
+        Column('id', Integer,  Identity(), primary_key=True),
+        Column('name', Text, nullable=False),
+        Column('description', Text)
+    )
+
+    clean_irradiation = Table(target_table_name, metadata_obj,
+        Column('sensor', Integer, nullable=False, primary_key=True),
+        Column('time', DateTime(timezone=True), primary_key=True),
+        Column('irradiation_w_m2', BigInteger),
+        Column('temperature_dc', BigInteger),
+        Column('source', Integer, ForeignKey("source.id"))
+    )
+
+    metadata_obj.create_all(db_con)
+
+    sources_data = [
+        {'name': 'raw', 'description': 'original values'},
+        {'name': 'satellite readings', 'description': 'satellite readings from external apis (e.g. solargis)'}
+    ]
+
+    db_con.execute(sources_table.insert(), sources_data)
+
+    create_hipertable_query = f'''
+        CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+            ON {target_table_name} (time, sensor);
+
+        SELECT create_hypertable('{target_table_name}', 'time', if_not_exists => TRUE)
+    '''
+
+    db_con.execute(create_hipertable_query)
+
+    # setup_target_table = f'''
+    #     CREATE TABLE IF NOT EXISTS
+    #        {target_table}
+    #         (
+    #             time TIMESTAMP WITH TIME ZONE NOT NULL,
+    #             sensor integer not null,
+    #             irradiation_w_m2 bigint,
+    #             temperature_dc bigint,
+    #             source integer not null,
+    #             CONSTRAINT "fk_clean_irradiation__sources" FOREIGN KEY ("source") REFERENCES "source" ("id") ON DELETE CASCADE
+    #         );
+
+    #     CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+    #         ON {target_table} (time, sensor);
+
+    #     SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE)
+    # '''
+    # db_con.execute(setup_target_table)
+
+def get_irradiation_readings(db_con, source_table, from_date, to_date):
+    from_date_str = from_date.strftime("%Y-%m-%d %H:%M:%S%z")
+    to_date_str = to_date.strftime("%Y-%m-%d %H:%M:%S%z")
+
+    device = 'sensor'
+    # where assumes UTC otherwise it would be wrong on DST change days
+    query = f'''
+        SELECT reg.time as time, dev.plant as plant, reg.sensor AS sensor, reg.irradiation_w_m2, reg.temperature_dc
+        FROM {source_table} as reg
+        LEFT JOIN {device} AS dev ON dev.id = reg.{device}
+        WHERE '{from_date_str}'::timestamptz <= reg.time and reg.time <= '{to_date_str}'::timestamptz
+        order by reg.time desc, dev.plant, reg.sensor
+    '''
+    queryresult = db_con.execute(query)
+    return queryresult.fetchall(), queryresult.keys()
+
+def get_satellite_irradiation_readings(db_con, from_date, to_date):
+    from_date_str = from_date.strftime("%Y-%m-%d %H:%M:%S%z")
+    to_date_str = to_date.strftime("%Y-%m-%d %H:%M:%S%z")
+
+    # where assumes UTC otherwise it would be wrong on DST change days
+    query = f'''
+        SELECT *
+        FROM satellite_readings as reg
+        WHERE '{from_date_str}'::timestamptz <= reg.time and reg.time <= '{to_date_str}'::timestamptz
+        order by reg.time
+    '''
+    queryresult = db_con.execute(query)
+    return queryresult.fetchall(), queryresult.keys()
+
+def clean_irradiation_readings(db_con, source_table, from_date, to_date):
+
+    # TODO Add the satellite readings to the get
+    irradiation_readings, keys = get_irradiation_readings(db_con, source_table, from_date, to_date)
+    satellite_irradiation_readings, satellite_keys = get_irradiation_readings(db_con, source_table, from_date, to_date)
+    df = pd.DataFrame(irradiation_readings, columns=keys)
+    sat_df = pd.DataFrame(satellite_irradiation_readings, columns=satellite_keys)
+
+    # TODO clean df
+
+    # match expected readings
+    # time, sensor, *metrics, source
+    df.drop(columns=['plant'], inplace=True)
+    # TODO join with source table
+    df['source'] = 1
+
+    clean_irradiation_readings_df = df
+
+    return clean_irradiation_readings_df
+
+def insert_ts_readings(db_con, target_table, clean_readings):
+    metadata_obj = MetaData()
+    clean_irradiation_table = Table(target_table, metadata_obj, autoload_with=db_con)
+    insert_stmt = insert(clean_irradiation_table).returning(clean_irradiation_table.c.time)
+    return db_con.execute(insert_stmt, clean_readings)
+
+def insert_clean_irradiation_readings(db_con, target_table, clean_readings_df):
+
+    clean_readings_df_nones = clean_readings_df.copy()
+
+    # replace nans with Nones otherwise insert complains nan overflows bigint
+    clean_readings_df_nones[['irradiation_w_m2', 'temperature_dc']] = clean_readings_df_nones[['irradiation_w_m2', 'temperature_dc']].replace({np.nan: None})
+    clean_readings = clean_readings_df_nones.to_dict(orient='records')
+
+    return insert_ts_readings(db_con, target_table, clean_readings)
+
+def irradiation_cleaning(db_con, to_date=None):
+    metric = 'sensorirradiationregistry'
+    source_table = f'bucket_5min_{metric}'
+    target_table = f'clean_{metric}'
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
+
+    # TODO check that source table exists and throw or just return if it doesnt
+    if not db_con.dialect.has_table(db_con, source_table):
+        logger.error(f"{source_table} does not exist, we can't clean it.")
+        return
+
+    if not db_con.dialect.has_table(db_con, target_table):
+        create_clean_irradiation(db_con, target_table)
+
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
+    logger.debug(f"Latest reading {target_table} is {latest_reading}")
+    clean_readings_df = clean_irradiation_readings(db_con=db_con, source_table=source_table, from_date=latest_reading, to_date=to_date)
+    result = insert_clean_irradiation_readings(db_con, target_table, clean_readings_df)
+    logger.debug(result)
+    return clean_readings_df
+
+def irradiation_cleaning_via_sql(db_con, to_date=None):
+
+    metric = 'sensorirradiationregistry'
+    source_table = f'bucket_5min_{metric}'
+    target_table = f'clean_{metric}'
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
+
+    # TODO check that source table exists and throw or just return if it doesnt
+    if not db_con.dialect.has_table(db_con, source_table):
+        logger.error(f"{source_table} does not exist, we can't clean it.")
+        return
+
+    if not db_con.dialect.has_table(db_con, target_table):
+        create_clean_irradiation(db_con, target_table)
+
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
+    logger.debug(f"Latest reading {target_table} is {latest_reading}")
+
+    query = Path(f'queries/maintenance/clean_{source_table}.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = f'''
+        INSERT INTO {target_table}
+         {query}
+         ON CONFLICT (time, string) DO
+            UPDATE
+	            SET intensity_ma = excluded.intensity_ma
+        RETURNING time, string, intensity_ma
+    '''
+    logger.debug("Insert query")
+    result = db_con.execute(insert_query).fetchall()
+    logger.debug("{} records inserted".format(len(result)))
+    return result
+
 def alarm_maintenance(db_con):
     alarm_manager = AlarmManager(db_con)
     alarm_manager.update_alarms()
@@ -144,6 +320,10 @@ def bucketed_registry_maintenance(db_con):
     logger.info('Updated bucketed inverter registry table')
     update_bucketed_string_registry(db_con)
     logger.info('Update bucketed inverterstring registry table')
+
+def cleaning_maintenance(db_con):
+    logger.info('Clean irradiation')
+    irradiation_cleaning(db_con)
 
 # Pending:
 # Dashboard: Alarma 3 Inversors temperatura anòmala històric temps real->
