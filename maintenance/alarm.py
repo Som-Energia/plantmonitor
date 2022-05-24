@@ -335,7 +335,7 @@ class AlarmStringNoIntensity(Alarm):
                 s.name as string_name,
                 CASE WHEN COUNT(CASE WHEN (reg.intensity_ma IS NULL or ireg.power_w IS NULL) THEN 1 END) > {minimum_non_null_readings}
                      THEN NULL
-                     ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma = 0 and ireg.power_w != 0 END)
+                     ELSE BOOL_AND(case when ireg.power_w = 0 or ireg.power_w is NULL THEN NULL ELSE reg.intensity_ma <= 500 and ireg.power_w != 0 END)
                 END as nointensity
             FROM {self.source_table} as reg
             LEFT JOIN string AS s ON s.id = reg.string
