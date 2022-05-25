@@ -32,6 +32,43 @@ def get_latest_reading(db_con, target_table, source_table=None):
 # - specifying which columns are metrics (for the update)
 # - specifying which agregation method to use on the buckets (avg, max, ...)
 
+def update_bucketed_irradiation_registry(db_con, to_date=None):
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
+
+    registry = 'sensorirradiationregistry'
+    device = 'sensor'
+    source_table = registry
+    target_table = 'bucket_5min_{}'.format(source_table)
+
+    setup_5min_table = f'''
+        CREATE TABLE IF NOT EXISTS
+            {target_table}
+            (time timestamptz, {device} integer, irradiation_w_m2 bigint, temperature_dc bigint);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+            ON {target_table} (time, {device});
+
+        SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE)
+    '''
+    db_con.execute(setup_5min_table)
+
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
+    logger.debug(f"Latest reading of {device} {latest_reading}")
+    query = Path(f'queries/maintenance/{target_table}.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
+    insert_query = f'''
+        INSERT INTO {target_table}
+         {query}
+         ON CONFLICT (time, {device}) DO
+            UPDATE
+	            SET irradiation_w_m2 = excluded.irradiation_w_m2,
+	            temperature_dc = excluded.temperature_dc
+        RETURNING time, {device}, irradiation_w_m2, temperature_dc
+    '''
+    logger.debug("Insert query")
+    return db_con.execute(insert_query).fetchall()
+
+
 def update_bucketed_inverter_registry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
     setup_5min_table = '''

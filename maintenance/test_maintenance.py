@@ -219,10 +219,6 @@ class MaintenanceTests(TestCase):
         self.session.rollback()
         self.session.close()
 
-    def create_plant(self, sunrise, sunset):
-        # TODO tables already exist, why?
-        self.plantfactory.create_inverter_sensor_plant(sunrise, sunset)
-
     def read_csv(self, csvfile):
         df = pd.read_csv(csvfile, sep=',')
         return df
@@ -234,6 +230,25 @@ class MaintenanceTests(TestCase):
             ''').fetchone()[0]
 
         self.assertEqual(time.tzinfo, datetime.timezone.utc)
+
+    def test__update_bucketed_irradiation_registry__base(self):
+        try:
+            device = 'sensorirradiation'
+            self.factory.create(f'{device}registry_factory_case1.csv', f'{device}registry')
+            self.factory.create_bucket_5min_irradiationregistry_empty_table()
+
+            to_date = datetime.datetime(2022, 3, 1, 12, 16, tzinfo=datetime.timezone.utc)
+            result = update_bucketed_irradiation_registry(self.dbmanager.db_con, to_date)
+            result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc'])
+            #result['time'] = result['time'].dt.tz_convert('UTC')
+
+            expected = pd.read_csv(f'test_data/update_bucketed_{device}_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            pd.testing.assert_frame_equal(result, expected)
+
+        except:
+            self.factory.delete(f'{device}registry')
+            self.factory.delete(f'bucket_5min_{device}registry')
+            raise
 
     def test__update_bucketed_inverter_registry__base(self):
         try:
