@@ -25,6 +25,10 @@ class DbTestFactory():
     def delete(self, table_name):
         self.dbmanager.db_con.execute("DROP TABLE IF EXISTS {};".format(table_name))
 
+    def create_bucket_5min_irradiationregistry_empty_table(self):
+        table_name = 'bucket_5min_irradiationregistry'
+        self.dbmanager.db_con.execute('create table {} (time timestamptz, sensor integer, irradiation_w_m2 bigint, temperature_dc bigint)'.format(table_name))
+
     def create_bucket_5min_inverterregistry_empty_table(self):
         table_name = 'bucket_5min_inverterregistry'
         self.dbmanager.db_con.execute('create table {} (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint)'.format(table_name))
