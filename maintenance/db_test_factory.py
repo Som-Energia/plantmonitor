@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from external_api.api_solargis import ApiSolargis
 from maintenance.db_manager import DBManager
+from sqlalchemy import MetaData, Table, insert
 
+import numpy as np
 import pandas as pd
 
 class DbTestFactory():
@@ -211,3 +214,22 @@ class DbPlantFactory():
                 2, 2, 39.440722, -0.428722
             )
         )
+
+    def create_solargis(self, csv_file=None):
+
+        # TODO set table name as a variable/parametrize the static method
+        solargis_table = 'satellite_readings'
+        # TODO assumes you've created plant table
+        ApiSolargis.create_table(self.dbmanager.db_con)
+
+        if csv_file:
+            df = pd.read_csv(f'test_data/{csv_file}', sep = ';', parse_dates=['time', 'request_time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            df.replace({np.nan:None}, inplace=True)
+
+            readings = df.to_dict(orient='records')
+
+            metadata_obj = MetaData()
+            clean_irradiation_table = Table(solargis_table, metadata_obj, autoload_with=self.dbmanager.db_con)
+            insert_stmt = insert(clean_irradiation_table)
+
+            self.dbmanager.db_con.execute(insert_stmt, readings)

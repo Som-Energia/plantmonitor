@@ -338,6 +338,8 @@ class MaintenanceTests(TestCase):
 
         self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
 
+        self.plantfactory.create_solargis('solargis_readings__base.csv')
+
         to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
         result = irradiation_cleaning(self.dbmanager.db_con, to_date=to_date)
         result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
