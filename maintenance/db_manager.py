@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 class DBManager():
 
-    def __init__(self, provider, user, host, port, database, password=None, echo=False):
+    def __init__(self, provider, user, host, port, database, password=None, timezone_str='utc', echo=False):
 
         user_encoded = urllib.parse.quote_plus(user)
         password_encoded = urllib.parse.quote_plus(password) if password else None
@@ -15,7 +15,9 @@ class DBManager():
 
         self.echo = echo
 
-        self.alchemy_engine = create_engine(self.engine_str, pool_recycle=3600, echo=self.echo)
+        connect_args = {"options": "-c timezone={}".format(timezone_str)}
+
+        self.alchemy_engine = create_engine(self.engine_str, pool_recycle=3600, echo=self.echo, connect_args=connect_args)
         self.db_con = self.alchemy_engine.connect()
 
     def __enter__(self):

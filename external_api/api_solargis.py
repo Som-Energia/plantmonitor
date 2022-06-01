@@ -363,7 +363,8 @@ class ApiSolargis:
         return all_readings
 
     # TODO use the db_factory
-    def create_table(self, db_con):
+    @staticmethod
+    def create_table(db_con):
         alarm_registry = '''
             CREATE TABLE IF NOT EXISTS
             satellite_readings

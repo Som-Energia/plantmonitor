@@ -224,11 +224,13 @@ def clean_irradiation_readings(db_con, source_table, from_date, to_date):
 
     # TODO Add the satellite readings to the get
     irradiation_readings, keys = get_irradiation_readings(db_con, source_table, from_date, to_date)
-    satellite_irradiation_readings, satellite_keys = get_irradiation_readings(db_con, source_table, from_date, to_date)
+    satellite_irradiation_readings, satellite_keys = get_satellite_irradiation_readings(db_con, from_date, to_date)
     df = pd.DataFrame(irradiation_readings, columns=keys)
     sat_df = pd.DataFrame(satellite_irradiation_readings, columns=satellite_keys)
 
     # TODO clean df
+
+    # import pudb; pudb.set_trace()
 
     # match expected readings
     # time, sensor, *metrics, source
