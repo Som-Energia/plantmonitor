@@ -190,7 +190,7 @@ def create_clean_irradiation(db_con, target_table_name):
     # '''
     # db_con.execute(setup_target_table)
 
-def get_irradiation_readings(db_con, source_table, from_date, to_date):
+def get_irradiation_readings_with_plant(db_con, source_table, from_date, to_date):
     from_date_str = from_date.strftime("%Y-%m-%d %H:%M:%S%z")
     to_date_str = to_date.strftime("%Y-%m-%d %H:%M:%S%z")
 
@@ -200,13 +200,19 @@ def get_irradiation_readings(db_con, source_table, from_date, to_date):
         SELECT reg.time as time, dev.plant as plant, reg.sensor AS sensor, reg.irradiation_w_m2, reg.temperature_dc
         FROM {source_table} as reg
         LEFT JOIN {device} AS dev ON dev.id = reg.{device}
-        WHERE '{from_date_str}'::timestamptz <= reg.time and reg.time <= '{to_date_str}'::timestamptz
+        WHERE dev.plant IS NOT NULL
+        AND '{from_date_str}'::timestamptz <= reg.time and reg.time <= '{to_date_str}'::timestamptz
         order by reg.time desc, dev.plant, reg.sensor
     '''
     queryresult = db_con.execute(query)
     return queryresult.fetchall(), queryresult.keys()
 
 def get_satellite_irradiation_readings(db_con, from_date, to_date):
+
+    # solargis uses half-hour time point
+    from_date = from_date.replace(second=0, minute=0) - datetime.timedelta(hours=1)
+    to_date = to_date.replace(second=0, minute=0) + datetime.timedelta(hours=1)
+
     from_date_str = from_date.strftime("%Y-%m-%d %H:%M:%S%z")
     to_date_str = to_date.strftime("%Y-%m-%d %H:%M:%S%z")
 
@@ -218,25 +224,68 @@ def get_satellite_irradiation_readings(db_con, from_date, to_date):
         order by reg.time
     '''
     queryresult = db_con.execute(query)
+
     return queryresult.fetchall(), queryresult.keys()
+
+def satellite_upsampling(sat_df):
+
+    sat_df_per_plant = sat_df.set_index('time').groupby('plant')
+
+    # resample hourly to 5minutal
+    # there are other options if this one is too slow
+    # TODO test speed on our data style (~11 groups max, hourly upsampling)
+
+    # Option 1:
+    # assumes equispaced time index
+    sat_df_per_plant.resample('5T')[['global_horizontal_irradiation_wh_m2','global_tilted_irradiation_wh_m2']].interpolate()
+
+    # Option 2:
+    # apply reset per group foreach group
+    #sat_df_per_plant[['global_horizontal_irradiation_wh_m2','global_tilted_irradiation_wh_m2']].apply(lambda g: g.resample('5T').interpolate(method='index'))
+    sat_df_5min = sat_df_per_plant[[
+            'global_horizontal_irradiation_wh_m2',
+            'global_tilted_irradiation_wh_m2',
+            'module_temperature_dc',
+            'photovoltaic_energy_output_wh'
+        ]].apply(lambda group: group.resample('5T').interpolate('index'))
+
+    # Option3:
+    # concat interpolate per group
+
+    sat_df_5min[['source', 'request_time']] = sat_df_per_plant[['source', 'request_time']].resample('5T').backfill()
+
+    return sat_df_5min
 
 def clean_irradiation_readings(db_con, source_table, from_date, to_date):
 
+    import ipdb; ipdb.set_trace()
+
     # TODO Add the satellite readings to the get
-    irradiation_readings, keys = get_irradiation_readings(db_con, source_table, from_date, to_date)
+    irradiation_readings, keys = get_irradiation_readings_with_plant(db_con, source_table, from_date, to_date)
     satellite_irradiation_readings, satellite_keys = get_satellite_irradiation_readings(db_con, from_date, to_date)
     df = pd.DataFrame(irradiation_readings, columns=keys)
     sat_df = pd.DataFrame(satellite_irradiation_readings, columns=satellite_keys)
 
     # TODO clean df
+    sat_df_5min = satellite_upsampling(sat_df)
 
-    # import pudb; pudb.set_trace()
+    clean_df = df.fillna(sat_df)
+
+    foo = df.set_index('time').asfreq('5T')
+    bar = sat_df_5min.reset_index('plant')
+    bur = bar.rename(columns={'global_tilted_irradiation_wh_m2': 'irradiation_w_m2', 'module_temperature_dc': 'temperature_dc'})
+
+
+    # TODO merge by time and add discriminator
 
     # match expected readings
     # time, sensor, *metrics, source
+
     df.drop(columns=['plant'], inplace=True)
+
     # TODO join with source table
     df['source'] = 1
+
 
     clean_irradiation_readings_df = df
 

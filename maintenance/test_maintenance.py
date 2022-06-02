@@ -13,7 +13,8 @@ from .maintenance import (
     update_bucketed_irradiation_registry,
     update_bucketed_inverter_registry,
     update_bucketed_string_registry,
-    alarm_maintenance
+    alarm_maintenance,
+    satellite_upsampling
 )
 from .db_manager import DBManager
 
@@ -328,6 +329,18 @@ class MaintenanceTests(TestCase):
 
     def test__create_irradiation(self):
         create_clean_irradiation(self.dbmanager.db_con, 'clean_sensorirradiation')
+
+    def test__satellite_upsampling__twoplants(self):
+
+        df = pd.read_csv(f'test_data/solargis_readings__twoplants.csv', sep = ';', parse_dates=['time', 'request_time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        import numpy as np
+        df.replace({np.nan:None}, inplace=True)
+
+        result_df = satellite_upsampling(df)
+        #result['time'] = result['time'].dt.tz_convert('UTC')
+
+        expected = pd.read_csv('test_data/satellite_upsampling__twoplants.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        pd.testing.assert_frame_equal(result_df, expected)
 
     def test__cleaning_maintenance(self):
 
