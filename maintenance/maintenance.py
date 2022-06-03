@@ -258,36 +258,39 @@ def satellite_upsampling(sat_df):
 
 def clean_irradiation_readings(db_con, source_table, from_date, to_date):
 
-    import ipdb; ipdb.set_trace()
-
-    # TODO Add the satellite readings to the get
     irradiation_readings, keys = get_irradiation_readings_with_plant(db_con, source_table, from_date, to_date)
     satellite_irradiation_readings, satellite_keys = get_satellite_irradiation_readings(db_con, from_date, to_date)
-    df = pd.DataFrame(irradiation_readings, columns=keys)
+    sources = pd.read_sql('source', db_con)
+
+    irr_df = pd.DataFrame(irradiation_readings, columns=keys)
     sat_df = pd.DataFrame(satellite_irradiation_readings, columns=satellite_keys)
 
-    # TODO clean df
     sat_df_5min = satellite_upsampling(sat_df)
 
-    clean_df = df.fillna(sat_df)
+    irr_ts_df = irr_df.set_index(['plant','time']) #.asfreq('5T') #we assume it's bucketed already
+    sat_ts_df = sat_df_5min#.reset_index('plant')
+    sat_ts_df.rename(columns={'global_tilted_irradiation_wh_m2': 'irradiation_w_m2', 'module_temperature_dc': 'temperature_dc'}, inplace=True)
 
-    foo = df.set_index('time').asfreq('5T')
-    bar = sat_df_5min.reset_index('plant')
-    bur = bar.rename(columns={'global_tilted_irradiation_wh_m2': 'irradiation_w_m2', 'module_temperature_dc': 'temperature_dc'})
+    irr_ts_df['irradiation_w_m2_source'] = 'sonda'
+    irr_ts_df['temperature_dc_source'] = 'sonda'
+    irr_ts_df.loc[irr_ts_df.irradiation_w_m2.isnull(), 'irradiation_w_m2_source'] = 'solargis'
+    irr_ts_df.loc[irr_ts_df.temperature_dc.isnull(), 'temperature_dc_source'] = 'solargis'
 
+    irr_ts_df.update(sat_ts_df, overwrite=False)
 
-    # TODO merge by time and add discriminator
+    irr_ts_df['source'] = irr_ts_df.apply(
+        lambda r: 'solargis' if r.irradiation_w_m2_source == 'solargis' or r.temperature_dc_source == 'solargis' else 'sonda',
+        axis=1
+    )
 
-    # match expected readings
-    # time, sensor, *metrics, source
+    irr_ts_df.source = irr_ts_df.irradiation_w_m2_source.map({'sonda':'raw','solargis':'satellite readings'}).map(sources.set_index('name').id)
 
-    df.drop(columns=['plant'], inplace=True)
+    irr_ts_df.reset_index(inplace=True)
 
-    # TODO join with source table
-    df['source'] = 1
+    irr_ts_df.drop(columns=['plant'], inplace=True)
+    irr_ts_df.drop(columns=['irradiation_w_m2_source', 'temperature_dc_source'], inplace=True)
 
-
-    clean_irradiation_readings_df = df
+    clean_irradiation_readings_df = irr_ts_df
 
     return clean_irradiation_readings_df
 
@@ -307,7 +310,7 @@ def insert_clean_irradiation_readings(db_con, target_table, clean_readings_df):
 
     return insert_ts_readings(db_con, target_table, clean_readings)
 
-def irradiation_cleaning(db_con, to_date=None):
+def irradiance_cleaning(db_con, to_date=None):
     metric = 'sensorirradiationregistry'
     source_table = f'bucket_5min_{metric}'
     target_table = f'clean_{metric}'
@@ -328,7 +331,7 @@ def irradiation_cleaning(db_con, to_date=None):
     logger.debug(result)
     return clean_readings_df
 
-def irradiation_cleaning_via_sql(db_con, to_date=None):
+def irradiance_cleaning_via_sql(db_con, to_date=None):
 
     metric = 'sensorirradiationregistry'
     source_table = f'bucket_5min_{metric}'
@@ -371,10 +374,15 @@ def bucketed_registry_maintenance(db_con):
     logger.info('Updated bucketed inverter registry table')
     update_bucketed_string_registry(db_con)
     logger.info('Update bucketed inverterstring registry table')
+    update_bucketed_irradiation_registry(db_con)
+    logger.info('Update bucketed sensorirradiation registry table')
 
 def cleaning_maintenance(db_con):
-    logger.info('Clean irradiation')
-    irradiation_cleaning(db_con)
+    pass
+    # Unused, irradiance is not used anywhere, only irradiation (wh/m2) is useful
+    # leaving it in case we ever change our mind or we have a similar problem
+    # logger.info('Clean irradiation')
+    # irradiance_cleaning(db_con)
 
 # Pending:
 # Dashboard: Alarma 3 Inversors temperatura anòmala històric temps real->

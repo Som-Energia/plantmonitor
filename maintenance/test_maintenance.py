@@ -9,7 +9,7 @@ from unittest import TestCase, skipIf
 from .maintenance import (
     create_clean_irradiation,
     get_latest_reading,
-    irradiation_cleaning,
+    irradiance_cleaning,
     update_bucketed_irradiation_registry,
     update_bucketed_inverter_registry,
     update_bucketed_string_registry,
@@ -247,6 +247,7 @@ class MaintenanceTests(TestCase):
             #result['time'] = result['time'].dt.tz_convert('UTC')
 
             expected = pd.read_csv(f'test_data/update_bucketed_{device}_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
             pd.testing.assert_frame_equal(result, expected)
 
         except:
@@ -342,21 +343,45 @@ class MaintenanceTests(TestCase):
         expected = pd.read_csv('test_data/satellite_upsampling__twoplants.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         pd.testing.assert_frame_equal(result_df, expected)
 
-    def test__cleaning_maintenance(self):
+    def test__cleaning_maintenance__base(self):
 
         # TODO we don't need sunrise sunset
         sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
-        self.plantfactory.create_inverter_sensor_plant(sunrise, sunset)
+        self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
 
         self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
 
         self.plantfactory.create_solargis('solargis_readings__base.csv')
 
         to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
-        result = irradiation_cleaning(self.dbmanager.db_con, to_date=to_date)
+        result = irradiance_cleaning(self.dbmanager.db_con, to_date=to_date)
         result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
         #result['time'] = result['time'].dt.tz_convert('UTC')
 
         expected = pd.read_csv('test_data/clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
+
         pd.testing.assert_frame_equal(result, expected)
+
+    def test__cleaning_maintenance__twoplants(self):
+
+        # TODO we don't need sunrise sunset
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
+
+        self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
+
+        self.plantfactory.create_solargis('solargis_readings__twoplants.csv')
+
+        to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
+        result = irradiance_cleaning(self.dbmanager.db_con, to_date=to_date)
+        result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
+        #result['time'] = result['time'].dt.tz_convert('UTC')
+
+        expected = pd.read_csv('test_data/clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(result, expected)
+

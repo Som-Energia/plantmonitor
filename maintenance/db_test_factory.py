@@ -80,6 +80,43 @@ class DbPlantFactory():
             )
         )
 
+
+    # TODO use plant yaml (used in pony) instead of hardcoding structure
+    def create_inverter_sensor_two_plants(self, sunrise, sunset):
+        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
+        self.dbmanager.db_con.execute(
+            "insert into plant(id, name, codename, description) values ({}, '{}', '{}', '{}'), ({}, '{}', '{}', '{}')".format(
+                1, 'Alibaba', 'SomEnergia_Alibaba', '',
+                2, 'TrucuAlmendrucu', 'SomEnergia_TrucuAlmendrucu', ''
+
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists inverter (id serial primary key, name text, plant integer)')
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {}),({}, '{}', {}),({}, '{}', {})".format(
+                1, 'Alibaba_inverter', 1,
+                2, 'Quaranta_Lladres_inverter', 1,
+                3, 'Almendrucu_inverter', 2
+            )
+        )
+        self.dbmanager.db_con.execute('create table if not exists sensor (id serial primary key, name text, plant integer not null, description text, deviceColumname text)')
+        self.dbmanager.db_con.execute(
+            "insert into sensor(id, name, plant, description, deviceColumname) values ({}, '{}', {}, '{}', '{}'), ({}, '{}', {}, '{}', '{}')".format(
+                1, 'SensorIrradiation1', 1, '', 'sensor',
+                2, 'SensorIrradiation1', 2, '', 'sensor'
+            )
+        )
+
+        self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
+        self.dbmanager.db_con.execute(
+            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}'),({}, {}, '{}', '{}')".format(
+                1, 1,
+                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z'),
+                2, 2,
+                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
+            )
+        )
+
     def create_inverter_string_plant(self):
 
         self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
