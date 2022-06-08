@@ -237,7 +237,7 @@ def satellite_upsampling(sat_df):
 
     # Option 1:
     # assumes equispaced time index
-    sat_df_per_plant.resample('5T')[['global_horizontal_irradiation_wh_m2','global_tilted_irradiation_wh_m2']].interpolate()
+    # sat_df_per_plant.resample('5T')[['global_horizontal_irradiation_wh_m2','global_tilted_irradiation_wh_m2']].interpolate()
 
     # Option 2:
     # apply reset per group foreach group
@@ -275,7 +275,6 @@ def clean_irradiation_readings(db_con, source_table, from_date, to_date):
     irr_ts_df['temperature_dc_source'] = 'sonda'
     irr_ts_df.loc[irr_ts_df.irradiation_w_m2.isnull(), 'irradiation_w_m2_source'] = 'solargis'
     irr_ts_df.loc[irr_ts_df.temperature_dc.isnull(), 'temperature_dc_source'] = 'solargis'
-
     irr_ts_df.update(sat_ts_df, overwrite=False)
 
     irr_ts_df['source'] = irr_ts_df.apply(

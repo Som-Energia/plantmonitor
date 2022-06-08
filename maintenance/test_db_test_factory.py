@@ -44,13 +44,13 @@ class TestDbTestFactory(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         factory.create_inverter_sensor_plant(sunrise, sunset)
 
-        factory.create_solargis('solargis_readings__base.csv')
+        factory.create_solargis('input__solargis_readings__base.csv')
 
         readings = self.dbmanager.db_con.execute("select * from satellite_readings;").fetchall()
         expected = [
-            (datetime.datetime(2022,3,1,10,30,tzinfo=datetime.timezone.utc), 1, 555, 860, 440, 694, 'solargis', datetime.datetime(2022,5,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
-            (datetime.datetime(2022,3,1,11,30,tzinfo=datetime.timezone.utc), 1, 733,1008, 507, 783, 'solargis', datetime.datetime(2022,5,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
-            (datetime.datetime(2022,3,1,12,30,tzinfo=datetime.timezone.utc), 1, 862,1065, 542, 792, 'solargis', datetime.datetime(2022,5,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
+            (datetime.datetime(2022,3,1,10,30,tzinfo=datetime.timezone.utc), 1, 555, 860, 440, 694, 'solargis', datetime.datetime(2022,3,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
+            (datetime.datetime(2022,3,1,11,30,tzinfo=datetime.timezone.utc), 1, 733,1008, 507, 783, 'solargis', datetime.datetime(2022,3,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
+            (datetime.datetime(2022,3,1,12,30,tzinfo=datetime.timezone.utc), 1, 862,1065, 542, 792, 'solargis', datetime.datetime(2022,3,20,14,48,21,566310,tzinfo=datetime.timezone.utc)),
         ]
         self.assertListEqual(readings, expected)
 

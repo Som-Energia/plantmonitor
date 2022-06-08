@@ -246,7 +246,7 @@ class MaintenanceTests(TestCase):
             result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc'])
             #result['time'] = result['time'].dt.tz_convert('UTC')
 
-            expected = pd.read_csv(f'test_data/update_bucketed_{device}_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+            expected = pd.read_csv(f'test_data/output__update_bucketed_{device}_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
             expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
             pd.testing.assert_frame_equal(result, expected)
 
@@ -317,6 +317,7 @@ class MaintenanceTests(TestCase):
             #result['time'] = result['time'].dt.tz_convert('UTC')
 
             expected = pd.read_csv('test_data/update_bucketed_string_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+
             pd.testing.assert_frame_equal(result, expected)
 
         except:
@@ -333,14 +334,15 @@ class MaintenanceTests(TestCase):
 
     def test__satellite_upsampling__twoplants(self):
 
-        df = pd.read_csv(f'test_data/solargis_readings__twoplants.csv', sep = ';', parse_dates=['time', 'request_time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        df = pd.read_csv(f'test_data/input__satellite_upsampling__solargis_readings__twoplants.csv', sep = ';', parse_dates=['time', 'request_time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         import numpy as np
         df.replace({np.nan:None}, inplace=True)
 
         result_df = satellite_upsampling(df)
         #result['time'] = result['time'].dt.tz_convert('UTC')
 
-        expected = pd.read_csv('test_data/satellite_upsampling__twoplants.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = pd.read_csv('test_data/output__satellite_upsampling__twoplants.csv', sep = ';', parse_dates=['time', 'request_time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        result_df.reset_index(inplace=True)
         pd.testing.assert_frame_equal(result_df, expected)
 
     def test__cleaning_maintenance__base(self):
@@ -350,16 +352,16 @@ class MaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
 
-        self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
+        self.factory.create('input__update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
 
-        self.plantfactory.create_solargis('solargis_readings__base.csv')
+        self.plantfactory.create_solargis('input__solargis_readings__base.csv')
 
         to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
         result = irradiance_cleaning(self.dbmanager.db_con, to_date=to_date)
         result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
         #result['time'] = result['time'].dt.tz_convert('UTC')
 
-        expected = pd.read_csv('test_data/clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = pd.read_csv('test_data/output__clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
 
         pd.testing.assert_frame_equal(result, expected)
@@ -371,16 +373,16 @@ class MaintenanceTests(TestCase):
         sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
         self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
 
-        self.factory.create('update_bucketed_sensorirradiation_registry__base.csv', 'bucket_5min_sensorirradiationregistry')
+        self.factory.create('input__update_bucketed_sensorirradiation_registry__twoplants.csv', 'bucket_5min_sensorirradiationregistry')
 
-        self.plantfactory.create_solargis('solargis_readings__twoplants.csv')
+        self.plantfactory.create_solargis('input__solargis_readings__twoplants.csv')
 
         to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
         result = irradiance_cleaning(self.dbmanager.db_con, to_date=to_date)
         result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc', 'source'])
         #result['time'] = result['time'].dt.tz_convert('UTC')
 
-        expected = pd.read_csv('test_data/clean_sensorirradiation_registry__base.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = pd.read_csv('test_data/output__clean_sensorirradiation_registry__twoplants.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
 
         pd.testing.assert_frame_equal(result, expected)
