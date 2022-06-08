@@ -7,7 +7,7 @@ import numpy as np
 
 import yaml
 
-from sqlalchemy import BigInteger, MetaData, Table, Text, Integer, Column, DateTime, ForeignKey, Identity
+from sqlalchemy import BigInteger, MetaData, Table, Text, Integer, Column, DateTime, ForeignKey
 from sqlalchemy import insert
 from conf.log import logger
 
@@ -140,7 +140,7 @@ def create_clean_irradiation(db_con, target_table_name):
     metadata_obj = MetaData()
 
     sources_table = Table('source', metadata_obj,
-        Column('id', Integer,  Identity(), primary_key=True),
+        Column('id', Integer, primary_key=True),
         Column('name', Text, nullable=False),
         Column('description', Text)
     )
