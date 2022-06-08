@@ -12,7 +12,8 @@ from external_api.api_solargis import ApiSolargis, Site, PVSystem
 
 from meteologica.utils import todtaware
 
-@unittest.skipIf(False, "we're querying an external api, let's disable tests by default")
+#@unittest.skipIf(True, "we're querying an external api, let's disable tests by default")
+@unittest.skipIf(True, "we have to pay solargis")
 class ApiSolargis_Test(unittest.TestCase):
 
     @classmethod
