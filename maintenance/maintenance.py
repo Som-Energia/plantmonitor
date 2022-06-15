@@ -43,8 +43,6 @@ def update_bucketed_sensorirradiation_registry(db_con, to_date=None):
             {target_table}
             (time timestamptz, {device} integer, irradiation_w_m2 bigint, temperature_dc bigint);
 
-        ALTER INDEX IF EXISTS time_sensor RENAME TO {target_table}_time_{device};
-
         CREATE UNIQUE INDEX IF NOT EXISTS {target_table}_time_{device}
             ON {target_table} (time, {device});
 
@@ -155,7 +153,7 @@ def update_irradiationregistry(db_con, to_date=None):
     latest_reading = get_latest_reading(db_con, target_table, source_table)
 
     logger.debug(f"Latest reading of string {latest_reading}")
-    query = Path('queries/maintenance/bucket_1h_irradiance.sql').read_text(encoding='utf8')
+    query = Path('queries/maintenance/irradiationregistry.sql').read_text(encoding='utf8')
     query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
 
     insert_query = f'''
