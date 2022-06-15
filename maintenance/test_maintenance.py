@@ -10,9 +10,10 @@ from .maintenance import (
     create_clean_irradiation,
     get_latest_reading,
     irradiance_cleaning,
-    update_bucketed_irradiation_registry,
+    update_bucketed_sensorirradiation_registry,
     update_bucketed_inverter_registry,
     update_bucketed_string_registry,
+    update_irradiation,
     alarm_maintenance,
     satellite_upsampling
 )
@@ -242,7 +243,7 @@ class MaintenanceTests(TestCase):
             self.factory.create_bucket_5min_irradiationregistry_empty_table()
 
             to_date = datetime.datetime(2022, 3, 1, 12, 16, tzinfo=datetime.timezone.utc)
-            result = update_bucketed_irradiation_registry(self.dbmanager.db_con, to_date)
+            result = update_bucketed_sensorirradiation_registry(self.dbmanager.db_con, to_date)
             result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_w_m2', 'temperature_dc'])
             #result['time'] = result['time'].dt.tz_convert('UTC')
 
@@ -324,6 +325,50 @@ class MaintenanceTests(TestCase):
             self.factory.delete('stringregistry')
             self.factory.delete('bucket_5min_stringregistry')
             raise
+
+    def test__update_irradiation__base(self):
+
+        # TODO we don't need sunrise sunset
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
+
+        self.factory.create('input__update_irradiation__base.csv', 'bucket_5min_sensorirradiationregistry')
+
+        to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
+        result = update_irradiation(self.dbmanager.db_con, to_date=to_date)
+        result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_wh_m2', 'quality'])
+
+        # TODO change from 12readings to __base, which uses 13 readings per hour (closed intervals [11:00,12:00] instead ot [11:00, 12:00))
+        # We can use rolling average and select the HH:30 (or lead 13 each row with partition)
+
+        expected = pd.read_csv('test_data/output__update_irradiation__base_v12readings.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
+
+    def test__update_irradiation__with_previous_records(self):
+
+        # TODO we don't need sunrise sunset
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
+
+        self.factory.create('input__update_irradiation__with_previous_records__5min.csv', 'bucket_5min_sensorirradiationregistry')
+        self.factory.create('input__update_irradiation__with_previous_records.csv', 'irradiationregistry')
+
+
+        to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
+        result = update_irradiation(self.dbmanager.db_con, to_date=to_date)
+        result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_wh_m2', 'quality'])
+
+        # TODO change from 12readings to __base, which uses 13 readings per hour (closed intervals [11:00,12:00] instead ot [11:00, 12:00))
+        # We can use rolling average and select the HH:30 (or lead 13 each row with partition)
+
+        expected = pd.read_csv('test_data/output__update_irradiation__with_previous_readings.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
+        expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
 
     def test__alarm_maintenance__no_bucket_tables(self):
 
