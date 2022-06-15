@@ -132,7 +132,7 @@ def update_bucketed_string_registry(db_con, to_date=None):
     logger.debug("{} records inserted".format(len(result)))
     return result
 
-def update_irradiation(db_con, to_date=None):
+def update_irradiationregistry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
 
     source_table = 'bucket_5min_sensorirradiationregistry'
@@ -143,7 +143,9 @@ def update_irradiation(db_con, to_date=None):
             {target_table}
             (time TIMESTAMP WITH TIME ZONE NOT NULL, sensor integer not null, irradiation_wh_m2 float, quality float);
 
-        CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+        ALTER INDEX IF EXISTS time_sensor RENAME TO irradiationregistry_time_sensor;
+
+        CREATE UNIQUE INDEX IF NOT EXISTS irradiationregistry_time_sensor
             ON {target_table} (time, sensor);
 
         SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE, migrate_data => TRUE)
@@ -414,7 +416,7 @@ def bucketed_registry_maintenance(db_con):
     logger.info('Update bucketed sensorirradiation registry table')
 
 def cleaning_maintenance(db_con):
-    update_irradiation(db_con)
+    update_irradiationregistry(db_con)
     logger.info('Update irradiation registry table')
 
     # Unused, irradiance is not used anywhere, only irradiation (wh/m2) is useful
