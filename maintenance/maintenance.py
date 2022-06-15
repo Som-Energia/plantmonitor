@@ -43,7 +43,9 @@ def update_bucketed_sensorirradiation_registry(db_con, to_date=None):
             {target_table}
             (time timestamptz, {device} integer, irradiation_w_m2 bigint, temperature_dc bigint);
 
-        CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+        ALTER INDEX IF EXISTS time_sensor RENAME TO {target_table}_time_{device};
+
+        CREATE UNIQUE INDEX IF NOT EXISTS {target_table}_time_{device}
             ON {target_table} (time, {device});
 
         SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE)
