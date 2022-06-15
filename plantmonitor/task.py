@@ -8,23 +8,19 @@ from yamlns import namespace as ns
 from erppeek import Client
 from .meters import (
     telemeasure_meter_names,
-    measures_from_date,
-    upload_measures,
-    uploaded_plantmonitor_measures,
-    last_uploaded_plantmonitor_measures,
     transfer_meter_to_plantmonitor,
 )
 
 from maintenance.maintenance import(
     bucketed_registry_maintenance,
     alarm_maintenance,
+    cleaning_maintenance
 )
 
 from maintenance.db_manager import DBManager
 
 from .operations import computeIntegralMetrics
 
-from meteologica.daily_upload_to_api import upload_meter_data
 from meteologica.forecasts import (
     downloadMeterForecasts,
     uploadMeterReadings
@@ -254,6 +250,8 @@ def task_maintenance():
                 bucketed_registry_maintenance(dbmanager.db_con)
             with dbmanager.db_con.begin():
                 alarm_maintenance(dbmanager.db_con)
+            with dbmanager.db_con.begin():
+                cleaning_maintenance(dbmanager.db_con)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise

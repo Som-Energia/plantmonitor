@@ -414,10 +414,9 @@ def bucketed_registry_maintenance(db_con):
     logger.info('Update bucketed sensorirradiation registry table')
 
 def cleaning_maintenance(db_con):
-    update_irradiation_registry(db_con)
-    logger.info('Update bucketed sensorirradiation registry table')
+    update_irradiation(db_con)
+    logger.info('Update irradiation registry table')
 
-    pass
     # Unused, irradiance is not used anywhere, only irradiation (wh/m2) is useful
     # leaving it in case we ever change our mind or we have a similar problem
     # logger.info('Clean irradiation')
