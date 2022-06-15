@@ -74,7 +74,9 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
             bucket_5min_inverterregistry
             (time timestamptz, inverter integer, temperature_dc bigint, power_w bigint, energy_wh bigint);
 
-        CREATE UNIQUE INDEX IF NOT EXISTS time_inverter
+        ALTER INDEX IF EXISTS time_inverter RENAME TO bucket_5min_inverterregistry_time_inverter;
+
+        CREATE UNIQUE INDEX IF NOT EXISTS bucket_5min_inverterregistry_time_inverter
             ON bucket_5min_inverterregistry (time, inverter);
 
         SELECT create_hypertable('bucket_5min_inverterregistry', 'time', if_not_exists => TRUE)
@@ -107,7 +109,9 @@ def update_bucketed_string_registry(db_con, to_date=None):
             bucket_5min_stringregistry
             (time TIMESTAMP WITH TIME ZONE NOT NULL, string integer not null, intensity_ma bigint);
 
-        CREATE UNIQUE INDEX IF NOT EXISTS time_string
+        ALTER INDEX IF EXISTS time_string RENAME TO bucket_5min_stringregistry_time_string;
+
+        CREATE UNIQUE INDEX IF NOT EXISTS bucket_5min_stringregistry_time_string
             ON bucket_5min_stringregistry (time, string);
 
         SELECT create_hypertable('bucket_5min_stringregistry', 'time', if_not_exists => TRUE)
