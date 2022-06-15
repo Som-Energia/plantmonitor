@@ -143,8 +143,6 @@ def update_irradiationregistry(db_con, to_date=None):
             {target_table}
             (time TIMESTAMP WITH TIME ZONE NOT NULL, sensor integer not null, irradiation_wh_m2 float, quality float);
 
-        ALTER INDEX IF EXISTS time_sensor RENAME TO irradiationregistry_time_sensor;
-
         CREATE UNIQUE INDEX IF NOT EXISTS irradiationregistry_time_sensor
             ON {target_table} (time, sensor);
 
