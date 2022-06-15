@@ -30,7 +30,7 @@ def get_latest_reading(db_con, target_table, source_table=None):
 # - specifying which columns are metrics (for the update)
 # - specifying which agregation method to use on the buckets (avg, max, ...)
 
-def update_bucketed_irradiation_registry(db_con, to_date=None):
+def update_bucketed_sensorirradiation_registry(db_con, to_date=None):
     to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
 
     registry = 'sensorirradiationregistry'
@@ -126,6 +126,44 @@ def update_bucketed_string_registry(db_con, to_date=None):
             UPDATE
 	            SET intensity_ma = excluded.intensity_ma
         RETURNING time, string, intensity_ma
+    '''
+    logger.debug("Insert query")
+    result = db_con.execute(insert_query).fetchall()
+    logger.debug("{} records inserted".format(len(result)))
+    return result
+
+def update_irradiation(db_con, to_date=None):
+    to_date = to_date or datetime.datetime.now(datetime.timezone.utc)
+
+    source_table = 'bucket_5min_sensorirradiationregistry'
+    target_table = 'irradiationregistry'
+
+    setup_irradiation = f'''
+        CREATE TABLE IF NOT EXISTS
+            {target_table}
+            (time TIMESTAMP WITH TIME ZONE NOT NULL, sensor integer not null, irradiation_wh_m2 float, quality float);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS time_sensor
+            ON {target_table} (time, sensor);
+
+        SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE, migrate_data => TRUE)
+    '''
+    db_con.execute(setup_irradiation)
+
+    latest_reading = get_latest_reading(db_con, target_table, source_table)
+
+    logger.debug(f"Latest reading of string {latest_reading}")
+    query = Path('queries/maintenance/bucket_1h_irradiance.sql').read_text(encoding='utf8')
+    query = query.format(latest_reading, to_date.strftime('%Y-%m-%d %H:%M:%S%z'))
+
+    insert_query = f'''
+        INSERT INTO {target_table}
+         {query}
+         ON CONFLICT (time, sensor) DO
+            UPDATE
+	            SET irradiation_wh_m2 = excluded.irradiation_wh_m2,
+                quality = excluded.quality
+        RETURNING time, sensor, irradiation_wh_m2, quality
     '''
     logger.debug("Insert query")
     result = db_con.execute(insert_query).fetchall()
@@ -372,10 +410,13 @@ def bucketed_registry_maintenance(db_con):
     logger.info('Updated bucketed inverter registry table')
     update_bucketed_string_registry(db_con)
     logger.info('Update bucketed inverterstring registry table')
-    update_bucketed_irradiation_registry(db_con)
+    update_bucketed_sensorirradiation_registry(db_con)
     logger.info('Update bucketed sensorirradiation registry table')
 
 def cleaning_maintenance(db_con):
+    update_irradiation_registry(db_con)
+    logger.info('Update bucketed sensorirradiation registry table')
+
     pass
     # Unused, irradiance is not used anywhere, only irradiation (wh/m2) is useful
     # leaving it in case we ever change our mind or we have a similar problem
