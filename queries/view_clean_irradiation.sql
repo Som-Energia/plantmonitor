@@ -2,13 +2,20 @@
 -- delete this view and do it in redash instead, with proper filters
 -- [chosen option] or hope that it's true that the planner limits the rows necessary by the subquery given a parent where clause
 -- Time it to decide
-select
-   sensor,
-   sir.time + interval '1 hour',
-   coalesce(sir.irradiation_wh_m2, sat.global_tilted_irradiation_wh_m2) as irradiation_wh_m2_coalesce,
-   case when sir.quality < 1 then sat.global_tilted_irradiation_wh_m2 else sir.irradiation_wh_m2 end as irradiation_wh_m2,
-   case when sir.quality < 1 then 'satellite' else 'sonda' end as reading_source
-from irradiationregistry as sir
-left join sensor on sensor.id = sir.sensor
-left join plant on plant.id = sensor.plant
-left join satellite_readings as sat on sat.plant = sensor.plant and time_bucket('1 hour', sat.time) = time_bucket('1 hour', sir.time);
+ SELECT sir.sensor,
+    sir."time",
+    COALESCE(sir.irradiation_wh_m2, sat.global_tilted_irradiation_wh_m2) AS irradiation_wh_m2_coalesce,
+    sir.irradiation_wh_m2 AS sonda_irradiation_wh_m2,
+    sat.global_tilted_irradiation_wh_m2 AS satellite_irradiation_wh_m2,
+        CASE
+            WHEN sir.quality < 1 THEN sat.global_tilted_irradiation_wh_m2
+            ELSE sir.irradiation_wh_m2
+        END AS irradiation_wh_m2,
+        CASE
+            WHEN sir.quality < 1 THEN 'satellite'
+            ELSE 'sonda'
+        END AS reading_source
+   FROM irradiationregistry sir
+     LEFT JOIN sensor ON sensor.id = sir.sensor
+     LEFT JOIN plant ON plant.id = sensor.plant
+     LEFT JOIN satellite_readings sat ON sat.plant = sensor.plant AND time_bucket('1 hour', sat."time") = time_bucket('1 hour', sir."time");
