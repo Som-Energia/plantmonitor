@@ -94,6 +94,20 @@ class AlarmTests(TestCase):
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
 
+    def create_alarm_noreading_meter_tables(self):
+        self.alarm_manager.create_alarm_tables()
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'meternoreading',
+                'description': 'Comptadors sense lectures (connection_protocol distinction)',
+                'severity': 'critical',
+                'active': True,
+                'createdate': datetime.date.today(),
+                'sql': 'meternoreading'
+            }]
+        }
+        self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
+
+
     def test__source_table_exists(self):
         self.alarm_manager.create_alarm_tables()
         alarm_table_exists = Alarm.source_table_exists(self.dbmanager.db_con, 'alarm')
@@ -797,6 +811,52 @@ class AlarmTests(TestCase):
 
         expected = [
             (1, 'Alibaba_inverter', None),
+            (2, 'Quaranta_Lladres_inverter', None),
+            (3, 'Els_cavalls_inverter', None)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__get_alarm_current_temperature_anomaly_inverter__alarm_triggered(self):
+        self.factory.create('input__get_alarm_current_inverter_temperature_anomaly__alarm_triggered.csv', 'bucket_5min_inverterregistry')
+        self.create_alarm_inverter_temperature_anomaly_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('invertertemperatureanomaly')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        # TODO factory this
+        self.dbmanager.db_con.execute(
+            "insert into inverter(id, name, plant) values ({}, '{}', {})".format(
+                3, 'Els_cavalls_inverter', 1
+            )
+        )
+
+        check_time = datetime.datetime(2022,2,17,13,24,55,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', True),
+            (2, 'Quaranta_Lladres_inverter', False),
+            (3, 'Els_cavalls_inverter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_meter_no_reading_get_alarm_current__base(self):
+        self.create_alarm_noreading_meter_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('meternoreading')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,12,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', False),
             (2, 'Quaranta_Lladres_inverter', None),
             (3, 'Els_cavalls_inverter', None)
         ]

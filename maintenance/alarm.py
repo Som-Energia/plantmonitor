@@ -376,3 +376,229 @@ class AlarmStringNoIntensity(Alarm):
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
         logger.debug(f"Updated {len(alarm_current)} records")
+
+
+class AlarmPVMeterNoEnergy(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'meter'
+        self.source_table = 'meterregistry'
+
+    def get_alarm_current(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        query = f'''
+            SELECT reg.meter AS meter, inv.name as meter_name, max(reg.power_w) = 0 as nopower
+            FROM {self.source_table} as reg
+            LEFT JOIN meter AS m ON m.id = reg.meter
+            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+            group by reg.meter, m.name
+        '''
+        return self.db_con.execute(query).fetchall()
+
+    # TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
+    # e.g. skip_condition(db_con, inverter, check_time)
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+            if status is not None:
+                # TODO we could pass the plant id instead of device_table+device_id
+                # TODO this generates as many queries as meters, we should fetch all of them beforehand or merge it in the alarm sql
+                is_day = self.is_daylight(self.db_con, device_table, device_id, check_time)
+                if not is_day:
+                    self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+                    continue
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
+        check_time = check_time or datetime.datetime.now()
+
+        # TODO check alarma noreading que invalida l'alarma nopower
+
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
+
+
+class AlarmHydroGasMeterNoEnergy(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'meter'
+        self.source_table = 'meterregistry'
+
+    def get_alarm_current(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        query = f'''
+            SELECT reg.meter AS meter, inv.name as meter_name, max(reg.power_w) = 0 as nopower
+            FROM {self.source_table} as reg
+            LEFT JOIN meter AS m ON m.id = reg.meter
+            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+            group by reg.meter, m.name
+        '''
+        return self.db_con.execute(query).fetchall()
+
+    # TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
+    # e.g. skip_condition(db_con, inverter, check_time)
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+            if status is not None:
+                self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
+        check_time = check_time or datetime.datetime.now()
+
+        # TODO check alarma noreading que invalida l'alarma nopower
+
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
+
+
+class Alarm5minNoReading(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'meter'
+        self.source_table = 'meterregistry'
+
+    def get_alarm_current(self, check_time):
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        query = f'''
+            SELECT reg.meter AS meter, inv.name as meter_name, max(reg.power_w) = 0 as nopower
+            FROM {self.source_table} as reg
+            LEFT JOIN meter AS m ON m.id = reg.meter
+            WHERE '{check_time}'::timestamptz - interval '60 minutes' <= reg.time and reg.time <= '{check_time}'::timestamptz
+            group by reg.meter, m.name
+        '''
+        return self.db_con.execute(query).fetchall()
+
+    # TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
+    # e.g. skip_condition(db_con, inverter, check_time)
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+            if status is not None:
+                # TODO we could pass the plant id instead of device_table+device_id
+                # TODO this generates as many queries as meters, we should fetch all of them beforehand or merge it in the alarm sql
+                is_day = self.is_daylight(self.db_con, device_table, device_id, check_time)
+                if not is_day:
+                    self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+                    continue
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
+        check_time = check_time or datetime.datetime.now()
+
+        # TODO check alarma noreading que invalida l'alarma nopower
+
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
+
+
+class AlarmMeterNoReading(Alarm):
+
+    def __init__(self, db_con, name, description, severity, createdate, active=True, sql=None):
+        super().__init__(db_con, name, description, severity, createdate, active, sql)
+        #TODO absolute and unique device ids must replace device_table specification requirement
+        self.device_table = 'meter'
+        self.source_table = 'meterregistry'
+
+    def get_alarm_current(self, check_time):
+        # get all active meters
+        # get last time in the last 24h
+        # add the ones not present (so we'll be assuming >24h without readings)
+
+        query = '''
+        select meter.* from meter
+        left join plant on plant.id = meter.plant
+        where description != 'SomRenovables'
+        '''
+
+        som_meters = self.db_con.execute(query).fetchall()
+
+        check_time = check_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        query = f'''
+            SELECT distinct on (reg.meter)
+                reg.meter AS meter,
+                m.name as meter_name,
+                m.connection_protocol,
+                time as latest_reading
+            FROM {self.source_table} as reg
+            LEFT JOIN meter AS m ON m.id = reg.meter
+            left join plant on plant.id = m.plant
+            WHERE '{check_time}'::timestamptz - interval '1 day' <= reg.time
+            and reg.time <= '{check_time}'::timestamptz
+            and description != 'SomRenovables'
+            order by meter, time desc
+        '''
+        latest_readings = self.db_con.execute(query).fetchall()
+
+        import ipdb; ipdb.set_trace()
+
+        # if moxa and 1 day < latest_reading - check_time: alarm
+        # if ip and 2h < latest_reading - check_time: alarm
+        # if meter in som_meters but not in latest_readings: alarm (it means > 30 day without reading)
+
+        noreadingalarm = [(meter, meter_name, noreading) for lr in latest_readings]
+
+        return noreadingalarm
+
+    # TODO the is_day condition could be abstracted and passed as a parameter if other alarms have different conditions
+    # e.g. skip_condition(db_con, inverter, check_time)
+    def set_devices_alarms(self, alarm_id, device_table, alarms_current, check_time):
+        for device_id, device_name, status in alarms_current:
+            if status is not None:
+                self.set_alarm_status_update_time(device_table, device_id, alarm_id, check_time)
+
+            current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+
+            if current_alarm['old_status'] == True and status != True:
+                self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
+
+    def update_alarm(self, check_time = None):
+
+        if not self.source_table_exists(self.db_con, self.source_table):
+            logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
+            return
+
+        check_time = check_time or datetime.datetime.now()
+
+        alarm_current = self.get_alarm_current(check_time)
+        self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
+
+        logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
+

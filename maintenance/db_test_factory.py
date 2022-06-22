@@ -270,3 +270,27 @@ class DbPlantFactory():
             insert_stmt = insert(clean_irradiation_table)
 
             self.dbmanager.db_con.execute(insert_stmt, readings)
+
+    def create_meter_plant(self, sunrise, sunset):
+        self.dbmanager.db_con.execute('create table if not exists plant (id serial primary key, name text, codename text, description text)')
+        self.dbmanager.db_con.execute('insert into plant (id, name, codename, description) values (%s, %s, %s, %s)', [
+                (1, 'Alibaba', 'SomEnergia_Alibaba', ''),
+                (2, 'Alicia', 'SomEnergia_Alicia', ''),
+                (3, 'Jules', 'SomEnergia_Jules', ''),
+                (4, 'Arsene', 'SomEnergia_Arsene', '')
+        ])
+
+        self.dbmanager.db_con.execute('create table if not exists meter (id serial primary key, name text, plant integer, connection_protocol text)')
+        self.dbmanager.db_con.execute('insert into meter (id, name, plant, connection_protocol) values (%s, %s, %s, %s)', [
+                (2, 'Alibaba_meter', 1, 'ip'),
+                (7, 'Meravelles_meter', 2, 'moxa'),
+                (34, 'Verne_meter', 3, 'moxa',),
+                (36, 'Lupin_meter', 4, 'moxa'),
+        ])
+        self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
+        self.dbmanager.db_con.execute(
+            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
+                1, 1,
+                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
+            )
+        )

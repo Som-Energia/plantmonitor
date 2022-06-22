@@ -54,4 +54,18 @@ class TestDbTestFactory(TestCase):
         ]
         self.assertListEqual(readings, expected)
 
+    def test_create_meter_plant(self):
+        factory = DbPlantFactory(self.dbmanager)
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        factory.create_meter_plant(sunrise, sunset)
+
+        meters = self.dbmanager.db_con.execute("select * from meter;").fetchall()
+        expected = [
+                (2, 'Alibaba_meter', 1, 'ip'),
+                (7, 'Meravelles_meter', 2, 'moxa'),
+                (34, 'Verne_meter', 3, 'moxa',),
+                (36, 'Lupin_meter', 4, 'moxa')
+        ]
+        self.assertListEqual(meters, expected)
 

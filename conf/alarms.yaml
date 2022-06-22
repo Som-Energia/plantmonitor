@@ -14,3 +14,8 @@ alarms:
   severity: critical
   active: True
   sql: nostringintensity
+- name: meternoreading
+  description: "Comptadors sense lectures (connection_protocol distinction)"
+  severity: critical
+  active: True
+  sql: meternoreading
