@@ -345,7 +345,7 @@ class MaintenanceTests(TestCase):
         expected = pd.read_csv('test_data/output__update_irradiation__base_v12readings.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
 
-        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, atol=0.001)
 
     def test__update_irradiation__with_previous_records(self):
 
@@ -368,7 +368,7 @@ class MaintenanceTests(TestCase):
         expected = pd.read_csv('test_data/output__update_irradiation__with_previous_readings.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
 
-        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, atol=0.001)
 
 
     def test__update_irradiation__upsert(self):
@@ -395,7 +395,7 @@ class MaintenanceTests(TestCase):
         expected = pd.read_csv('test_data/output__update_irradiation__base_v12readings.csv', sep = ';', parse_dates=['time'], date_parser=lambda col: pd.to_datetime(col, utc=True))
         expected = expected.sort_values(by=['time','sensor'], ascending=[False, True]).reset_index(drop=True)
 
-        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, atol=0.001)
 
 
     def test__alarm_maintenance__no_bucket_tables(self):
