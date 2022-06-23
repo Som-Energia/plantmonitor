@@ -19,3 +19,13 @@ alarms:
   severity: critical
   active: True
   sql: meternoreading
+- name: inverternoreading
+  description: "Inversors sense lectures"
+  severity: critical
+  active: True
+  sql: inverternoreading
+- name: sensorirradiationnoreading
+  description: "Sondes sense lectures"
+  severity: critical
+  active: True
+  sql: sensorirradiationnoreading

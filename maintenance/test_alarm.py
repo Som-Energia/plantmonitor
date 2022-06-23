@@ -17,7 +17,7 @@ from .db_test_factory import DbTestFactory, DbPlantFactory
 
 from re import search
 
-from .alarm import Alarm, AlarmInverterNoPower, NoSolarEventError
+from .alarm import Alarm, AlarmInverterNoPower, AlarmMeterNoReading, NoSolarEventError
 from .alarm_manager import AlarmManager
 
 class AlarmTests(TestCase):
@@ -34,7 +34,6 @@ class AlarmTests(TestCase):
 
         cls.factory = DbTestFactory(cls.dbmanager)
         cls.plantfactory = DbPlantFactory(cls.dbmanager)
-        cls.alarm_manager = AlarmManager(cls.dbmanager.db_con)
 
     @classmethod
     def tearDownClass(cls):
@@ -43,6 +42,7 @@ class AlarmTests(TestCase):
     def setUp(self):
         self.session = self.dbmanager.db_con.begin()
         self.dbmanager.db_con.execute('SET TIME ZONE UTC;')
+        self.alarm_manager = AlarmManager(self.dbmanager.db_con)
 
     def tearDown(self):
         self.session.rollback()
@@ -55,6 +55,11 @@ class AlarmTests(TestCase):
     def read_csv(self, csvfile):
         df = pd.read_csv(csvfile, sep=',')
         return df
+
+    def create_alarm_tables_from_alarms_testing_yaml(self):
+        self.alarm_manager.create_alarm_tables()
+        alarms_yaml_content = self.alarm_manager.read_alarms_config('test_data/alarms_testing.yaml')
+        self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
 
     def create_alarm_nopower_inverter_tables(self):
         self.alarm_manager.create_alarm_tables()
@@ -107,6 +112,8 @@ class AlarmTests(TestCase):
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
 
+    def test__check_alarm_manager_teardown(self):
+        self.assertFalse(self.alarm_manager.alarms)
 
     def test__source_table_exists(self):
         self.alarm_manager.create_alarm_tables()
@@ -515,7 +522,6 @@ class AlarmTests(TestCase):
         self.factory.create('input__get_alarm_current_nointensity_string__alarm_triggered.csv', 'bucket_5min_stringregistry')
         self.create_alarm_nointensity_string_tables()
         alarm = self.alarm_manager.get_alarm_by_name('nostringintensity')
-
         self.plantfactory.create_inverter_string_plant()
 
         check_time = datetime.datetime(2022,2,17,13,15,tzinfo=datetime.timezone.utc)
@@ -842,6 +848,85 @@ class AlarmTests(TestCase):
         ]
         self.assertListEqual(result, expected)
 
+    def test__alarm_sensorirradiation_no_reading_get_alarm_current__alarm(self):
+
+        self.create_alarm_tables_from_alarms_testing_yaml()
+        alarm = self.alarm_manager.get_alarm_by_name('sensorirradiationnoreading')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        self.factory.create('sensorirradiationregistry_1day.csv', 'sensorirradiationregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'SensorIrradiation1', True),
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_sensorirradiation_no_reading_get_alarm_current__no_alarm(self):
+
+        self.create_alarm_tables_from_alarms_testing_yaml()
+        alarm = self.alarm_manager.get_alarm_by_name('sensorirradiationnoreading')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        self.factory.create('sensorirradiationregistry_1day.csv', 'sensorirradiationregistry')
+
+        check_time = datetime.datetime(2022,6,22,11,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'SensorIrradiation1', False),
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_inverter_no_reading_get_alarm_current__base(self):
+
+        self.create_alarm_tables_from_alarms_testing_yaml()
+        alarm = self.alarm_manager.get_alarm_by_name('inverternoreading')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        self.factory.create('inverterregistry_1day.csv', 'inverterregistry')
+
+        check_time = datetime.datetime(2022,6,22,12,00,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', False),
+            (2, 'Quaranta_Lladres_inverter', True)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_inverter_no_reading_get_alarm_current__alarm(self):
+
+        self.create_alarm_tables_from_alarms_testing_yaml()
+        alarm = self.alarm_manager.get_alarm_by_name('inverternoreading')
+
+        sunrise = datetime.datetime(2022,2,17,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,2,17,18,tzinfo=datetime.timezone.utc)
+        self.create_plant(sunrise, sunset)
+
+        self.factory.create('inverterregistry_1day.csv', 'inverterregistry')
+
+        check_time = datetime.datetime(2022,6,22,12,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (1, 'Alibaba_inverter', True),
+            (2, 'Quaranta_Lladres_inverter', True)
+        ]
+        self.assertListEqual(result, expected)
+
+
     def test__alarm_meter_no_reading_get_alarm_current__base(self):
         self.create_alarm_noreading_meter_tables()
         alarm = self.alarm_manager.get_alarm_by_name('meternoreading')
@@ -852,12 +937,23 @@ class AlarmTests(TestCase):
 
         self.factory.create('meterregistry_2days.csv', 'meterregistry')
 
-        check_time = datetime.datetime(2022,6,22,12,20,10,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
         result = alarm.get_alarm_current(check_time)
 
         expected = [
-            (1, 'Alibaba_inverter', False),
-            (2, 'Quaranta_Lladres_inverter', None),
-            (3, 'Els_cavalls_inverter', None)
+            (2, 'Alibaba_meter', False), # ip < 2 hours
+            (7, 'Meravelles_meter', False), # moxa < 1 day
+            (34, 'Verne_meter', True), # > 1 day
+            (36, 'Lupin_meter', True) # > 7 days
         ]
         self.assertListEqual(result, expected)
+
+    def test__get_alarm_by_protocol__base(self):
+
+        reading_time = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        check_time = datetime.datetime(2022,6,23,9,tzinfo=datetime.timezone.utc)
+        protocol = 'moxa'
+
+        is_alarm = AlarmMeterNoReading.is_alarm_by_protocol(reading_time, check_time, protocol)
+
+        self.assertTrue(is_alarm)

@@ -4,9 +4,28 @@ alarms:
   severity: critical
   active: True
   sql: noinverterpower
+- name: invertertemperatureanomaly
+  description: "Inversor amb temperatura > 40 respecte els altres"
+  severity: critical
+  active: True
+  sql: invertertemperatureanomaly
 - name: nostringintensity
   description: "String d'inversor sense potència amb potència inversor > 10 kw"
   severity: critical
   active: True
   sql: nostringintensity
-
+- name: meternoreading
+  description: "Comptadors sense lectures (connection_protocol distinction)"
+  severity: critical
+  active: True
+  sql: meternoreading
+- name: inverternoreading
+  description: "Inversors sense lectures"
+  severity: critical
+  active: True
+  sql: inverternoreading
+- name: sensorirradiationnoreading
+  description: "Sondes sense lectures"
+  severity: critical
+  active: True
+  sql: sensorirradiationnoreading

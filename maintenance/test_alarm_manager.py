@@ -181,7 +181,7 @@ class AlarmManagerTests(TestCase):
     def test__read_alarms__base(self):
         self.maxDiff=None
         alarm_manager = AlarmManager(self.dbmanager.db_con)
-        alarms = alarm_manager.read_alarms_config('test_data/alarms_testing.yaml')
+        alarms = alarm_manager.read_alarms_config('test_data/alarms_testing_small.yaml')
 
         expected_alarms = {'alarms': sorted([
             {
@@ -204,7 +204,7 @@ class AlarmManagerTests(TestCase):
     def test__insert_alarms_from_config__base(self):
         alarm_manager = AlarmManager(self.dbmanager.db_con)
 
-        alarms_yaml_file = 'test_data/alarms_testing.yaml'
+        alarms_yaml_file = 'test_data/alarms_testing_small.yaml'
         alarms_yaml_content = alarm_manager.read_alarms_config(alarms_yaml_file)
 
         alarm_manager.create_alarm_table()
