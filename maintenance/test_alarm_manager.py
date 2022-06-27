@@ -231,3 +231,32 @@ class AlarmManagerTests(TestCase):
         check_time = datetime.datetime(2022,2,17,13,15,0,tzinfo=datetime.timezone.utc)
         alarm_manager = AlarmManager(self.dbmanager.db_con)
         alarm_manager.update_alarms(check_time=check_time)
+
+    def test__update_alarms__meter_alarms(self):
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days_noenergy.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        alarm_manager = AlarmManager(self.dbmanager.db_con)
+        alarm_manager.update_alarms(check_time=check_time)
+
+        result = self.dbmanager.db_con.execute('''
+            select alarm.name, alarm_status.* from alarm_status
+            left join alarm on alarm.id = alarm_status.alarm
+            order by alarm.id, device_table, device_id, update_time desc;
+        ''').fetchall()
+        expected = [
+            ('meternoreading', 1, 'meter', 2, 'Alibaba_meter', 2, check_time, check_time, True),
+            ('meternoreading', 2, 'meter', 7, 'Meravelles_meter', 2, check_time, check_time, False),
+            ('meternoreading', 3, 'meter', 34, 'Verne_meter', 2, check_time, check_time, True),
+            ('meternoreading', 4, 'meter', 36, 'Lupin_meter', 2, check_time, check_time, False),
+            ('meternoenergy', 1, 'meter', 2, 'Alibaba_meter', 2, check_time, check_time, True),
+            ('meternoenergy', 2, 'meter', 7, 'Meravelles_meter', 2, check_time, check_time, False),
+        ]
+
+        import ipdb; ipdb.set_trace()
+
+        self.assertListEqual(result, expected)

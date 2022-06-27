@@ -287,10 +287,15 @@ class DbPlantFactory():
                 (34, 'Verne_meter', 3, 'moxa',),
                 (36, 'Lupin_meter', 4, 'moxa'),
         ])
+
+        sunrise_str = sunrise.strftime('%Y-%m-%d %H:%M:%S%z')
+        sunset_str = sunset.strftime('%Y-%m-%d %H:%M:%S%z')
+
         self.dbmanager.db_con.execute('create table if not exists solarevent (id serial primary key, plant integer not null, sunrise timestamptz, sunset timestamptz)')
         self.dbmanager.db_con.execute(
-            "insert into solarevent(id, plant, sunrise, sunset) values ({}, {}, '{}', '{}')".format(
-                1, 1,
-                sunrise.strftime('%Y-%m-%d %H:%M:%S%z'),sunset.strftime('%Y-%m-%d %H:%M:%S%z')
-            )
-        )
+            "insert into solarevent(id, plant, sunrise, sunset) values (%s, %s, %s, %s)", [
+                (1, 1, sunrise_str, sunset_str),
+                (2, 2, sunrise_str, sunset_str),
+                (3, 3, sunrise_str, sunset_str),
+                (4, 4, sunrise_str, sunset_str),
+        ])

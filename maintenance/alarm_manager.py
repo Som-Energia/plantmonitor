@@ -5,12 +5,15 @@ from conf.log import logger
 
 from .alarm import (
     Alarm,
+    AlarmHydroBioGasMeterNoEnergy,
     AlarmInverterNoPower,
     AlarmInverterTemperatureAnomaly,
+    AlarmPVMeterNoEnergy,
     AlarmStringNoIntensity,
     AlarmMeterNoReading,
     AlarmSensorIrradiationNoReading,
-    AlarmInverterNoReading
+    AlarmInverterNoReading,
+    BatchMeterAlarm
 )
 
 class UndefinedAlarmError(Exception):
@@ -37,6 +40,12 @@ class AlarmManager:
             alarm = AlarmSensorIrradiationNoReading(db_con=self.db_con, name=name, **kwargs)
         elif name == 'inverternoreading':
             alarm = AlarmInverterNoReading(db_con=self.db_con, name=name, **kwargs)
+        elif name == 'pvmeternoenergy':
+            alarm = AlarmPVMeterNoEnergy(db_con=self.db_con, name=name, **kwargs)
+        elif name == 'hbmeternoenergy':
+            alarm = AlarmHydroBioGasMeterNoEnergy(db_con=self.db_con, name=name, **kwargs)
+        elif name == 'meternoenergy':
+            alarm = BatchMeterAlarm(db_con=self.db_con, name=name, **kwargs)
         else:
             raise UndefinedAlarmError("{} alarm is not known to alarms table".format(name))
 
@@ -147,6 +156,7 @@ class AlarmManager:
         self.create_alarm_tables()
         self.create_alarms()
         logger.debug("alarm tables creation checked")
+
         for alarm in self.alarms:
             logger.debug(f'Updating alarm {alarm.name}')
             alarm.update_alarm(check_time)

@@ -112,6 +112,43 @@ class AlarmTests(TestCase):
         }
         self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
 
+    def create_alarm_noenergy_meter_tables(self):
+        self.create_alarm_noreading_meter_tables()
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'pvmeternoenergy',
+                'description': 'Comptadors Fotovoltaica sense energia',
+                'severity': 'critical',
+                'active': True,
+                'createdate': datetime.date.today(),
+                'sql': 'pvmeternoenergy'
+            },{
+                'name': 'hbmeternoenergy',
+                'description': 'Comptadors Hdràulica i Biogàs sense energia',
+                'severity': 'critical',
+                'active': True,
+                'createdate': datetime.date.today(),
+                'plantids': [2],
+                'sql': 'hbmeternoenergy'
+            }]
+        }
+        self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
+
+    def create_batch_meter_alarm_tables(self):
+        self.create_alarm_noreading_meter_tables()
+        alarms_yaml_content = { 'alarms':[{
+                'name': 'meternoenergy',
+                'description': 'Comptadors sense energia',
+                'severity': 'critical',
+                'active': True,
+                'createdate': datetime.date.today(),
+                'plantids': [2],
+                'sql': 'meternoenergy'
+            }]
+        }
+        self.alarm_manager.insert_alarms_from_config(alarms_yaml_content)
+
+
+
     def test__check_alarm_manager_teardown(self):
         self.assertFalse(self.alarm_manager.alarms)
 
@@ -926,7 +963,6 @@ class AlarmTests(TestCase):
         ]
         self.assertListEqual(result, expected)
 
-
     def test__alarm_meter_no_reading_get_alarm_current__base(self):
         self.create_alarm_noreading_meter_tables()
         alarm = self.alarm_manager.get_alarm_by_name('meternoreading')
@@ -957,3 +993,112 @@ class AlarmTests(TestCase):
         is_alarm = AlarmMeterNoReading.is_alarm_by_protocol(reading_time, check_time, protocol)
 
         self.assertTrue(is_alarm)
+
+    def test__alarm_meter_no_energy_get_alarm_current__base(self):
+
+        self.create_alarm_noenergy_meter_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('pvmeternoenergy')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days_noenergy.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (2, 'Alibaba_meter', True),
+            (7, 'Meravelles_meter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_meter_no_energy_get_alarm_current__noreadings(self):
+
+        self.create_alarm_noenergy_meter_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('pvmeternoenergy')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days_noenergy.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,25,13,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = []
+        self.assertListEqual(result, expected)
+
+    def test__alarm_meter_no_energy_get_alarm_current__pv_hb_plants(self):
+
+        self.create_alarm_noenergy_meter_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('hbmeternoenergy')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.get_alarm_current(check_time)
+
+        expected = [
+            (7, 'Meravelles_meter', True)
+        ]
+        self.assertListEqual(result, expected)
+
+    def test__alarm_meter_no_energy__update_alarm(self):
+
+        self.create_alarm_noenergy_meter_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('pvmeternoenergy')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days_noenergy.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        result = alarm.update_alarm(check_time)
+
+        expected = [
+            (2, 'Alibaba_meter', True),
+            (7, 'Meravelles_meter', False)
+        ]
+        self.assertListEqual(result, expected)
+
+        result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
+        expected = [
+            (1, 'meter', 2, 'Alibaba_meter', 2, check_time, check_time, True),
+            (2, 'meter', 7, 'Meravelles_meter', 2, check_time, check_time, False)
+        ]
+
+        self.assertEqual(len(result), 2)
+        self.assertTupleEqual(tuple(result[0]), expected[0])
+        self.assertTupleEqual(tuple(result[1]), expected[1])
+
+
+    def test__batch_meter_alarm__base(self):
+
+        self.create_batch_meter_alarm_tables()
+        alarm = self.alarm_manager.get_alarm_by_name('meternoenergy')
+
+        sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_meter_plant(sunrise, sunset)
+
+        self.factory.create('meterregistry_2days.csv', 'meterregistry')
+
+        check_time = datetime.datetime(2022,6,22,13,20,10,tzinfo=datetime.timezone.utc)
+        alarm.update_alarm(check_time)
+
+        result = self.dbmanager.db_con.execute('select * from alarm_status').fetchall()
+        expected = [
+            (1, 'meter', 2, 'Alibaba_meter', 2, check_time, check_time, True),
+            (2, 'meter', 7, 'Meravelles_meter', 2, check_time, check_time, False)
+        ]
+
+        self.assertListEqual(result, expected)
