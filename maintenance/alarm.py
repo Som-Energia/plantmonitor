@@ -130,6 +130,16 @@ class Alarm(metaclass=ABCMeta):
         '''
         return self.db_con.execute(query).fetchone()
 
+    def get_last_status_per_device(self):
+
+        query = f'''
+            select distinct on ({self.device}) *
+            from alarm_status
+            where alarm.name = :alarm_name
+            order by {self.device}, time desc;
+        '''
+        return self.db_con.execute(text(query), alarm_name=self.name).fetchall()
+
     @classmethod
     def source_table_exists(cls, db_con, table_name):
         query = f"select exists ( select from information_schema.tables where table_name = '{table_name}')"
@@ -222,6 +232,7 @@ class BatchMeterAlarm(Alarm):
         '''
         return self.db_con.execute(text(query),check_time=check_time).fetchall()
 
+    # for each device return new historical alarm records
     def get_batch_alarm(self, device_id, batch_start, batch_end):
 
         query = f'''
@@ -234,8 +245,9 @@ class BatchMeterAlarm(Alarm):
             order by time desc, meter
         '''
 
-        return self.db_con.execute(text(query), ids=self.hb_plants_ids, device_id=device_id, batch_start=batch_start, batch_end=batch_end).fetchall()
+        query_result = self.db_con.execute(text(query), ids=self.hb_plants_ids, device_id=device_id, batch_start=batch_start, batch_end=batch_end)
 
+        return query_result.fetchall(), query_result.keys()
 
     def update_alarm(self, check_time = None):
 
@@ -249,13 +261,35 @@ class BatchMeterAlarm(Alarm):
 
         check_time = check_time or datetime.datetime.now()
 
-        for device_id, batch_start, batch_end in self.get_unprocessed_time_range(check_time):
+        # agafar l'ultim update time de tots els devices
+        # per cada device existent:
+        #     calcular l'alarma de cada fila (si no tinc lectura no hi serà i jasta)
+        #
+
+        batches = self.get_unprocessed_time_range(check_time)
+
+        for device_id, batch_start, batch_end in batches:
 
             if not batch_start:
-                raise NotImplementedError("aaaaaaaaah")
+                # TODO this might break the query depending on the data
+                # (e.g. = 0 for 4 readings but we only have 1 reading)
+                batch_start = batch_end - datetime.timedelta(hours=24)
 
             # get historic alarm
-            alarm_history = self.get_batch_alarm(device_id, batch_start, batch_end)
+            alarm_records, columns = self.get_batch_alarm(device_id, batch_start, check_time)
+            # get alarm changes and group by the moving max of (1h, 4h and 24h)
+            foo = pd.DataFrame(alarm_records, columns=columns)
+            alarm_historic_df = foo[foo.noenergy != foo.noenergy.shift(-1)]
+            # or
+            alarm_historic_df.w_noenergy = foo.rolling(4).sum() == 4
+            # or
+            alarm_historic_df.w_noenergy = foo.noenergy.rolling(4).min().fillna(False).astype(bool)
+            # or (preferred)
+            alarm_historic_df.w_noenergy = foo.noenergy.rolling(4).min().fillna(pd.NA).astype(bool)
+
+            alarm_historic = [(t.to_pydatetime(), *r, None if pd.isnan(ne) else bool(ne)) for t,*r,ne in  alarm_historic_df.to_records(index=False)]
+
+            # [(t.to_pydatetime(), *r, None if ne == pd.NA else ne) for t,*r, ne in  alarm_historic.to_records(index=False)]
 
             import ipdb; ipdb.set_trace()
 

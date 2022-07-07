@@ -1086,6 +1086,9 @@ class AlarmTests(TestCase):
         self.create_batch_meter_alarm_tables()
         alarm = self.alarm_manager.get_alarm_by_name('meternoenergy')
 
+        # set to all plants at the moment
+        alarm.hb_plants_ids = [1,2,3,4]
+
         sunrise = datetime.datetime(2022,6,22,8,tzinfo=datetime.timezone.utc)
         sunset = datetime.datetime(2022,6,22,21,tzinfo=datetime.timezone.utc)
         self.plantfactory.create_meter_plant(sunrise, sunset)

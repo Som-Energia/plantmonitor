@@ -29,3 +29,13 @@ alarms:
   severity: critical
   active: True
   sql: sensorirradiationnoreading
+- name: pvmeternoenergy
+  description: "Comptadors Fotovoltaica sense energia"
+  severity: critical
+  active: True
+  sql: pvmeternoenergy
+- name: hbmeternoenergy
+  description: "Comptadors Hdràulica i Biogàs sense energia"
+  severity: critical
+  active: True
+  sql: hbmeternoenergy
