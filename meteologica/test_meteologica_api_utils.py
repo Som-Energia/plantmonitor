@@ -150,20 +150,21 @@ class MeteologicaApiMock_Test(unittest.TestCase):
     def test_getForecastFormatCheck(self):
         api = self.createApi()
         facility = self.mainFacility()
+        today = datetime.date.today()
         api.uploadProduction(facility, [
-            (todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)), 10),
+            (todt("{}-{}-01 00:00:00".format(today.year, today.month)), 10),
         ])
         result = api.getForecast(
                     facility,
-                    todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)),
-                    todt("{}-01-01 00:00:00".format(datetime.datetime.now().year)),
+                    todt("{}-{}-01 00:00:00".format(today.year, today.month)),
+                    todt("{}-{}-01 00:00:00".format(today.year, today.month)),
                 )
 
         #expected [("2020-01-01 00:00:00", _)] since we don't know meteologica's algorithm
         logger.debug(result)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 2)
-        self.assertEqual(result[0][0], todtaware("{}-01-01 00:00:00".format(datetime.datetime.now().year)))
+        self.assertEqual(result[0][0], todtaware("{}-{}-01 00:00:00".format(today.year, today.month)))
 
     def test_getFacilities(self):
         pass

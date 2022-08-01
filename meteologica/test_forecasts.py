@@ -238,13 +238,15 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        fromDate = todt("{}-01-01 00:00:00".format(datetime.datetime.now().year))
-        toDate = todt("{}-01-03 00:00:00".format(datetime.datetime.now().year))
+        today = datetime.date.today()
+
+        fromDate = todt("{}-{}-01 00:00:00".format(today.year, today.month))
+        toDate = todt("{}-{}-03 00:00:00".format(today.year, today.month))
 
         with self.createApi() as api:
             for facility, values in data.items():
                 resultForecast = api.getForecast(facility, fromDate, toDate)
-                self.assertEqual(resultForecast[0][0], todtaware("{}-01-01 00:00:00".format(datetime.datetime.now().year)))
+                self.assertEqual(resultForecast[0][0], todtaware("{}-{}-01 00:00:00".format(today.year, today.month)))
 
     def test__downloadMeterForecasts__uptodate(self):
 

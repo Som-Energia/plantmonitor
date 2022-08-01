@@ -96,13 +96,15 @@ class DailyDownload_Test(unittest.TestCase):
             ],
         }
 
-        fromDate = todt("{}-01-01 00:00:00".format(dt.datetime.now().year))
-        toDate = todt("{}-01-03 00:00:00".format(dt.datetime.now().year))
+        # meteologica returns NO_FORECASTS if requested date is further than 5 months
+        today = dt.date.today()
+        fromDate = todt("{}-{}-01 00:00:00".format(today.year, today.month))
+        toDate = todt("{}-{}-03 00:00:00".format(today.year, today.month))
 
         with self.createApi() as api:
             for facility, values in data.items():
                 resultForecast = api.getForecast(facility, fromDate, toDate)
-                self.assertEqual(resultForecast[0][0], todtaware("{}-01-01 00:00:00".format(dt.datetime.now().year)))
+                self.assertEqual(resultForecast[0][0], todtaware("{}-{}-01 00:00:00".format(today.year, today.month)))
 
     def test_downloadForecastToEmptyDB_checkResponses(self):
         configdb = self.createConfig()
