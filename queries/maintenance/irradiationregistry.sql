@@ -16,7 +16,7 @@ select
 		time_bucket_gapfill('1 hour', time) as time,
 		sensor,
 	  avg(reg.irradiation_w_m2) as irradiation_wh_m2,
-		count(irradiation_w_m2)::float/12 as quality -- open right interval [11:00, 12:00)
+		coalesce(count(irradiation_w_m2),0)::float/12 as quality -- open right interval [11:00, 12:00)
 		--count(irradiation_w_m2)::float/13 as quality -- closed interval [11:00, 12:00]
 		--count(irradiation_w_m2)::float/count(*) as quality
 from bucket_5min_sensorirradiationregistry reg

@@ -4,7 +4,7 @@ import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from pathlib import Path
-from unittest import TestCase, skipIf
+from unittest import TestCase
 
 from .maintenance import (
     create_clean_irradiation,
@@ -20,13 +20,10 @@ from .maintenance import (
 from .db_manager import DBManager
 
 import pandas as pd
-from pandas.testing import assert_frame_equal
 
 import datetime
 
 from .db_test_factory import DbTestFactory, DbPlantFactory
-
-from re import search
 
 class IrradiationDBConnectionTest(TestCase):
 
@@ -397,6 +394,27 @@ class MaintenanceTests(TestCase):
 
         pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
 
+    def test__update_irradiation__null_zero_quality(self):
+
+        # TODO we don't need sunrise sunset
+        sunrise = datetime.datetime(2021,1,1,8,tzinfo=datetime.timezone.utc)
+        sunset = datetime.datetime(2021,1,1,18,tzinfo=datetime.timezone.utc)
+        self.plantfactory.create_inverter_sensor_two_plants(sunrise, sunset)
+
+        self.factory.create('input__update_irradiation__null_zero_quality.csv', 'bucket_5min_sensorirradiationregistry')
+
+        to_date = datetime.datetime(2022,3,1,12,20, tzinfo=datetime.timezone.utc)
+
+        # add some records
+        result = update_irradiationregistry(self.dbmanager.db_con, to_date=to_date)
+        result = pd.DataFrame(result, columns=['time', 'sensor', 'irradiation_wh_m2', 'quality'])
+
+        expected = pd.DataFrame([
+            (datetime.datetime(2022,3,1,11,0, tzinfo=datetime.timezone.utc), 2, None, 0.),
+            (datetime.datetime(2022,3,1,10,0, tzinfo=datetime.timezone.utc), 2, 890, 0.083333)
+        ], columns=['time', 'sensor', 'irradiation_wh_m2', 'quality'])
+
+        pd.testing.assert_frame_equal(result, expected, check_exact=False, check_less_precise=3)
 
     def test__alarm_maintenance__no_bucket_tables(self):
 
