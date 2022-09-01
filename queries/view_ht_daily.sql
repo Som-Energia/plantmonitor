@@ -1,13 +1,9 @@
-SELECT reg.sensor,
+SELECT reg.plant,
        date_trunc('day', reg.time AT TIME ZONE 'Europe/Madrid') AS "time",
-       count(*) AS ht,
-       plant.name AS plant
-FROM plant
-INNER JOIN sensor ON sensor.plant = plant.id
-INNER JOIN view_irradiation AS reg ON reg.sensor = sensor.id
-WHERE irradiation_w_m2_h > 5
-  AND sensor.classtype = 'SensorIrradiation'
+       count(*) AS ht
+FROM view_satellite_irradiation as reg
+INNER JOIN plant ON reg.plant = plant.id
+WHERE irradiation_wh_m2 > 5
 GROUP BY date_trunc('day', reg.time AT TIME ZONE 'Europe/Madrid'),
-         reg.sensor,
-         plant.name
+         reg.plant
 ORDER BY date_trunc('day', reg.time AT TIME ZONE 'Europe/Madrid');

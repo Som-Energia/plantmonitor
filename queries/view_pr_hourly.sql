@@ -1,18 +1,15 @@
  SELECT
     meterregistry."time" AS "time",
-    plant.name as plant,
-    meter.name as meter,
+    plant.id as plant,
+    meter.id as meter,
     export_energy_wh,
-    irradiation_w_m2_h,
-    (export_energy_wh / plantparameters.peak_power_w::float) / (NULLIF(irradiation_w_m2_h, 0.0) / 1000.0) AS pr_hourly
+    irr.irradiation_wh_m2,
+    (export_energy_wh / plantparameters.peak_power_w::float) / (NULLIF(irr.irradiation_wh_m2, 0.0) / 1000.0) AS pr_hourly
  FROM meterregistry
  JOIN meter
     ON meterregistry.meter = meter.id
- JOIN view_irradiation
-    ON view_irradiation."time" = meterregistry."time"
- JOIN sensor
-    ON sensor.plant = meter.plant
-    AND view_irradiation.sensor = sensor.id
+ JOIN view_satellite_irradiation as irr
+    ON meter.plant = irr.plant and irr."time" + interval '1 hour' = meterregistry."time"
  JOIN plant
     ON meter.plant = plant.id
  LEFT JOIN plantparameters
