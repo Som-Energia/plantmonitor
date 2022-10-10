@@ -200,7 +200,7 @@ class AlarmInverterNoPower(Alarm):
                     continue
 
             current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
-            logger.debug("Current alarm {}".format(current_alarm))
+            logger.debug("Current alarm for {},{},{} : {}".format(device_id, device_name, status, current_alarm))
 
             if current_alarm['old_status'] == True and status != True:
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
@@ -216,6 +216,8 @@ class AlarmInverterNoPower(Alarm):
         # TODO check alarma noreading que invalida l'alarma nopower
 
         alarm_current = self.get_alarm_current(check_time)
+        logger.debug("Current alarm {}".format(alarm_current))
+
         self.set_devices_alarms(self.id, self.device_table, alarm_current, check_time)
 
         logger.debug(f"Updated {len(alarm_current)} records with values {alarm_current}")
