@@ -211,7 +211,7 @@ class AlarmInverterNoPower(Alarm):
             logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
             return
 
-        check_time = check_time or datetime.datetime.now()
+        check_time = check_time or datetime.datetime.now(datetime.timezone.utc)
 
         # TODO check alarma noreading que invalida l'alarma nopower
 
@@ -276,7 +276,7 @@ class AlarmInverterTemperatureAnomaly(Alarm):
             logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
             return
 
-        check_time = check_time or datetime.datetime.now()
+        check_time = check_time or datetime.datetime.now(datetime.timezone.utc)
 
         # TODO check alarma noreading que invalida l'alarma temperatureanomaly
 
@@ -371,7 +371,7 @@ class AlarmStringNoIntensity(Alarm):
             logger.error(f'{self.source_table} table does not exist therefore alarm {self.name} cannot be computed')
             return
 
-        check_time = check_time or datetime.datetime.now()
+        check_time = check_time or datetime.datetime.now(datetime.timezone.utc)
 
         # TODO check alarma noreading que invalida l'alarma nointensity
         alarm_current = self.get_alarm_current(check_time)
