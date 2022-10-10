@@ -200,6 +200,7 @@ class AlarmInverterNoPower(Alarm):
                     continue
 
             current_alarm = self.set_alarm_status(device_table, device_id, device_name, alarm_id, check_time, status)
+            logger.debug("Current alarm {}".format(current_alarm))
 
             if current_alarm['old_status'] == True and status != True:
                 self.set_alarm_historic(device_table, device_id, device_name, alarm_id, current_alarm['old_start_time'], check_time)
