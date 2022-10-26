@@ -32,8 +32,8 @@ class PVSystem(NamedTuple):
     geometry_backTracking: bool
     geometry_rotationLimitEast: int
     geometry_rotationLimitWest: int
-    system_installedPower: int
-    system_installationType: str
+    system_installedPower: int # TO BE DELETED
+    system_installationType: str # TO BE DELETED
     system_dateStartup: str
     system_selfShading: bool
     module_type: str
@@ -464,8 +464,8 @@ class ApiSolargis:
                 name='Picanya',
                 latitude=39.440722,
                 longitude=-0.428722,
-                peak_power_w=335,
-                installation_type='FREE_STANDING',
+                peak_power_w=333.73,
+                installation_type='ROOF_MOUNTED',
                 pvsystem=pvsystems[9]
             ),
             3: Site(
@@ -528,7 +528,7 @@ class ApiSolargis:
                 latitude=41.820077,
                 longitude=2.723311,
                 peak_power_w=19.2,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[5]
             ),
             2: Site(
@@ -537,7 +537,7 @@ class ApiSolargis:
                 latitude=41.817997,
                 longitude=2.711988,
                 peak_power_w=22.4,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[2]
             ),
             4: Site(
@@ -546,7 +546,7 @@ class ApiSolargis:
                 latitude=41.809072,
                 longitude=2.721798,
                 peak_power_w=22.4,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[4]
             ),
             14: Site(
@@ -555,7 +555,7 @@ class ApiSolargis:
                 latitude=42.003036,
                 longitude=2.293811,
                 peak_power_w=95.01,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[14]
             ),
             15: Site(
@@ -573,7 +573,7 @@ class ApiSolargis:
                 latitude=41.6139742,
                 longitude=0.67029188,
                 peak_power_w=103,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[16]
             ),
             17: Site(
@@ -582,7 +582,7 @@ class ApiSolargis:
                 latitude=41.6692891,
                 longitude=0.61112424,
                 peak_power_w=98.4,
-                installation_type='ROOF_MOUNTED',
+                installation_type='FREE_STANDING',
                 pvsystem=pvsystems[17]
             ),
         }
@@ -730,7 +730,7 @@ class ApiSolargis:
             if status != 200:
                 logger.error(f"Error reading plant {plant_id} {plant_name} {status}")
             else:
-                all_readings = [
+                all_readings = all_readings + [
                     (t, plant_id, *values)
                     for t, *values in readings
                 ]

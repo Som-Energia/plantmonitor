@@ -40,15 +40,15 @@ class ApiSolargis_Test(unittest.TestCase):
             (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 6., -4.5,  1.445),
-            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 84., -2.6, 37.257),
-            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 141., -0.5, 79.982),
-            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 120., -0.6, 72.394),
-            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 92., -1, 62.699),
-            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 104., -0.2, 69.844),
-            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 88., -0.6, 55.652),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 53., -1.7, 29.994),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 10., -3.1, 3.274),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 6., -4.5,  1.585),
+            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 84., -2.6, 44.636),
+            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 141., -0.5, 95.458),
+            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 120., -0.6, 83.393),
+            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 92., -1.0, 63.849),
+            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 104., -0.2, 72.865),
+            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 88., -0.6, 59.146),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 53., -1.7, 30.708),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 10., -3.1, 3.287),
             (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
@@ -69,15 +69,15 @@ class ApiSolargis_Test(unittest.TestCase):
             (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5.0, 6.0, -4.5, 1.364),
+            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5.0, 6.0, -4.5, 1.412),
             (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66.0, 91.0, -2.3, 64.526),
             (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123.0, 171.0, 0.6, 151.429),
             (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110.0, 143.0, 0.2, 125.781),
             (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91.0, 86.0, -1.2, 68.384),
             (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102.0, 97.0, -0.4, 78.409),
             (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86.0, 83.0, -0.8, 64.47),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52.0, 50.0, -1.7, 33.408),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 8., -3.1, 2.995),
+            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52.0, 50.0, -1.7, 33.619),
+            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 8., -3.1, 3.013),
             (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
@@ -215,6 +215,12 @@ class ApiSolargis_Test(unittest.TestCase):
             peak_power_w=1000, installation_type='FREE_STANDING', pvsystem=demo_system
         )
 
+    def default_from_to(self):
+
+        from_date = todtaware('2015-01-01 13:00:00')
+        to_date = todtaware('2015-01-01 15:00:00')
+        return from_date, to_date
+
     def test__check_connection__arbitrary(self):
         request_xml = '''
             <ws:dataDeliveryRequest dateFrom="2014-04-28" dateTo="2014-04-28"
@@ -302,8 +308,8 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-1-01 13:00:00')
-        to_date = todtaware('2015-1-01 15:00:00')
+        from_date, to_date = self.default_from_to()
+
         site = self.demo_site()
         processing_keys = 'GHI'
 
@@ -320,8 +326,8 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
+
         site = self.demo_site()
         processing_keys = 'GHI GTI TEMP'
 
@@ -344,8 +350,8 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
+
         site = self.demo_site()
         processing_keys = 'GHI GTI TMOD'
 
@@ -362,8 +368,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
 
         processing_keys = 'GHI GTI TMOD PVOUT'
 
@@ -379,8 +384,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
 
         processing_keys = 'GHI GTI TMOD PVOUT'
 
@@ -396,8 +400,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
 
         self.api.sites = {1: self.demo_site() }
 
@@ -411,8 +414,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date = todtaware('2015-01-01 13:00:00')
-        to_date = todtaware('2015-01-01 15:00:00')
+        from_date, to_date = self.default_from_to()
 
         self.api.sites = {1: self.demo_site(1), 2: self.demo_site(2) }
 
