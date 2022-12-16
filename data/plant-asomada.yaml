@@ -1,0 +1,23 @@
+municipalities:
+- municipality:
+    name: Cartagena
+    ineCode : '30395'
+    countryCode : ES
+    country : Spain
+    regionCode : '30'
+    region : Murcia
+    provinceCode : '14'
+    province : Región de Murcia
+plants:
+- plant:
+    name: Asomada
+    codename: 'SomEnergia_Asomada_II'
+    description: Asomada
+    municipality: '30395'
+    meters:
+    - meter:
+        name: '502202107'
+    inverters: []
+    irradiationSensors: []
+    temperatureSensors: []
+    integratedSensors: []
