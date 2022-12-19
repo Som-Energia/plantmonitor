@@ -163,8 +163,8 @@ class ApiSolargis_ProductionTest(unittest.TestCase):
         self.maxDiff = None
 
         processing_keys = 'GHI GTI TMOD PVOUT'
-        from_date = todtaware('2022-10-01 13:00:00')
-        to_date = todtaware('2022-10-01 15:00:00')
+        from_date = todtaware('2022-11-01 13:00:00')
+        to_date = todtaware('2022-11-01 15:00:00')
 
         self.api.sites = {
             1: self.demo_site_high_loss(1),
