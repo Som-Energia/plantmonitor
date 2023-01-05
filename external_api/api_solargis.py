@@ -748,7 +748,11 @@ class ApiSolargis:
 
         status, text_response = self.get_arbitrary_payload(xml_request_content)
 
-        readings = self.text_response_to_readings(text_response) if status == 200 else None
+        if status == 200:
+            readings = self.text_response_to_readings(text_response)
+        else:
+            readings = None
+            logger.error(f"Error downloading readings from solargis {status}: {text_response}")
 
         return status, readings
 
@@ -774,14 +778,20 @@ class ApiSolargis:
         return all_readings
 
     # For hourly requests GHI GTI and PVOUT [Wh/m2] with mWh/m2 resolution TMOD [C] with one decimal resolution
-    def get_current_solargis_readings_standarized(self, from_date=None, to_date=None):
+    def get_current_solargis_readings_standarized(self, from_date=None, to_date=None, selected_site_ids=None):
 
         processing_keys = 'GHI GTI TMOD PVOUT'
         from_date = from_date or datetime.date.today() - datetime.timedelta(days=1)
         to_date = to_date or datetime.date.today() - datetime.timedelta(days=1)
 
         all_readings = []
-        for plant_id, site in self.sites.items():
+
+        if selected_site_ids:
+            sites = {site_id: site for site_id, site in self.sites.items() if site_id in selected_site_ids}
+        else:
+            sites = self.sites
+
+        for plant_id, site in sites.items():
             status, readings = self.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
             if status != 200:
                 logger.error(f"Error reading plant {plant_id} {site.name} {status}")
@@ -838,31 +848,31 @@ class ApiSolargis:
         return result.rowcount
 
     @staticmethod
-    def download_readings(from_date=None, to_date=None, processing_keys=None):
+    def download_readings(solargis_conf, database_info, from_date=None, to_date=None, processing_keys=None, plant_ids=None):
 
         from maintenance.db_manager import DBManager
-        from conf import envinfo
-
-        solargis_conf = envinfo.SOLARGIS
 
         api = ApiSolargis(**solargis_conf)
         api.create_xsd_schema()
 
-        database_info = envinfo.DB_CONF
+        num_rows = 0
+
         with DBManager(**database_info) as dbmanager:
             with dbmanager.db_con.begin():
                 api.create_table(dbmanager.db_con)
 
                 if not processing_keys or processing_keys == 'GHI GTI TMOD PVOUT':
-                    readings = api.get_current_solargis_readings_standarized(from_date=from_date, to_date=to_date)
+                    readings = api.get_current_solargis_readings_standarized(from_date=from_date, to_date=to_date, selected_site_ids=plant_ids)
                     if readings:
-                        api.save_to_db(dbmanager.db_con, readings)
+                        num_rows = api.save_to_db(dbmanager.db_con, readings)
 
                 else:
                     readings = api.get_current_solargis_irradiance_readings(from_date=from_date, to_date=to_date, processing_keys=processing_keys)
 
                     logger.info("database expects GHI GTI TMOD PVOUT, we're not saving. Just showing you the result.")
                     logger.info(readings)
+
+        return num_rows
 
 
     @staticmethod
@@ -890,10 +900,14 @@ if __name__ == '__main__':
         if len(sys.argv) < 3:
             logger.error("Missing paramaters. expected from_date to_date [processing_keys]")
         else:
+            from conf import envinfo
+            solargis_conf = envinfo.SOLARGIS
+            database_info = envinfo.DB_CONF
+
             from_date = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
             to_date = datetime.datetime.strptime(sys.argv[2], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
             processing_keys = ' '.join(sys.argv[3:]) if len(sys.argv) > 3 else None
-            ApiSolargis.download_readings(from_date, to_date, processing_keys)
+            ApiSolargis.download_readings(solargis_conf, database_info, from_date, to_date, processing_keys)
     except Exception as err:
         logger.error("[ERROR] %s" % err)
         raise

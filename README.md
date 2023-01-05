@@ -92,6 +92,15 @@ you can know the options running
 $ python scripts/sun_events.py --help
 ```
 
+And to download the solargis modeling irradiation and power from their api you can do
+
+```bash
+python -m scripts.solargis --help
+python -m scripts.solargis 'postgres://user:password@host:port/dbname" <solargis_key> 2022-12-01 2022-12-18 <site_id>
+```
+
+dates are inclusive and the dbapi has to be single quoted if it contains special characters. Data is stored in table satellite_readings.
+
 Api
 ===
 
