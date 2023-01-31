@@ -209,6 +209,7 @@ class Models_Test(unittest.TestCase):
                         "r2_VArh": 124,
                         "r3_VArh": 1234,
                         "r4_VArh": 124,
+                        "create_date": time
                     }],
                 },
                 {
@@ -239,6 +240,7 @@ class Models_Test(unittest.TestCase):
                         "r2_VArh": 124,
                         "r3_VArh": 1234,
                         "r4_VArh": 124,
+                        "create_date": time
                     }],
                 },
                 {
@@ -251,6 +253,7 @@ class Models_Test(unittest.TestCase):
                         "r2_VArh": 124,
                         "r3_VArh": 1234,
                         "r4_VArh": 124,
+                        "create_date": time
                     }],
                 }],key=lambda d: d['id']),
             }]
@@ -539,6 +542,7 @@ class Models_Test(unittest.TestCase):
             'r2_VArh': 2,
             'r3_VArh': 4,
             'r4_VArh': 1,
+            'create_date': unittest.mock.ANY
         }]
 
         self.assertListEqual(registries, expectedRegistries)
@@ -577,6 +581,7 @@ class Models_Test(unittest.TestCase):
             'r2_VArh': 2,
             'r3_VArh': 4,
             'r4_VArh': 1,
+            'create_date': unittest.mock.ANY
         }]
 
         self.assertListEqual(registries, expectedRegistries)
@@ -611,6 +616,7 @@ class Models_Test(unittest.TestCase):
                 'r2_VArh': 2,
                 'r3_VArh': 4,
                 'r4_VArh': 1,
+                'create_date': unittest.mock.ANY
             }]
 
             self.assertListEqual(registries, expectedRegistries)
@@ -878,6 +884,8 @@ class Models_Test(unittest.TestCase):
 
         plantdata = alcolea.plantData()
 
+        mRegistry["create_date"] = unittest.mock.ANY
+
         expectedPlantData = {
             "plant": "alcolea",
             "devices":
@@ -946,6 +954,7 @@ class Models_Test(unittest.TestCase):
                         "r3_VArh": 4,
                         "r4_VArh": 1,
                         "time": time,
+                        "create_date": time
                     }]
                 },
                 {
@@ -972,6 +981,39 @@ class Models_Test(unittest.TestCase):
         plantDataResult = alcolea.plantData()
 
         self.assertDictEqual(plantData, plantDataResult)
+
+    def test__Plant_insertPlantData__without_create_date(self):
+        alcoleaPlantNS = self.samplePlantNS()
+        alcolea = self.pony.db.Plant(name=alcoleaPlantNS.name, codename=alcoleaPlantNS.codename)
+        alcolea = alcolea.importPlant(alcoleaPlantNS)
+        orm.flush()
+        time = dt.datetime(2020, 12, 10, 15, 5, 10, 588861, tzinfo=dt.timezone.utc)
+
+        plantData = {
+                "plant": "alcolea",
+                "devices":
+                [
+                {
+                    "id": "Meter:1234578",
+                    "readings":
+                    [{
+                        "export_energy_wh": 10,
+                        "import_energy_wh": 5,
+                        "r1_VArh": 3,
+                        "r2_VArh": 2,
+                        "r3_VArh": 4,
+                        "r4_VArh": 1,
+                        "time": time
+                    }]
+                }]
+            }
+
+        alcolea.insertPlantData(plantData)
+
+        plantDataResult = alcolea.plantData()
+
+        self.assertIsNotNone(plantDataResult['devices'][2]['readings'][0]['create_date'])
+        self.assertIsInstance(plantDataResult['devices'][2]['readings'][0]['create_date'], dt.datetime)
 
     def _test__Plant_insertPlantData__Strings__Empty(self):
         alcoleaPlantNS = self.samplePlantNSWithStrings()

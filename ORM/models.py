@@ -479,7 +479,7 @@ def define_models(database):
         registries = Set('MeterRegistry', lazy=True)
         deviceColumnName = 'meter'
 
-        def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None):
+        def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None, create_date=None):
             logger.debug("inserting {} into {} ".format(time, self.name))
             r = MeterRegistry(
                 meter = self,
@@ -490,6 +490,7 @@ def define_models(database):
                 r2_VArh = r2_VArh,
                 r3_VArh = r3_VArh,
                 r4_VArh = r4_VArh,
+                create_date = create_date or datetime.datetime.now(datetime.timezone.utc)
                 )
 
         def getLastReadingDate(self):
@@ -514,6 +515,7 @@ def define_models(database):
         r2_VArh = Required(int, size=64)
         r3_VArh = Required(int, size=64)
         r4_VArh = Required(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
 
     class Inverter(RegisterMixin, database.Entity):
 

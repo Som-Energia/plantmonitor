@@ -180,6 +180,7 @@ CREATE TABLE "meterregistry" (
   "r2_varh" BIGINT NOT NULL,
   "r3_varh" BIGINT NOT NULL,
   "r4_varh" BIGINT NOT NULL,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("meter", "time")
 );
 
