@@ -4,7 +4,6 @@ import requests
 
 import psycopg2
 import datetime
-import conf.config as config
 
 from conf.logging_configuration import LOGGING
 import logging
@@ -16,9 +15,6 @@ logger = logging.getLogger("plantmonitor")
 from pony import orm
 
 import datetime
-
-from ORM.pony_manager import PonyManager
-
 class PonyMetricStorage:
 
     def __init__(self, db):

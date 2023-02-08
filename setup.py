@@ -25,8 +25,6 @@ setup(
             'nose',
             'rednose',
             'scipy',
-            #'Flask',
-            #'Flask-RESTful',
             'pony>=0.7.13',
             'fastapi',
             'psycopg2',

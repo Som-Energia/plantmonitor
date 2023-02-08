@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-import requests
-
-from pymodbus.client.sync import ModbusTcpClient
-from plantmonitor.resource import ProductionPlant
-from yamlns import namespace as ns
 from erppeek import Client
 from .meters import (
     telemeasure_meter_names,
@@ -11,30 +6,14 @@ from .meters import (
     meter_connection_protocol,
 )
 
-from meteologica.daily_upload_to_api import upload_meter_data
-from meteologica.daily_download_from_api import download_meter_data
-
-import sys
-import psycopg2
-import time
 import datetime
 import conf.config as config
-
-from ORM.pony_manager import PonyManager
 
 from conf.logging_configuration import LOGGING
 import logging
 import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
-
-import os
-
-from plantmonitor.storage import (
-    PonyMetricStorage,
-    ApiMetricStorage,
-    TimeScaleMetricStorage,
-)
 
 from pony import orm
 
