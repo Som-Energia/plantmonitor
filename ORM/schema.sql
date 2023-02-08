@@ -132,6 +132,7 @@ CREATE TABLE "inverterregistry" (
   "voltage_ca_mv" BIGINT,
   "uptime_h" BIGINT,
   "temperature_dc" BIGINT,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("inverter", "time")
 );
 
@@ -333,6 +334,7 @@ CREATE TABLE "sensorirradiationregistry" (
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
   "irradiation_w_m2" BIGINT,
   "temperature_dc" BIGINT,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("sensor", "time")
 );
 
@@ -342,6 +344,7 @@ CREATE TABLE "sensortemperatureambientregistry" (
   "sensor" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
   "temperature_dc" BIGINT,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("sensor", "time")
 );
 
@@ -351,6 +354,7 @@ CREATE TABLE "sensortemperaturemoduleregistry" (
   "sensor" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
   "temperature_dc" BIGINT,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("sensor", "time")
 );
 
@@ -407,6 +411,7 @@ CREATE TABLE "stringregistry" (
   "string" INTEGER NOT NULL,
   "time" TIMESTAMP WITH TIME ZONE NOT NULL,
   "intensity_ma" BIGINT,
+  "create_date" TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY ("string", "time")
 );
 

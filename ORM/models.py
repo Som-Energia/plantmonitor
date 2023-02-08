@@ -652,6 +652,8 @@ def define_models(database):
         voltage_ca_mV = Optional(int, size=64)
         uptime_h = Optional(int, size=64)
         temperature_dc = Optional(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
+
 
     class String(RegisterMixin, database.Entity):
 
@@ -678,6 +680,7 @@ def define_models(database):
         time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
         PrimaryKey(string, time)
         intensity_mA = Optional(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
 
     class Sensor(RegisterMixin, database.Entity):
 
@@ -758,6 +761,7 @@ def define_models(database):
         PrimaryKey(sensor, time)
         irradiation_w_m2 = Optional(int, size=64)
         temperature_dc = Optional(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
 
     class SensorTemperatureAmbientRegistry(database.Entity):
 
@@ -765,6 +769,7 @@ def define_models(database):
         time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
         PrimaryKey(sensor, time)
         temperature_dc = Optional(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
 
     class SensorTemperatureModuleRegistry(database.Entity):
 
@@ -772,6 +777,7 @@ def define_models(database):
         time = Required(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
         PrimaryKey(sensor, time)
         temperature_dc = Optional(int, size=64)
+        create_date = Optional(datetime.datetime, sql_type='TIMESTAMP WITH TIME ZONE', default=datetime.datetime.now(datetime.timezone.utc))
 
     class Inclinometer(database.Entity):
         name = Required(unicode)
