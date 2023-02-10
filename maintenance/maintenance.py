@@ -77,7 +77,7 @@ def update_bucketed_inverter_registry(db_con, to_date=None):
         CREATE UNIQUE INDEX IF NOT EXISTS bucket_5min_inverterregistry_time_inverter
             ON bucket_5min_inverterregistry (time, inverter);
 
-        SELECT create_hypertable('bucket_5min_inverterregistry', 'time', if_not_exists => FALSE)
+        SELECT create_hypertable('bucket_5min_inverterregistry', 'time', if_not_exists => TRUE)
     '''
     db_con.execute(setup_5min_table)
     source_table = 'inverterregistry'
@@ -110,7 +110,7 @@ def update_bucketed_string_registry(db_con, to_date=None):
         CREATE UNIQUE INDEX IF NOT EXISTS bucket_5min_stringregistry_time_string
             ON bucket_5min_stringregistry (time, string);
 
-        SELECT create_hypertable('bucket_5min_stringregistry', 'time', if_not_exists => FALSE)
+        SELECT create_hypertable('bucket_5min_stringregistry', 'time', if_not_exists => TRUE)
     '''
     db_con.execute(setup_5min_table)
     source_table = 'stringregistry'
@@ -146,7 +146,7 @@ def update_irradiationregistry(db_con, to_date=None):
         CREATE UNIQUE INDEX IF NOT EXISTS irradiationregistry_time_sensor
             ON {target_table} (time, sensor);
 
-        SELECT create_hypertable('{target_table}', 'time', if_not_exists => FALSE, migrate_data => TRUE)
+        SELECT create_hypertable('{target_table}', 'time', if_not_exists => TRUE, migrate_data => TRUE)
     '''
     db_con.execute(setup_irradiation)
 
