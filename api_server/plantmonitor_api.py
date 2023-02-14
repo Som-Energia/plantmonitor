@@ -50,6 +50,9 @@ def api_version():
 @api.put('/plant/{plant_id}/readings')
 async def api_putPlantReadings(plant_id: str, plant_reading: PlantReading):
     logger.info("Putting plant data into plant {} : {}".format(plant_id, plant_reading))
+    # TODO add db_session(retry=2) once the server migration is done and we're stable
+    # or something else
+    # to be robust against db restarts (which provoke pony.orm.dbapiprovider.OperationalError: terminating connection due to administrator command )
     with orm.db_session:
         storage.insertPlantData(plant_reading.dict())
     return plant_reading
