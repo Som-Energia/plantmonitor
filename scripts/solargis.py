@@ -44,7 +44,7 @@ def download_save_solargis_readings(dbapi: str, solargis_api_key: str, from_date
     num_rows = ApiSolargis.download_readings(solargis_conf, database_info, from_date, to_date, processing_keys, plant_ids)
     logger.info(f'Inserted {num_rows} rows.')
 
-    logger.info("Job'S Done, Have A Nice Day.")
+    logger.info("Job's Done, Have A Nice Day.")
 
 if __name__ == '__main__':
   app()
