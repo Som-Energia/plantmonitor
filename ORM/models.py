@@ -136,6 +136,7 @@ def define_models(database):
         plantParameters = Optional('PlantParameters')
         moduleParameters = Optional('PlantModuleParameters')
         plantMonthlyLegacy = Optional('PlantMonthlyLegacy')
+        device_uuid = Optional(str, nullable=True)
 
 
         @classmethod
@@ -478,6 +479,7 @@ def define_models(database):
         connection_protocol = Required(str, sql_default='\'ip\'')
         registries = Set('MeterRegistry', lazy=True)
         deviceColumnName = 'meter'
+        device_uuid = Optional(str, nullable=True)
 
         def insertRegistry(self, export_energy_wh, import_energy_wh, r1_VArh, r2_VArh, r3_VArh, r4_VArh, time=None, create_date=None):
             logger.debug("inserting {} into {} ".format(time, self.name))
@@ -527,6 +529,7 @@ def define_models(database):
         registries = Set('InverterRegistry', lazy=True)
         strings = Set('String')
         deviceColumnName = 'inverter'
+        device_uuid = Optional(str, nullable=True)
 
 
         # inverter Strings are created via modmap the first time
@@ -663,6 +666,7 @@ def define_models(database):
         deviceColumnName = 'string'
         # used as displayname, might be CCP box name + plug slot or string name
         stringbox_name = Optional(str, nullable=True)
+        device_uuid = Optional(str, nullable=True)
 
         def insertRegistry(self,
             intensity_mA,
@@ -687,6 +691,7 @@ def define_models(database):
         plant = Required(Plant)
         description = Optional(str)
         deviceColumnName = 'sensor'
+        device_uuid = Optional(str, nullable=True)
 
 
     class SensorIrradiation(Sensor):

@@ -1,5 +1,6 @@
 """
-Add device_uuid column to all device types (plant, meter, inverter, string, sensor)
+Add device_uuid column to all device types (plant, meter, inverter, string, sensor).
+Create signal_device_relation table.
 """
 
 from yoyo import step
@@ -9,18 +10,27 @@ __depends__ = {'20210920_03_BXEr2-timescale-stringregistry'}
 steps = [
     step(
         """
-        alter table plant add device_uuid varchar(36);
-        alter table meter add device_uuid varchar(36);
-        alter table inverter add device_uuid varchar(36);
-        alter table string add device_uuid varchar(36);
-        alter table sensor add device_uuid varchar(36);
+        ALTER TABLE plant ADD device_uuid VARCHAR(36);
+        ALTER TABLE meter ADD device_uuid VARCHAR(36);
+        ALTER TABLE inverter ADD device_uuid VARCHAR(36);
+        ALTER TABLE string ADD device_uuid VARCHAR(36);
+        ALTER TABLE sensor ADD device_uuid VARCHAR(36);
+
+        CREATE TABLE "signal_device_relation" (
+            "id" SERIAL PRIMARY KEY,
+            "signal_uuid" VARCHAR(36) NOT NULL,
+            "signal_name" TEXT,
+            "device_uuid" VARCHAR(36) NOT NULL,
+            "description" TEXT
+        );
         """,
         """
-        alter table plant drop column device_uuid;
-        alter table meter drop column device_uuid;
-        alter table inverter drop column device_uuid;
-        alter table string drop column device_uuid;
-        alter table sensor drop column device_uuid;
+        ALTER TABLE plant DROP COLUMN device_uuid;
+        ALTER TABLE meter DROP COLUMN device_uuid;
+        ALTER TABLE inverter DROP COLUMN device_uuid;
+        ALTER TABLE string DROP COLUMN device_uuid;
+        ALTER TABLE sensor DROP COLUMN device_uuid;
+        DROP TABLE signal_device_relation;
         """
     )
 ]
