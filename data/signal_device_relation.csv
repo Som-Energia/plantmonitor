@@ -1,0 +1,88 @@
+signal_uuid,signal_name,device_uuid,description
+04b371c6-351b-4fa6-84b4-d62c8d697eda,Comptador_Energia exportada,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+8db743ab-e4a7-4fae-81e5-190354fb01be,Comptador_Energia Importada,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+90ea93b7-c440-47a9-a0eb-1324fded20c0,Comptador_Energia Reactiva Q1,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+729c8fd7-e0fa-44a5-b7d6-b755d08b6498,Comptador_Energia Reactiva Q2,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+4cf42281-5796-4e32-bda7-f84fb3da6f7d,Comptador_Energia Reactiva Q3,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+22e134b3-b294-40e8-9fd5-a863e6b992ca,Comptador_Energia Reactiva Q4,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+388429dd-9695-4cf2-8b56-0c4dfa724704,Comptador_Vr MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+f59fc65c-0480-4f84-9e9a-340eba074901,Comptador_Vs MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+e82c8b3c-4073-4748-ba42-b75cd8b4a106,Comptador_Vt MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+b27611c4-7c4b-4eed-8b1f-3a86b492ffcf,Inversor 1_Potencia Activa,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+f9e5d92e-2373-4042-b5fd-0f4b17090d88,Inversor 1_Vdc ,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+56f431aa-9ed1-481e-88b2-3b671d2f549e,Inversor 1_Idc,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+87e0d708-05d3-4831-8d31-e3c7a4db6ff6,Inversor 1_Frequencia ,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+85887f10-8e86-45c3-ac87-52888bfc7507,Inversor 1_Ir BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+3a736cca-ccbe-427f-9197-496adb7a8b1b,Inversor 1_Is BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+d1b2fd0c-c10b-4571-8c33-d3817ff8011b,Inversor 1_It BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+ec655b2e-6097-4716-8ff7-ced6773865fc,Inversor 1_Vr BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+105be32a-b1ee-4f79-9fab-ff413a44d07d,Inversor 1_Vs BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+d67907b5-f142-4dd2-a9e7-6c7ec0c05d2b,Inversor 1_Vt BT,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+ce82c413-4dc8-48dc-bef1-0a41aa9fe738,Inversor 1_Energia,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+fb76c490-d393-4274-b61d-1d7468fa333a,Inversor 1_Energia total,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+45bae2f5-84e3-4791-94df-8a9a5d2a89ce,Inversor 1_Temperatura mitjana,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
+a909518d-75d3-4645-a44e-e79bc0fd061e,Inversor 1_Intensitat SCB1,363916dd-96de-44b4-9c62-23bc48a11029,Llanillos
+be0ebf9f-e0b5-47df-bac0-2ec1763afde8,Inversor 1_Intensitat SCB2,846fe189-0f8c-4d53-96f0-05a755aa0c41,Llanillos
+5afab8d4-4f1b-41f7-aee5-b1f2f9c11319,Inversor 1_Intensitat SCB3,9034a6ee-6bbf-4b6e-bcfa-0007595d50ca,Llanillos
+2ad09815-5b10-4957-b915-51471fc22503,Inversor 1_Intensitat SCB4,dad1c39e-127c-4838-98c0-7dd33f29beaa,Llanillos
+e10bc60e-d0fa-483c-8325-cd7e78505ab3,Inversor 1_Intensitat SCB5,0eb6ff01-ef76-4112-b468-5ac5e766aebc,Llanillos
+6fe6e4c9-fa87-430f-b0e4-68257598eee2,Inversor 1_Intensitat SCB6,8c593384-d9ab-4f1a-9ecb-f5dc6775681c,Llanillos
+685b0d57-0166-4680-a6f6-e79dfd0dcd42,Inversor 1_Intensitat SCB7,fb17065e-47d1-4564-a5e1-f1329e14060a,Llanillos
+69fc6c10-2153-441b-b950-5a3979352b86,Inversor 1_Intensitat SCB8,1b6c664b-cc87-4988-be57-be414445482b,Llanillos
+440251b3-90c3-48d3-aa4b-875a5f636988,Inversor 1_Intensitat SCB9,4bd99dcc-3173-472b-8df4-3a7d9323f1cd,Llanillos
+55736958-3e36-420b-ad90-d0a91e11f665,Inversor 1_Intensitat SCB10,88262b0f-66d4-4ca3-b358-3cbd8fc4885f,Llanillos
+a6791a24-3edf-4b88-b73b-680931202f66,Inversor 1_Intensitat SCB11,56ee9f87-7b33-402e-b673-5a057433b0dc,Llanillos
+7fa90baa-00bb-4bb6-9c80-e8ea94a1f23a,Inversor 1_Intensitat SCB12,f2a8c1de-fa00-4097-9075-4bb38a20fff2,Llanillos
+83bfcec5-3d87-4db6-88ab-e8579761144a,Inversor 1_Intensitat SCB13,c8842467-467e-49d3-b555-32f3505294ad,Llanillos
+bacf91a9-7e9d-498e-93f0-4dfe4c25d3ae,Inversor 1_Intensitat SCB14,3b1e74a9-c946-4ba9-9e4f-a2c382eba1fd,Llanillos
+0b543e9c-7d5c-4a06-883f-1fa8278ec364,Inversor 1_Intensitat SCB15,23bbeb02-c117-4d77-9c38-0af4177dc2db,Llanillos
+fbbca888-2dbb-417e-9419-10048a00e842,Inversor 1_Intensitat SCB16,ccbb1eb0-1861-4b76-90e4-7e4ced038308,Llanillos
+1ed77db3-fae7-4fd7-b9e5-ff13c14becea,Inversor 1_Intensitat SCB17,85a08290-8fda-40ce-9586-29508714c0c5,Llanillos
+133f9036-2c08-4010-8d59-628540926a6b,Inversor 1_Intensitat SCB18,7e3d5f82-01b8-46be-882f-01e95057c677,Llanillos
+3bd3d7f8-fc37-427e-8919-57853bcb12c6,Inversor 1_Idc_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+7fc2846b-50fb-4428-a673-e9b96a0ce927,Inversor 1_Temperatura mitjana_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+9e277b57-bc4e-440e-9734-55613ce8ec3f,Inversor 1_Ir BT_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+a839530c-a9ab-425b-90f1-50f9537611a0,Inversor 1_Is BT_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+95f2ee15-6047-4146-aa7b-b4946a7b8602,Inversor 1_It BT_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+f0bcd73e-8c25-4aff-b7ad-017afe5a1ddc,Inversor 1_Potencia Activa_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+eadfbedc-e25b-4e64-bba1-9d53a0412d97,Inversor 1_Energia_Modul 1,82f121fb-735e-40e1-9e79-5acb42681ca5,Llanillos
+a27a7563-6f0d-4e5c-9c10-0e0e6c99075b,Inversor 1_Idc_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+d243474d-ced0-44f5-9cf2-f187898b1ee4,Inversor 1_Temperatura mitjana_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+77956917-456f-4323-8307-75b367dad053,Inversor 1_Ir BT_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+b76553dd-b5af-47cc-b8e8-7d1b4c24768d,Inversor 1_Is BT_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+f4e3ca17-da73-4264-9228-68e52aba9ba3,Inversor 1_It BT_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+8239733c-0637-4568-8cb8-7db0bf1d495c,Inversor 1_Potencia Activa_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+d7e0add0-393f-4cc9-9013-23504cf4e53b,Inversor 1_Energia_Modul 2,75cd90e0-12d4-43bf-a7e9-1eb3841c2111,Llanillos
+04ba3d1a-5359-4216-96e0-f558bc7edaf7,Inversor 1_Idc_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+5423056f-d0ed-4339-9058-05f381cf446f,Inversor 1_Temperatura mitjana_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+668a3b25-df05-4286-a15b-fab708632574,Inversor 1_Ir BT_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+e1bd585c-9e91-45e7-8520-6d813906ee98,Inversor 1_Is BT_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+210b21b5-10ec-4114-9880-1d4207fe8629,Inversor 1_It BT_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+2596459f-c86d-485e-8bd7-950014e98f3a,Inversor 1_Potencia Activa_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+0e1079ac-5133-455a-ad51-684c3be54c1e,Inversor 1_Energia_Modul 3,d5be2bdb-0194-417a-adf3-2c9ad5454a4e,Llanillos
+caa9cddb-92b8-4c75-ab01-7660e94593a3,Inversor 1_Idc_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+ac2498bb-8786-41ab-911a-e46e76c29e89,Inversor 1_Temperatura mitjana_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+ba12cf09-44a5-45ce-9d9a-0c00664219b4,Inversor 1_Ir BT_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+0b44d34b-ae7f-40bf-98e8-2a5c22345f86,Inversor 1_Is BT_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+2c5a0e14-77d2-4ef2-9a2e-2f1fe48664ca,Inversor 1_It BT_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+e945e3d5-8ce5-4a35-ade5-3951c10d7e1a,Inversor 1_Potencia Activa_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+2b349cd2-23e9-484c-b0cf-299e9ac8066b,Inversor 1_Energia_Modul 4,904d2464-6d88-4a77-9503-a6467c34f50e,Llanillos
+0ec6eb63-68ea-4d88-8203-531c026aecc1,Inversor 1_Idc_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+e926f3ea-7171-4692-9acb-964cc2a2761b,Inversor 1_Temperatura mitjana_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+25067ef2-b039-428e-a0a0-ce690f62da73,Inversor 1_Ir BT_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+658073e3-2633-45db-997f-dfb0dd37e158,Inversor 1_Is BT_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+2e780cb3-1fb3-4625-a698-770e122a5ff1,Inversor 1_It BT_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+70187b20-db5b-4355-ba8d-5df8d773435c,Inversor 1_Potencia Activa_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+c33d6845-ec2b-4def-88d0-e483c4e79c1e,Inversor 1_Energia_Modul 5,9c0c7332-4431-4097-9e27-dbbd937b3ee8,Llanillos
+f717b70c-574f-489b-9f03-7ecd005f54da,Inversor 1_Idc_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+d96d64da-a0f6-4d28-8119-fd473115a76a,Inversor 1_Temperatura mitjana_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+1f4c8c8b-9076-4a9e-976c-f5736fc042c9,Inversor 1_Ir BT_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+0ae7208e-288c-4c95-81e7-c79527d9c730,Inversor 1_Is BT_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+f800a8c3-9e80-4478-9c2a-e5b829572230,Inversor 1_It BT_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+002006de-3e4d-4116-8326-41917c89de27,Inversor 1_Potencia Activa_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+0fa7df9c-76e5-44cf-9f1c-800640cb904b,Inversor 1_Energia_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+db276eda-bb40-410b-9784-c3a1c78875d2,Estacio Metereologica_Irradiacio_Sonda neta,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+55f3b1f3-68c9-4872-b2c4-1dfd76b6489a,Estacio Metereologica_Irradiacio_Sonda bruta,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+e37deaa4-cc0e-499f-b3ed-d8d1e81a459f,Estacio Metereologica_Irradiacio_Piranometre,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+4acf7aca-6209-493c-bb39-c8237b6b5f2e,Estacio Metereologica_Temperatura ambient,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+b9fed2c7-4c62-41c1-9bfc-5a9bf99b071d,Estacio Metereologica_Temperatura panell,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos

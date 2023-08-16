@@ -10,17 +10,17 @@ __depends__ = {'20210920_03_BXEr2-timescale-stringregistry'}
 steps = [
     step(
         """
-        ALTER TABLE plant ADD device_uuid VARCHAR(36);
-        ALTER TABLE meter ADD device_uuid VARCHAR(36);
-        ALTER TABLE inverter ADD device_uuid VARCHAR(36);
-        ALTER TABLE string ADD device_uuid VARCHAR(36);
-        ALTER TABLE sensor ADD device_uuid VARCHAR(36);
+        ALTER TABLE plant ADD device_uuid uuid;
+        ALTER TABLE meter ADD device_uuid uuid;
+        ALTER TABLE inverter ADD device_uuid uuid;
+        ALTER TABLE string ADD device_uuid uuid;
+        ALTER TABLE sensor ADD device_uuid uuid;
 
         CREATE TABLE "signal_device_relation" (
             "id" SERIAL PRIMARY KEY,
-            "signal_uuid" VARCHAR(36) NOT NULL,
+            "signal_uuid" uuid NOT NULL,
             "signal_name" TEXT,
-            "device_uuid" VARCHAR(36) NOT NULL,
+            "device_uuid" uuid NOT NULL,
             "description" TEXT
         );
         """,
