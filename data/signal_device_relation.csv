@@ -8,6 +8,7 @@ signal_uuid,signal_name,device_uuid,description
 388429dd-9695-4cf2-8b56-0c4dfa724704,Comptador_Vr MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
 f59fc65c-0480-4f84-9e9a-340eba074901,Comptador_Vs MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
 e82c8b3c-4073-4748-ba42-b75cd8b4a106,Comptador_Vt MT,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
+28d2cde2-9864-487a-a699-5ae7c9fcc366,Comptador_comunicacio_ok,716015b3-3f17-47e9-8c64-b728bfbec467,Llanillos
 b27611c4-7c4b-4eed-8b1f-3a86b492ffcf,Inversor 1_Potencia Activa,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
 f9e5d92e-2373-4042-b5fd-0f4b17090d88,Inversor 1_Vdc ,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
 56f431aa-9ed1-481e-88b2-3b671d2f549e,Inversor 1_Idc,09343308-c76e-4b4d-b124-51227852af8f,Llanillos
@@ -81,8 +82,410 @@ d96d64da-a0f6-4d28-8119-fd473115a76a,Inversor 1_Temperatura mitjana_Modul 6,f222
 f800a8c3-9e80-4478-9c2a-e5b829572230,Inversor 1_It BT_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
 002006de-3e4d-4116-8326-41917c89de27,Inversor 1_Potencia Activa_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
 0fa7df9c-76e5-44cf-9f1c-800640cb904b,Inversor 1_Energia_Modul 6,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
+13e4ee21-d0d2-4077-89ce-e73b8555f67c,Inversor 1_comunicacio_ok,f222098a-6fa3-48af-bce4-b29632b6cb9c,Llanillos
 db276eda-bb40-410b-9784-c3a1c78875d2,Estacio Metereologica_Irradiacio_Sonda neta,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
 55f3b1f3-68c9-4872-b2c4-1dfd76b6489a,Estacio Metereologica_Irradiacio_Sonda bruta,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
 e37deaa4-cc0e-499f-b3ed-d8d1e81a459f,Estacio Metereologica_Irradiacio_Piranometre,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
 4acf7aca-6209-493c-bb39-c8237b6b5f2e,Estacio Metereologica_Temperatura ambient,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
 b9fed2c7-4c62-41c1-9bfc-5a9bf99b071d,Estacio Metereologica_Temperatura panell,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+1df3c7a8-338b-41f7-899c-ee2441198d01,Estació Metereologica_comunicacio_ok,23c2f84b-5734-4efa-918d-c773cdff9f19,Llanillos
+f78b1a04-3458-44f3-8b1c-bbad1afc41ef,Comptador_Energia exportada,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+191957b2-2b63-4914-8919-5282ce56fb87,Comptador_Energia Importada,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+fc30e8e8-bae2-4771-9b5b-0f0c3e02ade4,Comptador_Energia Reactiva Q1,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+fa4f7b6d-f71e-42d3-a693-ca4b30e0a8f5,Comptador_Energia Reactiva Q2,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+59699634-ffc5-478c-9eae-6af27a6b9c23,Comptador_Energia Reactiva Q3,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+483f2e6f-e99d-455c-b31a-d5b897e7462e,Comptador_Energia Reactiva Q4,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+0af1ee28-3a28-48b2-ac8d-502eb4faa60b,Comptador_Vr MT,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+8bb0277c-ccf2-41b1-ab0c-81a5e99e5474,Comptador_Vs MT,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+dd065f6a-4ded-41a8-98d3-ba239f9a2a47,Comptador_Vt MT,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+3893ca3f-14d4-469f-9441-02e89310646d,Comptador_comunicacio_ok,c5ed9fab-e73c-40a5-acb3-113e22052fd6,Asomada
+081c3324-9f77-46ff-a6cf-6472f2f215a9,Inversor 1_Potencia Activa,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+d9c3c3aa-0ba1-41e8-b54d-468f80076dd6,Inversor 1_Vdc,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+c33b39f0-117f-4d25-8d4d-21bf239043bd,Inversor 1_Idc,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+68cdecdd-b60a-405c-b9bd-1a4c34b3355e,Inversor 1_Frequencia,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+ef139b65-58fb-4286-85c9-a24105e4edc6,Inversor 1_Ir BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+37fd2f48-0c69-4182-aada-506697deea65,Inversor 1_Is BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+aaaf2017-f217-449c-85fa-744aaed67ba6,Inversor 1_It BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+11224649-b9c8-4321-b6d7-d4bcdb1a5a70,Inversor 1_Vr BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+ac9f08fe-9574-4b59-83d1-52f31091a5bb,Inversor 1_Vs BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+eb30f552-33df-46e4-b39b-c4d06eab221d,Inversor 1_Vt BT,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+155386cd-b902-48d4-a6ae-99f8c7b57fa9,Inversor 1_Energia,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+836ea7e2-7cae-4c60-b641-5653d0da95bc,Inversor 1_Energia total,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+4807d7f9-0c47-4614-b755-6911364cc375,Inversor 1_Temperatura placa electronica,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+17b27139-a9f0-4d05-8a27-911eae74ef1b,Inversor 1_Intensitat SCB1,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+7d2ab0e2-3f75-4d49-b137-018e0407eb07,Inversor 1_Intensitat SCB2,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+234656d1-388c-4c79-aa4b-c4c59ec1c8cc,Inversor 1_Intensitat SCB3,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+84eb8f25-899b-4987-bd5c-483da26aa397,Inversor 1_Intensitat SCB4,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+ac8e21db-0168-4822-be66-dc9006d93397,Inversor 1_Intensitat SCB5,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+57359703-3f75-4d4b-ba85-c1c76e65854e,Inversor 1_Intensitat SCB6,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+61753c62-ec61-4e6d-9936-46e2f01e46a0,Inversor 1_Intensitat SCB7,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+7f0a3f9e-09f5-4132-bf66-ce46fc345c55,Inversor 1_Intensitat SCB8,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+1e6ecf42-edb9-4dd2-ab72-21bebb053dfd,Inversor 1_Intensitat SCB9,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+ae5ff12d-511e-477d-b09b-2e900a1ecaec,Inversor 1_Intensitat SCB10,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+55e21cda-d478-4ff4-9070-77ea66a0934d,Inversor 1_Intensitat SCB11,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+761744b0-fed7-4254-a1ed-4b604933dcf9,Inversor 1_Intensitat SCB12,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+ca67b11d-c30e-4eea-9542-4c6d7606936c,Inversor 1_Intensitat SCB13,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+9dadda3a-4b21-42e5-82ca-896da6e6abcd,Inversor 1_Intensitat SCB14,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+392a7ce2-3a22-4602-a9c8-4113bcfe4679,Inversor 1_Intensitat SCB15,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+1c1732cb-0568-4d07-8fea-1717a5a7f1cc,Inversor 1_Intensitat SCB16,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+d3c660fd-e47d-465d-ae8e-caef4a358d81,Inversor 1_Intensitat SCB17,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+a6d47254-cc28-42c4-ab45-d00d536d0652,Inversor 1_Intensitat SCB18,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+edf68a72-e88d-4520-9354-79957ddd7d62,Inversor 1_Intensitat SCB19,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+d5ed0d95-8a98-4acb-8d1b-93e9dd154775,Inversor 1_Intensitat SCB20,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+e46f0d3a-c95a-4bd4-a3fe-dc9dd2809d85,Inversor 1_Intensitat SCB21,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+3d9512b6-7f7f-489f-9a38-970bcc709854,Inversor 1_Intensitat SCB22,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+db49fac0-10eb-44db-8ae3-d8d42c86adc0,Inversor 1_Idc_Modul 1,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+2cca02ab-dadb-4642-a15e-74b78705e142,Inversor 1_Vdc_Modul 1,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+7b656129-a183-41e7-83e8-6b03e1f429d5,Inversor 1_ Temperatura mitjana_Modul 1,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+592e8998-1f55-4599-bdd6-120b53f35e4a,Inversor 1_Idc_Modul 2,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+a75dad83-ba01-4f44-9ca6-a83be8f5fce9,Inversor 1_Vdc_Modul 2,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+47c2f1c1-3ce6-47af-a801-2ddef4d08a25,Inversor 1_ Temperatura mitjana_Modul 2,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+d09f14b2-74e1-470e-8aa9-a4c7a27c35d7,Inversor 1_Idc_Modul 3,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+0d45bc0e-a95c-44db-b2d6-bcd944702519,Inversor 1_Vdc_Modul 3,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+d59ff51a-8f1b-4c7a-897f-7a18704c5748,Inversor 1_ Temperatura mitjana_Modul 3,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+0a41d125-8c3c-4301-9a1f-8183a7533f20,Inversor 1_comunicacio_ok,fa28cd1b-d582-4162-b02f-c43eb8b94d23,Asomada
+dcbf93aa-eff3-4277-bf76-6dbda10ecb8e,Estacio Metereologica_Irradiacio_Sonda neta,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+38c5b7be-fdd6-4e84-956e-cebd64f8e254,Estacio Metereologica_Irradiacio_Sonda bruta,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+ab8a48f9-faee-4e78-9121-c4f82a546047,Estacio Metereologica_Irradiacio_Mitja,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+aeba40db-5646-48fb-aba1-624dcba18233,Estacio Metereologica_Temperatura ambient,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+e894d976-5377-4503-8362-a4ec4b55876a,Estacio Metereologica_Temperatura panell,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+48bdb569-329b-4f8b-b774-be963cb717f2,Estacio Metereologica_comunicacio_ok,7ff6f43b-1349-43ad-af5a-3952e1d7311d,Asomada
+02c68a0c-0e23-4785-a5d0-a744f4eac0bd,Comptador_Energia exportada,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+ecc980b3-5029-441d-b9ce-53117c036bdf,Comptador_Energia Importada,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+674bf144-836b-4527-8604-a41f7215c8f1,Comptador_Energia Reactiva Q1,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+aa8b6a0d-c53b-41b7-9001-fa05972c21c0,Comptador_Energia Reactiva Q2,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+31ae7d09-95db-447d-b5bf-358b056ef5bf,Comptador_Energia Reactiva Q3,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+fe3145f8-dfcf-47bb-808f-59aaf747a080,Comptador_Energia Reactiva Q4,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+8e9182d5-4f76-4fb8-bec5-1c97b634d9ac,Comptador_Vr MT,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+5f986a81-fb7e-4c96-ae0c-180e173b5f11,Comptador_Vs MT,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+22596573-3772-4a86-9366-aa463d008174,Comptador_Vt MT,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+7b30f478-c321-43a6-9c7b-bc89c2002ef0,Comptador_comunicacio_ok,5deb3780-02e2-4dcf-a6a7-de646991762c,Tahal
+463342bd-ba4b-4fa8-91b4-425a4d6397cb,Inversor 111_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5dfe5100-b4f9-4368-b337-51892823e63a,Inversor 111_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2ff72596-f007-4a74-b7f7-3e565bdd33e5,Inversor 111_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+486563aa-2dc1-44c3-98b5-8d346e348d84,Inversor 111_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+87fe9154-d802-415d-b0a2-2940b6540380,Inversor 111_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+cf67daa1-8704-4ffd-a5ca-5f24aa3275d5,Inversor 111_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+92c46308-f9bf-4c5a-8538-44662312d331,Inversor 111_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+12bb2534-3ec3-41f4-a8da-45983bb58932,Inversor 111_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0f778c2b-d620-477a-a51b-c7ccf7f60ac6,Inversor 111_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8980988f-e624-407b-9c52-b8d60a722427,Inversor 111_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+260730da-afc1-4f59-a7c2-86a6f873395a,Inversor 111_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+52de4732-b315-4e23-86eb-36d39592f7ef,Inversor 111_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c51a0d39-e8fb-441e-a691-77100f399051,Inversor 111_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+56def1f2-4bdc-4ed1-9303-ed510bb61308,Inversor 111_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+967c2f3c-a383-4253-9e05-42b3daa12584,Inversor 111_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9a5873a9-1396-4a1d-99e2-b92668af8801,Inversor 111_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a8db3515-a151-421f-aa73-b438f7325533,Inversor 111_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+30b39bb8-912b-4ca0-9240-ed4226eebad2,Inversor 111_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c658a8d0-7fd8-4ee7-896a-0a147ec40f4b,Inversor 111_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+98d9aabb-262d-4904-85d3-1271071eb21d,Inversor 111_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9f6d7463-b401-455e-8377-eab98a6efd45,Inversor 111_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1eca74a8-51ac-43ae-873c-c31d968315ce,Inversor 111_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a39eda89-8031-4c56-8d01-a568b7a5e845,Inversor 111_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ede62218-de73-4be4-9390-f1f4cfcafc19,Inversor 111_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3e37f83e-4d9a-490e-b0e6-3cca8c6f3953,Inversor 111_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+43c3d53e-1f41-4dcf-bd8a-0b65a4d8d1ae,Inversor 111_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+022538c7-1a06-4b9b-982d-4c68b9faa71d,Inversor 111_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fc6597a0-cc7f-4464-a002-c074f990ab49,Inversor 112_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+99fc4127-1005-4558-988a-3ddb8f96851c,Inversor 112_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5faf8647-14d7-4a7f-830f-2f058621a924,Inversor 112_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3f82c37b-5eb0-4aa3-9788-b07c12e00e07,Inversor 112_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+77afcea9-9046-4f95-bcac-69b8dbeb6d34,Inversor 112_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0ce33304-1093-43c4-97ba-99acdbd43e55,Inversor 112_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+339bb2c7-7bbf-4e96-bba0-89835fdaaac8,Inversor 112_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+18843796-0d85-4665-a6cf-144f48f549a0,Inversor 112_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ec525dee-b099-4936-9f13-af1f20f8d206,Inversor 112_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2cf8022a-8119-49ef-a706-9a332ab678e0,Inversor 112_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+26f384a3-4a36-4f4f-930f-706fc0528cc6,Inversor 112_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6cb1bff7-3a78-40bd-9a68-54272b789698,Inversor 112_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8635c4fc-89de-4770-ad65-f6e9e4346707,Inversor 112_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6e405203-949a-4173-b782-d6c66557cf0c,Inversor 112_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+58fa2e6d-83bd-4496-a69d-2b04fbf1f0d5,Inversor 112_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+beea0bf9-062d-49a8-b56a-7d0d723e2e75,Inversor 112_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c44b8d27-8fa1-4d10-be57-9d11f265add9,Inversor 112_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4da4ba2d-a9b9-46bf-924a-c9f587f6f326,Inversor 112_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+56c52421-041b-448c-9c4a-bd60f8ff26b4,Inversor 112_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e1e253f5-1d15-459d-a922-864197c216ea,Inversor 112_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e252665c-f942-4cb6-989a-ccbcca788335,Inversor 112_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+db64f196-197d-4d80-a0a5-a09b2a5180e0,Inversor 112_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7a97ca97-d7e9-4dd7-9e5b-c13b5f4595b7,Inversor 112_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9a7cb288-8905-4b2d-ba5b-2d9b2b501a0e,Inversor 112_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+eecbf8d4-0e3d-4bf3-bb10-09c6f16ed5b8,Inversor 112_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+58b2ddb6-146f-42d4-b43f-863bada2272a,Inversor 112_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1eeb307c-7c95-42f5-8d83-fd5cb1210a6f,Inversor 112_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+665d3198-bc65-4aaf-9b31-dc2632a6775b,Inversor 113_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4de356ab-0602-4db6-8ba9-37e7cdfb0d48,Inversor 113_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+90cb50fc-d2ff-40f3-ad04-8434efe81ef2,Inversor 113_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+39b4fb70-13e6-4dcf-937a-6d2603835f28,Inversor 113_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+60c457b1-7403-48c3-9e04-af53568209ee,Inversor 113_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6e821878-0d94-4339-9326-7aac4c655231,Inversor 113_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b5a3e4a6-ff7d-4d30-9583-640120794ac8,Inversor 113_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+824753df-9936-4282-833c-75a00dd25f85,Inversor 113_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+446beb87-4f76-4ab2-89db-8865af5184b9,Inversor 113_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+40784873-e953-412a-b24c-679b703cebf5,Inversor 113_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+131ae52f-24c0-4529-96e7-17a395827c4c,Inversor 113_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a01324b3-0023-44aa-8c9c-0b81f9a199b0,Inversor 113_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e98da4a5-f094-45d7-a80d-86a5b1eddc0a,Inversor 113_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+694ceb46-4d05-4b27-801f-f724858fe575,Inversor 113_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3804ee3f-c798-4a5e-8369-3badc54ae718,Inversor 113_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+431e4326-d2bd-4da8-b891-4dd74b7bb4b5,Inversor 113_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7ac25eb1-3367-40f5-a417-83bda1d82d37,Inversor 113_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7409e4b7-1266-4477-a1dd-1e2f18d34bb2,Inversor 113_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9bbad353-0020-455d-811b-069ff0112a1c,Inversor 113_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+79fa0062-794b-4fcf-8856-2f2c97b19710,Inversor 113_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4899dc28-a03b-46c6-9370-158ca08568ee,Inversor 113_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+03c8cf14-b64d-4451-a4bf-e0d2b0aa9fbd,Inversor 113_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e66923ec-4daa-4cb8-ac3a-3e682abd866d,Inversor 113_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+acc74ee6-b669-4dd1-976a-a92f8abecb56,Inversor 113_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+97dd894e-db46-4c08-af5c-85673f61d2d9,Inversor 113_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7e9cd93c-d53b-480d-aac1-e9ea4be51752,Inversor 113_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+da6b2229-161e-4590-8ba3-d00d7e8c19ea,Inversor 113_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7563653c-35cd-418c-b5b7-1fd71d6d19d3,Inversor 114_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d58e9b26-6439-49c0-8466-48dd3a2d3574,Inversor 114_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c704e318-a376-4137-acd9-0af43649623e,Inversor 114_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+79475700-9b1b-499d-9b1e-65307604a1c1,Inversor 114_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d6fe80e6-74e3-44d2-b284-428ecdc9c325,Inversor 114_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4031d0f9-c82f-4913-8464-0f1df66b1bbc,Inversor 114_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a0afc536-a63c-4c54-8e45-5ab3e27e430e,Inversor 114_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a01e4f94-eda1-4b88-80f0-be6e51b2dd09,Inversor 114_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e878155b-2fbe-4027-857b-3c0a11104dfc,Inversor 114_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+19e0513d-9ecb-4204-b054-d200190587e6,Inversor 114_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1f53c79c-6612-43d6-8387-70e539ef3856,Inversor 114_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5867a12a-2741-4818-a65f-9a41cb86ff85,Inversor 114_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+11a19c1f-0c6d-4c5d-bc04-076c07f01aac,Inversor 114_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e413838b-50fa-4021-a021-b2462959a0ed,Inversor 114_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8ca35467-b7e1-416b-917a-d1a1545d57ac,Inversor 114_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f515d9d2-ba1c-4b02-a95e-2eec9e19e6fe,Inversor 114_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6851a3ba-1dea-4b24-8dbc-0938f3066fc2,Inversor 114_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+51abd5d1-fa58-405c-bc65-2efc4d36d507,Inversor 114_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a5e96cf8-7de4-4fcc-bf70-8b428d281f36,Inversor 114_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2df6fea4-e8d0-476d-845b-77c0f9b76190,Inversor 114_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3aebe6fe-1b71-4132-a88d-5889247f496c,Inversor 114_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6196f3b9-2e8a-4d4a-9899-5e46c3e4d02d,Inversor 114_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7d3581d8-3b58-4cdd-a9f9-e6ad713e432c,Inversor 114_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b6fdacc5-643a-4331-a169-16ace5ffc138,Inversor 114_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d402d7f5-0036-4f5d-abfb-61de1848b72e,Inversor 114_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+13afc40e-df0c-44c4-a5c0-6ea5a43f7293,Inversor 114_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4a7fe7a0-aee9-4754-a5e5-d06a8c87aa4c,Inversor 114_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a78aa6a3-86dc-4abb-bea1-6c1af95fb5aa,Inversor 121_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b3be23f7-e973-4a2a-8a68-54ca55e35a94,Inversor 121_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e6a8f87e-37e0-400e-be49-80343804c8de,Inversor 121_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0afe7d93-5a73-40ca-b84b-53e21529543d,Inversor 121_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+913dc30a-5feb-4bb7-af1a-29a12f6b9cea,Inversor 121_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+52b7d65b-c87e-4063-adc4-c9a79fd5520d,Inversor 121_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d5a103e1-0760-417c-9b83-9298b6376fff,Inversor 121_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1a82a821-cde4-461b-af97-31dc18cdc253,Inversor 121_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+113815ce-4a89-43ac-a1eb-bd305c805ee5,Inversor 121_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b7962687-34b8-4eef-814a-06c58264978a,Inversor 121_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8a39d7be-0215-4444-975f-22fa7a0e5b4f,Inversor 121_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+54069eaa-7011-41f3-b157-4d65e4c57f6b,Inversor 121_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b4b022dc-951c-4f57-8bf7-6b528a229dc6,Inversor 121_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dc82b3c2-4a04-4dc7-91ef-10880822728d,Inversor 121_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9561654d-5a84-4640-b87c-caa49491c6b0,Inversor 121_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2538ff00-0450-4c75-b3bf-233800915b28,Inversor 121_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a4a92f40-fbd6-4551-adca-f1eea090cd71,Inversor 121_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2d9de071-f412-4e4f-af9d-4ed5ad1b8657,Inversor 121_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d1f754a8-d330-4117-b00c-26b716529f3d,Inversor 121_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8c579e40-95e9-4a2b-ba3e-e8bb2255a82d,Inversor 121_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4f0fdf99-caa3-4319-90a7-f69fc7d523e7,Inversor 121_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+bdd9e285-5ff4-47a1-b749-d88bfff8fa5b,Inversor 121_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+058ab57c-119f-4a52-83b0-aab6542c8a53,Inversor 121_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+36060b02-e98f-446b-86b8-3d16bf4d41fc,Inversor 121_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+435b9382-1181-4cc9-a0b9-a2146bd806b5,Inversor 121_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dfa517f3-c4ab-48fc-94e8-4ffda7c90099,Inversor 121_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f074d074-8d7b-4e0a-b11e-3f293848c359,Inversor 121_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+309e2b80-d91e-4e2f-a7ec-ce61d50b07d7,Inversor 122_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+224cccb3-0d02-44eb-bc4d-399e28d8a560,Inversor 122_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2e09fcfe-222f-47d6-abf1-3e91d305f151,Inversor 122_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3ee4be70-8169-4791-9095-f37545f14d34,Inversor 122_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+cac46afe-d031-46be-b076-0a076d2466dc,Inversor 122_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e1df31c8-0e56-4e98-92c1-ab2058827b0c,Inversor 122_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6a1082e8-a764-4e2b-a5b9-a629752a2470,Inversor 122_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+eb103767-4e07-42b5-8554-ec0b9e56d366,Inversor 122_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dfec9162-0a96-48ef-ac97-59338616c5a2,Inversor 122_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b3ee916e-ee3a-4dad-b118-0ecd28a2ad2b,Inversor 122_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6cb7c293-3d0e-41b6-9ca3-6dd05214ff2d,Inversor 122_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+68afbc79-ea07-4f75-8091-79cc57d61523,Inversor 122_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+522f798c-1c26-401f-836d-4d21d1a57e67,Inversor 122_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ba1659f8-6aa8-4925-aab6-8cf54a30dfbe,Inversor 122_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+264db0ba-3d88-4421-8a44-288ec3c908b6,Inversor 122_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fb9bece8-4e29-4a40-8c2a-b7eca1f9e3ea,Inversor 122_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a86bafca-9c01-49a7-bb96-f909140945fb,Inversor 122_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3871949c-68dc-4c7b-8b6a-ce79674524f6,Inversor 122_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e8d81aa0-2631-4b02-80ea-9ce8864d3271,Inversor 122_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b24fe46b-2fd7-4368-82d5-20c11982b89b,Inversor 122_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ca99b61f-2a19-4654-a53e-e4cbe0c24c57,Inversor 122_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e5e372b6-9fe6-4f82-86b3-7c3082eee152,Inversor 122_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3433f64b-3d40-4a32-84b7-3debcbd319b6,Inversor 122_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e281462b-a4d3-46a9-9c96-b850a53d0b5c,Inversor 122_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a95909c7-f6e5-4e64-a14f-e334ac4d8fac,Inversor 122_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d710d013-216d-4956-b7da-bc072f3f6bc6,Inversor 122_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+04c27800-55dc-422d-9570-2b23e5b82eb5,Inversor 122_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+563fea01-0d7c-4e14-8e2a-4123e76886ee,Inversor 123_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+adb0ebac-c073-4933-9872-39d99f3adfeb,Inversor 123_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b7d0d275-c622-4feb-bc29-de8a20b11f07,Inversor 123_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a7c174bb-aef9-4dee-9078-3817a241ca2f,Inversor 123_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5bfd1c88-58f8-431d-a85b-1c0845d0f9e1,Inversor 123_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dededb53-d81f-4f36-8c66-d9f8077c1139,Inversor 123_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+918b6227-e442-4d3f-bc1c-53ed0561596c,Inversor 123_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+40fba78d-6158-4413-9d0f-f1cb11154f23,Inversor 123_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+775ee180-ff61-41f4-a0c0-cc7abdeea78c,Inversor 123_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fb2f1b45-3d38-4e71-ab07-b7b5bbc8299c,Inversor 123_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dd46c47b-2feb-4feb-a5c2-7509c31b05f3,Inversor 123_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9a7d0c2e-130c-42fa-9640-bd07126aa73f,Inversor 123_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0364143f-5cb0-4c71-82bf-91233a80c598,Inversor 123_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+bb1cc1d1-b7ab-4dab-8582-4c47c3b7d3d2,Inversor 123_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fe09b82d-68b2-4470-84e2-48f21e730239,Inversor 123_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+80867b0d-d3c1-4bdb-8871-4d212605bcee,Inversor 123_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+11c4cacc-72b7-4dd7-8174-a3735f290d5b,Inversor 123_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+53310785-28eb-4871-85a7-73ae69bed730,Inversor 123_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+bfd8ebf8-9306-497c-8496-c5ff58f02dba,Inversor 123_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+567877c4-febb-4222-9c67-53c770ee1628,Inversor 123_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c6ca437f-6b6e-48d7-ba13-643a80d92a92,Inversor 123_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2eb77490-7b9e-44eb-9b40-c950bd93d3ab,Inversor 123_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4493eec6-6c86-42c2-b7ff-2b3e9fc7faa0,Inversor 123_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a409bbeb-0a16-4c51-b5c7-524913ce98cc,Inversor 123_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+64ee2cfd-54e5-4691-88e3-03717105b41f,Inversor 123_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0e41b865-f68f-42d1-844b-2bc73b54bebe,Inversor 123_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+345febc5-02c3-4563-97b7-9028160d5d78,Inversor 123_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+72f64f74-2b6a-4b24-8839-eb0a51ce64f3,Inversor 124_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+52e47b5b-a8b8-4729-aed8-bcaf0abd0e5e,Inversor 124_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1c2fcc52-9913-4808-8ae7-314880bf267b,Inversor 124_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+73ff56c3-70d9-4c01-9939-e11a43ab63a4,Inversor 124_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d1dfb97e-6a6a-4f83-b542-6cde61c86314,Inversor 124_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5b13aaf4-bd4f-4ed4-8d91-7a36fdcdcf59,Inversor 124_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c9a6a313-67d8-4e81-8c3c-159772980c16,Inversor 124_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+63989441-dbfd-4160-8613-ac0fbe8be8a1,Inversor 124_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+46964390-6602-40e5-8f9f-86463f915c19,Inversor 124_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+34d46cb7-3f98-4ea4-a31a-8ba8cc620226,Inversor 124_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a8c2f3df-2e1d-4cd1-8aab-7f66e886a367,Inversor 124_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+26ef74ad-6ca6-4bd0-bb80-30b0aa268777,Inversor 124_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6643470d-7bce-4c28-b8d2-16bed0463cf3,Inversor 124_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6b9af938-11e9-42e9-beb8-0ce374622e00,Inversor 124_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+dfa37fe6-d57b-430c-b0b7-e56dc87f88f7,Inversor 124_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e53fb1e5-d580-4af5-a3fa-833ea7f82503,Inversor 124_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7171f04c-4f76-4257-8512-a55b66fa65a6,Inversor 124_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+06411af4-02ab-44ec-9eb3-4c45bfdf5f22,Inversor 124_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4429b1ff-3a0a-4752-a9d3-0707f0471be5,Inversor 124_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3b952429-0e05-41dc-8956-5ad3adb6ff07,Inversor 124_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ce11248f-04f3-42fc-b1a0-04069e7aa615,Inversor 124_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+27f87811-7f20-41f8-b896-afa632e9d1e0,Inversor 124_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ace312ec-e256-49f8-868a-02ca0a5f6075,Inversor 124_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d6886dcb-a7f2-4e4d-9089-be3ddb204c0f,Inversor 124_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1bc96107-bf8f-4011-a124-cc0585bdc432,Inversor 124_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+15453389-5523-4afc-8da0-573332cbcbd6,Inversor 124_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+cc20534a-e4ca-4b8a-8e84-1de537b634fb,Inversor 124_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f0c86790-5dbd-4081-a75e-67642eb17f96,Inversor 131_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d2f6bca0-34b8-4c3e-9442-02514ae1a62c,Inversor 131_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ae7c4c9f-c127-44bf-b682-bc860c0a883f,Inversor 131_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+3f56598d-b461-4b1f-ba6d-ef5d8cea7b98,Inversor 131_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+642858fe-0c72-42b9-b098-d0fe251c9e21,Inversor 131_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+044fe991-55a7-4622-a66d-57b325fba3b3,Inversor 131_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d492bde4-5533-419c-92e4-fbe08f5e25d8,Inversor 131_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+06ac2901-3190-432f-8ee7-d34b15f529a8,Inversor 131_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1b7269f0-1d2b-4c5c-8276-c77f028c703d,Inversor 131_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+de4a0656-79b8-4e8a-8296-81ec5dd9d917,Inversor 131_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a6f1b7b7-2a61-482e-b85b-54a9310c00d2,Inversor 131_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ff9d4a61-59a1-4b7e-8d43-fd8c4dd096bf,Inversor 131_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8b2bc988-2bf0-4c5b-a340-8b4620d87014,Inversor 131_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+07f9e0c3-671c-43c9-ae39-3010bb386374,Inversor 131_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e2665358-910b-435b-89d9-465b771db7c4,Inversor 131_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+be244cd8-ce8e-4d7f-92ab-3ee434d353ec,Inversor 131_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+962eb301-7bdb-4060-a129-2c45cceeadc3,Inversor 131_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+683642bc-85ac-42db-943f-b16eb98fdf17,Inversor 131_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f2dd2732-604b-4e29-8851-7bbb1ce8b846,Inversor 131_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4ace795b-1515-42dc-8184-a7992092c135,Inversor 131_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a94d5208-57b0-40bf-a01c-273b8b88ffd9,Inversor 131_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+34bb082e-4a5c-444b-bf28-f85f2863f4cd,Inversor 131_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0077bc95-afd6-42cf-a148-ce729245ae8d,Inversor 131_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f840c891-893c-4d40-93e3-5c2c9f8b4ac0,Inversor 131_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+24ee2648-b23e-4314-8290-19978b0e1501,Inversor 131_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+23bc86ca-10aa-4835-81cc-5395abfc0286,Inversor 131_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+796a16b1-d304-4f19-8cd3-7c93135b7e2e,Inversor 131_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+bba7aad3-f099-4c7b-86f3-a0bb878a0bfa,Inversor 132_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5ff22cd0-ac64-4a84-bbab-0228d20280c5,Inversor 132_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+7d43f095-2b80-4d2d-b237-3f1824303557,Inversor 132_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c788c302-e477-47e0-8385-cdad2984313f,Inversor 132_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d5c6547c-4a0b-4eda-b1cf-ccf44a070fef,Inversor 132_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+8e07c58e-ce93-4000-b1b1-ade6ee707335,Inversor 132_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+654ffc68-06f5-4cf4-8bc1-4d2de7f6149f,Inversor 132_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9842f219-6829-4932-87a2-ecf3b44c8dee,Inversor 132_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+152ceca2-3549-49e7-b9a4-d50df57efa91,Inversor 132_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+cbb5db9c-c08b-4253-a75c-e350a779f116,Inversor 132_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+261e5b5f-7579-44cb-9a55-e88c31ef5151,Inversor 132_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0dc7cb85-3bf7-4d09-9305-970a10a959e6,Inversor 132_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e240f56f-96f8-4c15-b04b-561dd9c4b0f0,Inversor 132_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6b011115-61a8-4fb6-9ef0-c6246be0249d,Inversor 132_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ec141617-34dd-4b33-9ccd-662db5883d02,Inversor 132_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+512d735c-4bf3-4986-8ae9-71d24eed5f53,Inversor 132_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1bd2f180-a747-46a8-bfcd-48b35d4fb7bd,Inversor 132_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ee273fe4-df77-48ed-af8b-98e5164edefb,Inversor 132_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b3862d46-5f5b-4b05-a1db-cbde6525f66d,Inversor 132_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+54ac688b-b3dc-48c2-81db-8fc3cee875e7,Inversor 132_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6a20fd80-fe56-4359-82a9-b00f9f024d43,Inversor 132_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+85a29677-662b-4931-bbcd-dc876184fc0c,Inversor 132_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+136674b3-2f0d-46b0-a4db-947cb66373a1,Inversor 132_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fb0569eb-9d73-468d-bba8-a184bfedf5db,Inversor 132_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+f103eac7-4d22-47a0-881b-f3765e453e5c,Inversor 132_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+508c5a9c-d33a-4b59-90ae-6b4fbdc6adeb,Inversor 132_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+82d933b4-9f01-4a1f-a2d0-620e35a17aa5,Inversor 132_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0cff305f-6b75-4add-9f42-44744dc29c09,Inversor 133_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+05ca6521-c80c-4eaa-b2a9-99fbda5630c3,Inversor 133_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d3b1e121-dadd-43b5-ad87-532b3397066f,Inversor 133_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+31162fda-68f1-4169-9bad-b8479c3bb20e,Inversor 133_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+34c81ef0-922e-4661-bf6a-190e3f3d1ecc,Inversor 133_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ebf75543-afaf-4ae4-9282-6a5aedd89632,Inversor 133_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+32c88915-9b49-432e-bcff-6f06a5b8c276,Inversor 133_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+75ed74c9-b95e-42a9-bd96-a0537f5732ca,Inversor 133_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+94834ea1-7dfb-4a7e-94d1-807b56970de6,Inversor 133_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+194d2978-b78f-4eda-98db-866e57f3c4fc,Inversor 133_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+82c17532-1677-4aa1-bee3-040687b40de4,Inversor 133_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ae55cc07-5c9b-45b5-911c-9b2d327d2006,Inversor 133_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+58633e49-a9ae-4269-9fa4-4d30b99eb9ff,Inversor 133_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5ec17e9b-fbb3-47b0-a205-007311941256,Inversor 133_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4fc4260f-df61-4468-8380-1a0a870195f1,Inversor 133_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+1ceb241b-538b-491b-8dff-79307690c3f3,Inversor 133_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4e0d8344-29aa-4e39-bec8-09c2de029e69,Inversor 133_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ff9a85d5-88dd-4cfc-9138-ab037197cbc8,Inversor 133_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+10b34b1a-c662-4633-99ef-bfff4d34ca11,Inversor 133_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2d64f685-e687-44d8-99fa-b2a56872f516,Inversor 133_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fb1c6317-e179-4241-a341-6a5420994129,Inversor 133_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4d62a38f-f9c8-49b0-bb86-202d0923503e,Inversor 133_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+79bebec0-52cc-4854-ab85-867a4b8065ce,Inversor 133_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+fa124f0d-20d5-49ec-bada-ae6f83fd238b,Inversor 133_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d9e87011-39a3-48b2-bce9-ae85eb2f9727,Inversor 133_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9569b667-26ec-410e-ae23-efc8495ee855,Inversor 133_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+49b6b59e-5d23-476b-a2e0-a1f40208c148,Inversor 133_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d3d3e53d-fdda-4ca2-8f0e-65d4be5f8e77,Inversor 134_Potencia Activa,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+9b6fe5b3-1496-414f-a95a-f645cbe3da5f,Inversor 134_Frequencia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+cc481d68-9e7b-4ed6-b8c4-0505d1c9ca91,Inversor 134_Energia,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c5f07342-ba10-4a3c-9b4f-83de6fcbe3ce,Inversor 134_Energia total,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+05e4ed5e-e495-4922-9222-dcae0924e422,Inversor 134_Temperatura mitjana,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6026c037-7de5-4f75-af88-90a6dc5f8271,Inversor 134_Vr BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c16918ac-afe3-415e-a3b8-73bb8bdf51db,Inversor 134_Vs BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5a9eaf78-3dcf-4c2f-8463-e19b2755e383,Inversor 134_Vt BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+625aed7c-b74b-412b-bb77-ea753d33e389,Inversor 134_Ir BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+76adffbf-c6e5-4d4d-8004-e453256fae43,Inversor 134_Is BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+33ea7bd3-b9c9-4c3e-84cb-6cc2b57091b8,Inversor 134_It BT,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2281aa25-814d-4c2e-a22d-b758d0ed1ff5,Inversor 134_Intensitat PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+5bb9549a-77e8-4fbf-b087-f8d72d8f7666,Inversor 134_Intensitat PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+ae1f99d6-e13a-45c1-a3ce-8a22b83fc34a,Inversor 134_Intensitat PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+724621f1-a909-4e59-b462-0ca4888c40b0,Inversor 134_Intensitat PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+01465419-1bc4-4eab-8442-f636667d25a7,Inversor 134_Intensitat PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2e57a49b-f28a-45f4-8ea5-7a17800f44e5,Inversor 134_Intensitat PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+2d338c3e-2e2e-4079-8828-94efb8dbe06f,Inversor 134_Intensitat PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0a9dd441-5cd4-402f-bb3c-bd47c308726f,Inversor 134_Intensitat PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+b4bfe977-fec5-48b3-ab66-1e9b9f53bbd4,Inversor 134_Voltatge PV1,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4593b925-7665-4b12-bb76-d9312a6098c2,Inversor 134_Voltatge PV2,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+a331590a-abc0-4668-9d05-6f3d40ef1c48,Inversor 134_Voltatge PV3,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+0dc00424-c7a3-45af-8de8-f8421d9b76c5,Inversor 134_Voltatge PV4,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+81066da9-1256-4608-b221-b40ebd5a1ad9,Inversor 134_Voltatge PV5,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+4608be73-a5a0-45dc-a6df-b4e78a17ce05,Inversor 134_Voltatge PV6,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+e0768906-8272-4518-8ca6-64ca2475ed9a,Inversor 134_Voltatge PV7,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+6f673b61-3a5f-48d7-84d0-1b1429e1c04e,Inversor 134_Voltatge PV8,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+d68ddf22-fd34-47d1-996c-4d564c84fc26,Smartlogger inversor_comunicacio_ok,68ddeceb-57f2-4189-9382-1e85acb47e4f,Tahal
+c4b67f10-615c-4822-bbb2-7486e1c3a76a,Estacio Metereologica_Irradiacio,3313d282-dca0-4a38-845b-19b1e18f16ee,Tahal
+06ca1c25-8f2b-47e2-87f6-4d2d8f5af333,Estacio Metereologica_Temperatura panell,3313d282-dca0-4a38-845b-19b1e18f16ee,Tahal
+a8c35b59-b23c-4b91-abff-2256db052c6d,Estacio Metereologica_Temperatura ambient,3313d282-dca0-4a38-845b-19b1e18f16ee,Tahal
+e82508d8-d9ae-4f5d-8428-7e5d09e1a556,Estacio Metereologica_estat com,3313d282-dca0-4a38-845b-19b1e18f16ee,Tahal
