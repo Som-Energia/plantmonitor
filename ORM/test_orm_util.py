@@ -346,6 +346,7 @@ class ORMSetup_Test(unittest.TestCase):
                 plants:
                 - plant:
                     name: alcolea
+                    plant_uuid:
                     codename: SCSOM04
                     description: la bonica planta
                     meters:

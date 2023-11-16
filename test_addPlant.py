@@ -75,6 +75,7 @@ class ImportPlant_Test(unittest.TestCase):
             nsplants = ns.loads("""\
                 plants:
                 - plant:
+                    plant_uuid: null
                     name: alcolea
                     codename: SCSOM04
                     description: la bonica planta
@@ -113,6 +114,7 @@ class ImportPlant_Test(unittest.TestCase):
         content = """\
             plants:
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
@@ -157,6 +159,7 @@ class ImportPlant_Test(unittest.TestCase):
         content = """\
             plants:
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
@@ -207,6 +210,7 @@ class ImportPlant_Test(unittest.TestCase):
                 province: Girona
             plants:
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
@@ -249,6 +253,7 @@ class ImportPlant_Test(unittest.TestCase):
             nsplants = ns.loads("""\
                 plants:
                 - plant:
+                    plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                     name: alcolea
                     codename: SCSOM04
                     description: la bonica planta
@@ -290,6 +295,7 @@ class ImportPlant_Test(unittest.TestCase):
             #TODO test the whole fixture, not just the plant data
             resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
             nsplants.plants[0].plant.description = ''
+            nsplants.plants[0].plant.plant_uuid = None
             nsplants.plants[0].plant.codename = 'SomEnergia_alcolea'
 
             self.assertNsEqual(nsplants, resultPlantNs)
@@ -312,6 +318,7 @@ class ImportPlant_Test(unittest.TestCase):
             #TODO test the whole fixture, not just the plant data
             resultPlantNs = exportPlants(self.pony.db, skipEmpty=True)
             nsplants.plants[0].plant.description = ''
+            nsplants.plants[0].plant.plant_uuid = None
             nsplants.plants[0].plant.codename = 'SomEnergia_new_plant'
 
             self.assertNsEqual(nsplants, resultPlantNs)
@@ -321,6 +328,7 @@ class ImportPlant_Test(unittest.TestCase):
         nsplants_original = ns.loads("""\
             plants:
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: Le_Roger
                 codename: SomEnergia_Le_Roger_Meteo
                 description: ohlala
