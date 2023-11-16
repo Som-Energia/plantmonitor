@@ -166,6 +166,8 @@ def define_models(database):
                 self.name = plant.name
             if 'description' in plant and self.description != plant['description']:
                 self.description = plant['description']
+            if 'plant_uuid' in plant and self.device_uuid != plant.plant_uuid:
+                self.device_uuid = plant.plant_uuid
             logger.info("Importing plant {}".format(self.name))
             if 'municipality' in plant:
                 m = Municipality.get(ineCode=plant['municipality'])
@@ -224,6 +226,7 @@ def define_models(database):
                         name = self.name,
                         codename = self.codename,
                         description = self.description,
+                        plant_uuid = str(self.device_uuid) if self.device_uuid else None,
                         meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)],
                         inverters = [ns(inverter=ns(name=inverter.name) if not inverter.strings else
                                     ns(name=inverter.name, strings=sorted([s.name for s in inverter.strings])))
@@ -238,7 +241,8 @@ def define_models(database):
                 plantns = ns(
                         name = self.name,
                         codename = self.codename,
-                        description = self.description
+                        description = self.description,
+                        plant_uuid = str(self.device_uuid) if self.device_uuid else None
                 )
                 meters    = [ns(meter=ns(name=meter.name)) for meter in Meter.select(lambda m: m.plant == self)]
                 inverters = [ns(inverter=ns(name=inverter.name) if not inverter.strings else

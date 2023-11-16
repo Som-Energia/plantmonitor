@@ -27,7 +27,8 @@ CREATE TABLE "plant" (
   "name" TEXT NOT NULL,
   "codename" TEXT NOT NULL,
   "municipality" INTEGER,
-  "description" TEXT NOT NULL
+  "description" TEXT NOT NULL,
+  "device_uuid" UUID
 );
 
 CREATE INDEX "idx_plant__municipality" ON "plant" ("municipality");
@@ -114,7 +115,8 @@ CREATE TABLE "inverter" (
   "plant" INTEGER NOT NULL,
   "brand" TEXT,
   "model" TEXT,
-  "nominal_power_w" INTEGER
+  "nominal_power_w" INTEGER,
+  "device_uuid" UUID
 );
 
 CREATE INDEX "idx_inverter__plant" ON "inverter" ("plant");
@@ -164,7 +166,8 @@ CREATE TABLE "meter" (
   "id" SERIAL PRIMARY KEY,
   "plant" INTEGER NOT NULL,
   "name" TEXT NOT NULL,
-  "connection_protocol" TEXT DEFAULT 'ip' NOT NULL
+  "connection_protocol" TEXT DEFAULT 'ip' NOT NULL,
+  "device_uuid" UUID
 );
 
 CREATE INDEX "idx_meter__plant" ON "meter" ("plant");
@@ -311,6 +314,7 @@ CREATE TABLE "sensor" (
   "name" TEXT NOT NULL,
   "plant" INTEGER NOT NULL,
   "description" TEXT NOT NULL,
+  "device_uuid" UUID,
   "classtype" TEXT NOT NULL,
   "ambient" BOOLEAN
 );
@@ -397,7 +401,8 @@ CREATE TABLE "string" (
   "id" SERIAL PRIMARY KEY,
   "inverter" INTEGER NOT NULL,
   "name" TEXT NOT NULL,
-  "stringbox_name" TEXT
+  "stringbox_name" TEXT,
+  "device_uuid" UUID
 );
 
 CREATE INDEX "idx_string__inverter" ON "string" ("inverter");

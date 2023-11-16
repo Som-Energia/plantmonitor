@@ -77,6 +77,7 @@ class Models_Test(unittest.TestCase):
                 ineCode: '17079'
             plants:
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: alcolea
                 codename: SCSOM04
                 description: la bonica planta
@@ -88,6 +89,7 @@ class Models_Test(unittest.TestCase):
                 - inverter:
                     name: '5555'
             - plant:
+                plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
                 name: figuerea
                 codename: Som_figuerea
                 description: la bonica planta
@@ -116,6 +118,7 @@ class Models_Test(unittest.TestCase):
 
     def samplePlantNS(self):
         alcoleaPlantNS = ns.loads("""\
+            plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
             name: alcolea
             codename: SCSOM04
             description: la bonica planta
@@ -142,6 +145,7 @@ class Models_Test(unittest.TestCase):
     def samplePlantNSWithStrings(self):
         alcoleaPlantNS = ns.loads("""\
             name: alcolea
+            plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
             codename: SCSOM04
             description: la bonica planta
             inverters:
@@ -158,6 +162,7 @@ class Models_Test(unittest.TestCase):
     def samplePlantNSWithModuleParameters(self):
         alcoleaPlantNS = ns.loads("""\
             name: alcolea
+            plant_uuid: 7022523a-9f02-4f3c-9329-d30104521f75
             codename: SCSOM04
             description: la bonica planta
             moduleParameters:
@@ -366,6 +371,7 @@ class Models_Test(unittest.TestCase):
             irradiationSensors: []
             meters: []
             name: alcolea
+            plant_uuid:
             temperatureAmbientSensors: []
             temperatureModuleSensors: []
             """)
@@ -716,7 +722,9 @@ class Models_Test(unittest.TestCase):
 
         plantData = oneplant.exportPlant()
 
-        expectedPlant = {"name": "Alice",
+        expectedPlant = {
+            "plant_uuid": None,
+            "name": "Alice",
             "codename": "LaSuisse",
             "description": '',
             "meters": [],
