@@ -2,7 +2,7 @@ import datetime
 
 import typer
 
-from typing import List
+from typing import List, Optional
 
 from conf.log import logger
 
@@ -25,7 +25,7 @@ def dbapi_to_dict(dbapi: str):
     }
 
 @app.command()
-def download_save_solargis_readings(dbapi: str, solargis_api_key: str, from_date: datetime.datetime, to_date: datetime.datetime, plant_ids: List[int]):
+def download_save_solargis_readings(dbapi: str, solargis_api_key: str, from_date: datetime.datetime, to_date: datetime.datetime, plant_ids: Optional[List[int]] = None):
     """
         dbapi has to be single-quoted if it contains special characters
     """
