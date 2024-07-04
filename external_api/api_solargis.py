@@ -626,7 +626,7 @@ class ApiSolargis:
                 name='Lleida',
                 latitude=41.6139742,
                 longitude=0.67029188,
-                peak_power_w=140,
+                peak_power_w=103,
                 installation_type='FREE_STANDING',
                 pvsystem=pvsystems[16]
             ),
@@ -635,7 +635,7 @@ class ApiSolargis:
                 name='Torrefarrera',
                 latitude=41.6692891,
                 longitude=0.61112424,
-                peak_power_w=140,
+                peak_power_w=99,
                 installation_type='FREE_STANDING',
                 pvsystem=pvsystems[17]
             ),
