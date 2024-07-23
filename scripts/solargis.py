@@ -32,14 +32,29 @@ def dbapi_to_dict(dbapi: str):
 
 @app.command()
 def download_save_solargis_readings(
-    dbapi: str,
-    solargis_api_key: str,
-    from_date: datetime.datetime,
-    to_date: datetime.datetime,
-    plant_ids: Optional[List[int]] = None,
+    dbapi: str = typer.Argument(
+        ...,
+        help="Database connection. Has to be single-quoted if it contains special characters.",
+    ),
+    solargis_api_key: str = typer.Argument(
+        ...,
+        help="Solargis API key",
+    ),
+    from_date: datetime.datetime = typer.Argument(
+        ...,
+        help="Start date in format YYYY-MM-DD",
+    ),
+    to_date: datetime.datetime = typer.Argument(
+        ...,
+        help="End date in format YYYY-MM-DD",
+    ),
+    plant_ids: Optional[List[int]] = typer.Argument(
+        None,
+        help="List of plant IDs",
+    ),
 ):
     """
-    dbapi has to be single-quoted if it contains special characters
+    Download and save Solargis readings to a database.
     """
     from_date = from_date.replace(tzinfo=datetime.timezone.utc)
     to_date = to_date.replace(tzinfo=datetime.timezone.utc)
