@@ -52,8 +52,8 @@ class PVSystem(NamedTuple):
     topology_xsi_type: str
     topology_relativeSpacing: float
     topology_type: str
-    tiltLimitMin: Optional[int] = None
-    tiltLimitMax: Optional[int] = None
+    geometry_tiltLimitMin: Optional[int] = 0  # default values in the API docs
+    geometry_tiltLimitMax: Optional[int] = 90  # default values in the API docs
 
 
 class Site(NamedTuple):
@@ -758,7 +758,7 @@ class ApiSolargis:
             """
         elif site.pvsystem.geometry_type == "GeometryTwoAxisAstronomical":
             geo_xml = f"""
-                <pv:geometry xsi:type="pv:{site.pvsystem.geometry_type}" rotationLimitEast="{site.pvsystem.geometry_rotationLimitEast}" rotationLimitWest="{site.pvsystem.geometry_rotationLimitWest}" tiltLimitMin="{site.pvsystem.tiltLimitMin or 0}" tiltLimitMax="{site.pvsystem.tiltLimitMin or 90}" backTracking="{site.pvsystem.geometry_backTracking}"/>
+                <pv:geometry xsi:type="pv:{site.pvsystem.geometry_type}" rotationLimitEast="{site.pvsystem.geometry_rotationLimitEast}" rotationLimitWest="{site.pvsystem.geometry_rotationLimitWest}" tiltLimitMin="{site.pvsystem.geometry_tiltLimitMin}" tiltLimitMax="{site.pvsystem.geometry_tiltLimitMax}" backTracking="{site.pvsystem.geometry_backTracking}"/>
             """
         elif site.pvsystem.geometry_type == "GeometryFixedOneAngle":
             geo_xml = f"""
