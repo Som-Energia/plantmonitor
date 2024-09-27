@@ -124,7 +124,10 @@ def plant_sun_events_update(start, end, plant, database, plantlist):
     if plantlist:
         se = SunEvents()
         plant_names = se.list_plants()
-        print(plant_names)
+        
+        print("Plant names and locations:")
+        for p in plant_names:
+            print(p)
         return 0
 
     plants = plant
