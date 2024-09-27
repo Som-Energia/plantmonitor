@@ -1,4 +1,5 @@
-from .base import *
+from .base import BASE_DIR, Env
+import os
 
 prod_env = Env()
 prod_env.read_env(os.path.join(BASE_DIR, ".env.prod"), override=True)
