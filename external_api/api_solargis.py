@@ -571,6 +571,34 @@ class ApiSolargis:
                 topology_relativeSpacing=4.0,
                 topology_type="UNPROPORTIONAL1",
             ),
+            # La Serra
+            42: PVSystem(
+                geometry_type="GeometryFixedOneAngle",
+                geometry_azimuth=180,
+                geometry_tilt=25,
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=2773,
+                system_installationType="FREE_STANDING",
+                system_dateStartup="2022-10-01",
+                system_selfShading="true",
+                module_type="CSI",
+                degradation_content=0.55,
+                degradationFirstYear_content=2.00,
+                PmaxCoeff_content=-0.35,
+                efficiency_type="EfficiencyConstant",
+                efficiency_content=98.8,
+                limitationACPower_content=2310,
+                dcLosses_snowPollution=2.50,
+                dcLosses_cables=1.00,
+                dcLosses_mismatch=1.50,
+                acLosses_transformer=1.10,
+                acLosses_cables=0.80,
+                topology_xsi_type="TopologyRow",
+                topology_relativeSpacing=2.2,
+                topology_type="UNPROPORTIONAL1",
+            ),
         }
 
         self.sites = {
@@ -735,6 +763,15 @@ class ApiSolargis:
                 peak_power_w=622.08,
                 installation_type="FREE_STANDING",
                 pvsystem=pvsystems[20],
+            ),
+            42: Site(
+                id=42,
+                name="La Serra",
+                latitude=41.651777,
+                longitude=1.085012,
+                peak_power_w=2773,
+                installation_type="FREE_STANDING",
+                pvsystem=pvsystems[42],
             ),
         }
 

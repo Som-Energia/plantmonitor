@@ -5,9 +5,9 @@ import stat
 import pytz
 from pathlib import Path
 
-from datetime import (datetime, timedelta, timezone)
+from datetime import datetime, timedelta, timezone
 
-#from django.conf import settings
+# from django.conf import settings
 
 from zeep import Client
 from zeep.transports import Transport
@@ -21,12 +21,17 @@ from conf.logging_configuration import LOGGING
 
 import logging
 import logging.config
+
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
 
-class MeteologicaApiError(Exception): pass
-class MeteologicaFacilityIDError(MeteologicaApiError): pass
+class MeteologicaApiError(Exception):
+    pass
+
+
+class MeteologicaFacilityIDError(MeteologicaApiError):
+    pass
 
 
 class MeteologicaApi_Mock(object):
@@ -39,39 +44,45 @@ class MeteologicaApi_Mock(object):
 
     def login(self, username, password):
         self._login = dict(
-            username = username,
-            password = password,
+            username=username,
+            password=password,
         )
-        if self._login['username'] != 'alberto' or self._login['password'] != '1234':
+        if self._login["username"] != "alberto" or self._login["password"] != "1234":
             self._session = {
-                    'errorCode': 'INVALID_USERNAME_OR_PASSWORD',
-                    'header': {
-                        'sessionToken': None,
-                        'errorCode': 'NO_SESSION'
-                        }
-                    }
+                "errorCode": "INVALID_USERNAME_OR_PASSWORD",
+                "header": {"sessionToken": None, "errorCode": "NO_SESSION"},
+            }
             return self._session
         else:
             self._session = {
-                    'errorCode': 'OK',
-                    'header': {
-                    'sessionToken': '73f19a710bbced25fb2e46e5a0d65b126716a8d19bb9f9038d2172adc14665a5f0c65a30e9fb677e5654b2f59f51abdb',
-                    'errorCode': 'OK'
-                        }
-                    }
+                "errorCode": "OK",
+                "header": {
+                    "sessionToken": "73f19a710bbced25fb2e46e5a0d65b126716a8d19bb9f9038d2172adc14665a5f0c65a30e9fb677e5654b2f59f51abdb",
+                    "errorCode": "OK",
+                },
+            }
             return self._session
 
     def uploadProduction(self, facility, data):
         self._checkFacility(facility)
         facility_data = self._data.setdefault(facility, [])
         facility_data += data
-        return 'OK'
+        return "OK"
 
-    def downloadProduction(self, facility, fromDate, toDate, variableId='prod',
-        predictorId='aggregated', granularity='60', forecastDate=None):
+    def downloadProduction(
+        self,
+        facility,
+        fromDate,
+        toDate,
+        variableId="prod",
+        predictorId="aggregated",
+        granularity="60",
+        forecastDate=None,
+    ):
 
         facility_data = self._data.get(facility, [])
-        if not facility_data: return None
+        if not facility_data:
+            return None
         return facility_data
 
     def _checkFacility(self, facility):
@@ -80,7 +91,8 @@ class MeteologicaApi_Mock(object):
 
     def lastDateUploaded(self, facility):
         facility_data = self._data.get(facility, [])
-        if not facility_data: return None
+        if not facility_data:
+            return None
         return max(date for date, measure in facility_data)
 
     def dateRange(self, fromDate, toDate, dt):
@@ -88,8 +100,16 @@ class MeteologicaApi_Mock(object):
             yield fromDate
             fromDate += dt
 
-    def getForecast(self, facility, fromDate, toDate, variableId='prod',
-        predictorId='aggregated', granularity='60', forecastDate=None):
+    def getForecast(
+        self,
+        facility,
+        fromDate,
+        toDate,
+        variableId="prod",
+        predictorId="aggregated",
+        granularity="60",
+        forecastDate=None,
+    ):
         if fromDate.tzinfo is None or fromDate.tzinfo.utcoffset(fromDate) is None:
             fromDate = fromDate.replace(tzinfo=timezone.utc)
         if toDate.tzinfo is None or toDate.tzinfo.utcoffset(toDate) is None:
@@ -114,13 +134,13 @@ class MeteologicaApi:
     def session(self):
         if not self._session:
             return None
-        return  self._session.header['sessionToken']
+        return self._session.header["sessionToken"]
 
     def __enter__(self):
         self.login()
         return self
 
-    def __exit__(self,type,value,traceback):
+    def __exit__(self, type, value, traceback):
         if self.session():
             self.logout()
 
@@ -128,54 +148,66 @@ class MeteologicaApi:
         self._client = Client(self._config.wsdl)
         self._session = None
 
-        response = self._client.service.login(dict(
-            username = self._config.username,
-            password = self._config.password,
-        ))
-        if self._showResponses(): print("joete2", response)
-        if response.errorCode != 'OK':
+        response = self._client.service.login(
+            dict(
+                username=self._config.username,
+                password=self._config.password,
+            )
+        )
+        if self._showResponses():
+            print("joete2", response)
+        if response.errorCode != "OK":
             raise MeteologicaApiError(response.errorCode)
         self._session = response
 
     def logout(self):
         response = self._client.service.logout(self._session)
-        if self._showResponses(): print("joete2", response)
+        if self._showResponses():
+            print("joete2", response)
         self._client = None
         self._session = None
 
     def _showResponses(self):
-        if self._config.get('showResponses', False): return True
-        return os.environ.get('VERBOSE')
+        if self._config.get("showResponses", False):
+            return True
+        return os.environ.get("VERBOSE")
 
     @decorator.decorator
     def withinSession(f, self, *args, **kwds):
         withinSession = self.session() != None
-        if not withinSession: self.login()
+        if not withinSession:
+            self.login()
         try:
             result = f(self, *args, **kwds)
         finally:
-            if not withinSession: self.logout()
+            if not withinSession:
+                self.logout()
         return result
 
     @withinSession
     def uploadProduction(self, facility, data):
 
-        response = self._client.service.setObservation(dict(
-            header = self._session.header,
-            facilityId = facility,
-            variableId = 'prod',
-            measurementType ='MEAN',
-            measurementTime = 60, # minutes
-            unit = 'W',
-            observationData = dict(item=[
-                dict(
-                    startTime=startTime,
-                    data=value,
-                )
-                for startTime, value in data
-            ]),
-        ))
-        if self._showResponses(): print("joete",response)
+        response = self._client.service.setObservation(
+            dict(
+                header=self._session.header,
+                facilityId=facility,
+                variableId="prod",
+                measurementType="MEAN",
+                measurementTime=60,  # minutes
+                unit="W",
+                observationData=dict(
+                    item=[
+                        dict(
+                            startTime=startTime,
+                            data=value,
+                        )
+                        for startTime, value in data
+                    ]
+                ),
+            )
+        )
+        if self._showResponses():
+            print("joete", response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_FACILITY_ID":
                 raise MeteologicaApiError("{}: {}".format(response.errorCode, facility))
@@ -183,18 +215,22 @@ class MeteologicaApi:
                 raise MeteologicaApiError(response.errorCode)
 
         # TODO session renewal not tested yet
-        self._session.header['sessionToken'] = response.header['sessionToken']
+        self._session.header["sessionToken"] = response.header["sessionToken"]
 
         lastDateOfCurrentBatch = max(date for date, measure in data)
         lastDates = ns.load(self._config.lastDateFile)
-        lastDates[facility] = max(lastDates.get(facility,''), str(lastDateOfCurrentBatch))
+        lastDates[facility] = max(
+            lastDates.get(facility, ""), str(lastDateOfCurrentBatch)
+        )
         lastDates.dump(self._config.lastDateFile)
 
         return response.errorCode
 
     @withinSession
     def downloadProduction(self, facility, data):
-        raise MeteologicaApiError("There's no method in the api to retrieve uploaded observations. Use the web interface.")
+        raise MeteologicaApiError(
+            "There's no method in the api to retrieve uploaded observations. Use the web interface."
+        )
 
     def lastDateUploaded(self, facility):
         lastDates = ns.load(self._config.lastDateFile)
@@ -202,34 +238,47 @@ class MeteologicaApi:
         return todt(lastDate)
 
     @withinSession
-    def getForecast(self, facility, fromDate, toDate, variableId='prod',
-        predictorId='aggregated', granularity='60', forecastDate=None):
+    def getForecast(
+        self,
+        facility,
+        fromDate,
+        toDate,
+        variableId="prod",
+        predictorId="aggregated",
+        granularity="60",
+        forecastDate=None,
+    ):
         if not forecastDate:
-            forecastDate=fromDate
+            forecastDate = fromDate
         forecastRequest = {
-            'header': self._session.header,
-            'facilityId': facility,
-            'variableId': variableId,
-            'predictorId': predictorId,
-            'granularity': granularity,
-            'forecastDate': forecastDate,
-            'fromDate': fromDate,
-            'toDate': toDate
+            "header": self._session.header,
+            "facilityId": facility,
+            "variableId": variableId,
+            "predictorId": predictorId,
+            "granularity": granularity,
+            "forecastDate": forecastDate,
+            "fromDate": fromDate,
+            "toDate": toDate,
         }
         response = self._client.service.getForecast(forecastRequest)
 
-        if self._showResponses(): print("joete",response)
+        if self._showResponses():
+            print("joete", response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_FACILITY_ID":
                 raise MeteologicaApiError("{}: {}".format(response.errorCode, facility))
             else:
                 raise MeteologicaApiError(response.errorCode)
 
-        self._session.header['sessionToken'] = response.header['sessionToken']
+        self._session.header["sessionToken"] = response.header["sessionToken"]
 
-        forecastData = response['forecastData']
-        forecastDataDict = [entry.split('~') for entry in forecastData.split(':') if entry] # first entry is empty, probably slicing is faster than filtering
-        resultForecast = [ (self.unixStrtoDT(entry[0]), float(entry[2])) for entry in forecastDataDict]
+        forecastData = response["forecastData"]
+        forecastDataDict = [
+            entry.split("~") for entry in forecastData.split(":") if entry
+        ]  # first entry is empty, probably slicing is faster than filtering
+        resultForecast = [
+            (self.unixStrtoDT(entry[0]), float(entry[2])) for entry in forecastDataDict
+        ]
 
         return resultForecast
 
@@ -242,20 +291,23 @@ class MeteologicaApi:
     @withinSession
     def getAllFacilities(self):
         forecastRequest = {
-            'header': self._session.header,
+            "header": self._session.header,
         }
         response = self._client.service.getAllFacilities(forecastRequest)
-        if self._showResponses(): print("joete",response)
+        if self._showResponses():
+            print("joete", response)
         if response.errorCode != "OK":
             if response.errorCode == "INVALID_HEADER":
                 raise MeteologicaApiError("{}".format(response.errorCode))
             else:
                 raise MeteologicaApiError(response.errorCode)
 
-        self._session.header['sessionToken'] = response.header['sessionToken']
-        facilitiesID = [i['facilityId'] for i in response['facilityItems']['item']]
+        self._session.header["sessionToken"] = response.header["sessionToken"]
+        facilitiesID = [i["facilityId"] for i in response["facilityItems"]["item"]]
         return facilitiesID
-'''
+
+
+"""
 class MeteologicaApiUtils(object):
 
     def __init__(self, wsdl, username, password):
@@ -318,4 +370,4 @@ class MeteologicaApiUtils(object):
         if self._client is not None:
             self._client.service.logout(self._api_session)
 
-'''
+"""
