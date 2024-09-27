@@ -67,16 +67,52 @@ class SunEvents:
                 solar_db.db.SolarEvent.insertPlantSolarEvents(plant, sun_events)
 
 
-@click.command()
-@click.option('-s', '--start', default=None, help='start date in UTC. Example: 2020-10-04')
-@click.option('-e', '--end', default=None, help='end date in UTC. Example: 2021-10-04')
-@click.option('-p', '--plant', multiple=True, help='Plant (name) to update sunevents (accepts multiple)')
-@click.option('-d', '--database', default=None, is_flag=True, help='Print database info and quit')
-@click.option('-l', '--plantlist', default=None, is_flag=True, help='Print plants names and locations and quit')
+_default_end = datetime.datetime.now(datetime.timezone.utc)
+_years_delta = 5  # compute five years by default
+_delta = datetime.timedelta(days=365 * _years_delta)
+_default_start = _default_end - _delta
+
+
+@click.command(context_settings={"show_default": True})
+@click.option(
+    "-s",
+    "--start",
+    default=_default_start.strftime("%Y-%m-%d"),
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    help="start date in UTC. If not provided, it will be 5 years before now.",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=_default_end.strftime("%Y-%m-%d"),
+    help="end date in UTC. If not provided, it will be now.",
+)
+@click.option(
+    "-p",
+    "--plant",
+    multiple=True,
+    help="Plant (name) to update sunevents (accepts multiple)",
+)
+@click.option(
+    "-d",
+    "--database",
+    default=None,
+    is_flag=True,
+    help="Print database info and quit",
+)
+@click.option(
+    "-l",
+    "--plantlist",
+    default=None,
+    is_flag=True,
+    help="Print plants names and locations and quit",
+)
 def plant_sun_events_update(start, end, plant, database, plantlist):
 
     if database:
         from conf import envinfo
+
         print(envinfo.DB_CONF)
         return 0
 
@@ -87,14 +123,19 @@ def plant_sun_events_update(start, end, plant, database, plantlist):
         return 0
 
     plants = plant
-    delta = datetime.timedelta(days=365*5) # compute five years by default
-    start = datetime.datetime.strptime(start, '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc) if start else datetime.datetime.now(datetime.timezone.utc)
-    end = datetime.datetime.strptime(end, '%Y-%m-%d') if end else start + delta
-    end = end.replace(hour=23,minute=59,second=59,tzinfo=datetime.timezone.utc)
+
+    update_start = start
+
+    update_end = end.replace(
+        hour=23,
+        minute=59,
+        second=59,
+        tzinfo=datetime.timezone.utc,
+    )
 
     se = SunEvents()
 
-    se.sun_events_update(start=start, end=end, plants=plants)
+    se.sun_events_update(start=update_start, end=update_end, plants=plants)
 
     return 0
 
