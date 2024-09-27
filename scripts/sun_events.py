@@ -73,7 +73,12 @@ _delta = datetime.timedelta(days=365 * _years_delta)
 _default_start = _default_end - _delta
 
 
-@click.command(context_settings={"show_default": True})
+@click.command(
+    context_settings={
+        "show_default": True,
+        "help_option_names": ["-h", "--help"],
+    },
+)
 @click.option(
     "-s",
     "--start",
