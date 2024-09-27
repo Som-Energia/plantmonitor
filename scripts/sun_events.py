@@ -124,7 +124,7 @@ def plant_sun_events_update(start, end, plant, database, plantlist):
     if plantlist:
         se = SunEvents()
         plant_names = se.list_plants()
-        
+
         print("Plant names and locations:")
         for p in plant_names:
             print(p)
@@ -132,7 +132,9 @@ def plant_sun_events_update(start, end, plant, database, plantlist):
 
     plants = plant
 
-    update_start = start
+    update_start = start.replace(
+        tzinfo=datetime.timezone.utc,
+    )
 
     update_end = end.replace(
         hour=23,
