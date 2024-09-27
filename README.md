@@ -84,12 +84,12 @@ Scripts
 To write all solar events for a plant run:
 
 ```
-$ python scripts/sun_events.py -p Alibaba
+$ python -m scripts.sun_events -p Alibaba
 ```
 
 you can know the options running
 ```
-$ python scripts/sun_events.py --help
+$ python -m scripts.sun_events --help
 ```
 
 And to download the solargis modeling irradiation and power from their api you can do
