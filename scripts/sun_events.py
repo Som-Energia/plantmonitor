@@ -62,7 +62,9 @@ class SunEvents:
 
                 sun_events = sun_events_gen.generate_sunevents(start=start, end=end)
 
-                print(sun_events)
+                print(
+                    f"Total events fetched for plant '{plant.name}': {len(sun_events)}"
+                )
 
                 solar_db.db.SolarEvent.insertPlantSolarEvents(plant, sun_events)
 
