@@ -1,8 +1,8 @@
-
 import os
-ENVIRONMENT_VARIABLE = 'PLANTMONITOR_MODULE_SETTINGS'
 
-os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.devel')
+ENVIRONMENT_VARIABLE = "PLANTMONITOR_MODULE_SETTINGS"
+
+os.environ.setdefault("PLANTMONITOR_MODULE_SETTINGS", "conf.settings.devel")
 
 import datetime
 import click
@@ -12,25 +12,29 @@ from maintenance.sun_events_generator import SunEventsGenerator
 from ORM.pony_manager import PonyManager
 
 
-class SunEvents():
+class SunEvents:
 
     def list_plants(self):
 
         from conf import envinfo
+
         database_info = envinfo.DB_CONF
 
         solar_db = PonyManager(database_info)
         solar_db.define_solar_models()
         solar_db.binddb(create_tables=False)
         with orm.db_session:
-            plant_info = orm.select((p.name, p.location.latitude, p.location.longitude) for p in solar_db.db.Plant)[:]
+            plant_info = orm.select(
+                (p.name, p.location.latitude, p.location.longitude)
+                for p in solar_db.db.Plant
+            )[:]
 
         return plant_info
 
-
-    def sun_events_update(self, start, end, plants = None):
+    def sun_events_update(self, start, end, plants=None):
 
         from conf import envinfo
+
         database_info = envinfo.DB_CONF
 
         solar_db = PonyManager(database_info)
@@ -54,9 +58,9 @@ class SunEvents():
 
                 lat = plant.location.latitude
                 lon = plant.location.longitude
-                sun_events_gen = SunEventsGenerator(lat,lon)
+                sun_events_gen = SunEventsGenerator(lat, lon)
 
-                sun_events = sun_events_gen.generate_sunevents(start=start,end=end)
+                sun_events = sun_events_gen.generate_sunevents(start=start, end=end)
 
                 print(sun_events)
 
@@ -94,6 +98,7 @@ def plant_sun_events_update(start, end, plant, database, plantlist):
 
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     plant_sun_events_update()
