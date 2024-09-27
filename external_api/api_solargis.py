@@ -572,7 +572,7 @@ class ApiSolargis:
                 topology_type="UNPROPORTIONAL1",
             ),
             # La Serra
-            21: PVSystem(
+            42: PVSystem(
                 geometry_type="GeometryFixedOneAngle",
                 geometry_azimuth=180,
                 geometry_tilt=25,
@@ -764,14 +764,14 @@ class ApiSolargis:
                 installation_type="FREE_STANDING",
                 pvsystem=pvsystems[20],
             ),
-            21: Site(
-                id=21,
+            42: Site(
+                id=42,
                 name="La Serra",
                 latitude=41.651777,
                 longitude=1.085012,
                 peak_power_w=2773,
                 installation_type="FREE_STANDING",
-                pvsystem=pvsystems[21],
+                pvsystem=pvsystems[42],
             ),
         }
 
