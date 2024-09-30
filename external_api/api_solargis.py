@@ -766,7 +766,7 @@ class ApiSolargis:
             ),
             42: Site(
                 id=42,
-                name="La Serra",
+                name="La_Serra",
                 latitude=41.651777,
                 longitude=1.085012,
                 peak_power_w=2773,
