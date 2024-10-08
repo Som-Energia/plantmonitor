@@ -93,3 +93,4 @@ conf/config_meteologica.yaml
 
 # debugging data excludes
 /untracked_data/
+.python-version
