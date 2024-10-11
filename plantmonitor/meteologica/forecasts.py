@@ -9,7 +9,7 @@ import datetime
 
 from plantmonitor.ORM.pony_manager import PonyManager
 
-from plantmonitor.meteologica_api_utils import (
+from plantmonitor.meteologica.meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )

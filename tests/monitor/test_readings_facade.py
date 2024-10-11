@@ -9,7 +9,7 @@ import datetime as dt
 
 from yamlns import namespace as ns
 
-from .readings_facade import ReadingsFacade
+from plantmonitor.monitor.readings_facade import ReadingsFacade
 
 from pony import orm
 

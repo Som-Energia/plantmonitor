@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from erppeek import Client
-from .meters import (
+from plantmonitor.monitor.meters import (
     telemeasure_meter_names,
     measures_from_date,
     meter_connection_protocol,
@@ -19,7 +19,7 @@ from pony import orm
 
 import datetime
 
-from .standardization import erp_meter_readings_to_plant_data
+from plantmonitor.monitor.standardization import erp_meter_readings_to_plant_data
 
 class ReadingsFacade():
   def __init__(self, db):

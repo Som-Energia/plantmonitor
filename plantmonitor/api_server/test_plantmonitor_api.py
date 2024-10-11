@@ -25,7 +25,7 @@ class Api_Test(unittest.TestCase):
         cls.pony.define_all_models()
         cls.pony.binddb(create_tables=True)
 
-        from api_server.plantmonitor_api import api
+        from plantmonitor.api_server.plantmonitor_api import api
 
         cls.api = api
 

@@ -5,8 +5,8 @@ from unittest import mock
 
 from datetime import datetime, timezone
 
-from maintenance.db_manager import DBManager
-from maintenance.db_test_factory import DbPlantFactory
+from plantmonitor.maintenance.db_manager import DBManager
+from plantmonitor.maintenance.db_test_factory import DbPlantFactory
 
 from external_api.api_solargis import ApiSolargis, Site, PVSystem
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from external_api.api_solargis import ApiSolargis
-from maintenance.db_manager import DBManager
+from plantmonitor.maintenance.db_manager import DBManager
 from sqlalchemy import MetaData, Table, insert
 
 import numpy as np

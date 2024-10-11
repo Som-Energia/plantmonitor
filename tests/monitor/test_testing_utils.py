@@ -3,7 +3,7 @@ os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from unittest import TestCase
 from pathlib import Path
-from .testing_utils import (
+from plantmonitor.monitor.testing_utils import (
     readTimedDataTsv,
     parseDate,
 )

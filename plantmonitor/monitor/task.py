@@ -2,17 +2,17 @@
 from plantmonitor.monitor.resource import ProductionPlant
 from yamlns import namespace as ns
 
-from maintenance.maintenance import(
+from plantmonitor.maintenance.maintenance import(
     bucketed_registry_maintenance,
     alarm_maintenance,
     cleaning_maintenance
 )
 
-from maintenance.db_manager import DBManager
+from plantmonitor.maintenance.db_manager import DBManager
 
-from .operations import computeIntegralMetrics
+from plantmonitor.monitor.operations import computeIntegralMetrics
 
-from plantmonitor.forecasts import (
+from plantmonitor.meteologica.forecasts import (
     downloadMeterForecasts,
     uploadMeterReadings
 )
@@ -35,8 +35,8 @@ from plantmonitor.monitor.storage import (
 
 from pony import orm
 
-from .standardization import registers_to_plant_data
-from .readings_facade import ReadingsFacade
+from plantmonitor.monitor.standardization import registers_to_plant_data
+from plantmonitor.monitor.readings_facade import ReadingsFacade
 
 from plantmonitor.ORM.pony_manager import PonyManager
 

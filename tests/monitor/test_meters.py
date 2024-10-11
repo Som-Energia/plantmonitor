@@ -5,7 +5,7 @@ import unittest
 from erppeek import Client
 from yamlns import namespace as ns
 from conf import config
-from .meters import (
+from plantmonitor.monitor.meters import (
     measures_from_date,
     meter_connection_protocol,
 )

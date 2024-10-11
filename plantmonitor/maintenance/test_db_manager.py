@@ -5,7 +5,7 @@ os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from pathlib import Path
 from unittest import TestCase
-from maintenance.db_test_factory import DbTestFactory
+from plantmonitor.maintenance.db_test_factory import DbTestFactory
 
 from psycopg2 import OperationalError
 

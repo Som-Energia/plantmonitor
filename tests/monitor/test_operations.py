@@ -20,7 +20,7 @@ from plantmonitor.ORM.db_utils import setupDatabase, getTablesToTimescale, times
 from yamlns import namespace as ns
 import datetime
 
-from .operations import (
+from plantmonitor.monitor.operations import (
     integrateHour,
     integrateMetric,
     integrateIrradiance,

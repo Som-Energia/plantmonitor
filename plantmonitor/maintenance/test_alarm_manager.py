@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from maintenance.alarm import Alarm
+from plantmonitor.maintenance.alarm import Alarm
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 import datetime
@@ -13,7 +13,7 @@ from .db_manager import DBManager
 
 from .db_test_factory import DbTestFactory, DbPlantFactory
 
-from maintenance.alarm_manager import AlarmManager
+from plantmonitor.maintenance.alarm_manager import AlarmManager
 
 
 class AlarmManagerTests(TestCase):

@@ -1040,7 +1040,7 @@ class ApiSolargis:
         plant_ids=None,
     ):
 
-        from maintenance.db_manager import DBManager
+        from plantmonitor.maintenance.db_manager import DBManager
 
         api = ApiSolargis(**solargis_conf)
         api.create_xsd_schema()
@@ -1077,7 +1077,7 @@ class ApiSolargis:
     @staticmethod
     def daily_download_readings():
 
-        from maintenance.db_manager import DBManager
+        from plantmonitor.maintenance.db_manager import DBManager
         from conf import envinfo
 
         solargis_conf = envinfo.SOLARGIS

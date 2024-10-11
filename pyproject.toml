@@ -36,6 +36,8 @@ environs = "*"
 zeep = "*"
 b2btest = "*"
 uvicorn = "*"
+sqlalchemy = "^2.0.35"
+pandas = "<2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]

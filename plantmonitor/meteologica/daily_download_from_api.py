@@ -8,7 +8,7 @@ from plantmonitor.plantmonitor_db import (
     PlantmonitorDBError,
 )
 
-from plantmonitor.meteologica_api_utils import (
+from plantmonitor.meteologica.meteologica_api_utils import (
     MeteologicaApi,
     MeteologicaApiError,
 )

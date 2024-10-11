@@ -8,7 +8,7 @@ import datetime as dt
 
 from yamlns import namespace as ns
 
-from .standardization import (
+from plantmonitor.monitor.standardization import (
     registers_to_plant_data,
     alcolea_inverter_to_plantdata,
     florida_inverter_to_plantdata,

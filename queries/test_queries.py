@@ -4,13 +4,13 @@ os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 from unittest import TestCase
 from pony import orm
-from ORM.pony_manager import PonyManager
+from plantmonitor.ORM.pony_manager import PonyManager
 from pathlib import Path
-from plantmonitor.operations import integrateExpectedPower
+from plantmonitor.monitor.operations import integrateExpectedPower
 from yamlns import namespace as ns
 import datetime
 
-from meteologica.utils import todtaware
+from plantmonitor.meteologica.utils import todtaware
 
 @unittest.skipIf(True, 'sometimes this queries are unbelievably slow due to some b2b performance bug')
 class Queries_Test(TestCase):

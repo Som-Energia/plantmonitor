@@ -5,11 +5,11 @@ from unittest import TestCase
 from pony import orm
 from plantmonitor.ORM.pony_manager import PonyManager
 from pathlib import Path
-from .testing_utils import (
+from plantmonitor.monitor.testing_utils import (
     readTimedDataTsv,
     parseDate,
 )
-from .operations import integrateExpectedPower
+from plantmonitor.monitor.operations import integrateExpectedPower
 from yamlns import namespace as ns
 from yamlns.dateutils import Date
 import datetime

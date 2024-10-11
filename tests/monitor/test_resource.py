@@ -10,7 +10,7 @@ from yamlns import namespace as ns
 from pymodbus.pdu import ExceptionResponse
 from pymodbus.exceptions import ConnectionException
 
-from .resource import (
+from plantmonitor.monitor.resource import (
     ProductionPlant,
     ProductionDevice,
     ProductionDeviceModMap,

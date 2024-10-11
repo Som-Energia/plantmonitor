@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from maintenance.db_manager import DBManager
+from plantmonitor.maintenance.db_manager import DBManager
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
 import unittest
@@ -12,7 +12,7 @@ from plantmonitor.monitor.resource import ProductionPlant
 
 from conf import envinfo
 
-from .task import (
+from plantmonitor.monitor.task import (
     get_plant_reading,
 )
 

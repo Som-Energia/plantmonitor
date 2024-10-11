@@ -2,7 +2,7 @@
 import os
 os.environ.setdefault('PLANTMONITOR_MODULE_SETTINGS', 'conf.settings.testing')
 
-from plantmonitor.meteologica_api_utils import (
+from plantmonitor.meteologica.meteologica_api_utils import (
     MeteologicaApi_Mock,
     MeteologicaApi,
     MeteologicaApiError,
