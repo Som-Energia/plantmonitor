@@ -1,0 +1,26 @@
+version: "3.9"
+name: plantmonitor
+
+services:
+
+  postgres-test:
+    image: postgres:15.6 # current version used in plantmonitor is 15.6
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+      - ./docker/postgres-test/docker-entrypoint-initdb.d/startup_postgres_roles.sh:/docker-entrypoint-initdb.d/startup_postgres_roles.sh
+    environment:
+      POSTGRES_USER: tester
+      POSTGRES_PASSWORD: dontusemeinproduction
+      POSTGRES_DB: plants_test
+    ports:
+      - 5439:5432
+    networks:
+      - default
+
+volumes:
+  pgdata-test:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

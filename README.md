@@ -28,7 +28,25 @@ Requires python >= 3.5
 
 ## Testing
 
-Testing requires:
+Testing requires a working postgres database. A disposable database can be created for testing purposes using docker-compose. You can create one with:
+
+```bash
+docker compose -f docker-compose.postgres-test.yml up -d
+```
+
+You can access the database logs with:
+
+```bash
+docker-compose.postgres-test.yml logs --follow --tail=10
+```
+
+To run the tests:
+
+```bash
+pytest
+```
+
+Some caveats:
 
 - The running user requires createdb grants in postgres (`ALTER USER myuser CREATEDB;`)
 - `createdb orm_test`
