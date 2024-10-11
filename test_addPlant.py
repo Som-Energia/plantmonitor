@@ -10,25 +10,25 @@ import datetime as dt
 
 from click.testing import CliRunner
 
-from meteologica.plantmonitor_db import (
+from plantmonitor.plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBMock,
     PlantmonitorDBError,
 )
 
-from meteologica.utils import todt
+from plantmonitor.meteologica.utils import todt
 
 from pathlib import Path
 
 from pony import orm
 
-from ORM.pony_manager import PonyManager
-from ORM.models import (
+from plantmonitor.ORM.pony_manager import PonyManager
+from plantmonitor.ORM.models import (
     importPlants,
     exportPlants,
 )
 
-from ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
+from plantmonitor.ORM.db_utils import setupDatabase, getTablesToTimescale, timescaleTables
 
 from addPlant import importPlantCLI, importPlantsFromFile
 
