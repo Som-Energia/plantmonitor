@@ -13,14 +13,14 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
-from ORM.pony_manager import PonyManager
+from plantmonitor.ORM.pony_manager import PonyManager
 
-from ORM.db_utils import setupDatabase, dropTables
+from plantmonitor.ORM.db_utils import setupDatabase, dropTables
 
-from ORM.migrations import migrateLegacyToPony
+from plantmonitor.ORM.migrations import migrateLegacyToPony
 from pony import orm
 
-from meteologica.plantmonitor_db import (
+from plantmonitor.plantmonitor_db import (
     PlantmonitorDB,
     PlantmonitorDBError,
 )

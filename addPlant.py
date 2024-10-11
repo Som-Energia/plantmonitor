@@ -15,8 +15,8 @@ logging.config.dictConfig(LOGGING)
 logger = logging.getLogger("plantmonitor")
 
 from pony import orm
-from ORM.pony_manager import PonyManager
-from ORM.models import (
+from plantmonitor.ORM.pony_manager import PonyManager
+from plantmonitor.ORM.models import (
     importPlants,
 )
 
