@@ -1448,16 +1448,19 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "yamlns"
-version = "0.6"
+version = "0.11.0"
 description = "YAML serializable dictionary with dual item and attribute accessors"
 optional = false
 python-versions = "*"
 files = [
-    {file = "yamlns-0.6.tar.gz", hash = "sha256:d68bd80547528260f7ffd40be8a0c2c17ddc296177136b86568d710f43f59dff"},
+    {file = "yamlns-0.11.0-py3-none-any.whl", hash = "sha256:abc4b013bf82670c5d6f0d70afb286037f48762b52942bc4d7e1c0274844ca50"},
+    {file = "yamlns-0.11.0.tar.gz", hash = "sha256:d5cad27ada26d0872c4124c87601a71150e75f699ff347f53f1c2ec3b329de49"},
 ]
 
 [package.dependencies]
-PyYAML = "*"
+pytest = "*"
+PyYAML = ">=5.3.1"
+setuptools = ">=20.4"
 
 [[package]]
 name = "zeep"
@@ -1489,4 +1492,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "f48754b7b24c58df17b5840e5f303ea1e947c0f14ff7be4ad920235e049e1426"
+content-hash = "f53e44995c9510970780dfc57f1e43e9971f3b7fca9c2d1566dc3634ead14bcd"
