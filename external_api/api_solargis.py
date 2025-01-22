@@ -431,7 +431,7 @@ class ApiSolargis:
                 acLosses_transformer=0.0,
                 acLosses_cables=0.5,
                 topology_xsi_type="TopologyRow",
-                topology_relativeSpacing=1.8,
+                topology_relativeSpacing=2.5,
                 topology_type="UNPROPORTIONAL2",
             ),
             17: PVSystem(
