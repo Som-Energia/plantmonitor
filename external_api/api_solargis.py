@@ -877,7 +877,7 @@ class ApiSolargis:
             ),
             45: Site(
                 id=45,
-                name="La Vinya",
+                name="La_Vinya",
                 latitude=41.9252339,
                 longitude=1.6548239,
                 peak_power_w=2398,
