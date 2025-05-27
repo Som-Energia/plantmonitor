@@ -655,6 +655,34 @@ class ApiSolargis:
                 topology_relativeSpacing=2.2,
                 topology_type="UNPROPORTIONAL1",
             ),
+            # La Vinya
+            45: PVSystem(
+                geometry_type="GeometryFixedOneAngle",
+                geometry_azimuth=180,
+                geometry_tilt=25,
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=2398,
+                system_installationType="FREE_STANDING",
+                system_dateStartup="2023-11-01",
+                system_selfShading="true",
+                module_type="CSI",
+                degradation_content=0.40,
+                degradationFirstYear_content=1.00,
+                PmaxCoeff_content=-0.3,
+                efficiency_type="EfficiencyConstant",
+                efficiency_content=100.0,
+                limitationACPower_content=1980,
+                dcLosses_snowPollution=2.50,
+                dcLosses_cables=1.00,
+                dcLosses_mismatch=1.50,
+                acLosses_transformer=1.10,
+                acLosses_cables=0.80,
+                topology_xsi_type="TopologyRow",
+                topology_relativeSpacing=2.2,
+                topology_type="UNPROPORTIONAL1",
+            ),
         }
 
         self.sites = {
@@ -846,6 +874,15 @@ class ApiSolargis:
                 peak_power_w=3598,
                 installation_type="FREE_STANDING",
                 pvsystem=pvsystems[44],
+            ),
+            45: Site(
+                id=45,
+                name="La Vinya",
+                latitude=41.9252339,
+                longitude=1.6548239,
+                peak_power_w=2398,
+                installation_type="FREE_STANDING",
+                pvsystem=pvsystems[45],
             ),
         }
 
