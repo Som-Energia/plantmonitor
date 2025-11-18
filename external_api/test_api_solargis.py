@@ -31,6 +31,16 @@ class ApiSolargis_Test(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def sample_reading_qh(self):
+        # Datetime GHI GTI TMOD PVOUT
+        return {
+            0 : (datetime(2015,1,1, 0, 7,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            1 : (datetime(2015,1,1, 0,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            50 : (datetime(2015,1,1,12,37,30,tzinfo=timezone.utc), 69., 92., -1.0, 63.106),
+            94 : (datetime(2015,1,1,23,37,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            95 : (datetime(2015,1,1,23,52,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+        }
+
     def sample_reading(self):
         # Datetime GHI GTI TMOD PVOUT
         return [
@@ -221,6 +231,12 @@ class ApiSolargis_Test(unittest.TestCase):
         to_date = todtaware('2015-01-01 15:00:00')
         return from_date, to_date
 
+    def default_from_to_qh(self):
+
+        from_date = todtaware('2015-01-01 00:00:00')
+        to_date = todtaware('2015-01-01 23:59:00')
+        return from_date, to_date
+
     def test__check_connection__arbitrary(self):
         request_xml = '''
             <ws:dataDeliveryRequest dateFrom="2014-04-28" dateTo="2014-04-28"
@@ -231,7 +247,7 @@ class ApiSolargis_Test(unittest.TestCase):
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <site id="demo_site" name="Demo site" lat="48.61259" lng="20.827079">
             </site>
-            <processing key="GHI" summarization="HOURLY" terrainShading="true">
+            <processing key="GHI" summarization="MIN_15" terrainShading="true">
             </processing>
             </ws:dataDeliveryRequest>
         '''
@@ -252,6 +268,27 @@ class ApiSolargis_Test(unittest.TestCase):
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <site id="demo_site" lat="48.61259" lng="20.827079">
             </site>
+            <processing key="GHI" summarization="MIN_15" terrainShading="true">
+            </processing>
+            </ws:dataDeliveryRequest>
+        '''
+
+        status_code, text_response = self.api.get_arbitrary_payload(request_xml)
+
+        self.assertEqual(status_code, 200)
+
+        self.assertNotEqual(text_response, '')
+
+    def test__check_connection__arbitrary_hourly(self):
+        request_xml = '''
+            <ws:dataDeliveryRequest dateFrom="2014-04-28" dateTo="2014-04-28"
+            xmlns="http://geomodel.eu/schema/data/request"
+            xmlns:ws="http://geomodel.eu/schema/ws/data"
+            xmlns:geo="http://geomodel.eu/schema/common/geo"
+            xmlns:pv="http://geomodel.eu/schema/common/pv"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <site id="demo_site" name="Demo site" lat="48.61259" lng="20.827079">
+            </site>
             <processing key="GHI" summarization="HOURLY" terrainShading="true">
             </processing>
             </ws:dataDeliveryRequest>
@@ -262,6 +299,28 @@ class ApiSolargis_Test(unittest.TestCase):
         self.assertEqual(status_code, 200)
 
         self.assertNotEqual(text_response, '')
+
+    def test__get_arbitrary_payload__no_name_hourly(self):
+        request_xml = '''
+            <ws:dataDeliveryRequest dateFrom="2014-04-28" dateTo="2014-04-28"
+            xmlns="http://geomodel.eu/schema/data/request"
+            xmlns:ws="http://geomodel.eu/schema/ws/data"
+            xmlns:geo="http://geomodel.eu/schema/common/geo"
+            xmlns:pv="http://geomodel.eu/schema/common/pv"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <site id="demo_site" lat="48.61259" lng="20.827079">
+            </site>
+            <processing key="GHI" summarization="HOURLY" terrainShading="true">
+            </processing>
+            </ws:dataDeliveryRequest>
+        '''
+
+        status_code, text_response = self.api.get_arbitrary_payload(request_xml)
+
+        self.assertEqual(status_code, 200)
+
+        self.assertNotEqual(text_response, '')
+
 
     def test__create_xsd_schema__base(self):
         self.api.create_xsd_schema()
@@ -308,7 +367,7 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.maxDiff = None
 
-        from_date, to_date = self.default_from_to()
+        from_date, to_date = self.default_from_to_qh()
 
         site = self.demo_site()
         processing_keys = 'GHI'
@@ -317,10 +376,14 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.assertEqual(status, 200)
 
-        expected = [(t, ghi, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        self.assertEqual(len(readings), 96)
+
+        readings_sample = [readings[i] for i in self.sample_reading_qh().keys()]
+
+        expected = [(t, ghi, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()]
 
         self.assertEqual(status, 200)
-        self.assertListEqual(readings, expected)
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_irradiance_readings_location__GHI_GTI_TEMP(self):
 

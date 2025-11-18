@@ -1048,7 +1048,7 @@ class ApiSolargis:
             <site id="{site.name}" lat="{site.latitude}" lng="{site.longitude}">
                 {system}
             </site>
-            <processing key="{processing_keys}" summarization="HOURLY" terrainShading="true">
+            <processing key="{processing_keys}" summarization="MIN_15" terrainShading="true">
             </processing>
             </ws:dataDeliveryRequest>
         """
