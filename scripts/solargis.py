@@ -48,6 +48,10 @@ def download_save_solargis_readings(
         ...,
         help="End date in format YYYY-MM-DD",
     ),
+    processing_keys: str = typer.Option(
+        "GHI GTI TMOD PVOUT",
+        help="List of processing keys: 'GHI GTI TMOD PVOUT'",
+    ),
     plant_ids: Optional[List[int]] = typer.Argument(
         None,
         help="List of plant IDs",
@@ -70,8 +74,10 @@ def download_save_solargis_readings(
         f"Downloading sites {plant_ids} from {from_date} to {to_date} to {database_info['host']}/{database_info['database']}"
     )
 
-    # TODO parametrize processing_keys
-    processing_keys = "GHI GTI TMOD PVOUT"
+    processing_keys = "GHI GTI TMOD PVOUT" if not processing_keys else processing_keys
+
+    logger.info(f"Requesting the following metrics: {processing_keys}")
+
     num_rows = ApiSolargis.download_readings(
         solargis_conf, database_info, from_date, to_date, processing_keys, plant_ids
     )
