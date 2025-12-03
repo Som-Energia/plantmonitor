@@ -683,6 +683,34 @@ class ApiSolargis:
                 topology_relativeSpacing=2.2,
                 topology_type="UNPROPORTIONAL1",
             ),
+            # SHAD Mollet
+            46: PVSystem(
+                geometry_type="GeometryFixedOneAngle",
+                geometry_azimuth=190,
+                geometry_tilt=5,
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=302.9,
+                system_installationType="ROOF_MOUNTED",
+                system_dateStartup="2022-12-01",
+                system_selfShading="true",
+                module_type="CSI",
+                degradation_content=0.52,
+                degradationFirstYear_content=2.00,
+                PmaxCoeff_content=-0.34,
+                efficiency_type="EfficiencyConstant",
+                efficiency_content=98.0,
+                limitationACPower_content=300,
+                dcLosses_snowPollution=7.20,
+                dcLosses_cables=1.0,
+                dcLosses_mismatch=1.0,
+                acLosses_transformer=0.0,
+                acLosses_cables=1.0,
+                topology_xsi_type="TopologyRow",
+                topology_relativeSpacing=1.8,
+                topology_type="UNPROPORTIONAL2",
+            ),
         }
 
         self.sites = {
@@ -883,6 +911,15 @@ class ApiSolargis:
                 peak_power_w=2398,
                 installation_type="FREE_STANDING",
                 pvsystem=pvsystems[45],
+            ),
+            46: Site(
+                id=46,
+                name="SHAD_Mollet",
+                latitude=41.547747,
+                longitude=2.230203,
+                peak_power_w=302.9,
+                installation_type="ROOF_MOUNTED",
+                pvsystem=pvsystems[46],
             ),
         }
 
