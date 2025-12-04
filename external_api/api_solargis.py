@@ -684,7 +684,7 @@ class ApiSolargis:
                 topology_type="UNPROPORTIONAL1",
             ),
             # SHAD Mollet
-            46: PVSystem(
+            48: PVSystem(
                 geometry_type="GeometryFixedOneAngle",
                 geometry_azimuth=190,
                 geometry_tilt=5,
@@ -912,14 +912,14 @@ class ApiSolargis:
                 installation_type="FREE_STANDING",
                 pvsystem=pvsystems[45],
             ),
-            46: Site(
-                id=46,
+            48: Site(
+                id=48,
                 name="SHAD_Mollet",
                 latitude=41.547747,
                 longitude=2.230203,
                 peak_power_w=302.9,
                 installation_type="ROOF_MOUNTED",
-                pvsystem=pvsystems[46],
+                pvsystem=pvsystems[48],
             ),
         }
 
