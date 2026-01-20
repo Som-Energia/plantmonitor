@@ -1148,7 +1148,6 @@ class ApiSolargis:
                 module_temperature_dc bigint,
                 photovoltaic_energy_output_wh bigint,
                 source text,
-                reading_interval interval,
                 request_time timestamptz,
                 CONSTRAINT "fk_satellite_readings__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id") ON DELETE CASCADE
             );
@@ -1169,10 +1168,9 @@ class ApiSolargis:
                 module_temperature_dc,
                 photovoltaic_energy_output_wh,
                 source,
-                reading_interval,
                 request_time
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, interval '1 hour', %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             --returning doesn't return in sqlalchemy when more than one tuple is given
             RETURNING time, plant;
         """
@@ -1192,10 +1190,9 @@ class ApiSolargis:
                 module_temperature_dc,
                 photovoltaic_energy_output_wh,
                 source,
-                reading_interval,
                 request_time
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, interval '15 minutes', %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s || '_qh', %s)
             --returning doesn't return in sqlalchemy when more than one tuple is given
             RETURNING time, plant;
         """

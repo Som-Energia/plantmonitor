@@ -584,8 +584,10 @@ class ApiSolargis_DB_Test(unittest.TestCase):
 
         num_rows = self.api.save_to_db_qh(self.dbmanager.db_con, readings)
 
+        readings_result = [(t,id,r1,r2,r3,r4,'solargis_qh', rt) for t,id,r1,r2,r3,r4,_,rt in readings]
+
         self.assertEqual(num_rows, len(readings))
 
         result = self.dbmanager.db_con.execute('select * from satellite_readings;').fetchall()
 
-        self.assertListEqual(result, readings)
+        self.assertListEqual(result, readings_result)
