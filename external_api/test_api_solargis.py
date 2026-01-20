@@ -566,3 +566,26 @@ class ApiSolargis_DB_Test(unittest.TestCase):
         result = self.dbmanager.db_con.execute('select * from satellite_readings;').fetchall()
 
         self.assertListEqual(result, readings)
+
+
+    def test__save_to_db__qh(self):
+
+        self.plantfactory.create_plant_with_location()
+        self.api.create_table(self.dbmanager.db_con)
+
+        request_time = todtaware('2021-11-02 13:00:00')
+
+        readings = [
+            (todtaware('2021-11-01 13:07:30'), 1, 100, 900, 6000, 10000, 'solargis', request_time),
+            (todtaware('2021-11-01 13:22:30'), 1, 200, 1000, 6000, 10000, 'solargis', request_time),
+            (todtaware('2021-11-01 13:37:30'), 2, 10000, 90000, None, 1000000, 'solargis', request_time),
+            (todtaware('2021-11-01 13:52:30'), 2, 20000, 100000, None, 1000000, 'solargis', request_time),
+        ]
+
+        num_rows = self.api.save_to_db_qh(self.dbmanager.db_con, readings)
+
+        self.assertEqual(num_rows, len(readings))
+
+        result = self.dbmanager.db_con.execute('select * from satellite_readings;').fetchall()
+
+        self.assertListEqual(result, readings)

@@ -1148,6 +1148,7 @@ class ApiSolargis:
                 module_temperature_dc bigint,
                 photovoltaic_energy_output_wh bigint,
                 source text,
+                reading_interval interval,
                 request_time timestamptz,
                 CONSTRAINT "fk_satellite_readings__plant" FOREIGN KEY ("plant") REFERENCES "plant" ("id") ON DELETE CASCADE
             );
@@ -1168,9 +1169,33 @@ class ApiSolargis:
                 module_temperature_dc,
                 photovoltaic_energy_output_wh,
                 source,
+                reading_interval,
                 request_time
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, interval '1 hour', %s)
+            --returning doesn't return in sqlalchemy when more than one tuple is given
+            RETURNING time, plant;
+        """
+
+        result = db_con.execute(query, readings)
+        return result.rowcount
+
+    def save_to_db_qh(self, db_con, readings):
+
+        query = """
+            INSERT INTO
+            satellite_readings (
+                time,
+                plant,
+                global_horizontal_irradiation_wh_m2,
+                global_tilted_irradiation_wh_m2,
+                module_temperature_dc,
+                photovoltaic_energy_output_wh,
+                source,
+                reading_interval,
+                request_time
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, interval '15 minutes', %s)
             --returning doesn't return in sqlalchemy when more than one tuple is given
             RETURNING time, plant;
         """
@@ -1206,7 +1231,7 @@ class ApiSolargis:
                         selected_site_ids=plant_ids,
                     )
                     if readings:
-                        num_rows = api.save_to_db(dbmanager.db_con, readings)
+                        num_rows = api.save_to_db_qh(dbmanager.db_con, readings)
 
                 else:
                     readings = api.get_current_solargis_irradiance_readings(
@@ -1238,7 +1263,7 @@ class ApiSolargis:
             with dbmanager.db_con.begin():
                 api.create_table(dbmanager.db_con)
                 readings = api.get_current_solargis_readings_standarized()
-                api.save_to_db(dbmanager.db_con, readings)
+                api.save_to_db_qh(dbmanager.db_con, readings)
 
 
 if __name__ == "__main__":
