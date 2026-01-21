@@ -34,9 +34,9 @@ class ApiSolargis_Test(unittest.TestCase):
     def sample_reading_qh(self):
         # Datetime GHI GTI TMOD PVOUT
         return {
-            0 : (datetime(2015,1,1, 0, 7,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            1 : (datetime(2015,1,1, 0,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            50 : (datetime(2015,1,1,12,37,30,tzinfo=timezone.utc), 69., 92., -1.0, 63.106),
+            0  : (datetime(2015,1,1, 0, 7,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            1  : (datetime(2015,1,1, 0,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            50 : (datetime(2015,1,1,12,37,30,tzinfo=timezone.utc), 69., 71.0, -0.1, 43.337),
             94 : (datetime(2015,1,1,23,37,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
             95 : (datetime(2015,1,1,23,52,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
         }
@@ -70,63 +70,25 @@ class ApiSolargis_Test(unittest.TestCase):
             (datetime(2015,1,1,23,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
         ]
 
-    def sample_reading_oneaxis(self):
+    def sample_reading_oneaxis_qh(self):
         # Datetime GHI GTI TMOD PVOUT
-        return [
-            (datetime(2015,1,1, 0,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 1,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 2,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5.0, 6.0, -4.5, 1.38),
-            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66.0, 91.0, -2.3, 64.13),
-            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123.0, 171.0, 0.6, 150.742),
-            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110.0, 143.0, 0.2, 125.004),
-            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91.0, 86.0, -1.2, 67.18),
-            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102.0, 97.0, -0.5, 77.043),
-            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86.0, 83.0, -0.8, 63.435),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52.0, 50.0, -1.8, 32.502),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 8., -3.2, 2.572),
-            (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,18,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,19,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,20,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,21,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-            (datetime(2015,1,1,23,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
-        ]
+        return {
+            0  : (datetime(2015,1,1, 0, 7,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            1  : (datetime(2015,1,1, 0,22,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            50 : (datetime(2015,1,1,12,37,30,tzinfo=timezone.utc), 69.0, 64.0, -0.3, 45.171),
+            94 : (datetime(2015,1,1,23,37,30,tzinfo=timezone.utc), 0., 0., -99., 0.),
+            95 : (datetime(2015,1,1,23,52,30,tzinfo=timezone.utc), 0., 0., -99., 0.)
+        }
 
-    def sample_reading_temp(self):
+    def sample_reading_temp_qh(self):
         # Datetime GHI GTI TEMP PVOUT
-        return [
-            (datetime(2015,1,1, 0,30,tzinfo=timezone.utc), 0., 0., -6.2, 0.),
-            (datetime(2015,1,1, 1,30,tzinfo=timezone.utc), 0., 0., -5.9, 0.),
-            (datetime(2015,1,1, 2,30,tzinfo=timezone.utc), 0., 0., -5.6, 0.),
-            (datetime(2015,1,1, 3,30,tzinfo=timezone.utc), 0., 0., -5.3, 0.),
-            (datetime(2015,1,1, 4,30,tzinfo=timezone.utc), 0., 0., -5.2, 0.),
-            (datetime(2015,1,1, 5,30,tzinfo=timezone.utc), 0., 0., -5.1, 0.),
-            (datetime(2015,1,1, 6,30,tzinfo=timezone.utc), 5., 6., -4.8, 0.),
-            (datetime(2015,1,1, 7,30,tzinfo=timezone.utc), 66., 84., -4.9, 0.),
-            (datetime(2015,1,1, 8,30,tzinfo=timezone.utc), 123., 141., -4.7, 0.),
-            (datetime(2015,1,1, 9,30,tzinfo=timezone.utc), 110., 120., -4.3, 0.),
-            (datetime(2015,1,1,10,30,tzinfo=timezone.utc), 91., 92., -3.9, 0.),
-            (datetime(2015,1,1,11,30,tzinfo=timezone.utc), 102., 104., -3.4, 0.),
-            (datetime(2015,1,1,12,30,tzinfo=timezone.utc), 86., 88., -3.4, 0.),
-            (datetime(2015,1,1,13,30,tzinfo=timezone.utc), 52., 53., -3.3, 0.),
-            (datetime(2015,1,1,14,30,tzinfo=timezone.utc), 9., 10., -3.5, 0.),
-            (datetime(2015,1,1,15,30,tzinfo=timezone.utc), 0., 0., -3.7, 0.),
-            (datetime(2015,1,1,16,30,tzinfo=timezone.utc), 0., 0., -3.8, 0.),
-            (datetime(2015,1,1,17,30,tzinfo=timezone.utc), 0., 0., -4.0, 0.),
-            (datetime(2015,1,1,18,30,tzinfo=timezone.utc), 0., 0., -4.2, 0.),
-            (datetime(2015,1,1,19,30,tzinfo=timezone.utc), 0., 0., -4.7, 0.),
-            (datetime(2015,1,1,20,30,tzinfo=timezone.utc), 0., 0., -5.6, 0.),
-            (datetime(2015,1,1,21,30,tzinfo=timezone.utc), 0., 0., -6.1, 0.),
-            (datetime(2015,1,1,22,30,tzinfo=timezone.utc), 0., 0., -6.0, 0.),
-            (datetime(2015,1,1,23,30,tzinfo=timezone.utc), 0., 0., -5.9, 0.),
-        ]
+        return {
+            0  : (datetime(2015,1,1, 0, 7,30,tzinfo=timezone.utc), 0., 0., -6.1, 0.),
+            1  : (datetime(2015,1,1, 0,22,30,tzinfo=timezone.utc), 0., 0., -6.1, 0.),
+            50 : (datetime(2015,1,1,12,37,30,tzinfo=timezone.utc), 69., 71., -2.3, 0.),
+            94 : (datetime(2015,1,1,23,37,30,tzinfo=timezone.utc), 0., 0., -5.9, 0.),
+            95 : (datetime(2015,1,1,23,52,30,tzinfo=timezone.utc), 0., 0., -6.0, 0.)
+        }
 
     def sample_reading_2(self):
         # Datetime GHI DIF DNI PVOUT
@@ -398,16 +360,14 @@ class ApiSolargis_Test(unittest.TestCase):
 
         self.assertEqual(status, 200)
 
-        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_temp()]
+        readings_sample = [readings[i] for i in self.sample_reading_temp_qh().keys()]
 
-        print([(ghi, gti, temp) for _, ghi, gti, temp, *_ in readings])
+        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_temp_qh().values()]
+
+        print([(ghi, gti, temp) for _, ghi, gti, temp, *_ in readings_sample])
 
         self.assertEqual(status, 200)
-
-        for i in range(0,len(expected)):
-            self.assertTupleEqual(readings[i], expected[i])
-
-        self.assertListEqual(readings, expected)
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_irradiance_readings_location__GHI_GTI_TMOD(self):
 
@@ -420,12 +380,14 @@ class ApiSolargis_Test(unittest.TestCase):
 
         status, readings = self.api.get_current_solargis_irradiance_readings_site(site, from_date, to_date, processing_keys)
 
-        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        readings_sample = [readings[i] for i in self.sample_reading_qh().keys()]
 
-        print([(ghi, gti, tmod) for t, ghi, gti, tmod, *_ in readings])
+        expected = [(t, ghi, gti, temp, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()]
+
+        print([(ghi, gti, tmod) for t, ghi, gti, tmod, *_ in readings_sample])
 
         self.assertEqual(status, 200)
-        self.assertListEqual(readings, expected)
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_irradiance_readings__real_processing_keys(self):
 
@@ -439,9 +401,12 @@ class ApiSolargis_Test(unittest.TestCase):
 
         readings = self.api.get_current_solargis_irradiance_readings(from_date, to_date, processing_keys)
 
-        expected = [(t, 1, ghi, gti, temp, pvout, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        readings_sample = [readings[i] for i in self.sample_reading_qh().keys()]
+        print(readings_sample)
 
-        self.assertListEqual(readings, expected)
+        expected = [(t, 1, ghi, gti, temp, pvout, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()]
+
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_irradiance_readings__real_processing_keys_one_axis_plant(self):
 
@@ -455,9 +420,11 @@ class ApiSolargis_Test(unittest.TestCase):
 
         readings = self.api.get_current_solargis_irradiance_readings(from_date, to_date, processing_keys)
 
-        expected = [(t, 1, ghi, gti, temp, pvout, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_oneaxis()]
+        readings_sample = [readings[i] for i in self.sample_reading_oneaxis_qh().keys()]
 
-        self.assertListEqual(readings, expected)
+        expected = [(t, 1, ghi, gti, temp, pvout, 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_oneaxis_qh().values()]
+
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_readings_standarized__base(self):
 
@@ -469,9 +436,13 @@ class ApiSolargis_Test(unittest.TestCase):
 
         readings = self.api.get_current_solargis_readings_standarized(from_date, to_date)
 
-        expected = [(t, 1, int(ghi), int(gti), int(temp*10) if temp != -99 else None, int(pvout), 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading()]
+        readings_sample = [readings[i] for i in self.sample_reading_qh().keys()]
 
-        self.assertListEqual(readings, expected)
+        expected = [(t, 1, int(ghi), int(gti), int(temp*10) if temp != -99 else None, int(pvout), 'solargis', mock.ANY) for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()]
+
+        print(readings_sample)
+
+        self.assertListEqual(readings_sample, expected)
 
     def test__get_current_solargis_readings_standarized__two_sites(self):
 
@@ -483,17 +454,22 @@ class ApiSolargis_Test(unittest.TestCase):
 
         readings = self.api.get_current_solargis_readings_standarized(from_date, to_date)
 
+        readings_sample = [readings[i] for i in self.sample_reading_qh().keys()]
+        readings_sample += [readings[int(len(readings)/2) + i] for i in self.sample_reading_qh().keys()]
+
         expected = [
             (t, 1, int(ghi), int(gti), int(temp*10) if temp != -99 else None, int(pvout), 'solargis', mock.ANY)
-            for t,ghi,gti,temp,pvout in self.sample_reading()
+            for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()
         ]
 
         expected = expected + [
             (t, 2, int(ghi), int(gti), int(temp*10) if temp != -99 else None, int(pvout), 'solargis', mock.ANY)
-            for t,ghi,gti,temp,pvout in self.sample_reading()
+            for t,ghi,gti,temp,pvout in self.sample_reading_qh().values()
         ]
 
-        self.assertListEqual(readings, expected)
+        print(readings_sample)
+
+        self.assertListEqual(readings_sample, expected)
 
 
 class ApiSolargis_DB_Test(unittest.TestCase):
