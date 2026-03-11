@@ -38,7 +38,8 @@ def add_jobs(app):
         app.add_job(task, 'cron', minute='*/5')
     elif env_active == env['plantmonitor_server']:
         app.add_job(task_meters_erp_to_orm, 'interval', minutes=20)
-        app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=17, minute=30)
+        # replaced by plant-reader dag
+        # app.add_job(task_daily_upload_to_api_meteologica, 'cron', kwargs={'test_env':False}, hour=17, minute=30)
         app.add_job(task_daily_download_from_api_meteologica, 'cron', kwargs={'test_env':False}, hour=18, minute=30)
         app.add_job(task_maintenance, 'cron', minute="*/5")
         app.add_job(task_daily_download_from_api_solargis, 'cron', hour=6, minute=0)
