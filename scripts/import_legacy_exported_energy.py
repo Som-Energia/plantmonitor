@@ -33,7 +33,6 @@ inecodes = {
         ('25228','Torrefarrera'),
         ('08112','Manlleu'),
         ('46193','Picanya'),
-        ('25230','Torregrossa'),
         ('47114','Peñafiel'),
         ('41006','Alcolea del Rio'), # tilde mising in drive
         ('41055','Lora del Rio'), # tilde mising in drive
@@ -52,7 +51,6 @@ plantCodes = {
     "Lleida": "Lleida",
     "Picanya": "Picanya",
     "Torrefarrera": "Torrefarrera",
-    "Torregrossa": "Torregrossa",
     "Valteina": "Valteina",
     "Alcolea del Rio": "Alcolea",
     "La Matallana": "Matallana",

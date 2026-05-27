@@ -6,7 +6,6 @@ update plant set municipality=(select city.id from municipality as city where ci
 update plant set municipality=(select city.id from municipality as city where city.inecode='08112')  where plant.name = 'Manlleu_Pavello';
 update plant set municipality=(select city.id from municipality as city where city.inecode='25228')  where plant.name = 'Torrefarrera'   ;
 update plant set municipality=(select city.id from municipality as city where city.inecode='46193')  where plant.name = 'Picanya'        ;
-update plant set municipality=(select city.id from municipality as city where city.inecode='25230')  where plant.name = 'Torregrossa'    ;
 update plant set municipality=(select city.id from municipality as city where city.inecode='47114')  where plant.name = 'Valteina'       ;
 update plant set municipality=(select city.id from municipality as city where city.inecode='41006')  where plant.name = 'Alcolea'        ;
 update plant set municipality=(select city.id from municipality as city where city.inecode='41055')  where plant.name = 'Matallana'      ;
