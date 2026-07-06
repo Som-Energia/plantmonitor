@@ -711,6 +711,62 @@ class ApiSolargis:
                 topology_relativeSpacing=1.8,
                 topology_type="UNPROPORTIONAL2",
             ),
+            # GURB002A Baix Montseny
+            49: PVSystem(
+                geometry_type="GeometryFixedOneAngle",
+                geometry_azimuth=None,  # TODO,  # orientació panells
+                geometry_tilt=None,  # TODO,  # inclinació panells
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=138700,
+                system_installationType="ROOF_MOUNTED",
+                system_dateStartup="2026-05-07",
+                system_selfShading="true",
+                module_type="CSI",
+                degradation_content=None,  # TODO,
+                degradationFirstYear_content=None,  # TODO,
+                PmaxCoeff_content=-0.34,
+                efficiency_type="EfficiencyConstant",
+                efficiency_content=None,  # TODO,
+                limitationACPower_content=100000,
+                dcLosses_snowPollution=None,  # TODO,
+                dcLosses_cables=None,  # TODO,
+                dcLosses_mismatch=None,  # TODO,
+                acLosses_transformer=None,  # TODO,
+                acLosses_cables=None,  # TODO,
+                topology_xsi_type="TopologyRow",
+                topology_relativeSpacing=None,  # TODO,
+                topology_type="UNPROPORTIONAL1",
+            ),
+            # GURB002B Baix Montseny
+            50: PVSystem(
+                geometry_type="GeometryFixedOneAngle",
+                geometry_azimuth=None,  # TODO,  # orientació panells
+                geometry_tilt=None,  # TODO,  # inclinació panells
+                geometry_backTracking=None,
+                geometry_rotationLimitEast=None,
+                geometry_rotationLimitWest=None,
+                system_installedPower=142200,
+                system_installationType="ROOF_MOUNTED",
+                system_dateStartup="2026-05-07",
+                system_selfShading="true",
+                module_type="CSI",
+                degradation_content=None,  # TODO,
+                degradationFirstYear_content=None,  # TODO,
+                PmaxCoeff_content=-0.34,
+                efficiency_type="EfficiencyConstant",
+                efficiency_content=None,  # TODO,
+                limitationACPower_content=100000,
+                dcLosses_snowPollution=None,  # TODO,
+                dcLosses_cables=None,  # TODO,
+                dcLosses_mismatch=None,  # TODO,
+                acLosses_transformer=None,  # TODO,
+                acLosses_cables=None,  # TODO,
+                topology_xsi_type="TopologyRow",
+                topology_relativeSpacing=None,  # TODO,
+                topology_type="UNPROPORTIONAL1",
+            ),
         }
 
         self.sites = {
@@ -920,6 +976,26 @@ class ApiSolargis:
                 peak_power_w=302.9,
                 installation_type="ROOF_MOUNTED",
                 pvsystem=pvsystems[48],
+            ),
+            # GURB002A Baix Montseny
+            49: Site(
+                id=49,
+                name="GURB002A_Baix_Montseny",
+                latitude=41.627410,
+                longitude=2.374088,
+                peak_power_w=138700,
+                installation_type="ROOF_MOUNTED",
+                pvsystem=pvsystems[49],
+            ),
+            # GURB002B Baix Montseny
+            50: Site(
+                id=50,
+                name="GURB002B_Baix_Montseny",
+                latitude=41.403143,
+                longitude=2.024228,
+                peak_power_w=142200,
+                installation_type="ROOF_MOUNTED",
+                pvsystem=pvsystems[50],
             ),
         }
 
