@@ -59,7 +59,7 @@ class PVSystem(NamedTuple):
 class Site(NamedTuple):
     id: int
     name: str
-    peak_power_w: int
+    peak_power_w: int  # TODO: API needs kWp, not W. See https://kb.solargis.com/apidocs/monitor-forecast-api-endpoint
     latitude: float
     longitude: float
     installation_type: str
@@ -983,7 +983,7 @@ class ApiSolargis:
                 name="GURB002A_Baix_Montseny",
                 latitude=41.627410,
                 longitude=2.374088,
-                peak_power_w=138700,
+                peak_power_w=138.7,  # API needs kWp, not W.
                 installation_type="ROOF_MOUNTED",
                 pvsystem=pvsystems[49],
             ),
@@ -993,7 +993,7 @@ class ApiSolargis:
                 name="GURB002B_Baix_Montseny",
                 latitude=41.403143,
                 longitude=2.024228,
-                peak_power_w=142200,
+                peak_power_w=142.2,  # API needs kWp, not W.
                 installation_type="ROOF_MOUNTED",
                 pvsystem=pvsystems[50],
             ),
