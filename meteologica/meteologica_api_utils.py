@@ -57,7 +57,7 @@ class MeteologicaApi_Mock(object):
             self._session = {
                 "errorCode": "OK",
                 "header": {
-                    "sessionToken": "73f19a710bbced25fb2e46e5a0d65b126716a8d19bb9f9038d2172adc14665a5f0c65a30e9fb677e5654b2f59f51abdb",
+                    "sessionToken": "meteologica-mock-token",
                     "errorCode": "OK",
                 },
             }
