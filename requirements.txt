@@ -10,7 +10,7 @@ decorator==4.4.2
 defusedxml==0.6.0
 environs==8.0.0
 ERPpeek==1.7.1
-fastapi==0.61.1
+fastapi==0.65.2
 idna==2.9
 isodate==0.6.0
 lxml>=4.6.2
