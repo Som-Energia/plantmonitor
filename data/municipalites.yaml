@@ -82,15 +82,6 @@ municipalities:
     countryCode : ES
     country : España
 - municipality:
-    ineCode : '25230'
-    name: Torregrossa
-    provinceCode : '25'
-    province : Lleida
-    regionCode : '09'
-    region : Cataluña
-    countryCode : ES
-    country : España
-- municipality:
     ineCode : '46193'
     name: Picanya
     provinceCode : '46'
